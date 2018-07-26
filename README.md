@@ -10,7 +10,7 @@ GLOVE has been designed towards facilitating developers to easily build and inte
 
 GLOVE is considered as a work-in-progress and is open-sourced under the LGPL v3 license through which it is provided as free software with unlimited use for educational and research purposes.
 
-Future planned extensions of GLOVE include the support for OpenGL ES 3.x and OpenCL applications.
+Future planned extensions of GLOVE include the support for OpenGL ES 3.x and OpenGL applications.
 
 
 # Prerequisites
@@ -28,7 +28,7 @@ GLOVE has been tested with [GLOVE demos](Demos/README_demos.md) with the followi
 | Open GL ES 2.0 |MESA Vulkan Intel driver (version 0x4800001)| 1.0.57 | Ubuntu 16.04 | XCB | Intel HD Graphics 530 (Skylake GT2) | success | applied depth buffer workaround | 
 | Open GL ES 2.0 |NVIDIA Vulkan driver (version 384.130)| 1.0.49 | Ubuntu 16.04 | XCB |NVIDIA GeForce 940M | ongoing | - |
 
-# SW Desing
+# SW Design
 
 You can find a short description on GLOVE SW design as well as "How To extend GLOVE" guidelines in [GLOVE Design Document](Docs/GLOVEDesignDocument.md)
 
