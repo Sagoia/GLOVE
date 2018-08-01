@@ -26,3 +26,5 @@ out64/*
 *build*
 External/glslang
 External/googletest
+CMake/FindXCB.cmake
+CMake/ECMFindModuleHelpersStub.cmake

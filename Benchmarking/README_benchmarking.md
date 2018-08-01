@@ -7,7 +7,7 @@ To clone this repository:
 ```
 git clone https://github.com/glmark2/glmark2.git
 ```
-Build and Install procedure can be found in README files of this repository. Note that _'--with-flavors=x11-glesv2'_ must be used in build configuration.
+Build and Install procedure can be found in README files of this repository. Note that _`--with-flavors=x11-glesv2`_ must be used in build configuration.
 
 To run glmark2 benchmark use this command:
 ```
@@ -15,5 +15,5 @@ To run glmark2 benchmark use this command:
 ```
 
 Note:
-* "reuse-context" option is needed at this phase since GLOVE does not fully support multiple contexts yet
+* `--reuse-context` option is needed at this phase since GLOVE does not fully support multiple contexts yet
 * glmark2\_benchmarks\_options contain a list of the so far supported benchmarks by GLOVE

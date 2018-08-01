@@ -77,7 +77,7 @@ GLOVE building can be configured according to the options listed in the followin
 | --- | --- | --- |
 | -a \| --arm-compile | _OFF_ | _Enable cross building for ARM platform_ |
 | -d \| --debug | _OFF_ | _Enable building Debug mode_ |
-| -i \| --install-path (dir) | _System Installation Path (/usr/local)_ | _Set custom installation path_ |
+| -i \| --install-prefix (dir) | _System Installation Prefix (/usr/local)_ | _Set custom installation prefix path_ |
 | -s \| --sysroot (dir) | _-_ | _Set sysroot for cross compilation_ |
 | -t \| --trace-build | _OFF_ | _Enable logs_ |
 | -u \| --vulkan-include-path (dir) | _System Include Path_ | _Set custom Vulkan include path_ |
@@ -95,18 +95,18 @@ make
 
 ## Install Project
 
-To install all necessary files to system directories:
+To install all necessary files to system directories (superuser privilege might be required):
 
 ```
-sudo make install
+make install
 ```
 
 ## Uninstall
 
-To uninstall the libraries from the system directories:
+To uninstall the libraries from the system directories (superuser privilege might be required):
 
 ```
-sudo make uninstall
+make uninstall
 ```
 
 # Known Issues

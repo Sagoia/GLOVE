@@ -9,7 +9,7 @@ VULKAN_INCLUDE_PATH=""
 TRACE_BUILD=OFF
 TOOLCHAIN_FILE=""
 SYSROOT=""
-INSTALL_PATH="/usr/local"
+INSTALL_PREFIX="/usr/local"
 BUILD_FOLDER=build
 CROSS_COMPILATION_ARM=false
 WORKAROUNDS=ON
@@ -23,11 +23,12 @@ function buildGlove() {
 
     cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DVULKAN_LIBRARY=$VULKAN_LIBRARY \
+          -DVULKAN_INCLUDE_PATH=$VULKAN_INCLUDE_PATH \
           -DTRACE_BUILD=$TRACE_BUILD \
           -DWORKAROUNDS=$WORKAROUNDS \
           -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
           -DCMAKE_SYSROOT=$SYSROOT \
-          -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH ..
+          -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
 
     cd ..
 }
@@ -46,7 +47,7 @@ else
                 CROSS_COMPILATION_ARM=true
                 BUILD_FOLDER=cross_build
                 TOOLCHAIN_FILE=$BASEDIR/CMake/toolchain-arm.cmake
-                INSTALL_PATH=""
+                INSTALL_PREFIX=""
                 echo "Cross compiling for ARM"
                 ;;
             # option to build with Debug option
@@ -55,10 +56,10 @@ else
                 echo "Building with Debug option"
                 ;;
             # option to set install path
-            -i|--install-path)
+            -i|--install-prefix)
                 shift
-                INSTALL_PATH=$1
-                echo "Setting installation path to $INSTALL_PATH"
+                INSTALL_PREFIX=$1
+                echo "Setting installation prefix to $INSTALL_PREFIX"
                 ;;
             # option to set sysroot
             -s|--sysroot)
@@ -93,7 +94,7 @@ else
                 echo "Try the following:"
                 echo " -a | --arm-compile                   # cross build for ARM platform (default OFF)"
                 echo " -d | --debug                         # build in Debug mode (default Release)"
-                echo " -i | --install-path        (dir)     # set custom installation path"
+                echo " -i | --install-prefix      (dir)     # set custom installation prefix path"
                 echo " -s | --sysroot             (dir)     # set sysroot for cross compilation"
                 echo " -t | --trace-build                   # activate logs (default OFF)"
                 echo " -u | --vulkan-include-path (dir)     # set custom Vulkan include path"
@@ -121,8 +122,8 @@ if [ -n "$VULKAN_INCLUDE_PATH" ] && [ ! -e $VULKAN_INCLUDE_PATH ]; then
     exit 1
 fi
 
-if [ ! -d $INSTALL_PATH ]; then
-    echo -e "\e[0;31mCannot find '$INSTALL_PATH' path to install the libraries.\e[0m"
+if [ ! -d $INSTALL_PREFIX ]; then
+    echo -e "\e[0;31mCannot find '$INSTALL_PREFIX' path to install the libraries.\e[0m"
     exit 1
 fi
 
@@ -131,12 +132,12 @@ if [ $CROSS_COMPILATION_ARM == "true" ]; then
         echo -e "\e[0;31mCannot find '$SYSROOT' path for sysroot.\e[0m"
         exit 1
     fi
-    if [ -z "$INSTALL_PATH" ]; then
+    if [ -z "$INSTALL_PREFIX" ]; then
         echo -e "\e[0;31mSet custom installation path (use '-i' option).\e[0m"
         exit 1
     fi
     if [ ! -d "$BASEDIR/External/glslang" ] || [ ! -d "$BASEDIR/External/googletest/cross_build" ]; then
-        echo -e "\e[0;31mExternal sources are not cross-compiled. Run './update_external_sources.sh -s $SYSROOT -i $INSTALL_PATH'.\e[0m"
+        echo -e "\e[0;31mExternal sources are not cross-compiled. Run './update_external_sources.sh -s $SYSROOT -i $INSTALL_PREFIX'.\e[0m"
         exit 1
     fi
 fi

@@ -16,7 +16,7 @@ GLOVE (GLOverVulkan) is a software library that acts as a bridge between an Open
 **Figure 2:** _GLOVE components in a system_
 
 
-To accomplish the above functionality, GLOVE offers implementations of OpenGL ES and EGL (see Figure 2) and is comprised of two shared libraries: libGLESv2.so and libEGL.so. Additionally, the translation from ESSL shaders to SPIR-V (needed by vulkan) is handled by the external [glslang](https://github.com/KhronosGroup/glslang) library. The latter is statically linked to libGLESv2.so.
+To accomplish the above functionality, GLOVE offers implementations of OpenGL ES and EGL (see Figure 2) and is comprised of two shared libraries: libGLESv2.so and libEGL.so. Additionally, the translation from ESSL shaders to SPIR-V (needed by Vulkan) is handled by the external [glslang](https://github.com/KhronosGroup/glslang) library. The latter is statically linked to libGLESv2.so.
 
 Currently, GLOVE supports [OpenGL ES 2.0](https://www.khronos.org/registry/OpenGL/specs/es/2.0/es_full_spec_2.0.pdf) and [EGL 1.4](https://www.khronos.org/registry/EGL/specs/eglspec.1.4.pdf) versions and has been tested with mesa Vulkan Intel driver, version **1.0.54** (see specification [here](https://www.khronos.org/registry/vulkan/)).
 
