@@ -59,7 +59,7 @@ private:
 // ------------
     void        *                               mWriteSurface;
     void        *                               mReadSurface;
-    BufferObject*                               mTempIbo;
+    BufferObject*                               mExplicitIbo;
     Framebuffer *                               mWriteFBO;
 
     Framebuffer *                               mSystemFBO;
@@ -83,7 +83,7 @@ private:
     void DrawGeometry(VkCommandBuffer *CmdBuffer, bool indexed, uint32_t firstVertex, uint32_t vertCount);
     void SetCapability(GLenum cap, GLboolean enable);
 
-    bool AllocateTempIndexBuffer(const void *srcData, size_t size, BufferObject** ibo);
+    bool AllocateExplicitIndexBuffer(const void *srcData, size_t size, BufferObject** ibo);
     bool ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo);
 
     void InitializeDefaultTextures(void);

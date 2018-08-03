@@ -58,7 +58,7 @@ Context::Context()
     mReadSurface  = nullptr;
     mWriteFBO     = nullptr;
     mSystemFBO    = nullptr;
-    mTempIbo      = nullptr;
+    mExplicitIbo  = nullptr;
 }
 
 Context::~Context()
@@ -80,7 +80,7 @@ Context::~Context()
     delete mShaderCompiler;
     delete mPipeline;
     delete mClearPass;
-    delete mTempIbo;
+    delete mExplicitIbo;
 }
 
 void

@@ -229,26 +229,25 @@ void Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
     }
 }
 
-bool Context::AllocateTempIndexBuffer(const void *data, size_t size, BufferObject** ibo) {
-    if(mTempIbo != nullptr) {
-        delete mTempIbo;
-        mTempIbo = nullptr;
+bool Context::AllocateExplicitIndexBuffer(const void *data, size_t size, BufferObject** ibo) {
+    if(mExplicitIbo != nullptr) {
+        delete mExplicitIbo;
+        mExplicitIbo = nullptr;
     }
-    mTempIbo = new IndexBufferObject(mVkContext);
-    mTempIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
-    *ibo = mTempIbo;
-    return mTempIbo->Allocate(size, data);
+    mExplicitIbo = new IndexBufferObject(mVkContext);
+    mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
+    *ibo = mExplicitIbo;
+    return mExplicitIbo->Allocate(size, data);
 }
 
 bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo) {
 
     uint16_t *converted_indices_u16 = new uint16_t[elementCount];
-    uint32_t actual_size = elementCount * sizeof(uint16_t);
+    size_t actual_size = elementCount * sizeof(uint16_t);
 
     bool validatedBuffer = ConvertBuffer<uint8_t, uint16_t>(srcData, converted_indices_u16, elementCount);
     if(validatedBuffer) {
-        converted_indices_u16 = converted_indices_u16;
-        validatedBuffer = AllocateTempIndexBuffer(converted_indices_u16, actual_size, ibo);
+        validatedBuffer = AllocateExplicitIndexBuffer(converted_indices_u16, actual_size, ibo);
     }
     delete[] converted_indices_u16;
 
@@ -272,7 +271,7 @@ void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices,
     VkDeviceSize offset = 0;
     BufferObject *ibo = nullptr;
     bool validatedBuffer = true;
-    uint32_t actual_size = vertCount * (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
+    size_t actual_size = vertCount * (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
 
     // Index buffer requires special handling for passing data and handling unsigned bytes:
     // - If there is a index buffer bound, use the indices parameter as offset.
@@ -296,7 +295,7 @@ void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices,
         if(type == GL_UNSIGNED_BYTE) {
             validatedBuffer = ConvertIndexBufferToUint16(indices, vertCount, &ibo);
         } else {
-            validatedBuffer = AllocateTempIndexBuffer(indices, actual_size, &ibo);
+            validatedBuffer = AllocateExplicitIndexBuffer(indices, actual_size, &ibo);
         }
     }
 
