@@ -60,8 +60,8 @@ public:
     inline VkBool32             GetUpdateColorState(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Color;}
     inline VkBool32             GetUpdateDepthState(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Depth;}
     inline VkBool32             GetUpdateStencilState(void)               const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Stencil;}
-    inline VkClearRect *        GetRect(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return &mVkClearRect;}
-    inline VkClearAttachment *  GetAttachments(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mVkClearAttachments;}
+    inline const VkClearRect *  GetRect(void)                             const { FUN_ENTRY(GL_LOG_TRACE); return &mVkClearRect;}
+    inline const VkClearAttachment * GetAttachments(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mVkClearAttachments;}
 
 // Set Functions
     inline void                 SetUpdateColorState(VkBool32 enable)            { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Color   = enable;}
