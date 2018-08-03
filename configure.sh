@@ -28,7 +28,8 @@ function buildGlove() {
           -DWORKAROUNDS=$WORKAROUNDS \
           -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
           -DCMAKE_SYSROOT=$SYSROOT \
-          -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+          -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+          --no-warn-unused-cli ..
 
     cd ..
 }
@@ -45,7 +46,7 @@ else
             # option to cross compile
             -a|--arm-compile)
                 CROSS_COMPILATION_ARM=true
-                BUILD_FOLDER=cross_build
+                BUILD_FOLDER=cross_${BUILD_FOLDER}
                 TOOLCHAIN_FILE=$BASEDIR/CMake/toolchain-arm.cmake
                 INSTALL_PREFIX=""
                 echo "Cross compiling for ARM"
@@ -53,12 +54,16 @@ else
             # option to build with Debug option
             -d|--debug)
                 BUILD_TYPE=Debug
+                BUILD_FOLDER=${BUILD_FOLDER}_debug
                 echo "Building with Debug option"
                 ;;
             # option to set install path
             -i|--install-prefix)
                 shift
                 INSTALL_PREFIX=$1
+                if [ ! "${INSTALL_PREFIX:0:1}" == "/" ]; then
+                    INSTALL_PREFIX=$BASEDIR/$1
+                fi
                 echo "Setting installation prefix to $INSTALL_PREFIX"
                 ;;
             # option to set sysroot
@@ -117,7 +122,7 @@ if [ -n "$VULKAN_LIBRARY" ] && { [ ! -e $VULKAN_LIBRARY ] || echo $VULKAN_LIBRAR
     exit 1
 fi
 
-if [ -n "$VULKAN_INCLUDE_PATH" ] && [ ! -e $VULKAN_INCLUDE_PATH ]; then
+if [ -n "$VULKAN_INCLUDE_PATH" ] && [ ! -d $VULKAN_INCLUDE_PATH ]; then
     echo -e "\e[0;31mCannot find Vulkan include path '$VULKAN_INCLUDE_PATH'.\e[0m"
     exit 1
 fi
@@ -128,7 +133,7 @@ if [ ! -d $INSTALL_PREFIX ]; then
 fi
 
 if [ $CROSS_COMPILATION_ARM == "true" ]; then
-    if [ ! -d $SYSROOT ]; then
+    if [ -z "$SYSROOT" ] || [ ! -d $SYSROOT ]; then
         echo -e "\e[0;31mCannot find '$SYSROOT' path for sysroot.\e[0m"
         exit 1
     fi
