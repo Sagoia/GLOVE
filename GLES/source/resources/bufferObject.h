@@ -33,6 +33,7 @@ private:
 
     GLenum                  mUsage;
     GLenum                  mTarget;
+    bool                    mAllocated;
 
     vulkanAPI::Memory*      mMemory;
 
@@ -64,7 +65,7 @@ public:
     inline VkBuffer         GetVkBuffer(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer(); }
 
 // Set Functions
-    inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget    = target; }
+    void                    SetTarget(GLenum target);
     inline void             SetUsage(GLenum usage)                              { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
     inline void             SetContext(const vkContext_t *vkContext)            { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
                                                                                                        mBuffer->SetContext(vkContext);

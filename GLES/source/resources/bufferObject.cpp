@@ -30,7 +30,7 @@
 #include "bufferObject.h"
 
 BufferObject::BufferObject(const vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode, const VkFlags vkFlags)
-: mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mTarget(GL_INVALID_VALUE)
+: mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mTarget(GL_INVALID_VALUE), mAllocated(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -53,6 +53,7 @@ BufferObject::Release()
 
     mBuffer->Release();
     mMemory->Release();
+    mAllocated = false;
 }
 
 bool
@@ -61,14 +62,13 @@ BufferObject::Allocate(VkFormat srcFormat, bool normalize, size_t size, const vo
     FUN_ENTRY(GL_LOG_DEBUG);
 
     mBuffer->SetSize(size);
-    if(mBuffer->GetFlags() == VK_NULL_HANDLE)
-        mBuffer->SetFlags(mTarget == GL_ELEMENT_ARRAY_BUFFER ? VK_BUFFER_USAGE_INDEX_BUFFER_BIT : VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    return mBuffer->CreateVkBuffer()                                       &&
+    mAllocated = mBuffer->CreateVkBuffer()                                 &&
            mMemory->GetBufferMemoryRequirements(mBuffer->GetVkBuffer())    &&
            mMemory->Allocate()                                             &&
            mMemory->SetData(srcFormat, normalize, size, 0, data)           &&
            mMemory->BindBufferMemory(mBuffer->GetVkBuffer());
+    return mAllocated;
 }
 
 bool
@@ -93,6 +93,33 @@ BufferObject::UpdateData(size_t size, size_t offset, const void *data)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     mMemory->UpdateData(size, offset, data);
+}
+
+void
+BufferObject::SetTarget(GLenum target)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    // realloc with combined flags in case GL specifies at a later state that an
+    // already allocated, e.g., vertex buffer is also an index buffer and vice-versa
+    if(mTarget != target && mTarget != GL_INVALID_VALUE) {
+        VkBufferUsageFlagBits combinedBuffers =
+                static_cast<VkBufferUsageFlagBits>(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        if(mBuffer->GetFlags() != combinedBuffers && mAllocated == true) {
+            size_t size = mBuffer->GetSize();
+            uint8_t *srcData = new uint8_t[size];
+            this->GetData(size, 0, srcData);
+            this->Release();
+            mBuffer->SetFlags(combinedBuffers);
+            this->Allocate(size, srcData);
+            delete[] srcData;
+        }
+    } else if(target == GL_ARRAY_BUFFER) {
+        mBuffer->SetFlags(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    } else if(target == GL_ELEMENT_ARRAY_BUFFER) {
+        mBuffer->SetFlags(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+    }
+    mTarget = target;
 }
 
 bool
