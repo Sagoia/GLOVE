@@ -116,7 +116,7 @@ public:
       inline bool             UpdateColorMask(GLboolean red,
                                               GLboolean green,
                                               GLboolean blue,
-                                              GLboolean alpha)                  { FUN_ENTRY(GL_LOG_TRACE); GLchar mask = (!!(red) << 3) | (!!(green) << 2) | (!!(blue) << 1) | (!!(alpha));
+                                              GLboolean alpha)                  { FUN_ENTRY(GL_LOG_TRACE); GLchar mask = static_cast<GLchar>((red << 3) | (green << 2) | (blue << 1) | alpha);
                                                                                                        bool res = (mColorMask != mask);
                                                                                                        mColorMask = mask;
                                                                                                        return res; }

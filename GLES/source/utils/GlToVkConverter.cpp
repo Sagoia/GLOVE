@@ -32,6 +32,36 @@
 #   define NOT_FOUND_ENUM(inv_enum)                     { printf("Invalid enum: %#04x\n", inv_enum); assert(0); }
 #endif // NDEBUG
 
+VkBool32
+GlBooleanToVkBool(GLboolean value)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    return value ? VK_TRUE : VK_FALSE;
+}
+
+VkColorComponentFlagBits
+GLColorMaskToVkColorComponentFlagBits(GLchar colorMask)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    assert(colorMask > 0);
+    uint8_t bits = 0;
+    if(colorMask & 0x8) {
+        bits |= VK_COLOR_COMPONENT_R_BIT;
+    }
+    if(colorMask & 0x4) {
+        bits |= VK_COLOR_COMPONENT_G_BIT;
+    }
+    if(colorMask & 0x2) {
+        bits |= VK_COLOR_COMPONENT_B_BIT;
+    }
+    if(colorMask & 0x1) {
+        bits |= VK_COLOR_COMPONENT_A_BIT;
+    }
+    return static_cast<VkColorComponentFlagBits>(bits);
+}
+
 VkPolygonMode
 GLPrimitiveModeToVkPolygonMode(GLenum mode)
 {

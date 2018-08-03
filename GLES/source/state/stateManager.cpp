@@ -82,7 +82,7 @@ StateManager::InitVkPipelineStates(vulkanAPI::Pipeline *pipeline)
     float              depthBiasSlopeFactor    = GetRasterizationState()->GetPolygonOffsetUnits();
     float              depthBiasClamp          = GetRasterizationState()->GetPolygonOffsetClamp();
     VkBool32           blendEnable             = GlBooleanToVkBool(GetFragmentOperationsState()->GetBlendingEnabled());
-    VkColorComponentFlagBits colorWriteMask    = static_cast<VkColorComponentFlagBits>(GetFramebufferOperationsState()->GetColorMask());
+    VkColorComponentFlagBits colorWriteMask    = GLColorMaskToVkColorComponentFlagBits(GetFramebufferOperationsState()->GetColorMask());
 
     VkBlendFactor srcColorBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorSourceRGB());
     VkBlendFactor dstColorBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorDestinationRGB());

@@ -29,7 +29,8 @@
 #include "GLES2/gl2ext.h"
 #include "vulkan/vulkan.h"
 
-inline VkBool32         GlBooleanToVkBool(GLboolean value)                      { return value ? VK_TRUE : VK_FALSE; }
+VkBool32                GlBooleanToVkBool(GLboolean value);
+VkColorComponentFlagBits GLColorMaskToVkColorComponentFlagBits(GLchar colorMask);
 VkBlendFactor           GlBlendFactorToVkBlendFactor(GLenum mode);
 VkLogicOp           	GlLogicOpToVkLogicOp(GLenum mode);
 VkBlendOp               GlBlendEquationToVkBlendOp(GLenum mode);
