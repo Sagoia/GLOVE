@@ -132,6 +132,10 @@ Context::Clear(GLbitfield mask)
     SetClearRect();
     SetClearAttachments(clearColor, clearDepth, clearStencil);
 
+    if(mClearPass->GetRect()->rect.extent.width == 0 || mClearPass->GetRect()->rect.extent.height == 0) {
+        return;
+    }
+
     // Clearing attachments via vkCmdClearAttachments is not correct from performance point of view.
     // TODO: Add clear values in VkRenderPassBeginInfo (currently set to NULL) when calling Begin of Vk Renderpass.
     BeginRendering();
