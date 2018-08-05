@@ -1,8 +1,8 @@
-# GLOVE - GL Over Vulkan
+# GLOVE - GL Over Vulkan Embedded
 
 ![GLOVE functionality](Docs/Images/GLOVEfunction.jpg)
 
-GLOVE (GL Over Vulkan) is a software library that acts as an intermediate layer between an OpenGL application and Vulkan.
+GLOVE (GL Over Vulkan Embedded) is a software library that acts as an intermediate layer between an OpenGL ES application and Vulkan.
 
 GLOVE is focused towards embedded systems and is comprised of OpenGL ES and EGL implementations, which translate at runtime all OpenGL ES / EGL calls & ESSL shaders to Vulkan commands &amp; SPIR-V shader respectively and finally relays them to the underlying Vulkan driver.
 
