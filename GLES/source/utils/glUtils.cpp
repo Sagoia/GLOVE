@@ -631,45 +631,40 @@ GlFormatToStorageBits(GLenum format, GLboolean *r_, GLboolean *g_, GLboolean *b_
 
 
 bool
-GlFormatIsDepth(GLenum format)
+GlFormatIsDepthRenderable(GLenum format)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(format) {
-    case GL_DEPTH24_STENCIL8_OES:
-    case GL_DEPTH_COMPONENT16:
-    case GL_DEPTH_COMPONENT24_OES:
-    case GL_DEPTH_COMPONENT32_OES:      return true;
+    case GL_DEPTH_COMPONENT16:          return true;
     default:                            return false;
     }
 }
 
 bool
-GlFormatIsStencil(GLenum format)
+GlFormatIsStencilRenderable(GLenum format)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(format) {
-    case GL_DEPTH24_STENCIL8_OES:
-    case GL_STENCIL_INDEX1_OES:
-    case GL_STENCIL_INDEX4_OES:
     case GL_STENCIL_INDEX8:             return true;
     default:                            return false;
     }
 }
 
 bool
-GlFormatIsColor(GLenum format)
+GlFormatIsColorRenderable(GLenum format)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(format) {
-    case GL_RGB565:
-    case GL_RGBA4:
-    case GL_RGB5_A1:
+// TODO: not-renderable formats !! - to be removed
     case GL_RGB8_OES:
     case GL_RGBA8_OES:
-    case GL_BGRA_EXT:                   return true;
+// -----------------------------------------------
+    case GL_RGB565:
+    case GL_RGBA4:
+    case GL_RGB5_A1:                    return true;
     default:                            return false;
     }
 }

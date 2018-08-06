@@ -157,10 +157,9 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
     }
 
     if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive() ||
-       (texture &&  mResourceManager.TextureExists(texture) &&
+       !IsTexture(texture) ||
        ((mResourceManager.GetTexture(texture)->GetTarget() == GL_TEXTURE_2D       && textarget != GL_TEXTURE_2D) ||
         (mResourceManager.GetTexture(texture)->GetTarget() == GL_TEXTURE_CUBE_MAP && textarget == GL_TEXTURE_2D))
-      )
       ) {
         RecordError(GL_INVALID_OPERATION);
         return;

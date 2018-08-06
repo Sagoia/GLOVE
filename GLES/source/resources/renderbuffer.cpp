@@ -22,7 +22,7 @@
  *  @scope
  *
  *  Renderbuffer objects contain images (texture). They are created and used
- *  specifically with Framebuffer Objects. 
+ *  specifically with Framebuffer Objects.
  *
  */
 
@@ -68,7 +68,7 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
     mTexture->SetTarget(GL_TEXTURE_2D);
     mTexture->SetVkFormat(GlInternalFormatToVkFormat(internalformat));
 
-    if(GlFormatIsColor(mInternalFormat)) {
+    if(GlFormatIsColorRenderable(mInternalFormat)) {
         mTexture->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
         mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     } else {

@@ -438,6 +438,7 @@ Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
     mVkContext->mCommandBufferManager->BeginVkAuxCommandBuffer();
     VkCommandBuffer cmdBuffer = mVkContext->mCommandBufferManager->GetAuxCommandBuffer();
 
+    mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
     mImage->ModifyImageLayout(&cmdBuffer, newImageLayout);
 
     mVkContext->mCommandBufferManager->EndVkAuxCommandBuffer();

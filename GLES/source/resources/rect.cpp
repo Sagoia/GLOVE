@@ -116,7 +116,7 @@ InvertImageYAxis(uint8_t *image, const ImageRect* rect)
     uint8_t *dstRow = static_cast<uint8_t *>(image) + (rect->height - 1) * rowStride;
 
     // switch rows
-    for(uint32_t i = 0; i < (uint32_t)(rect->height / 2); ++i) {
+    for(uint32_t i = 0; i < (uint32_t)(rect->height >> 1); ++i) {
         memcpy(tmpRow, dstRow, rowStride);
         memcpy(dstRow, srcRow, rowStride);
         memcpy(srcRow, tmpRow, rowStride);

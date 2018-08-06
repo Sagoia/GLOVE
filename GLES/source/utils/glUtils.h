@@ -37,8 +37,8 @@ size_t                  GlTypeToElementSize(GLenum type);
 void                    GlFormatToStorageBits(GLenum format, GLint     *r_, GLint     *g_, GLint     *b_, GLint     *a_, GLint     *d_, GLint     *s_);
 void                    GlFormatToStorageBits(GLenum format, GLfloat   *r_, GLfloat   *g_, GLfloat   *b_, GLfloat   *a_, GLfloat   *d_, GLfloat   *s_);
 void                    GlFormatToStorageBits(GLenum format, GLboolean *r_, GLboolean *g_, GLboolean *b_, GLboolean *a_, GLboolean *d_, GLboolean *s_);
-bool                    GlFormatIsDepth(GLenum format);
-bool                    GlFormatIsStencil(GLenum format);
-bool                    GlFormatIsColor(GLenum format);
+bool                    GlFormatIsDepthRenderable(GLenum format);
+bool                    GlFormatIsStencilRenderable(GLenum format);
+bool                    GlFormatIsColorRenderable(GLenum format);
 
 #endif // __GLUTILS_H__

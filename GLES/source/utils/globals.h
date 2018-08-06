@@ -154,7 +154,7 @@ SafeDelete(T*& ptr) {
     FUN_ENTRY(GL_LOG_TRACE);
 
     delete ptr;
-    ptr = NULL;
+    ptr = nullptr;
 }
 
 #endif // __GLOBALS_H__

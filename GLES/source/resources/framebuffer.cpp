@@ -121,18 +121,21 @@ Framebuffer::CheckStatus(void)
         return GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
     }
 
-    if((colorType == GL_COLOR_ATTACHMENT0   &&
-        (!GlFormatIsColor(mAttachmentColors[0]->GetTexture()->GetInternalFormat()) ||
-         mAttachmentColors[0]->GetTexture()->GetWidth()  < 0   ||
-         mAttachmentColors[0]->GetTexture()->GetHeight() < 0)) ||
-       (mAttachmentDepth->GetType() == GL_DEPTH_ATTACHMENT    &&
-        (!GlFormatIsDepth(mAttachmentDepth->GetTexture()->GetInternalFormat())  ||
-         mAttachmentDepth->GetTexture()->GetWidth()  < 0 ||
-         mAttachmentDepth->GetTexture()->GetHeight() < 0)) ||
-       (mAttachmentStencil->GetType() == GL_STENCIL_ATTACHMENT  &&
-        (!GlFormatIsStencil(mAttachmentStencil->GetTexture()->GetInternalFormat())  ||
-         mAttachmentStencil->GetTexture()->GetWidth()  < 0 ||
-         mAttachmentStencil->GetTexture()->GetHeight() < 0))) {
+    if((colorType != GL_NONE   &&
+       (!GlFormatIsColorRenderable(mAttachmentColors[0]->GetTexture()->GetInternalFormat()) ||
+         mAttachmentColors[0]->GetTexture()->GetWidth()  <= 0   ||
+         mAttachmentColors[0]->GetTexture()->GetHeight() <= 0   )
+        ) ||
+       (mAttachmentDepth->GetType() != GL_NONE    &&
+        (!GlFormatIsDepthRenderable(mAttachmentDepth->GetTexture()->GetInternalFormat())  ||
+         mAttachmentDepth->GetTexture()->GetWidth()  <= 0 ||
+         mAttachmentDepth->GetTexture()->GetHeight() <= 0)
+       ) ||
+       (mAttachmentStencil->GetType() != GL_NONE  &&
+       (!GlFormatIsStencilRenderable(mAttachmentStencil->GetTexture()->GetInternalFormat())  ||
+         mAttachmentStencil->GetTexture()->GetWidth()  <= 0 ||
+         mAttachmentStencil->GetTexture()->GetHeight() <= 0))
+       ) {
         return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
     }
 
