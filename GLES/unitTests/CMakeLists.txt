@@ -19,8 +19,7 @@ include_directories(${GLES_PATH}/source
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 link_directories(${GTEST_PATH}/lib
-                 ${CMAKE_BINARY_DIR}/GLES/source
-                 ${CMAKE_INSTALL_FULL_LIBDIR})
+                 ${CMAKE_BINARY_DIR}/GLES/source)
 
 add_library(gtest_main STATIC IMPORTED)
 set_target_properties(gtest_main PROPERTIES IMPORTED_LOCATION ${GTEST_PATH}/lib/libgtest_main.a)

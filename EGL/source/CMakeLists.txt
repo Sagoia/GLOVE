@@ -46,8 +46,6 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${Vulkan_INCLUDE_DIR}
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
-link_directories(${CMAKE_INSTALL_FULL_LIBDIR})
-
 add_library(EGL SHARED ${SOURCES})
 set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
                                      LINK_FLAGS "-Wl,-Bsymbolic"

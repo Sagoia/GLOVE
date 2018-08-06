@@ -90,8 +90,7 @@ include_directories(${GLES_PATH}/source
                     ${Vulkan_INCLUDE_DIR}
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
-link_directories(${GLSLANG_PATH}/lib
-                 ${CMAKE_INSTALL_FULL_LIBDIR})
+link_directories(${GLSLANG_PATH}/lib)
 
 # Ensure we re-link if our external libraries change.
 add_library(glslang STATIC IMPORTED)

@@ -34,8 +34,7 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/include
                     ${CMAKE_SOURCE_DIR}/GLES/include)
 
 link_directories(${CMAKE_BINARY_DIR}/EGL
-                 ${CMAKE_BINARY_DIR}/GLES
-                 ${CMAKE_INSTALL_FULL_LIBDIR})
+                 ${CMAKE_BINARY_DIR}/GLES)
 
 add_subdirectory(assets)
 add_subdirectory(eglut)
