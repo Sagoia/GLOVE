@@ -68,6 +68,25 @@ Texture::~Texture()
 }
 
 bool
+Texture::IsNPOT(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+    State_t *state = &mState[0][0];
+    if(state->format == GL_INVALID_VALUE) {
+        return false;
+    }
+
+    return (!ISPOWEROFTWO(state->width) || !ISPOWEROFTWO(state->height));
+}
+
+bool
+Texture::IsNPOTAccessCompleted(void)
+{
+    return !(IsNPOT() && ((GetMinFilter() != GL_LINEAR         && GetMinFilter() != GL_NEAREST)    ||
+                          (GetWrapS()     != GL_CLAMP_TO_EDGE  || GetWrapT()     != GL_CLAMP_TO_EDGE)));
+}
+
+bool
 Texture::IsCompleted(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

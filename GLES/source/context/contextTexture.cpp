@@ -22,8 +22,7 @@
  */
 
 #include "context.h"
-
-#define ISPOWEROFTWO(x)                                 ((x != 0) && !(x & (x - 1)))
+#include "resources/texture.h"
 
 void
 Context::ActiveTexture(GLenum texture)

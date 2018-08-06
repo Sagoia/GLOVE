@@ -989,7 +989,7 @@ void ShaderProgram::UpdateSamplerDescriptors()
                     Texture *activeTexture = ((Context *)mGlContext)->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
                     mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
 
-                    if( !activeTexture->IsCompleted() ) {
+                    if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
                         uint8_t pixels[4] = {0,0,0,255};
                         //activeTexture->SetVkImageUsage(VK_IMAGE_USAGE_SAMPLED_BIT);
                         //activeTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);

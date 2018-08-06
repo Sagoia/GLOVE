@@ -32,6 +32,8 @@
 #include "vulkan/cbManager.h"
 #include "utils/GlToVkConverter.h"
 
+#define ISPOWEROFTWO(x)                                 ((x != 0) && !(x & (x - 1)))
+
 class Texture {
 
     struct State {
@@ -175,6 +177,8 @@ public:
                                                                                                                mFormat != GL_LUMINANCE       &&
                                                                                                                mFormat != GL_LUMINANCE_ALPHA &&
                                                                                                                mFormat != GL_BGRA8_EXT); }
+           bool             IsNPOT(void);
+           bool             IsNPOTAccessCompleted(void);
            bool             IsCompleted(void);
 
 };
