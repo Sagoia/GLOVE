@@ -70,7 +70,7 @@ endif()
 # Set c/cpp flag definitions for the compiler.
 set(C_REDUCE_ERRORS "-Wno-unused-parameter -Wno-unused-function")
 set(CXX_REDUCE_ERRORS "-Wno-unused-parameter -Wno-unused-function")
-set(PEDANTIC "-Wall -Wextra -Winline -Wreturn-type -Wuninitialized -Winit-self -Werror")
+set(PEDANTIC "-Wall -Wextra -Winline -Wreturn-type -Wuninitialized -Winit-self")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_PROTOTYPES -DGL_GLEXT_PROTOTYPES -std=c++11 ${PEDANTIC} ${CXX_REDUCE_ERRORS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_PROTOTYPES -DGL_GLEXT_PROTOTYPES -std=c99 ${PEDANTIC} ${C_REDUCE_ERRORS}")
