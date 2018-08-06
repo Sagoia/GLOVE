@@ -110,8 +110,9 @@ public:
                                                                                                        bool res = (mClearDepth != d);
                                                                                                        mClearDepth = d;
                                                                                                        return res; }
-      inline bool             UpdateClearStencil(GLint stencil)                 { FUN_ENTRY(GL_LOG_TRACE); bool res = (mClearStencil != stencil);
-                                                                                                       mClearStencil = stencil;
+      inline bool             UpdateClearStencil(GLint stencil)                 { FUN_ENTRY(GL_LOG_TRACE); GLint s = stencil & 0xFF;    // Note that works only for 8bit stencil buffer
+                                                                                                       bool res = (mClearStencil != s);
+                                                                                                       mClearStencil = s;
                                                                                                        return res; }
       inline bool             UpdateColorMask(GLboolean red,
                                               GLboolean green,
@@ -123,15 +124,18 @@ public:
       inline bool             UpdateDepthMask(GLenum enable)                    { FUN_ENTRY(GL_LOG_TRACE); bool res = (mDepthMask != enable);
                                                                                                        mDepthMask = enable;
                                                                                                        return res; }
-      inline bool             UpdateStencilMask(GLuint mask)                    { FUN_ENTRY(GL_LOG_TRACE); bool res = (mStencilMaskFront != mask) || (mStencilMaskBack != mask);
-                                                                                                       mStencilMaskFront = mask;
-                                                                                                       mStencilMaskBack = mask;
+      inline bool             UpdateStencilMask(GLuint mask)                    { FUN_ENTRY(GL_LOG_TRACE); GLuint m = mask & 0xFFu;
+                                                                                                       bool res = (mStencilMaskFront != m) || (mStencilMaskBack != m);
+                                                                                                       mStencilMaskFront = m;
+                                                                                                       mStencilMaskBack  = m;
                                                                                                        return res; }
-      inline bool             UpdateStencilMaskFront(GLuint mask)               { FUN_ENTRY(GL_LOG_TRACE); bool res = (mStencilMaskFront != mask);
-                                                                                                       mStencilMaskFront = mask;
+      inline bool             UpdateStencilMaskFront(GLuint mask)               { FUN_ENTRY(GL_LOG_TRACE); GLuint m = mask & 0xFFu;     // Note that works only for 8bit stencil buffer
+                                                                                                       bool res = (mStencilMaskFront != m);
+                                                                                                       mStencilMaskFront = m;
                                                                                                        return res; }
-      inline bool             UpdateStencilMaskBack(GLuint mask)                { FUN_ENTRY(GL_LOG_TRACE); bool res = (mStencilMaskBack  != mask);
-                                                                                                       mStencilMaskBack = mask;
+      inline bool             UpdateStencilMaskBack(GLuint mask)                { FUN_ENTRY(GL_LOG_TRACE); GLuint m = mask & 0xFFu;     // Note that works only for 8bit stencil buffer
+                                                                                                       bool res = (mStencilMaskBack  != m);
+                                                                                                       mStencilMaskBack = m;
                                                                                                        return res; }
 };
 

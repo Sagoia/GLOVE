@@ -30,7 +30,7 @@
 
 StateFramebufferOperations::StateFramebufferOperations()
 : mClearDepth(1.0f), mClearStencil(0),
-mColorMask(0xf), mDepthMask(GL_TRUE), mStencilMaskFront(0xffffffff), mStencilMaskBack(0xffffffff)
+mColorMask(0xf), mDepthMask(GL_TRUE), mStencilMaskFront(0xFF), mStencilMaskBack(0xFF)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
