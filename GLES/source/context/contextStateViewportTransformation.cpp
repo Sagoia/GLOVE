@@ -28,9 +28,9 @@ Context::DepthRangef(GLclampf zNear, GLclampf zFar)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mStateManager.GetViewportTransformationState()->SetMinDepthRange(zNear);
-    mStateManager.GetViewportTransformationState()->SetMaxDepthRange(zFar);
-    mPipeline->SetUpdateViewportState(true);
+    if(mStateManager.GetViewportTransformationState()->UpdateDepthRange(zNear, zFar)) {
+        mPipeline->SetUpdateViewportState(true);
+    }
 }
 
 void
