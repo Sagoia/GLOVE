@@ -39,7 +39,7 @@ int Texture::mDefaultInternalAlignment = 1;
 Texture::Texture(const vkContext_t *vkContext, const VkFlags vkFlags)
 : mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1)
+mMipLevelsCount(1), mLayersCount(1), mIsFboAttached(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -444,6 +444,29 @@ Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
     mVkContext->mCommandBufferManager->EndVkAuxCommandBuffer();
     mVkContext->mCommandBufferManager->SubmitVkAuxCommandBuffer();
     mVkContext->mCommandBufferManager->WaitVkAuxCommandBuffer();
+}
+
+void
+Texture::InvertPixels()
+{
+    int numElements = GlInternalFormatTypeToNumElements(GetExplicitInternalFormat(), GetExplicitType());
+    int sizeElement = GlTypeToElementSize(GetExplicitType());
+    int alignment   = Texture::GetDefaultInternalAlignment();
+    ImageRect srcRect(0, 0, GetWidth(), GetHeight(), numElements, sizeElement, alignment);
+    ImageRect dstRect(0, 0, GetWidth(), GetHeight(), numElements, sizeElement, alignment);
+
+    const size_t     baseLevel  = 0;
+    const size_t     baseSize   = dstRect.GetRectBufferSize();
+          uint8_t   *basePixels[1];
+    for(GLint layer = 0; layer < 1; ++layer) {
+        basePixels[layer] = new uint8_t[baseSize];
+        CopyPixelsToHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);
+    }
+
+    for(GLint layer = 0; layer < 1; ++layer) {
+        CopyPixelsFromHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);
+        delete[] basePixels[layer];
+    }
 }
 
 void

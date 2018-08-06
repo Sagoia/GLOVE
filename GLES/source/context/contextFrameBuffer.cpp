@@ -118,6 +118,7 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         mWriteFBO->SetColorAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetColorAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetColorAttachmentName(renderbuffer);
+        mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture()->SetFramebufferAttachment(true);
         break;
     case GL_DEPTH_ATTACHMENT:
         mWriteFBO->SetDepthAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
@@ -171,6 +172,7 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         mWriteFBO->SetColorAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetColorAttachmentName(texture);
         mWriteFBO->SetColorAttachmentLayer(texture && mResourceManager.GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+        mResourceManager.GetTexture(texture)->SetFramebufferAttachment(true);
         break;
     case GL_DEPTH_ATTACHMENT:
         mWriteFBO->SetDepthAttachmentTexture(texture ? mResourceManager.GetTexture(texture) : nullptr);
