@@ -29,7 +29,7 @@
 
 #include "shader.h"
 
-Shader::Shader(const vkContext_t *vkContext)
+Shader::Shader(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mShaderCompiler(nullptr), mSource(nullptr),
   mSourceLength(0), mShaderType(INVALID_SHADER), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
 {

@@ -26,6 +26,7 @@
 
 #include "utils/globals.h"
 #include "utils/glsl_types.h"
+#include "vulkan/context.h"
 
 #define GLSLANG_MAX_ATTRIBUTES                    GLOVE_MAX_VERTEX_ATTRIBS
 #define GLSLANG_MAX_ATTRIBUTE_NAME_LENGTH         50

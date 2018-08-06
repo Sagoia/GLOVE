@@ -22,14 +22,14 @@
  *  @scope
  *
  *  A Shader Program represents fully processed executable code, in the OpenGL ES
- *  Shading Language (ESSL) for one or more Shader stages. 
+ *  Shading Language (ESSL) for one or more Shader stages.
  *
  */
 
 #include "shaderProgram.h"
 #include "context/context.h"
 
-ShaderProgram::ShaderProgram(const vkContext_t *vkContext)
+ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext)
 : mGlContext(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);

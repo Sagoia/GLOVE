@@ -24,7 +24,7 @@
 #ifndef __VKBUFFER_H__
 #define __VKBUFFER_H__
 
-#include "utils/globals.h"
+#include "context.h"
 
 namespace vulkanAPI {
 

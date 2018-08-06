@@ -24,7 +24,7 @@
 #ifndef __VKPIPELINE_H__
 #define __VKPIPELINE_H__
 
-#include "utils/globals.h"
+#include "context.h"
 
 namespace vulkanAPI {
 
@@ -104,9 +104,9 @@ public:
 
     inline void SetColorBlendAttachmentEnable(VkBool32 enable)                  { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.blendEnable = enable; mUpdateState.Pipeline = true; }
     inline void SetColorBlendConstants(float *color)                            { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendState.blendConstants[0] = color[0];
-                                                                                                       mVkPipelineColorBlendState.blendConstants[1] = color[1];
-                                                                                                       mVkPipelineColorBlendState.blendConstants[2] = color[2];
-                                                                                                       mVkPipelineColorBlendState.blendConstants[3] = color[3];    mUpdateState.Pipeline = true;}
+                                                                                                           mVkPipelineColorBlendState.blendConstants[1] = color[1];
+                                                                                                           mVkPipelineColorBlendState.blendConstants[2] = color[2];
+                                                                                                           mVkPipelineColorBlendState.blendConstants[3] = color[3];    mUpdateState.Pipeline = true;}
     inline void SetColorBlendAttachmentWriteMask(VkColorComponentFlagBits mask) { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.colorWriteMask = mask; mUpdateState.Pipeline = true;}
 
     inline void SetColorBlendAttachmentSrcColorFactor(VkBlendFactor factor)     { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.srcColorBlendFactor = factor; mUpdateState.Pipeline = true;}

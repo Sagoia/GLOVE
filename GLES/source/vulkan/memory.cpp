@@ -29,7 +29,10 @@
  */
 
 #include "memory.h"
-#include "context/context.h"
+
+#define GLOVE_FIXED_PRECISION                           16
+#define GLOVE_FIXED_ONE                                 (1 << GLOVE_FIXED_PRECISION)
+#define GLOVE_FIXED_TO_FLOAT(x)                         x * (1.0f / static_cast<float>(GLOVE_FIXED_ONE))
 
 namespace vulkanAPI {
 
@@ -108,7 +111,7 @@ Memory::SetData(VkFormat srcFormat, bool normalize, VkDeviceSize size, VkDeviceS
                   srcFormat == VK_FORMAT_R16G16B16A16_SSCALED) {
             /// fixed point to float conversion
             float *pDst         = (float *)pData;
-            const GLfixed *pSrc = (GLfixed *)data;
+            const int *pSrc     = (int   *)data;
 
             for(size_t i = 0; i < floor(size / (float)sizeof(float)); ++i) {
                 pDst[i] = normalize ? GLOVE_FIXED_TO_FLOAT(pSrc[i]) / 255.0f : GLOVE_FIXED_TO_FLOAT(pSrc[i]);

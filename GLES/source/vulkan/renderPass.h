@@ -24,7 +24,7 @@
 #ifndef __VKRENDERPASS_H__
 #define __VKRENDERPASS_H__
 
-#include "utils/globals.h"
+#include "context.h"
 
 namespace vulkanAPI {
 

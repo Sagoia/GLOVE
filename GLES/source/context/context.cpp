@@ -103,7 +103,6 @@ Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    /// Create frame buffer object
     Framebuffer *fbo = nullptr;
     if(EGL_WINDOW_BIT == eglSurfaceInterface->type) {
         fbo = InitializeFrameBuffer(eglSurfaceInterface);
@@ -131,7 +130,6 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
 
     Framebuffer *fbo = new Framebuffer(mVkContext);
 
-    /// Create textures
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext);
 

@@ -36,14 +36,13 @@
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vkContext_t *vkContext, const VkFlags vkFlags)
-: mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
+Texture::Texture(const vulkanAPI::vkContext_t *vkContext, const VkFlags vkFlags)
+: mVkContext(vkContext),
+mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mIsFboAttached(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
-
-    mVkContext = vkContext;
 
     mState     = NULL;
     mImage     = new vulkanAPI::Image(vkContext);

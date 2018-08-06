@@ -32,6 +32,8 @@
 
 namespace vulkanAPI {
 
+#define GLOVE_VK_VALIDATION_LAYERS                      false
+
 #define ARRAY_SIZE(array)   (int)(sizeof(array) / sizeof(array[0]))
 
 #ifdef VK_USE_PLATFORM_XCB_KHR

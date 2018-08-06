@@ -24,7 +24,6 @@
 #ifndef __VKIMAGEVIEW_H__
 #define __VKIMAGEVIEW_H__
 
-#include "utils/globals.h"
 #include "image.h"
 
 namespace vulkanAPI {

@@ -30,8 +30,10 @@
 
 class ShaderProgram {
 private:
-    const Context *                                     mGlContext;
-    const vkContext_t *                                 mVkContext;
+    const
+    Context *                                           mGlContext;
+    const
+    vulkanAPI::vkContext_t *                            mVkContext;
     VkDescriptorSetLayout                               mVkDescSetLayout;
     VkDescriptorSetLayoutBinding *                      mVkDescSetLayoutBind;
     VkDescriptorPool                                    mVkDescPool;
@@ -87,7 +89,7 @@ private:
     void                                                GenerateVertexInputProperties(GenericVertexAttributes *genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
 
 public:
-    ShaderProgram(const vkContext_t *vkContext = NULL);
+    ShaderProgram(const vulkanAPI::vkContext_t *vkContext = NULL);
     ~ShaderProgram();
 
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
@@ -131,7 +133,8 @@ public:
     uint32_t                                            GetActiveVertexVkBuffersCount(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffersCount; }
     const VkBuffer *                                    GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
 
-    void                                                SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); assert(!mVkContext); mVkContext = vkContext; }
+    void                                                SetVkContext(const
+                                                                     vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); assert(!mVkContext); mVkContext = vkContext; }
     void                                                SetGlContext(const Context *context)                { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGlContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != NULL); mShaderCompiler = shaderCompiler; }
     void                                                SetStagesIDs(uint32_t index, uint32_t id)           { FUN_ENTRY(GL_LOG_TRACE); mStagesIDs[index] = id; }
@@ -151,11 +154,9 @@ public:
     int                                                 GetAttributeLocation(const char *name) const;
     VkPipelineCache                                     GetVkPipelineCache(void);
     void                                                ReleaseVkPipelineCache(void);
-
     void                                                SetShaderModules(void);
 
     void                                                MarkForDeletion(void)                               { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }
-
     bool                                                HasVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mShaders[0]; }
     bool                                                HasFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mShaders[1]; }
     bool                                                HasStages(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount; }

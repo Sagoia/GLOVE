@@ -203,7 +203,7 @@ public:
 	  void SetSampler(uint32_t location, int count, const int *textureUnit);
 
     void AllocateUniformClientData(void);
-	  bool AllocateUniformBufferObjects(const vkContext_t *vkContext);
+	  bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
 	  bool UpdateUniformBufferData(void);
 
     void UpdateAttributeInterface(void);

@@ -27,6 +27,7 @@
 #include "bufferObject.h"
 #include "utils/parser_helpers.h"
 #include "utils/glsl_types.h"
+#include "utils/globals.h"
 
 class GenericVertexAttributes {
 private:

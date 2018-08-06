@@ -30,7 +30,7 @@
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
 
-Framebuffer::Framebuffer(const vkContext_t *vkContext)
+Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mUpdated(true), mDepthStencilTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -122,7 +122,7 @@ Framebuffer::CheckStatus(void)
     }
 
     if((colorType != GL_NONE   &&
-       (!GlFormatIsColorRenderable(mAttachmentColors[0]->GetTexture()->GetInternalFormat()) ||
+        (!GlFormatIsColorRenderable(mAttachmentColors[0]->GetTexture()->GetInternalFormat()) ||
          mAttachmentColors[0]->GetTexture()->GetWidth()  <= 0   ||
          mAttachmentColors[0]->GetTexture()->GetHeight() <= 0   )
         ) ||
@@ -132,7 +132,7 @@ Framebuffer::CheckStatus(void)
          mAttachmentDepth->GetTexture()->GetHeight() <= 0)
        ) ||
        (mAttachmentStencil->GetType() != GL_NONE  &&
-       (!GlFormatIsStencilRenderable(mAttachmentStencil->GetTexture()->GetInternalFormat())  ||
+        (!GlFormatIsStencilRenderable(mAttachmentStencil->GetTexture()->GetInternalFormat())  ||
          mAttachmentStencil->GetTexture()->GetWidth()  <= 0 ||
          mAttachmentStencil->GetTexture()->GetHeight() <= 0))
        ) {

@@ -33,9 +33,13 @@
 
 #include "cbManager.h"
 
+#define GLOVE_NO_BUFFER_TO_WAIT                         0x7FFFFFFF
+#define GLOVE_NUM_COMMAND_BUFFERS                       2
+#define GLOVE_FENCE_WAIT_TIMEOUT                        UINT64_MAX
+
 CommandBufferManager *CommandBufferManager::mInstance = nullptr;
 
-CommandBufferManager::CommandBufferManager(vkContext_t *context)
+CommandBufferManager::CommandBufferManager(vulkanAPI::vkContext_t *context)
 : mVkContext(context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -95,7 +99,7 @@ CommandBufferManager::~CommandBufferManager()
 }
 
 CommandBufferManager *
-CommandBufferManager::GetCommandBufferManager(vkContext_t *context)
+CommandBufferManager::GetCommandBufferManager(vulkanAPI::vkContext_t *context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -137,16 +141,16 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
         return false;
     }
 
-    mVkCommandBuffers.commandBuffer.resize(GLOVE_NUM_VK_COMMAND_BUFFERS);
-    mVkCommandBuffers.commandBufferState.resize(GLOVE_NUM_VK_COMMAND_BUFFERS);
-    mVkCommandBuffers.fence.resize(GLOVE_NUM_VK_COMMAND_BUFFERS);
+    mVkCommandBuffers.commandBuffer.resize(GLOVE_NUM_COMMAND_BUFFERS);
+    mVkCommandBuffers.commandBufferState.resize(GLOVE_NUM_COMMAND_BUFFERS);
+    mVkCommandBuffers.fence.resize(GLOVE_NUM_COMMAND_BUFFERS);
 
     VkCommandBufferAllocateInfo cmdAllocInfo;
     cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     cmdAllocInfo.pNext              = NULL;
     cmdAllocInfo.commandPool        = mVkCmdPool;
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdAllocInfo.commandBufferCount = GLOVE_NUM_VK_COMMAND_BUFFERS;
+    cmdAllocInfo.commandBufferCount = GLOVE_NUM_COMMAND_BUFFERS;
 
     err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, mVkCommandBuffers.commandBuffer.data());
     assert(!err);
@@ -170,7 +174,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     fenceInfo.pNext = NULL;
     fenceInfo.flags = 0;
 
-    for(uint32_t i = 0; i < GLOVE_NUM_VK_COMMAND_BUFFERS; ++i) {
+    for(uint32_t i = 0; i < GLOVE_NUM_COMMAND_BUFFERS; ++i) {
         mVkCommandBuffers.commandBufferState[i] = CMD_BUFFER_INITIAL_STATE;
 
         err = vkCreateFence(mVkContext->vkDevice, &fenceInfo, NULL, &mVkCommandBuffers.fence[i]);
@@ -325,7 +329,7 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
     mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_SUBMITED_STATE;
 
     mLastSubmittedBuffer = mActiveCmdBuffer;
-    mActiveCmdBuffer = (mActiveCmdBuffer + 1) % GLOVE_NUM_VK_COMMAND_BUFFERS;
+    mActiveCmdBuffer = (mActiveCmdBuffer + 1) % GLOVE_NUM_COMMAND_BUFFERS;
 
     mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_INITIAL_STATE;
 

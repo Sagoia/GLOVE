@@ -29,7 +29,7 @@
 #include "renderbuffer.h"
 #include "utils/glUtils.h"
 
-Renderbuffer::Renderbuffer(const vkContext_t *vkContext)
+Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mInternalFormat(GL_RGBA4), mTarget(GL_INVALID_VALUE), mTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);

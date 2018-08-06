@@ -24,7 +24,7 @@
 #ifndef __VKSAMPLER_H__
 #define __VKSAMPLER_H__
 
-#include "utils/globals.h"
+#include "context.h"
 
 namespace vulkanAPI {
 

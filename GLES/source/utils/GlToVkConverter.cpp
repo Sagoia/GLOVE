@@ -24,14 +24,6 @@
 #include "GlToVkConverter.h"
 #include "glLogger.h"
 
-#ifdef NDEBUG
-#   define NOT_REACHED()                                printf("You shouldn't be here. (function %s at line %d of file %s)\n", __func__, __LINE__, __FILE__)
-#   define NOT_FOUND_ENUM(inv_enum)                     printf("Invalid enum: %#04x. (function %s at line %d of file %s)\n", inv_enum, __func__, __LINE__, __FILE__)
-#else
-#   define NOT_REACHED()                                assert(0 && "You shouldn't be here.")
-#   define NOT_FOUND_ENUM(inv_enum)                     { printf("Invalid enum: %#04x\n", inv_enum); assert(0); }
-#endif // NDEBUG
-
 VkBool32
 GlBooleanToVkBool(GLboolean value)
 {

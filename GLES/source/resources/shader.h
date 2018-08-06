@@ -28,7 +28,8 @@
 
 class Shader {
 private:
-    const vkContext_t *                 mVkContext;
+    const
+    vulkanAPI::vkContext_t *            mVkContext;
     VkShaderModule                      mVkShaderModule;
     ShaderCompiler *                    mShaderCompiler;
 
@@ -45,7 +46,7 @@ private:
     void                                DestroyVkShader(void);
 
 public:
-    Shader(const vkContext_t *vkContext = nullptr);
+    Shader(const vulkanAPI::vkContext_t *vkContext = nullptr);
     ~Shader();
 
     bool                                CompileShader(void);
@@ -66,7 +67,8 @@ public:
 
 // Set Functions
     void                                SetShaderSource(GLsizei count, const GLchar *const *string, const GLint *length);
-    void                                SetVkContext(const vkContext_t *vkContext)      { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
+    void                                SetVkContext(const
+                                                    vulkanAPI::vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
     void                                SetShaderCompiler(ShaderCompiler* compiler)     { FUN_ENTRY(GL_LOG_TRACE); mShaderCompiler  = compiler; }
     void                                SetShaderType(shader_type_t type)               { FUN_ENTRY(GL_LOG_TRACE); mShaderType      = type; }
     void                                MarkForDeletion(void)                           { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }
@@ -75,7 +77,6 @@ public:
     bool                                IsCompiled(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mCompiled; }
     bool                                IsVertex(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return (mShaderType == SHADER_TYPE_VERTEX) ? true : false; }
     bool                                HasSource(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mSource; }
-
 };
 
 #endif // __SHADER_H__

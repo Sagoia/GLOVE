@@ -53,22 +53,6 @@ using namespace std;
 #   define COMPILER_WARN_UNUSED_RESULT
 #endif // __GNUC__
 
-// Code
-#ifdef NDEBUG
-#   define NOT_REACHED()                                printf("You shouldn't be here. (function %s at line %d of file %s)\n", __func__, __LINE__, __FILE__)
-#   define NOT_IMPLEMENTED()                            printf("Function %s (line %d of file %s) not implemented yet.\n", __func__, __LINE__, __FILE__)
-#else
-#   define NOT_REACHED()                                assert(0 && "You shouldn't be here.")
-#   define NOT_IMPLEMENTED()                            assert(0 && "Function not implemented yet.")
-#endif // NDEBUG
-
-// GL_FIXED
-#define GLOVE_FIXED_PRECISION                           16
-#define GLOVE_FIXED_ONE                                 (1 << GLOVE_FIXED_PRECISION)
-
-// GL
-#define GLOVE_FIXED_TO_FLOAT(x)                         x * (1.0f / static_cast<float>(GLOVE_FIXED_ONE))
-
 // GL ES Limits
 #define GLOVE_MAX_VERTEX_ATTRIBS                        32    // MIN VALUE:   8
 #define GLOVE_MAX_VARYING_VECTORS                       8     // MIN VALUE:   8
@@ -85,9 +69,6 @@ using namespace std;
 #define GLOVE_MAX_TEXTURE_SIZE                          4096
 #define GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE                 4096
 #define GLOVE_MAX_RENDERBUFFER_SIZE                     4096
-
-#define GLOVE_NO_BUFFER_TO_WAIT                         0x7FFFFFFF
-#define GLOVE_NUM_VK_COMMAND_BUFFERS                    2
 
 #define GLOVE_NUM_SHADER_BINARY_FORMATS                 0
 #define GLOVE_NUM_PROGRAM_BINARY_FORMATS                1
@@ -112,9 +93,6 @@ using namespace std;
 #define GLOVE_DUMP_ORIGINAL_SHADER_SOURCE               false
 #define GLOVE_DUMP_PROCESSED_SHADER_SOURCE              false
 
-#define GLOVE_VK_VALIDATION_LAYERS                      false
-
-#define GLOVE_FENCE_WAIT_TIMEOUT                        UINT64_MAX
 #define GLOVE_INVALID_OFFSET                            UINT32_MAX
 
 #ifndef GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE
@@ -129,32 +107,5 @@ using namespace std;
 // TODO : remove
 class Context;
 class CommandBufferManager;
-
-typedef struct vkContext_t {
-    vkContext_t() {
-        vkInstance            = VK_NULL_HANDLE;
-        vkQueue               = VK_NULL_HANDLE;
-        vkDevice              = VK_NULL_HANDLE;
-        mCommandBufferManager = nullptr;
-    }
-
-    VkInstance                                          vkInstance;
-    vector<VkPhysicalDevice>                            vkGpus;
-    VkQueue                                             vkQueue;
-    uint32_t                                            vkGraphicsQueueNodeIndex;
-    VkDevice                                            vkDevice;
-    VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
-    vkSyncItems_t                                       *vkSyncItems;
-    CommandBufferManager                                *mCommandBufferManager;
-} vkContext_t;
-
-template<typename T>
-inline void
-SafeDelete(T*& ptr) {
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    delete ptr;
-    ptr = nullptr;
-}
 
 #endif // __GLOBALS_H__

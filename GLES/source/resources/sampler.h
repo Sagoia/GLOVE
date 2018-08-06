@@ -46,17 +46,17 @@ public:
 
 // Update Functions
     inline bool             UpdateMinFilter(GLenum mode)                        { FUN_ENTRY(GL_LOG_TRACE); bool res = mMinFilter != mode;
-                                                                                                       mMinFilter = mode;
-                                                                                                       return res; }
+                                                                                                           mMinFilter = mode;
+                                                                                                           return res; }
     inline bool             UpdateMagFilter(GLenum mode)                        { FUN_ENTRY(GL_LOG_TRACE); bool res = mMagFilter != mode;
-                                                                                                       mMagFilter = mode;
-                                                                                                       return res; }
+                                                                                                           mMagFilter = mode;
+                                                                                                           return res; }
     inline bool             UpdateWrapS(GLenum mode)                            { FUN_ENTRY(GL_LOG_TRACE); bool res = mWrapS != mode;
-                                                                                                       mWrapS = mode;
-                                                                                                       return res; }
+                                                                                                           mWrapS = mode;
+                                                                                                           return res; }
     inline bool             UpdateWrapT(GLenum mode)                            { FUN_ENTRY(GL_LOG_TRACE); bool res = mWrapT != mode;
-                                                                                                       mWrapT = mode;
-                                                                                                       return res; }
+                                                                                                           mWrapT = mode;
+                                                                                                           return res; }
 };
 
 #endif // __SAMPLER_H__

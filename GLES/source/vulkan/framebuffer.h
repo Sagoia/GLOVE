@@ -24,7 +24,7 @@
 #ifndef __VKFRAMEBUFFER_H__
 #define __VKFRAMEBUFFER_H__
 
-#include "utils/globals.h"
+#include "context.h"
 
 namespace vulkanAPI {
 

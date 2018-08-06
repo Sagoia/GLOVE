@@ -29,7 +29,7 @@
 class Renderbuffer
 {
 private:
-    const vkContext_t *     mVkContext;
+    const vulkanAPI::vkContext_t *     mVkContext;
 
     Rect                    mDims;
     GLenum                  mInternalFormat;
@@ -37,7 +37,7 @@ private:
     Texture *               mTexture;
 
 public:
-    Renderbuffer(const vkContext_t *vkContext = nullptr);
+    Renderbuffer(const vulkanAPI::vkContext_t *vkContext = nullptr);
     ~Renderbuffer();
 
 // Allocate Functions
@@ -47,15 +47,15 @@ public:
     void        Release(void);
 
 // Get Functions
-    int32_t     GetWidth(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.width;     }
-    int32_t     GetHeight(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.height;    }
-    GLenum      GetTarget(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget;         }
-    GLenum      GetInternalFormat(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mInternalFormat; }
-    Texture *   GetTexture(void)                            const   { FUN_ENTRY(GL_LOG_TRACE); return mTexture;        }
+    int32_t     GetWidth(void)                                            const { FUN_ENTRY(GL_LOG_TRACE); return mDims.width;     }
+    int32_t     GetHeight(void)                                           const { FUN_ENTRY(GL_LOG_TRACE); return mDims.height;    }
+    GLenum      GetTarget(void)                                           const { FUN_ENTRY(GL_LOG_TRACE); return mTarget;         }
+    GLenum      GetInternalFormat(void)                                   const { FUN_ENTRY(GL_LOG_TRACE); return mInternalFormat; }
+    Texture *   GetTexture(void)                                          const { FUN_ENTRY(GL_LOG_TRACE); return mTexture;        }
 
 // Set Functions
-    void        SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
-    void        SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget    = target;    }
+    void        SetVkContext(const vulkanAPI::vkContext_t *vkContext)           { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    void        SetTarget(GLenum target)                                        { FUN_ENTRY(GL_LOG_TRACE); mTarget    = target;    }
 };
 
 #endif // __RENDERBUFFER_H__

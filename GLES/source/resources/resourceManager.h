@@ -115,8 +115,8 @@ public:
 
     inline GLboolean           IsShadingObject(GLuint index,
                                              shadingNamespaceType_t type) const { FUN_ENTRY(GL_LOG_TRACE); if(!index || index >= mShadingObjectCount || !ShadingObjectExists(index)) { return GL_FALSE; }
-                                                                                                       ShadingNamespace_t shadId = mShadingObjectPool.find(index)->second;
-                                                                                                       return (shadId.arrayIndex && shadId.type == type) ? GL_TRUE : GL_FALSE;}
+                                                                                                           ShadingNamespace_t shadId = mShadingObjectPool.find(index)->second;
+                                                                                                           return (shadId.arrayIndex && shadId.type == type) ? GL_TRUE : GL_FALSE;}
     uint32_t                   FindShaderID(const Shader *shader);
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
 

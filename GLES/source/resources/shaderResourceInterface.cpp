@@ -115,7 +115,7 @@ ShaderResourceInterface::AllocateUniformClientData(void)
 }
 
 bool
-ShaderResourceInterface::AllocateUniformBufferObjects(const vkContext_t *vkContext)
+ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

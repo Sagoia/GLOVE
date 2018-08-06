@@ -24,10 +24,10 @@
 #ifndef __VKCLEARPASS_H__
 #define __VKCLEARPASS_H__
 
-#include "utils/glLogger.h"
-#include "vulkan/vulkan.h"
 #include <memory>
 #include <limits>
+#include "utils/glLogger.h"
+#include "vulkan/vulkan.h"
 
 namespace vulkanAPI {
 
@@ -50,7 +50,7 @@ private:
 public:
 // Constructor
     ClearPass();
-    
+
 // Destructor
     ~ClearPass();
 
@@ -61,7 +61,7 @@ public:
     inline VkBool32             GetUpdateDepthState(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Depth;}
     inline VkBool32             GetUpdateStencilState(void)               const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Stencil;}
     inline const VkClearRect *  GetRect(void)                             const { FUN_ENTRY(GL_LOG_TRACE); return &mVkClearRect;}
-    inline const VkClearAttachment * GetAttachments(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mVkClearAttachments;}
+    inline const VkClearAttachment *  GetAttachments(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkClearAttachments;}
 
 // Set Functions
     inline void                 SetUpdateColorState(VkBool32 enable)            { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Color   = enable;}
@@ -70,44 +70,44 @@ public:
 
     inline void                 SetAttachmentsCount(uint32_t count)             { FUN_ENTRY(GL_LOG_TRACE); mClearAttachmentsCount = count;}
     inline void                 SetColorAttachment(uint32_t j, float *color)    { FUN_ENTRY(GL_LOG_TRACE); mVkClearAttachments[j].aspectMask                      = VK_IMAGE_ASPECT_COLOR_BIT;
-                                                                                                       mVkClearAttachments[j].colorAttachment                 = 0;
-                                                                                                       mVkClearAttachments[j].clearValue.color.float32[0]     = color[0];
-                                                                                                       mVkClearAttachments[j].clearValue.color.float32[1]     = color[1];
-                                                                                                       mVkClearAttachments[j].clearValue.color.float32[2]     = color[2];
-                                                                                                       mVkClearAttachments[j].clearValue.color.float32[3]     = color[3];
-                                                                                                       mUpdateState.Color  = false; }
+                                                                                                           mVkClearAttachments[j].colorAttachment                 = 0;
+                                                                                                           mVkClearAttachments[j].clearValue.color.float32[0]     = color[0];
+                                                                                                           mVkClearAttachments[j].clearValue.color.float32[1]     = color[1];
+                                                                                                           mVkClearAttachments[j].clearValue.color.float32[2]     = color[2];
+                                                                                                           mVkClearAttachments[j].clearValue.color.float32[3]     = color[3];
+                                                                                                           mUpdateState.Color  = false; }
 
     inline void                 SetDepthAttachment(uint32_t j, float depth)     { FUN_ENTRY(GL_LOG_TRACE); mVkClearAttachments[j].aspectMask                      = VK_IMAGE_ASPECT_DEPTH_BIT;
-                                                                                                       mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.stencil = 0;
+                                                                                                           mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.stencil = 0;
 
 #ifdef WORKAROUNDS
-                                                                                                       //workaround for mesa Vulkan Intel driver
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.depth   = depth * std::numeric_limits<float>::max();
+                                                                                                           //workaround for mesa Vulkan Intel driver
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.depth   = depth * std::numeric_limits<float>::max();
 
 #else
-                                                                                                       //correct solution
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.depth   = depth;
+                                                                                                           //correct solution
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.depth   = depth;
 #endif
-                                                                                                       mUpdateState.Depth   = false; }
+                                                                                                           mUpdateState.Depth   = false; }
     inline void                 SetStencilAttachment(uint32_t j, int stencil)   { FUN_ENTRY(GL_LOG_TRACE); mVkClearAttachments[j].aspectMask                      = VK_IMAGE_ASPECT_STENCIL_BIT;
-                                                                                                       mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.stencil = stencil;
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.depth   = 0.f;
-                                                                                                       mUpdateState.Stencil = false; }
+                                                                                                           mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.stencil = stencil;
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.depth   = 0.f;
+                                                                                                           mUpdateState.Stencil = false; }
     inline void                 SetDepthStencilAttachment(uint32_t j,
                                                           float depth,
                                                           int stencil)          { FUN_ENTRY(GL_LOG_TRACE); mVkClearAttachments[j].aspectMask                      = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-                                                                                                       mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.depth   = depth;
-                                                                                                       mVkClearAttachments[j].clearValue.depthStencil.stencil = stencil;
-                                                                                                       mUpdateState.Depth   = false;
-                                                                                                       mUpdateState.Stencil = false; }
+                                                                                                           mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.depth   = depth;
+                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.stencil = stencil;
+                                                                                                           mUpdateState.Depth   = false;
+                                                                                                           mUpdateState.Stencil = false; }
     inline void                 SetRect( int32_t x,  int32_t y,
                                         uint32_t w, uint32_t h)                 { FUN_ENTRY(GL_LOG_TRACE); mVkClearRect.rect.offset.x      = x;
-                                                                                                       mVkClearRect.rect.offset.y      = y;
-                                                                                                       mVkClearRect.rect.extent.width  = w;
-                                                                                                       mVkClearRect.rect.extent.height = h; }
+                                                                                                           mVkClearRect.rect.offset.y      = y;
+                                                                                                           mVkClearRect.rect.extent.width  = w;
+                                                                                                           mVkClearRect.rect.extent.height = h; }
 };
 
 }

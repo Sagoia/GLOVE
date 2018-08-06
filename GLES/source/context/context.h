@@ -48,7 +48,8 @@ class Context {
 
 private:
 // ------------
-    const vkContext_t *                         mVkContext;
+    const
+    vulkanAPI::vkContext_t *                    mVkContext;
 // ------------
     StateManager                                mStateManager;
     ResourceManager                             mResourceManager;

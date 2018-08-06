@@ -24,7 +24,7 @@
 #ifndef __VKCBMANAGER_H__
 #define __VKCBMANAGER_H__
 
-#include "utils/globals.h"
+#include "context.h"
 
 typedef enum {
     CMD_BUFFER_INITIAL_STATE = 0,
@@ -76,7 +76,7 @@ private:
 
     static CommandBufferManager    *mInstance;
     VkCommandPool                   mVkCmdPool;
-    vkContext_t                    *mVkContext;
+    vulkanAPI::vkContext_t         *mVkContext;
 
     uint32_t                        mActiveCmdBuffer;
     int32_t                         mLastSubmittedBuffer;
@@ -93,13 +93,13 @@ private:
 
 public:
 // Constructor
-    CommandBufferManager(vkContext_t *context = nullptr);
+    CommandBufferManager(vulkanAPI::vkContext_t *context = nullptr);
 
 // Destructor
     ~CommandBufferManager();
 
 // Get Functions
-    static CommandBufferManager *GetCommandBufferManager(vkContext_t *context);
+    static CommandBufferManager *GetCommandBufferManager(vulkanAPI::vkContext_t *context);
 
 // Reset Functions
     static void                  ResetCommandBufferManager(void);

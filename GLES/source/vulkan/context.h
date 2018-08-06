@@ -17,20 +17,48 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      Context Functionality via Vulkan 
+ *  @brief      Context Functionality via Vulkan
  *
  */
 
 #ifndef __VKCONTEXT_H__
 #define __VKCONTEXT_H__
 
-#include "utils/globals.h"
+#include <map>
+#include <vector>
+#include "utils/glLogger.h"
+#include "vulkan/vulkan.h"
+#include "rendering_api_interface.h"
+
+using namespace std;
+
+class CommandBufferManager;
 
 namespace vulkanAPI {
+
+    typedef struct vkContext_t {
+        vkContext_t() {
+            vkInstance            = VK_NULL_HANDLE;
+            vkQueue               = VK_NULL_HANDLE;
+            vkDevice              = VK_NULL_HANDLE;
+            mCommandBufferManager = nullptr;
+        }
+
+        VkInstance                                          vkInstance;
+        vector<VkPhysicalDevice>                            vkGpus;
+        VkQueue                                             vkQueue;
+        uint32_t                                            vkGraphicsQueueNodeIndex;
+        VkDevice                                            vkDevice;
+        VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
+        vkSyncItems_t                                       *vkSyncItems;
+        CommandBufferManager                                *mCommandBufferManager;
+    } vkContext_t;
 
     vkContext_t *                     GetContext();
     bool                              InitContext();
     void                              TerminateContext();
+
+    template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 };
 
 #endif // __VKCONTEXT_H__

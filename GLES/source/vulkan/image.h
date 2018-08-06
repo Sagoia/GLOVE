@@ -24,8 +24,8 @@
 #ifndef __VKIMAGE_H__
 #define __VKIMAGE_H__
 
-#include "utils/globals.h"
 #include "utils.h"
+#include "context.h"
 
 #define TEXTURE_2D_LAYERS         1
 #define TEXTURE_CUBE_MAP_LAYERS   6
@@ -106,7 +106,7 @@ public:
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext     = vkContext; }
     inline void                       SetFormat(VkFormat format)                { FUN_ENTRY(GL_LOG_TRACE); mVkFormat      = format;    }
     inline void                       SetImage(VkImage image)                   { FUN_ENTRY(GL_LOG_TRACE); mVkImage       = image;
-                                                                                                       mDelete        = false;     }
+                                                                                                           mDelete        = false;     }
     inline void                       SetImageUsage(VkImageUsageFlagBits usage) { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
     inline void                       SetImageTarget(VkImageTarget target)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTarget = target;    }
     inline void                       SetImageTiling(VkImageTiling tiling)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTiling = tiling;    }

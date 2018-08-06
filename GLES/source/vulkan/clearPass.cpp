@@ -28,8 +28,6 @@
 
 #include "clearPass.h"
 
-#include <string.h>
-
 namespace vulkanAPI {
 
 ClearPass::ClearPass()

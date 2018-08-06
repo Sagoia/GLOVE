@@ -30,7 +30,6 @@
  */
 
 #include "image.h"
-#include "context/context.h"
 
 namespace vulkanAPI {
 

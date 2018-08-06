@@ -24,8 +24,9 @@
 #ifndef __VKMEMORY_H__
 #define __VKMEMORY_H__
 
-#include "utils/globals.h"
+#include <cmath>
 #include "utils.h"
+#include "context.h"
 
 namespace vulkanAPI {
 

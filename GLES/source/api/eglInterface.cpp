@@ -36,7 +36,7 @@ void                  delete_context(api_context_t api_context);
 void                  set_next_image_index(api_context_t api_context, uint32_t index);
 void                  finish(api_context_t api_context);
 
-static void           FillInVkInterface(vkContext_t* vkContext);
+static void           FillInVkInterface(vulkanAPI::vkContext_t* vkContext);
 
 rendering_api_interface_t GLES2Interface = {
     gles2_state,
@@ -50,7 +50,7 @@ rendering_api_interface_t GLES2Interface = {
     finish
 };
 
-static void FillInVkInterface(vkContext_t* vkContext)
+static void FillInVkInterface(vulkanAPI::vkContext_t* vkContext)
 {
     vkInterface.vkInstance = vkContext->vkInstance;
     vkInterface.vkGpus = &vkContext->vkGpus[0];

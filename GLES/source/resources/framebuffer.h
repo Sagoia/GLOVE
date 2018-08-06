@@ -32,7 +32,8 @@
 class Framebuffer {
 private:
 
-    const vkContext_t *             mVkContext;
+    const
+    vulkanAPI::vkContext_t *        mVkContext;
 
     Rect                            mDims;
     GLenum                          mTarget;
@@ -50,7 +51,7 @@ private:
     void                            Release(void);
 
 public:
-    Framebuffer(const vkContext_t *vkContext = nullptr);
+    Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr);
     ~Framebuffer();
 
 // Create Functions
@@ -98,7 +99,8 @@ public:
 
 // Set Functions
            void             SetColorAttachmentTexture(Texture *texture);
-    inline void             SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
+    inline void             SetVkContext(const
+                                         vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
 
     inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget      = target; }
     inline void             SetWidth(int32_t width)                             { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
@@ -114,19 +116,18 @@ public:
     inline void             SetDepthAttachmentLevel(GLint level)                { FUN_ENTRY(GL_LOG_TRACE); mAttachmentDepth->SetLevel(level); }
     inline void             SetDepthAttachmentLayer(GLenum layer)               { FUN_ENTRY(GL_LOG_TRACE); mAttachmentDepth->SetLayer(layer); }
     inline void             SetDepthAttachmentTexture(Texture *texture)         { FUN_ENTRY(GL_LOG_TRACE); mAttachmentDepth->SetTexture(texture);
-                                                                                                       mUpdated = true; }
+                                                                                                           mUpdated = true; }
 
     inline void             SetStencilAttachmentType(GLenum type)               { FUN_ENTRY(GL_LOG_TRACE); mAttachmentStencil->SetType(type);   }
     inline void             SetStencilAttachmentName(uint32_t name)             { FUN_ENTRY(GL_LOG_TRACE); mAttachmentStencil->SetName(name);   }
     inline void             SetStencilAttachmentLevel(GLint level)              { FUN_ENTRY(GL_LOG_TRACE); mAttachmentStencil->SetLevel(level); }
     inline void             SetStencilAttachmentLayer(GLenum layer)             { FUN_ENTRY(GL_LOG_TRACE); mAttachmentStencil->SetLayer(layer); }
     inline void             SetStencilAttachmentTexture(Texture *texture)       { FUN_ENTRY(GL_LOG_TRACE); mAttachmentStencil->SetTexture(texture);
-                                                                                                       mUpdated = true; }
+                                                                                                           mUpdated = true; }
     inline void             SetDepthStencilAttachmentTexture(Texture *texture)  { FUN_ENTRY(GL_LOG_TRACE); mAttachmentDepth->SetTexture(texture);
-                                                                                                       mAttachmentStencil->SetTexture(texture);
-                                                                                                       mUpdated = true; }
-
-    inline void             SetWriteBufferIndex(uint32_t buffer)                { FUN_ENTRY(GL_LOG_TRACE); if(mAttachmentColors.size() > 1) mWriteBufferIndex = buffer; }
+                                                                                                           mAttachmentStencil->SetTexture(texture);
+                                                                                                           mUpdated = true; }
+    inline void             SetWriteBufferIndex(uint32_t buffer)                { FUN_ENTRY(GL_LOG_TRACE); if(mAttachmentColors.size() > 1) {mWriteBufferIndex = buffer;} }
 };
 
 #endif // __FRAMEBUFFER_H__

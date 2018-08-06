@@ -32,7 +32,7 @@
 #include "vulkan/cbManager.h"
 #include "utils/GlToVkConverter.h"
 
-#define ISPOWEROFTWO(x)                                 ((x != 0) && !(x & (x - 1)))
+#define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
 
 class Texture {
 
@@ -51,7 +51,8 @@ class Texture {
     typedef map<uint32_t, State_t> StateMap_t;
 
 private:
-    const vkContext_t *         mVkContext;
+    const
+    vulkanAPI::vkContext_t *    mVkContext;
 
     GLenum                      mFormat;
     GLenum                      mTarget;
@@ -81,7 +82,7 @@ private:
     void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vkContext_t  *vkContext = nullptr,
+    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr,
             const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     ~Texture();
 
@@ -93,7 +94,7 @@ public:
 
 // Init Functions
     inline void             InitState(void)                                     { FUN_ENTRY(GL_LOG_TRACE); mLayersCount  = mTarget == GL_TEXTURE_2D ? TEXTURE_2D_LAYERS : TEXTURE_CUBE_MAP_LAYERS;
-                                                                                                       mState        = new StateMap_t[mLayersCount]; }
+                                                                                                           mState        = new StateMap_t[mLayersCount]; }
 
 // Helper Functions
     static int              GetDefaultInternalAlignment()                       { FUN_ENTRY(GL_LOG_TRACE); return mDefaultInternalAlignment; }
@@ -137,24 +138,23 @@ public:
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
 
 // Set Functions
-    inline void             SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
-                                                                                                       mMemory->SetContext(vkContext);
-                                                                                                       mSampler->SetContext(vkContext);
-                                                                                                       mImageView->SetContext(vkContext);
-                                                                                                       mImage->SetContext(vkContext); }
+    inline void             SetVkContext(const
+                                         vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
+                                                                                                           mMemory->SetContext(vkContext);
+                                                                                                           mSampler->SetContext(vkContext);
+                                                                                                           mImageView->SetContext(vkContext);
+                                                                                                           mImage->SetContext(vkContext); }
     inline void             SetFramebufferAttachment(bool att)                  { FUN_ENTRY(GL_LOG_TRACE); mIsFboAttached = att; }
     inline void             SetWrapS(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapS(mode)) { \
-                                                                                                       mSampler->SetAddressModeU(GlTexAddressToVkTexAddress(mode));}}
+                                                                                                           mSampler->SetAddressModeU(GlTexAddressToVkTexAddress(mode));}}
     inline void             SetWrapT(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapT(mode)) { \
-                                                                                                       mSampler->SetAddressModeV(GlTexAddressToVkTexAddress(mode));}}
+                                                                                                           mSampler->SetAddressModeV(GlTexAddressToVkTexAddress(mode));}}
     inline void             SetMinFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMinFilter(mode)){ \
-                                                                                                       mSampler->SetMinFilter(GlTexFilterToVkTexFilter(mode)); \
-                                                                                                       mSampler->SetMipmapMode(GlTexMipMapModeToVkMipMapMode(mode));
-                                                                                                       mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.0 : static_cast<float>(mMipLevelsCount-1));
-                                                                                                       } }
+                                                                                                           mSampler->SetMinFilter(GlTexFilterToVkTexFilter(mode)); \
+                                                                                                           mSampler->SetMipmapMode(GlTexMipMapModeToVkMipMapMode(mode));
+                                                                                                           mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.0 : static_cast<float>(mMipLevelsCount-1));}}
     inline void             SetMagFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMagFilter(mode)) { \
-                                                                                                       mSampler->SetMagFilter(GlTexFilterToVkTexFilter(mode));
-                                                                                                       } }
+                                                                                                           mSampler->SetMagFilter(GlTexFilterToVkTexFilter(mode));} }
     inline void             SetWidth(int width)                                 { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int height)                               { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }
     inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget      = target; }
@@ -176,15 +176,14 @@ public:
     inline bool             IsFramebufferAttachment(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mIsFboAttached; }
     inline bool             IsCubeMap(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget  == GL_TEXTURE_CUBE_MAP; }
     inline bool             IsCompressed(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return (mFormat != GL_ALPHA           &&
-                                                                                                               mFormat != GL_RGB             &&
-                                                                                                               mFormat != GL_RGBA            &&
-                                                                                                               mFormat != GL_LUMINANCE       &&
-                                                                                                               mFormat != GL_LUMINANCE_ALPHA &&
-                                                                                                               mFormat != GL_BGRA8_EXT); }
+                                                                                                                   mFormat != GL_RGB             &&
+                                                                                                                   mFormat != GL_RGBA            &&
+                                                                                                                   mFormat != GL_LUMINANCE       &&
+                                                                                                                   mFormat != GL_LUMINANCE_ALPHA &&
+                                                                                                                   mFormat != GL_BGRA8_EXT); }
            bool             IsNPOT(void);
            bool             IsNPOTAccessCompleted(void);
            bool             IsCompleted(void);
-
 };
 
 #endif // __TEXTURE_H__
