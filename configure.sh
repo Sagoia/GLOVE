@@ -9,6 +9,8 @@ VULKAN_INCLUDE_PATH=""
 TRACE_BUILD=OFF
 TOOLCHAIN_FILE=""
 SYSROOT=""
+C_FLAGS=""
+CXX_FLAGS=""
 INSTALL_PREFIX="/usr/local"
 BUILD_FOLDER=build
 CROSS_COMPILATION_ARM=false
@@ -29,6 +31,8 @@ function buildGlove() {
           -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
           -DCMAKE_SYSROOT=$SYSROOT \
           -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+          -DCMAKE_C_FLAGS=$C_FLAGS \
+          -DCMAKE_CXX_FLAGS=$CXX_FLAGS \
           --no-warn-unused-cli ..
 
     cd ..
@@ -51,11 +55,17 @@ else
                 INSTALL_PREFIX=""
                 echo "Cross compiling for ARM"
                 ;;
-            # option to build with Debug option
+            # option to build in Debug mode
             -d|--debug)
                 BUILD_TYPE=Debug
                 BUILD_FOLDER=${BUILD_FOLDER}_debug
-                echo "Building with Debug option"
+                echo "Building in Debug mode"
+                ;;
+            # option to handle warnings as errors
+            -e|--werror)
+                C_FLAGS="-Werror"
+                CXX_FLAGS="-Werror"
+                echo "Turn all compilation warnings into errors"
                 ;;
             # option to set install path
             -i|--install-prefix)
@@ -99,6 +109,7 @@ else
                 echo "Try the following:"
                 echo " -a | --arm-compile                   # cross build for ARM platform (default OFF)"
                 echo " -d | --debug                         # build in Debug mode (default Release)"
+                echo " -e | --werror                        # handle warnings as errors (default OFF)"
                 echo " -i | --install-prefix      (dir)     # set custom installation prefix path"
                 echo " -s | --sysroot             (dir)     # set sysroot for cross compilation"
                 echo " -t | --trace-build                   # activate logs (default OFF)"
