@@ -43,7 +43,7 @@ const char * const RenderingThread::EGLErrors[] = {   "EGL_SUCCESS",
 
 
 RenderingThread::RenderingThread()
-: mLastError(EGL_SUCCESS)
+    : mCurrentAPI(EGL_OPENGL_ES_API), mLastError(EGL_SUCCESS)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 }
