@@ -244,7 +244,7 @@ Context::GetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, char* 
     if(!src) {
         return;
     }
-    
+
     GLint len         = shaderPtr->GetShaderSourceLength();
     GLint returnedLen = static_cast<GLint>(std::max(std::min(bufsize, len) - 1, 0));
 
@@ -308,5 +308,8 @@ Context::ReleaseShaderCompiler(void)
 
     HasShaderCompiler();
 
-    NOT_IMPLEMENTED();
+    if(mShaderCompiler != nullptr) {
+        delete mShaderCompiler;
+        mShaderCompiler = nullptr;
+    }
 }

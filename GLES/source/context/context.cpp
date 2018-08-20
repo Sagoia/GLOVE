@@ -77,7 +77,11 @@ Context::~Context()
         delete mSystemFBO;
     }
 
-    delete mShaderCompiler;
+    if(mShaderCompiler != nullptr) {
+        delete mShaderCompiler;
+        mShaderCompiler = nullptr;
+    }
+
     delete mPipeline;
     delete mClearPass;
     delete mExplicitIbo;
