@@ -164,13 +164,13 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         return;
     }
 
-    if(texture && !mResourceManager->TextureExists(texture)) {
+    if(texture && !mResourceManager.TextureExists(texture)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if((mResourceManager->GetTexture(texture)->GetTarget() == GL_TEXTURE_2D       && textarget != GL_TEXTURE_2D) ||
-       (mResourceManager->GetTexture(texture)->GetTarget() == GL_TEXTURE_CUBE_MAP && textarget == GL_TEXTURE_2D)) {
+    if((mResourceManager.GetTexture(texture)->GetTarget() == GL_TEXTURE_2D       && textarget != GL_TEXTURE_2D) ||
+       (mResourceManager.GetTexture(texture)->GetTarget() == GL_TEXTURE_CUBE_MAP && textarget == GL_TEXTURE_2D)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
