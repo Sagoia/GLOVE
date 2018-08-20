@@ -46,6 +46,7 @@ Context::Context()
 
     mVkContext      = vulkanAPI::GetContext();
 
+    mResourceManager= new ResourceManager(mVkContext);
     mShaderCompiler = new GlslangShaderCompiler();
     mClearPass      = new vulkanAPI::ClearPass();
     mPipeline       = new vulkanAPI::Pipeline(mVkContext);
@@ -82,6 +83,7 @@ Context::~Context()
         mShaderCompiler = nullptr;
     }
 
+    delete mResourceManager;
     delete mPipeline;
     delete mClearPass;
     delete mExplicitIbo;
@@ -93,12 +95,8 @@ Context::InitializeDefaultTextures()
     FUN_ENTRY(GL_LOG_DEBUG);
 
     for(int i = 0; i < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS; ++i) {
-        Texture *tex = mResourceManager.GetDefaultTexture(GL_TEXTURE_2D);
-                 tex->SetVkContext(mVkContext);
-        mStateManager.GetActiveObjectsState()->SetActiveTexture(GL_TEXTURE_2D      , i, tex);
-                 tex = mResourceManager.GetDefaultTexture(GL_TEXTURE_CUBE_MAP);
-                 tex->SetVkContext(mVkContext);
-        mStateManager.GetActiveObjectsState()->SetActiveTexture(GL_TEXTURE_CUBE_MAP, i, tex);
+        mStateManager.GetActiveObjectsState()->SetActiveTexture(GL_TEXTURE_2D      , i, mResourceManager->GetDefaultTexture(GL_TEXTURE_2D));
+        mStateManager.GetActiveObjectsState()->SetActiveTexture(GL_TEXTURE_CUBE_MAP, i, mResourceManager->GetDefaultTexture(GL_TEXTURE_CUBE_MAP));
     }
 }
 
@@ -151,6 +149,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetVkImage(swapChainImages[i]);
         tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
         tex->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+        tex->SetVkImageTiling();
         tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
         tex->CreateVkImageSubResourceRange();
         tex->CreateVkImageView();
@@ -177,6 +176,7 @@ Context::AllocatePBufferTexture(EGLSurfaceInterface *eglSurfaceInterface)
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
     tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+    tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
     GLenum glformat = VkFormatToGlInternalformat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
     tex->InitState();
@@ -218,7 +218,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(depthFormat);
     tex->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-    tex->SetVkImageTiling(VK_IMAGE_TILING_OPTIMAL);
+    tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
 
     GLenum glformat = VkFormatToGlInternalformat(depthFormat);

@@ -35,7 +35,7 @@ Context::BindBuffer(GLenum target, GLuint buffer)
 
     BufferObject *bo = nullptr;
     if(buffer) {
-        bo = mResourceManager.GetBuffer(buffer);
+        bo = mResourceManager->GetBuffer(buffer);
         bo->SetTarget(target);
         bo->SetContext(mVkContext);
     }
@@ -116,15 +116,15 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
     while(n-- != 0) {
         uint32_t buffer = *buffers++;
 
-        if(buffer && mResourceManager.BufferExists(buffer)) {
+        if(buffer && mResourceManager->BufferExists(buffer)) {
 
-            BufferObject *buf = mResourceManager.GetBuffer(buffer);
+            BufferObject *buf = mResourceManager->GetBuffer(buffer);
 
             if(mStateManager.GetActiveObjectsState()->EqualsActiveBufferObject(buf)) {
                 mStateManager.GetActiveObjectsState()->ResetActiveBufferObject(buf->GetTarget());
             }
 
-            mResourceManager.DeallocateBuffer(buffer);
+            mResourceManager->DeallocateBuffer(buffer);
         }
     }
 }
@@ -167,7 +167,7 @@ Context::GenBuffers(GLsizei n, GLuint* buffers)
     }
 
     while(n != 0) {
-        *buffers++ = mResourceManager.AllocateBuffer();
+        *buffers++ = mResourceManager->AllocateBuffer();
         --n;
     }
 }
@@ -177,8 +177,8 @@ Context::IsBuffer(GLuint buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(buffer && mResourceManager.BufferExists(buffer)) {
-        BufferObject *pBuffer = mResourceManager.GetBuffer(buffer);
+    if(buffer && mResourceManager->BufferExists(buffer)) {
+        BufferObject *pBuffer = mResourceManager->GetBuffer(buffer);
         return (pBuffer && pBuffer->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
     }
 

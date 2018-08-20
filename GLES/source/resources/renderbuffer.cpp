@@ -76,6 +76,8 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
         mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
     mTexture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
+    mTexture->SetVkImageTiling();
+
     mTexture->InitState();
     mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat), GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), NULL);
 

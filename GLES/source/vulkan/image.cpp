@@ -69,8 +69,35 @@ Image::Release(void)
     mDelete     = true;
 }
 
+void
+Image::SetImageTiling(void)
+{
+    VkFormatProperties props;
+    vkGetPhysicalDeviceFormatProperties(mVkContext->vkGpus[0], mVkFormat, &props);
+
+    VkFormatFeatureFlagBits flagbits = static_cast<VkFormatFeatureFlagBits>(0);
+    if(mVkImageUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+        flagbits = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    }
+    else if (mVkImageUsage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+        flagbits = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+    }
+
+    if      (props.linearTilingFeatures  & flagbits) {
+        mVkImageTiling = VK_IMAGE_TILING_LINEAR;
+    }
+    else if (props.optimalTilingFeatures & flagbits) {
+        mVkImageTiling = VK_IMAGE_TILING_OPTIMAL;
+    }
+    else {
+        // Format not supported
+        assert(0);
+    }
+}
+
+
 bool
-Image::Create()
+Image::Create(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

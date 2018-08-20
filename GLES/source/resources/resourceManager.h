@@ -69,7 +69,7 @@ private:
     Texture                *   mDefaultTextureCubeMap;
 
 public:
-    ResourceManager();
+    ResourceManager(const vulkanAPI::vkContext_t *vkContext);
     ~ResourceManager();
 
 // Allocate/Deallocate Functions
@@ -120,7 +120,7 @@ public:
     uint32_t                   FindShaderID(const Shader *shader);
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
 
-    void                       CreateDefaultTextures(void);
+    void                       CreateDefaultTextures(const vulkanAPI::vkContext_t *vkContext);
 
 };
 

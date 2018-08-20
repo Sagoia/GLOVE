@@ -108,8 +108,9 @@ public:
     inline void                       SetImage(VkImage image)                   { FUN_ENTRY(GL_LOG_TRACE); mVkImage       = image;
                                                                                                            mDelete        = false;     }
     inline void                       SetImageUsage(VkImageUsageFlagBits usage) { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
-    inline void                       SetImageTarget(VkImageTarget target)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTarget = target;    }
+           void                       SetImageTiling();
     inline void                       SetImageTiling(VkImageTiling tiling)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTiling = tiling;    }
+    inline void                       SetImageTarget(VkImageTarget target)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTarget = target;    }
     inline void                       SetImageLayout(VkImageLayout layout)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageLayout = layout;    }
     inline void                       SetWidth(uint32_t width)                  { FUN_ENTRY(GL_LOG_TRACE); mWidth         = width;     }
     inline void                       SetHeight(uint32_t height)                { FUN_ENTRY(GL_LOG_TRACE); mHeight        = height;    }

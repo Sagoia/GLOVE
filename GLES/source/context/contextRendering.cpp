@@ -215,7 +215,7 @@ void Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
     /// If this is true then VkPipeline needs to be updated too.
     /// Otherwise only the buffer that will be bound with vkCmdBindVertexBuffers need to be updated
     if(mPipeline->GetUpdateVertexAttribVBOs() || firstVertex) {
-        mStateManager.GetActiveShaderProgram()->PrepareVertexAttribBufferObjects(vertCount, firstVertex, mResourceManager.GetGenericVertexAttributes());
+        mStateManager.GetActiveShaderProgram()->PrepareVertexAttribBufferObjects(vertCount, firstVertex, mResourceManager->GetGenericVertexAttributes());
         mPipeline->SetUpdatePipeline(true);
         mPipeline->SetUpdateVertexAttribVBOs(false);
     }

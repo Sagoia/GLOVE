@@ -50,7 +50,7 @@ Context::BindTexture(GLenum target, GLuint texture)
     Texture *tex = nullptr;
     if(texture)
     {
-        tex = mResourceManager.GetTexture(texture);
+        tex = mResourceManager->GetTexture(texture);
 
         if(tex->GetTarget() == GL_INVALID_VALUE) {
             tex->SetVkContext(mVkContext);
@@ -58,13 +58,15 @@ Context::BindTexture(GLenum target, GLuint texture)
             tex->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
             tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetVkImageTarget(target == GL_TEXTURE_2D ? vulkanAPI::Image::VK_IMAGE_TARGET_2D : vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);
+            tex->SetVkImageTiling();
+            
             tex->InitState();
         } else if(tex->GetTarget() != target) {
             RecordError(GL_INVALID_OPERATION);
             return;
         }
     } else {
-        tex = mResourceManager.GetDefaultTexture(target);
+        tex = mResourceManager->GetDefaultTexture(target);
     }
 
     mStateManager.GetActiveObjectsState()->SetActiveTexture(target, tex);
@@ -86,8 +88,8 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
     while (n-- != 0) {
         uint32_t texture = *textures++;
 
-        if (texture && mResourceManager.TextureExists(texture)) {
-            Texture *tex = mResourceManager.GetTexture(texture);
+        if (texture && mResourceManager->TextureExists(texture)) {
+            Texture *tex = mResourceManager->GetTexture(texture);
 
             if(tex == mWriteFBO->GetColorAttachmentTexture()) {
                 mWriteFBO->SetColorAttachmentTexture(nullptr);
@@ -110,11 +112,11 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
             GLenum target = tex->GetTarget();
             for(int i = 0; i < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS && target != GL_INVALID_VALUE; ++i) {
                 if(mStateManager.GetActiveObjectsState()->EqualsActiveTexture(target, i, tex)) {
-                    mStateManager.GetActiveObjectsState()->SetActiveTexture(target, i, mResourceManager.GetDefaultTexture(target));
+                    mStateManager.GetActiveObjectsState()->SetActiveTexture(target, i, mResourceManager->GetDefaultTexture(target));
                 }
             }
 
-            mResourceManager.DeallocateTexture(texture);
+            mResourceManager->DeallocateTexture(texture);
         }
     }
 }
@@ -160,7 +162,7 @@ Context::GenTextures(GLsizei n, GLuint* textures)
     }
 
     while (n != 0) {
-        *textures++ = mResourceManager.AllocateTexture();
+        *textures++ = mResourceManager->AllocateTexture();
         --n;
     }
 }
@@ -301,7 +303,7 @@ Context::IsTexture(GLuint texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    return (texture && mResourceManager.TextureExists(texture) && mResourceManager.GetTexture(texture)->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
+    return (texture && mResourceManager->TextureExists(texture) && mResourceManager->GetTexture(texture)->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
 }
 
 void

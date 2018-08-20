@@ -50,13 +50,13 @@ Context::CreateShader(GLenum type)
         return 0;
     }
 
-    GLuint res     = mResourceManager.AllocateShader();
-    Shader *shader = mResourceManager.GetShader(res);
+    GLuint res     = mResourceManager->AllocateShader();
+    Shader *shader = mResourceManager->GetShader(res);
     shader->SetShaderType(type == GL_VERTEX_SHADER ? SHADER_TYPE_VERTEX : SHADER_TYPE_FRAGMENT);
     shader->SetVkContext(mVkContext);
     shader->SetShaderCompiler(mShaderCompiler);
 
-    return mResourceManager.PushShadingObject((ShadingNamespace_t){SHADER_ID, res});
+    return mResourceManager->PushShadingObject((ShadingNamespace_t){SHADER_ID, res});
 }
 
 void
@@ -81,8 +81,8 @@ Context::DeleteShader(Shader *shaderPtr)
     }
 
     if(!shaderPtr->GetRefCount()) {
-        mResourceManager.EraseShadingObject(GetShaderId(shaderPtr));
-        mResourceManager.DeallocateShader(shaderPtr);
+        mResourceManager->EraseShadingObject(GetShaderId(shaderPtr));
+        mResourceManager->DeallocateShader(shaderPtr);
     } else {
         shaderPtr->MarkForDeletion();
     }
@@ -93,18 +93,18 @@ Context::GetShaderPtr(GLuint shader)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!shader || shader >= mResourceManager.GetShadingObjectCount() || !mResourceManager.ShadingObjectExists(shader)) {
+    if(!shader || shader >= mResourceManager->GetShadingObjectCount() || !mResourceManager->ShadingObjectExists(shader)) {
         RecordError(GL_INVALID_VALUE);
         return nullptr;
     }
 
-    ShadingNamespace_t shadId = mResourceManager.GetShadingObject(shader);
+    ShadingNamespace_t shadId = mResourceManager->GetShadingObject(shader);
     if(!shadId.arrayIndex || shadId.type != SHADER_ID) {
         RecordError(GL_INVALID_OPERATION);
         return nullptr;
     }
 
-    return mResourceManager.GetShader(shadId.arrayIndex);
+    return mResourceManager->GetShader(shadId.arrayIndex);
 }
 
 void
@@ -269,7 +269,7 @@ Context::IsShader(GLuint shader)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    return mResourceManager.IsShadingObject(shader, SHADER_ID);
+    return mResourceManager->IsShadingObject(shader, SHADER_ID);
 }
 
 void

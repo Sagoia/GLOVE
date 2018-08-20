@@ -200,7 +200,7 @@ Framebuffer::CreateDepthStencilTexture(void)
         mDepthStencilTexture->SetVkFormat(vkformat);
         mDepthStencilTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-        mDepthStencilTexture->SetVkImageTiling(VK_IMAGE_TILING_OPTIMAL);
+        mDepthStencilTexture->SetVkImageTiling();
         GLenum glformat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
         mDepthStencilTexture->InitState();
         mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat), GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), NULL);

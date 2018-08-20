@@ -38,7 +38,7 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
         return;
     }
 
-    Renderbuffer *rendbuff = mResourceManager.GetRenderbuffer(renderbuffer);
+    Renderbuffer *rendbuff = mResourceManager->GetRenderbuffer(renderbuffer);
     if(rendbuff->GetTarget() == GL_INVALID_VALUE) {
         rendbuff->SetVkContext(mVkContext);
         rendbuff->SetTarget(target);
@@ -59,8 +59,8 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
     while(n-- != 0) {
         uint32_t index = *renderbuffers++;
 
-        if(index && mResourceManager.RenderbufferExists(index)) {
-            Renderbuffer *rbo = mResourceManager.GetRenderbuffer(index);
+        if(index && mResourceManager->RenderbufferExists(index)) {
+            Renderbuffer *rbo = mResourceManager->GetRenderbuffer(index);
 
             if(rbo->GetTexture() == mWriteFBO->GetColorAttachmentTexture()) {
                 mWriteFBO->SetColorAttachmentTexture(nullptr);
@@ -83,7 +83,7 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
             if(mStateManager.GetActiveObjectsState()->EqualsActiveRenderbufferObject(index)) {
                 mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(0);
             }
-            mResourceManager.DeallocateRenderbuffer(index);
+            mResourceManager->DeallocateRenderbuffer(index);
         }
     }
 }
@@ -99,7 +99,7 @@ Context::GenRenderbuffers(GLsizei n, GLuint *renderbuffers)
     }
 
     while (n != 0) {
-        *renderbuffers++ = mResourceManager.AllocateRenderbuffer();
+        *renderbuffers++ = mResourceManager->AllocateRenderbuffer();
         --n;
     }
 }
@@ -121,7 +121,7 @@ Context::GetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params)
         return;
     }
 
-    Renderbuffer* activeRenderbuffer = mResourceManager.GetRenderbuffer(activeRenderbufferId);
+    Renderbuffer* activeRenderbuffer = mResourceManager->GetRenderbuffer(activeRenderbufferId);
 
     if(activeRenderbuffer->GetTarget() == GL_INVALID_VALUE) {
         *params = (pname == GL_RENDERBUFFER_INTERNAL_FORMAT) ? GL_RGBA4 : 0;
@@ -147,8 +147,8 @@ Context::IsRenderbuffer(GLuint renderbuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(renderbuffer && mResourceManager.RenderbufferExists(renderbuffer)) {
-        Renderbuffer *pRenderBuffer = mResourceManager.GetRenderbuffer(renderbuffer);
+    if(renderbuffer && mResourceManager->RenderbufferExists(renderbuffer)) {
+        Renderbuffer *pRenderBuffer = mResourceManager->GetRenderbuffer(renderbuffer);
         return (pRenderBuffer && pRenderBuffer->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
     }
 
@@ -182,7 +182,7 @@ Context::RenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width
         return;
     }
 
-    Renderbuffer* activeRenderbuffer = mResourceManager.GetRenderbuffer(activeRenderbufferId);
+    Renderbuffer* activeRenderbuffer = mResourceManager->GetRenderbuffer(activeRenderbufferId);
     if(!activeRenderbuffer->Allocate(width, height, internalformat)) {
         RecordError(GL_OUT_OF_MEMORY);
         return;

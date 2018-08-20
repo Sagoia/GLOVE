@@ -81,13 +81,13 @@ Context::CreateProgram(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    GLuint         res     = mResourceManager.AllocateShaderProgram();
-    ShaderProgram *progPtr = mResourceManager.GetShaderProgram(res);
+    GLuint         res     = mResourceManager->AllocateShaderProgram();
+    ShaderProgram *progPtr = mResourceManager->GetShaderProgram(res);
     progPtr->SetVkContext(mVkContext);
     progPtr->SetGlContext(this);
     progPtr->SetShaderCompiler(mShaderCompiler);
 
-    return mResourceManager.PushShadingObject((ShadingNamespace_t){SHADER_PROGRAM_ID, res});
+    return mResourceManager->PushShadingObject((ShadingNamespace_t){SHADER_PROGRAM_ID, res});
 }
 
 void
@@ -106,8 +106,8 @@ Context::DeleteProgram(GLuint program)
 
     if(progPtr != mStateManager.GetActiveShaderProgram()) {
         progPtr->DetachAndDeleteShaders();
-        mResourceManager.EraseShadingObject(program);
-        mResourceManager.DeallocateShaderProgram(progPtr);
+        mResourceManager->EraseShadingObject(program);
+        mResourceManager->DeallocateShaderProgram(progPtr);
     } else {
         progPtr->MarkForDeletion();
     }
@@ -136,8 +136,8 @@ Context::DetachShader(GLuint program, GLuint shader)
     progPtr->DetachShader(shaderPtr);
 
     if(!shaderPtr->GetRefCount() && shaderPtr->GetMarkForDeletion()) {
-        mResourceManager.EraseShadingObject(shader);
-        mResourceManager.DeallocateShader(shaderPtr);
+        mResourceManager->EraseShadingObject(shader);
+        mResourceManager->DeallocateShader(shaderPtr);
     }
 }
 
@@ -337,18 +337,18 @@ Context::GetProgramPtr(GLuint program)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!program || program >= mResourceManager.GetShadingObjectCount() || !mResourceManager.ShadingObjectExists(program)) {
+    if(!program || program >= mResourceManager->GetShadingObjectCount() || !mResourceManager->ShadingObjectExists(program)) {
         RecordError(GL_INVALID_VALUE);
         return nullptr;
     }
 
-    ShadingNamespace_t progId = mResourceManager.GetShadingObject(program);
+    ShadingNamespace_t progId = mResourceManager->GetShadingObject(program);
     if(!progId.arrayIndex || progId.type != SHADER_PROGRAM_ID) {
         RecordError(GL_INVALID_OPERATION);
         return nullptr;
     }
 
-    return mResourceManager.GetShaderProgram(progId.arrayIndex);
+    return mResourceManager->GetShaderProgram(progId.arrayIndex);
 }
 
 void
@@ -547,7 +547,7 @@ Context::IsProgram(GLuint program)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    return mResourceManager.IsShadingObject(program, SHADER_PROGRAM_ID);
+    return mResourceManager->IsShadingObject(program, SHADER_PROGRAM_ID);
 }
 
 bool
@@ -1358,8 +1358,8 @@ Context::UseProgram(GLuint program)
 
     if(mStateManager.GetActiveShaderProgram() && mStateManager.GetActiveShaderProgram()->GetMarkForDeletion()) {
         mStateManager.GetActiveShaderProgram()->DetachAndDeleteShaders();
-        mResourceManager.EraseShadingObject(GetProgramId(mStateManager.GetActiveShaderProgram()));
-        mResourceManager.DeallocateShaderProgram(mStateManager.GetActiveShaderProgram());
+        mResourceManager->EraseShadingObject(GetProgramId(mStateManager.GetActiveShaderProgram()));
+        mResourceManager->DeallocateShaderProgram(mStateManager.GetActiveShaderProgram());
     }
 
     mStateManager.GetActiveObjectsState()->SetActiveShaderProgram(progPtr);

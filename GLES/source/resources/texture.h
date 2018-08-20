@@ -169,6 +169,8 @@ public:
     inline void             SetVkImageUsage(VkImageUsageFlagBits usage)         { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }
     inline void             SetVkImageLayout(VkImageLayout layout)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageLayout(layout); }
     inline void             SetVkImageTiling(VkImageTiling tiling)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling(tiling); }
+    inline void             SetVkImageTiling(void)                              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
+
     inline void             SetVkImageTarget(vulkanAPI::Image::VkImageTarget
                                                                      target)    { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTarget(target); }
 

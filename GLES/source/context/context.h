@@ -52,7 +52,7 @@ private:
     vulkanAPI::vkContext_t *                    mVkContext;
 // ------------
     StateManager                                mStateManager;
-    ResourceManager                             mResourceManager;
+    ResourceManager *                           mResourceManager;
     ShaderCompiler *                            mShaderCompiler;
     vulkanAPI::Pipeline *                       mPipeline;
     vulkanAPI::ClearPass *                      mClearPass;
@@ -95,14 +95,14 @@ private:
     void SetSystemFramebuffer(Framebuffer *FBO);
 
 // Get Functions
-           uint32_t         GetProgramId(const ShaderProgram *progPtr)           { FUN_ENTRY(GL_LOG_TRACE); return (progPtr)   ? mResourceManager.FindShaderProgramID(progPtr) : 0; }
-           uint32_t         GetShaderId(const Shader *shaderPtr)                 { FUN_ENTRY(GL_LOG_TRACE); return (shaderPtr) ? mResourceManager.FindShaderID(shaderPtr)      : 0; }
+           uint32_t         GetProgramId(const ShaderProgram *progPtr)           { FUN_ENTRY(GL_LOG_TRACE); return (progPtr)   ? mResourceManager->FindShaderProgramID(progPtr) : 0; }
+           uint32_t         GetShaderId(const Shader *shaderPtr)                 { FUN_ENTRY(GL_LOG_TRACE); return (shaderPtr) ? mResourceManager->FindShaderID(shaderPtr)      : 0; }
 
 // Is/Has Functions
     inline bool             HasShaderCompiler(void)                              { FUN_ENTRY(GL_LOG_TRACE); GLboolean compilerSupport;
-                                                                                                        GetBooleanv(GL_SHADER_COMPILER, &compilerSupport);
-                                                                                                        if(!compilerSupport) { RecordError(GL_INVALID_OPERATION); return false; }
-                                                                                                        return true; }
+                                                                                                            GetBooleanv(GL_SHADER_COMPILER, &compilerSupport);
+                                                                                                            if(!compilerSupport) { RecordError(GL_INVALID_OPERATION); return false; }
+                                                                                                            return true; }
     inline bool             IsDrawModeTriangle(GLenum mode)                const { FUN_ENTRY(GL_LOG_TRACE); return (mode == GL_TRIANGLE_STRIP || mode  == GL_TRIANGLE_FAN || mode == GL_TRIANGLES); }
 // Other Functions
     inline void             RecordError(GLenum error)                            { FUN_ENTRY(GL_LOG_TRACE); if (mStateManager.GetError() == GL_NO_ERROR) { mStateManager.SetError(error); } }

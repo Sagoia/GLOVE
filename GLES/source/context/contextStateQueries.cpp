@@ -37,14 +37,14 @@ Context::GetBooleanv(GLenum pname, GLboolean* params)
     switch(pname) {
     case GL_IMPLEMENTATION_COLOR_READ_FORMAT:   *params = GL_TRUE; break;
     case GL_IMPLEMENTATION_COLOR_READ_TYPE:     *params = GL_TRUE; break;
-    case GL_TEXTURE_BINDING_2D:                 *params = mResourceManager.GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D)) == 0 ? GL_FALSE : GL_TRUE; break;
-    case GL_TEXTURE_BINDING_CUBE_MAP:           *params = mResourceManager.GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP)) == 0 ? GL_FALSE : GL_TRUE; break;
+    case GL_TEXTURE_BINDING_2D:                 *params = mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D)) == 0 ? GL_FALSE : GL_TRUE; break;
+    case GL_TEXTURE_BINDING_CUBE_MAP:           *params = mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP)) == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_FRAMEBUFFER_BINDING:                *params = mStateManager.GetActiveObjectsState()->GetActiveFramebufferObjectID() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_RENDERBUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveRenderbufferObjectID() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_ACTIVE_TEXTURE:                     *params = mStateManager.GetActiveObjectsState()->GetActiveTextureUnit() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_CURRENT_PROGRAM:                    *params = GetProgramId(mStateManager.GetActiveShaderProgram()) == 0 ? GL_FALSE : GL_TRUE; break;
-    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)         ? mResourceManager.GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)        ) == 0 ? GL_FALSE : GL_TRUE : GL_FALSE; break;
-    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager.GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) == 0 ? GL_FALSE : GL_TRUE : GL_FALSE; break;
+    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)         ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)        ) == 0 ? GL_FALSE : GL_TRUE : GL_FALSE; break;
+    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) == 0 ? GL_FALSE : GL_TRUE : GL_FALSE; break;
     case GL_NUM_SHADER_BINARY_FORMATS:          *params = GLOVE_NUM_SHADER_BINARY_FORMATS == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_COMPRESSED_TEXTURE_FORMATS:         *params = GL_FALSE; break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:     *params = GL_FALSE; break;
@@ -155,8 +155,8 @@ Context::GetIntegerv(GLenum pname, GLint* params)
     case GL_CURRENT_PROGRAM:                    *params = GetProgramId(mStateManager.GetActiveShaderProgram()); break;
     case GL_IMPLEMENTATION_COLOR_READ_FORMAT:   *params = GL_RGBA; break;
     case GL_IMPLEMENTATION_COLOR_READ_TYPE:     *params = GL_UNSIGNED_BYTE; break;
-    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)         ? mResourceManager.GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER))   : 0; break;
-    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager.GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) : 0; break;
+    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)         ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER))   : 0; break;
+    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) : 0; break;
     case GL_RED_BITS:                           GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), params, NULL, NULL, NULL, NULL, NULL); break;
     case GL_BLUE_BITS:                          GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), NULL, params, NULL, NULL, NULL, NULL); break;
     case GL_GREEN_BITS:                         GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), NULL, NULL, params, NULL, NULL, NULL); break;
@@ -204,8 +204,8 @@ Context::GetIntegerv(GLenum pname, GLint* params)
     case GL_SAMPLE_ALPHA_TO_COVERAGE:           *params = mStateManager.GetFragmentOperationsState()->GetSampleAlphaToCoverageEnabled(); break;
     case GL_SHADER_COMPILER:                    *params = 1; break;
     case GL_SUBPIXEL_BITS:                      *params = 4; break;
-    case GL_TEXTURE_BINDING_2D:                 *params = static_cast<GLint>(mResourceManager.GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D))); break;
-    case GL_TEXTURE_BINDING_CUBE_MAP:           *params = static_cast<GLint>(mResourceManager.GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP))); break;
+    case GL_TEXTURE_BINDING_2D:                 *params = static_cast<GLint>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D))); break;
+    case GL_TEXTURE_BINDING_CUBE_MAP:           *params = static_cast<GLint>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP))); break;
     case GL_ACTIVE_TEXTURE:                     *params = static_cast<GLint>(mStateManager.GetActiveObjectsState()->GetActiveTextureUnit()); break;
     case GL_STENCIL_WRITEMASK:                  *params = static_cast<GLint>(mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront()); break;
     case GL_STENCIL_BACK_WRITEMASK:             *params = static_cast<GLint>(mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack());  break;
@@ -242,7 +242,7 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(pname) {
-    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER) ? mResourceManager.GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)) : 0; break;
+    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER) ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)) : 0; break;
     case GL_BLEND:                              *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetBlendingEnabled()); break;
     case GL_BLEND_COLOR:                        mStateManager.GetFragmentOperationsState()->GetBlendingColor(params); break;
     case GL_BLEND_DST_ALPHA:                    *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetBlendingFactorDestinationAlpha()); break;
@@ -261,7 +261,7 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     case GL_DEPTH_TEST:                         *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetDepthTestEnabled()); break;
     case GL_DEPTH_WRITEMASK:                    *params = static_cast<GLfloat>(mStateManager.GetFramebufferOperationsState()->GetDepthMask()); break;
     case GL_DITHER:                             *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetDitheringEnabled()); break;
-    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager.GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) : 0; break;
+    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) : 0; break;
     case GL_FRAMEBUFFER_BINDING:                *params = static_cast<GLfloat>(mStateManager.GetActiveObjectsState()->GetActiveFramebufferObjectID()); break;
     case GL_FRONT_FACE:                         *params = static_cast<GLfloat>(mStateManager.GetRasterizationState()->GetFrontFace()); break;
     case GL_IMPLEMENTATION_COLOR_READ_FORMAT:   *params = GL_RGBA; break;
@@ -314,8 +314,8 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     case GL_SAMPLE_COVERAGE_VALUE:              *params = mStateManager.GetFragmentOperationsState()->GetSampleCoverageValue(); break;
     case GL_SHADER_COMPILER:                    *params = 1.0f; break;
     case GL_SUBPIXEL_BITS:                      *params = 4.0f; break;
-    case GL_TEXTURE_BINDING_2D:                 *params = static_cast<GLfloat>(mResourceManager.GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D))); break;
-    case GL_TEXTURE_BINDING_CUBE_MAP:           *params = static_cast<GLfloat>(mResourceManager.GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP))); break;
+    case GL_TEXTURE_BINDING_2D:                 *params = static_cast<GLfloat>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D))); break;
+    case GL_TEXTURE_BINDING_CUBE_MAP:           *params = static_cast<GLfloat>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP))); break;
     case GL_ACTIVE_TEXTURE:                     *params = static_cast<GLfloat>(mStateManager.GetActiveObjectsState()->GetActiveTextureUnit()); break;
     case GL_STENCIL_WRITEMASK:                  *params = static_cast<GLfloat>(mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront()); break;
     case GL_STENCIL_BACK_WRITEMASK:             *params = static_cast<GLfloat>(mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack());  break;

@@ -35,7 +35,7 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
 
     Framebuffer *fbo;
     if(framebuffer) {
-        fbo = mResourceManager.GetFramebuffer(framebuffer);
+        fbo = mResourceManager->GetFramebuffer(framebuffer);
         if(fbo->GetTarget() == GL_INVALID_VALUE) {
             fbo->SetTarget(target);
             fbo->SetVkContext(mVkContext);
@@ -60,7 +60,7 @@ Context::CheckFramebufferStatus(GLenum target)
 
     return (mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) ?
             GL_FRAMEBUFFER_COMPLETE :
-            mResourceManager.GetFramebuffer(mStateManager.GetActiveObjectsState()->GetActiveFramebufferObjectID())->CheckStatus();
+            mResourceManager->GetFramebuffer(mStateManager.GetActiveObjectsState()->GetActiveFramebufferObjectID())->CheckStatus();
 }
 
 void
@@ -76,8 +76,8 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
     while(n-- != 0) {
         uint32_t fboindex = *framebuffers++;
 
-        if(fboindex && mResourceManager.FramebufferExists(fboindex)) {
-            Framebuffer *fbo = mResourceManager.GetFramebuffer(fboindex);
+        if(fboindex && mResourceManager->FramebufferExists(fboindex)) {
+            Framebuffer *fbo = mResourceManager->GetFramebuffer(fboindex);
 
             if(fbo == mWriteFBO) {
                 mWriteFBO = mSystemFBO;
@@ -87,7 +87,7 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
                 mPipeline->SetUpdateViewportState(true);
             }
 
-            mResourceManager.DeallocateFramebuffer(fboindex);
+            mResourceManager->DeallocateFramebuffer(fboindex);
         }
     }
 }
@@ -108,27 +108,27 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
     }
 
     if( mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive() ||
-      ( renderbuffer && !mResourceManager.RenderbufferExists(renderbuffer))) {
+      ( renderbuffer && !mResourceManager->RenderbufferExists(renderbuffer))) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0:
-        mWriteFBO->SetColorAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
+        mWriteFBO->SetColorAttachmentTexture(renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetColorAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetColorAttachmentName(renderbuffer);
         if(renderbuffer > 0) {
-            mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture()->SetFramebufferAttachment(true);
+            mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->SetFramebufferAttachment(true);
         }
         break;
     case GL_DEPTH_ATTACHMENT:
-        mWriteFBO->SetDepthAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
+        mWriteFBO->SetDepthAttachmentTexture(renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetDepthAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetDepthAttachmentName(renderbuffer);
         break;
     case GL_STENCIL_ATTACHMENT:
-        mWriteFBO->SetStencilAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
+        mWriteFBO->SetStencilAttachmentTexture(renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetStencilAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetStencilAttachmentName(renderbuffer);
         break;
@@ -164,38 +164,38 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         return;
     }
 
-    if(texture && !mResourceManager.TextureExists(texture)) {
+    if(texture && !mResourceManager->TextureExists(texture)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if((mResourceManager.GetTexture(texture)->GetTarget() == GL_TEXTURE_2D       && textarget != GL_TEXTURE_2D) ||
-       (mResourceManager.GetTexture(texture)->GetTarget() == GL_TEXTURE_CUBE_MAP && textarget == GL_TEXTURE_2D)) {
+    if((mResourceManager->GetTexture(texture)->GetTarget() == GL_TEXTURE_2D       && textarget != GL_TEXTURE_2D) ||
+       (mResourceManager->GetTexture(texture)->GetTarget() == GL_TEXTURE_CUBE_MAP && textarget == GL_TEXTURE_2D)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0:
-        mWriteFBO->SetColorAttachmentTexture(texture ? mResourceManager.GetTexture(texture) : nullptr);
+        mWriteFBO->SetColorAttachmentTexture(texture ? mResourceManager->GetTexture(texture) : nullptr);
         mWriteFBO->SetColorAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetColorAttachmentName(texture);
-        mWriteFBO->SetColorAttachmentLayer(texture && mResourceManager.GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+        mWriteFBO->SetColorAttachmentLayer(texture && mResourceManager->GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
         if(texture > 0) {
-            mResourceManager.GetTexture(texture)->SetFramebufferAttachment(true);
+            mResourceManager->GetTexture(texture)->SetFramebufferAttachment(true);
         }
         break;
     case GL_DEPTH_ATTACHMENT:
-        mWriteFBO->SetDepthAttachmentTexture(texture ? mResourceManager.GetTexture(texture) : nullptr);
+        mWriteFBO->SetDepthAttachmentTexture(texture ? mResourceManager->GetTexture(texture) : nullptr);
         mWriteFBO->SetDepthAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetDepthAttachmentName(texture);
-        mWriteFBO->SetDepthAttachmentLayer(texture && mResourceManager.GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+        mWriteFBO->SetDepthAttachmentLayer(texture && mResourceManager->GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
         break;
     case GL_STENCIL_ATTACHMENT:
-        mWriteFBO->SetStencilAttachmentTexture(texture ? mResourceManager.GetTexture(texture) : nullptr);
+        mWriteFBO->SetStencilAttachmentTexture(texture ? mResourceManager->GetTexture(texture) : nullptr);
         mWriteFBO->SetStencilAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetStencilAttachmentName(texture);
-        mWriteFBO->SetStencilAttachmentLayer(texture && mResourceManager.GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+        mWriteFBO->SetStencilAttachmentLayer(texture && mResourceManager->GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
         break;
     default:
         RecordError(GL_INVALID_ENUM);
@@ -214,7 +214,7 @@ Context::GenFramebuffers(GLsizei n, GLuint* framebuffers)
     }
 
     while (n != 0) {
-        *framebuffers++ = mResourceManager.AllocateFramebuffer();
+        *framebuffers++ = mResourceManager->AllocateFramebuffer();
         --n;
     }
 }
@@ -235,7 +235,7 @@ Context::GetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, G
     }
 
     uint32_t activeFBOid = mStateManager.GetActiveObjectsState()->GetActiveFramebufferObjectID();
-    Framebuffer *fbo = mResourceManager.GetFramebuffer(activeFBOid);
+    Framebuffer *fbo = mResourceManager->GetFramebuffer(activeFBOid);
 
     GLenum type  = GL_NONE;
     GLenum name  = 0;
@@ -248,7 +248,7 @@ Context::GetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, G
         name  = fbo->GetColorAttachmentName();
         if(type == GL_TEXTURE) {
             level = fbo->GetColorAttachmentLevel();
-            layer = mResourceManager.GetTexture(name)->IsCubeMap() ? fbo->GetColorAttachmentLayer() : 0;
+            layer = mResourceManager->GetTexture(name)->IsCubeMap() ? fbo->GetColorAttachmentLayer() : 0;
         }
         break;
     case GL_DEPTH_ATTACHMENT:
@@ -256,7 +256,7 @@ Context::GetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, G
         name  = fbo->GetDepthAttachmentName();
         if(type == GL_TEXTURE) {
             level = fbo->GetDepthAttachmentLevel();
-            layer = mResourceManager.GetTexture(name)->IsCubeMap() ? fbo->GetDepthAttachmentLayer() : 0;
+            layer = mResourceManager->GetTexture(name)->IsCubeMap() ? fbo->GetDepthAttachmentLayer() : 0;
         }
         break;
     case GL_STENCIL_ATTACHMENT:
@@ -264,7 +264,7 @@ Context::GetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, G
         name = fbo->GetStencilAttachmentName();
         if(type == GL_TEXTURE) {
             level = fbo->GetStencilAttachmentLevel();
-            layer = mResourceManager.GetTexture(name)->IsCubeMap() ? fbo->GetStencilAttachmentLayer() : 0;
+            layer = mResourceManager->GetTexture(name)->IsCubeMap() ? fbo->GetStencilAttachmentLayer() : 0;
         }
         break;
     default:
@@ -304,8 +304,8 @@ Context::IsFramebuffer(GLuint framebuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(framebuffer && mResourceManager.FramebufferExists(framebuffer)) {
-        Framebuffer *pFrameBuffer = mResourceManager.GetFramebuffer(framebuffer);
+    if(framebuffer && mResourceManager->FramebufferExists(framebuffer)) {
+        Framebuffer *pFrameBuffer = mResourceManager->GetFramebuffer(framebuffer);
         return (pFrameBuffer && pFrameBuffer->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
     }
 
