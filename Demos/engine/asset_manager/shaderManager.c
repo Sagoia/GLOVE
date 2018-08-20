@@ -95,9 +95,6 @@ bool  LoadShader(const char *filename, GLuint *shader, GLenum shaderType)
   }
   free(source);
 
-  glReleaseShaderCompiler();
-  ASSERT_NO_GL_ERROR();
-
   return status!=0;
 }
 

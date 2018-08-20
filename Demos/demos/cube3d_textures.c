@@ -39,6 +39,10 @@ bool InitGL()
     if(!LoadProgram(program.mVertexShader, program.mFragmentShader, &program.mID))
         return false;
 #endif
+
+// Free Shader Compiler Resources
+    glReleaseShaderCompiler();
+
 // Initialize Mesh
     InitMesh      (&mesh_cube, 3, 12, cube_vertex_buffer_data, sizeof(cube_vertex_buffer_data),
                                       cube_uv_buffer_data    , sizeof(cube_uv_buffer_data)    ,

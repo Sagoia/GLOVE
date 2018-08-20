@@ -40,6 +40,9 @@ bool InitGL()
         return false;
 #endif
 
+// Free Shader Compiler Resources
+    glReleaseShaderCompiler();
+
 // Initialize Mesh
     InitMesh      (&mesh_triangle, 2, 1,  triangle_vertex_buffer_data , sizeof(triangle_vertex_buffer_data) ,
                                           triangle_uv_buffer_data     , sizeof(triangle_uv_buffer_data)     ,

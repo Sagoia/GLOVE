@@ -42,6 +42,9 @@ bool InitGL()
         return false;
 #endif
 
+// Free Shader Compiler Resources
+    glReleaseShaderCompiler();
+
 // Initialize Mesh
     InitMesh      (&mesh_screen_quad, 2, 2, squad_vertex_buffer_data, sizeof(squad_vertex_buffer_data),
                                             squad_uv_buffer_data    , sizeof(squad_uv_buffer_data)    ,
