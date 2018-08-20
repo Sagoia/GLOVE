@@ -118,7 +118,9 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         mWriteFBO->SetColorAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetColorAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetColorAttachmentName(renderbuffer);
-        mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture()->SetFramebufferAttachment(true);
+        if(renderbuffer > 0) {
+            mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture()->SetFramebufferAttachment(true);
+        }
         break;
     case GL_DEPTH_ATTACHMENT:
         mWriteFBO->SetDepthAttachmentTexture(renderbuffer ? mResourceManager.GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
