@@ -171,7 +171,12 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
         format = mVkDefaultFormat;
     } else {
         assert(formatCount >= 1);
-        format = surfFormats[0].format;
+        for(int i=0; i<(int)formatCount; ++i) {
+            if (surfFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                format = surfFormats[i].format;
+                break;
+            }
+        }
     }
 
     /// Query if the selected format is actually supported by the physical device
