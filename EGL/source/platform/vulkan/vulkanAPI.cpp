@@ -64,6 +64,21 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
         preTransform = surfCapabilities.currentTransform;
     }
 
+    // Find a supported composite alpha mode - one of these is guaranteed to be set
+    const VkCompositeAlphaFlagBitsKHR compositeAlphaFlagBits[4] = {
+        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+        VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+        VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+    };
+
+    VkCompositeAlphaFlagBitsKHR compositeAlphaFlag = compositeAlphaFlagBits[0];
+    for (uint32_t i = 0; i < 4; i++) {
+        if (surfCapabilities.supportedCompositeAlpha & compositeAlphaFlagBits[i]) {
+            compositeAlphaFlag = compositeAlphaFlagBits[i];
+            break;
+        }
+    }
 
     VkSwapchainCreateInfoKHR swapChainCreateInfo;
     memset((void *)&swapChainCreateInfo, 0 ,sizeof(swapChainCreateInfo));
@@ -75,12 +90,12 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
     swapChainCreateInfo.imageExtent.width     = swapChainExtent.width;
     swapChainCreateInfo.imageExtent.height    = swapChainExtent.height;
     swapChainCreateInfo.preTransform          = preTransform;
-    swapChainCreateInfo.compositeAlpha        = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapChainCreateInfo.compositeAlpha        = compositeAlphaFlag;
     swapChainCreateInfo.imageArrayLayers      = 1;
     swapChainCreateInfo.presentMode           = swapchainPresentMode;
     swapChainCreateInfo.oldSwapchain          = VK_NULL_HANDLE;
     swapChainCreateInfo.clipped               = true;
-    swapChainCreateInfo.imageColorSpace       = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+    swapChainCreateInfo.imageColorSpace       = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     swapChainCreateInfo.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     swapChainCreateInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
     swapChainCreateInfo.queueFamilyIndexCount = 0;
