@@ -55,7 +55,7 @@ Context::GetBooleanv(GLenum pname, GLboolean* params)
     case GL_BLEND_EQUATION_RGB:                 *params = mStateManager.GetFragmentOperationsState()->GetBlendingEquationRGB() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_BLEND_SRC_ALPHA:                    *params = mStateManager.GetFragmentOperationsState()->GetBlendingFactorSourceAlpha() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_BLEND_SRC_RGB:                      *params = mStateManager.GetFragmentOperationsState()->GetBlendingFactorSourceRGB() == 0 ? GL_FALSE : GL_TRUE; break;
-    case GL_DEPTH_CLEAR_VALUE:                  *params = mStateManager.GetFramebufferOperationsState()->GetClearDepth() == 0.0f ? GL_FALSE : GL_TRUE;
+    case GL_DEPTH_CLEAR_VALUE:                  *params = mStateManager.GetFramebufferOperationsState()->GetClearDepth() == 0.0f ? GL_FALSE : GL_TRUE; break;
     case GL_PACK_ALIGNMENT:                     *params = mStateManager.GetPixelStorageState()->GetPixelStorePack() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_UNPACK_ALIGNMENT:                   *params = mStateManager.GetPixelStorageState()->GetPixelStoreUnpack() == 0 ? GL_FALSE : GL_TRUE; break;
     case GL_STENCIL_WRITEMASK:                  *params = mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() == 0 ? GL_FALSE : GL_TRUE; break;
