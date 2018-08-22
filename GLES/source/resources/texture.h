@@ -152,7 +152,7 @@ public:
     inline void             SetMinFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMinFilter(mode)){ \
                                                                                                            mSampler->SetMinFilter(GlTexFilterToVkTexFilter(mode)); \
                                                                                                            mSampler->SetMipmapMode(GlTexMipMapModeToVkMipMapMode(mode));
-                                                                                                           mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.0 : static_cast<float>(mMipLevelsCount-1));}}
+                                                                                                           mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.25f : static_cast<float>(mMipLevelsCount-1));}}
     inline void             SetMagFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMagFilter(mode)) { \
                                                                                                            mSampler->SetMagFilter(GlTexFilterToVkTexFilter(mode));} }
     inline void             SetWidth(int width)                                 { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }

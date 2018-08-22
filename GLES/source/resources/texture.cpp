@@ -155,7 +155,7 @@ Texture::CreateVkImage(void)
     mImage->SetMipLevels(mMipLevelsCount);
     mImage->SetImageLayout(VK_IMAGE_LAYOUT_UNDEFINED);
 
-    mSampler->SetMaxLod((mParameters.GetMinFilter() == GL_NEAREST || mParameters.GetMinFilter() == GL_LINEAR) ? 0.0 : static_cast<float>(mMipLevelsCount-1));
+    mSampler->SetMaxLod((mParameters.GetMinFilter() == GL_NEAREST || mParameters.GetMinFilter() == GL_LINEAR) ? 0.25f : static_cast<float>(mMipLevelsCount-1));
     return mImage->Create();
 }
 
