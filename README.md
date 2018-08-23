@@ -26,7 +26,7 @@ GLOVE has been tested with [GLOVE demos](Demos/README_demos.md) with the followi
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Open GL ES 2.0 |MESA Vulkan Intel driver (version 0x4402008) | 1.0.54 | Ubuntu 16.04 | XCB | Intel Ivybridge Desktop | success | - |
 | Open GL ES 2.0 |MESA Vulkan Intel driver (version 0x4800001)| 1.0.57 | Ubuntu 16.04 | XCB | Intel HD Graphics 530 (Skylake GT2) | success | applied depth buffer workaround | 
-| Open GL ES 2.0 |NVIDIA Vulkan driver (version 384.130)| 1.0.49 | Ubuntu 16.04 | XCB |NVIDIA GeForce 940M | ongoing | - |
+| Open GL ES 2.0 |NVIDIA Vulkan driver (version 384.130)| 1.0.49 | Ubuntu 16.04 | XCB |NVIDIA GeForce 940M | ongoing |see issue [#5](https://github.com/Think-Silicon/GLOVE/issues/5) |
 
 # SW Design
 
