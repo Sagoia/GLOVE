@@ -32,9 +32,9 @@
 
 using namespace std;
 
-class CommandBufferManager;
-
 namespace vulkanAPI {
+
+    class CommandBufferManager;
 
     typedef struct vkContext_t {
         vkContext_t() {

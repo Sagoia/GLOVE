@@ -33,13 +33,15 @@
 
 #include "cbManager.h"
 
+namespace vulkanAPI {
+
 #define GLOVE_NO_BUFFER_TO_WAIT                         0x7FFFFFFF
 #define GLOVE_NUM_COMMAND_BUFFERS                       2
 #define GLOVE_FENCE_WAIT_TIMEOUT                        UINT64_MAX
 
 CommandBufferManager *CommandBufferManager::mInstance = nullptr;
 
-CommandBufferManager::CommandBufferManager(vulkanAPI::vkContext_t *context)
+CommandBufferManager::CommandBufferManager(vkContext_t *context)
 : mVkContext(context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -99,7 +101,7 @@ CommandBufferManager::~CommandBufferManager()
 }
 
 CommandBufferManager *
-CommandBufferManager::GetCommandBufferManager(vulkanAPI::vkContext_t *context)
+CommandBufferManager::GetCommandBufferManager(vkContext_t *context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -481,4 +483,6 @@ CommandBufferManager::WaitVkAuxCommandBuffer(void)
     }
 
     return true;
+}
+
 }
