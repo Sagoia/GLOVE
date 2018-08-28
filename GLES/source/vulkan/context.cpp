@@ -340,7 +340,7 @@ CreateVkCommandBuffers(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    GloveVkContext.mCommandBufferManager = CommandBufferManager::GetCommandBufferManager(&GloveVkContext);
+    GloveVkContext.mCommandBufferManager = CommandBufferManager::Get(&GloveVkContext);
     if(!GloveVkContext.mCommandBufferManager) {
         return false;
     }
@@ -380,16 +380,8 @@ CreateVkSemaphores(void)
         return false;
     }
 
-    err = vkCreateSemaphore(GloveVkContext.vkDevice, &semaphoreCreateInfo, NULL, &GloveVkContext.vkSyncItems->vkAuxSemaphore);
-    assert(!err);
-
-    if(err != VK_SUCCESS) {
-        return false;
-    }
-
     GloveVkContext.vkSyncItems->acquireSemaphoreFlag = true;
     GloveVkContext.vkSyncItems->drawSemaphoreFlag = false;
-    GloveVkContext.vkSyncItems->auxSemaphoreFlag = false;
 
     return true;
 }
@@ -439,7 +431,7 @@ TerminateContext()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    GloveVkContext.mCommandBufferManager->ResetCommandBufferManager();
+    GloveVkContext.mCommandBufferManager->Release();
     GloveVkContext.mCommandBufferManager = nullptr;
 
     if(GloveVkContext.vkSyncItems->vkAcquireSemaphore != VK_NULL_HANDLE) {
@@ -450,11 +442,6 @@ TerminateContext()
     if(GloveVkContext.vkSyncItems->vkDrawSemaphore != VK_NULL_HANDLE) {
         vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkDrawSemaphore, NULL);
         GloveVkContext.vkSyncItems->vkDrawSemaphore = VK_NULL_HANDLE;
-    }
-
-    if(GloveVkContext.vkSyncItems->vkAuxSemaphore != VK_NULL_HANDLE) {
-        vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkAuxSemaphore, NULL);
-        GloveVkContext.vkSyncItems->vkAuxSemaphore = VK_NULL_HANDLE;
     }
 
     if(GloveVkContext.vkDevice != VK_NULL_HANDLE ) {

@@ -71,8 +71,6 @@ typedef struct vkSyncItems_t {
     bool                                acquireSemaphoreFlag;
     VkSemaphore                         vkDrawSemaphore;
     bool                                drawSemaphoreFlag;
-    VkSemaphore                         vkAuxSemaphore;
-    bool                                auxSemaphoreFlag;
 } vkSyncItems_t;
 
 typedef struct vkInterface {

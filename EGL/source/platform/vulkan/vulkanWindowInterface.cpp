@@ -326,16 +326,11 @@ VulkanWindowInterface::PresentImage(EGLSurface_t *eglSurface)
     if(mVkInterface->vkSyncItems->drawSemaphoreFlag) {
         pSems.push_back(mVkInterface->vkSyncItems->vkDrawSemaphore);
     }
-    if(mVkInterface->vkSyncItems->auxSemaphoreFlag) {
-        pSems.push_back(mVkInterface->vkSyncItems->vkAuxSemaphore);
-    }
 
-    /// present ready buffer
     uint32_t imageIndex = eglSurface->GetCurrentImageIndex();
 
     mVkInterface->vkSyncItems->acquireSemaphoreFlag = true;
     mVkInterface->vkSyncItems->drawSemaphoreFlag = false;
-    mVkInterface->vkSyncItems->auxSemaphoreFlag = false;
 
     EGLBoolean ASSERT_ONLY mWsiSuccess;
     mWsiSuccess = mVkAPI->PresentImage(dynamic_cast<const VulkanResources *>(eglSurface->GetPlatformResources()), imageIndex, pSems);

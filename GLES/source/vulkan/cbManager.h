@@ -86,7 +86,6 @@ private:
     State                           mVkCommandBuffers;
 
     VkCommandBuffer                 mVkAuxCommandBuffer;
-    cmdBufferState_t                mVkAuxCommandBufferState;
     VkFence                         mVkAuxFence;
 
     std::vector<resourceBase_t *>   mReferencedResources;
@@ -101,10 +100,10 @@ public:
     ~CommandBufferManager();
 
 // Get Functions
-    static CommandBufferManager *GetCommandBufferManager(vkContext_t *context);
+    static CommandBufferManager *Get(vkContext_t *context);
 
-// Reset Functions
-    static void                  ResetCommandBufferManager(void);
+// Release Functions
+    static void                  Release(void);
 
 // Allocate Functions
     bool AllocateVkCmdBuffers(void);
@@ -114,7 +113,7 @@ public:
     bool BeginVkDrawCommandBuffer(void);
 
 // End Functions
-    void EndVkAuxCommandBuffer(void);
+    bool EndVkAuxCommandBuffer(void);
     void EndVkDrawCommandBuffer(void);
 
 // Submit Functions
