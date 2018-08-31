@@ -106,7 +106,11 @@ public:
     static void                  Release(void);
 
 // Allocate Functions
+    bool AllocateVkCmdPool(void);
     bool AllocateVkCmdBuffers(void);
+
+// Allocate Functions
+    void DestroyVkCmdBuffers(void);
 
 // Begin Functions
     bool BeginVkAuxCommandBuffer(void);

@@ -72,27 +72,35 @@ CommandBufferManager::~CommandBufferManager()
 
         vkDeviceWaitIdle(mVkContext->vkDevice);
 
-        for(uint32_t i = 0; i < mVkCommandBuffers.fence.size(); ++i) {
-            if(mVkCommandBuffers.fence[i] != VK_NULL_HANDLE) {
-                vkDestroyFence(mVkContext->vkDevice, mVkCommandBuffers.fence[i], NULL);
-            }
-        }
-
-        vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
-        mVkCommandBuffers.commandBuffer.clear();
-        mVkCommandBuffers.commandBufferState.clear();
-        mVkCommandBuffers.fence.clear();
-        memset((void *)&mVkCommandBuffers, 0, mVkCommandBuffers.commandBuffer.size()*sizeof(State));
-
-        if(mVkAuxCommandBuffer != VK_NULL_HANDLE) {
-            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
-            mVkAuxCommandBuffer = VK_NULL_HANDLE;
-        }
+        DestroyVkCmdBuffers();
 
         if(mVkCmdPool != VK_NULL_HANDLE) {
             vkDestroyCommandPool(mVkContext->vkDevice, mVkCmdPool, NULL);
             mVkCmdPool = VK_NULL_HANDLE;
         }
+    }
+}
+
+void
+CommandBufferManager::DestroyVkCmdBuffers(void)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    for(uint32_t i = 0; i < mVkCommandBuffers.fence.size(); ++i) {
+        if(mVkCommandBuffers.fence[i] != VK_NULL_HANDLE) {
+            vkDestroyFence(mVkContext->vkDevice, mVkCommandBuffers.fence[i], NULL);
+        }
+    }
+
+    vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
+    mVkCommandBuffers.commandBuffer.clear();
+    mVkCommandBuffers.commandBufferState.clear();
+    mVkCommandBuffers.fence.clear();
+    memset((void *)&mVkCommandBuffers, 0, mVkCommandBuffers.commandBuffer.size()*sizeof(State));
+
+    if(mVkAuxCommandBuffer != VK_NULL_HANDLE) {
+        vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
+        mVkAuxCommandBuffer = VK_NULL_HANDLE;
     }
 }
 
@@ -154,7 +162,7 @@ CommandBufferManager::Get(vkContext_t *context)
 }
 
 bool
-CommandBufferManager::AllocateVkCmdBuffers(void)
+CommandBufferManager::AllocateVkCmdPool(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -172,6 +180,14 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
         return false;
     }
 
+    return true;
+}
+
+bool
+CommandBufferManager::AllocateVkCmdBuffers(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     mVkCommandBuffers.commandBuffer.resize(GLOVE_NUM_COMMAND_BUFFERS);
     mVkCommandBuffers.commandBufferState.resize(GLOVE_NUM_COMMAND_BUFFERS);
     mVkCommandBuffers.fence.resize(GLOVE_NUM_COMMAND_BUFFERS);
@@ -183,7 +199,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     cmdAllocInfo.commandBufferCount = GLOVE_NUM_COMMAND_BUFFERS;
 
-    err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, mVkCommandBuffers.commandBuffer.data());
+    VkResult err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, mVkCommandBuffers.commandBuffer.data());
     assert(!err);
 
     if(err != VK_SUCCESS) {

@@ -58,6 +58,9 @@ namespace vulkanAPI {
     bool                              InitContext();
     void                              TerminateContext();
 
+    bool                              CreateVkCommandBuffers(void);
+    void                              DestroyVkCommandBuffers(void);
+
     template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 };
 

@@ -124,6 +124,9 @@ void release_system_fbo(api_context_t api_context)
 
     Context *ctx = reinterpret_cast<Context *>(api_context);
     ctx->ReleaseSystemFBO();
+
+    vulkanAPI::DestroyVkCommandBuffers();
+    vulkanAPI::CreateVkCommandBuffers();
 }
 
 void set_next_image_index(api_context_t api_context, uint32_t index)

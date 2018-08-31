@@ -58,7 +58,7 @@ static bool CreateVkInstance(void);
 static bool EnumerateVkGpus(void);
 static bool InitVkQueueFamilyIndex(void);
 static bool CreateVkDevice(void);
-static bool CreateVkCommandBuffers(void);
+static bool CreateVkCommandPool(void);
 static bool CreateVkSemaphores(void);
 static void InitVkQueue(void);
 
@@ -336,7 +336,7 @@ CreateVkDevice(void)
 }
 
 static bool
-CreateVkCommandBuffers(void)
+CreateVkCommandPool(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -345,7 +345,7 @@ CreateVkCommandBuffers(void)
         return false;
     }
 
-    if(!GloveVkContext.mCommandBufferManager->AllocateVkCmdBuffers()) {
+    if(!GloveVkContext.mCommandBufferManager->AllocateVkCmdPool()) {
         return false;
     }
 
@@ -416,6 +416,7 @@ InitContext()
         !InitVkQueueFamilyIndex()     ||
         !CheckVkDeviceExtensions()    ||
         !CreateVkDevice()             ||
+        !CreateVkCommandPool()        ||
         !CreateVkCommandBuffers()     ||
         !CreateVkSemaphores()          ) {
         assert(false);
@@ -424,6 +425,22 @@ InitContext()
     InitVkQueue();
 
     return true;
+}
+
+bool
+CreateVkCommandBuffers(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    return GloveVkContext.mCommandBufferManager->AllocateVkCmdBuffers();
+}
+
+void
+DestroyVkCommandBuffers(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    GloveVkContext.mCommandBufferManager->DestroyVkCmdBuffers();
 }
 
 void
