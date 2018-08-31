@@ -50,7 +50,7 @@ private:
     VkExtent2D                   SetSwapchainExtent(EGLSurface_t* surface, VkSurfaceCapabilitiesKHR *surfCapabilities);
 
     void                         CreateSwapchain(EGLSurface_t *surface);
-    void                         DestroySwapchain(EGLSurface_t *eglSurface);
+    void                         DestroySwapchain(EGLSurface_t *surface);
 
     VkPresentModeKHR             SetSwapchainPresentMode(EGLSurface_t* surface);
     void                         SetSurfaceColorFormat(EGLSurface_t *surface);
@@ -68,10 +68,10 @@ public:
     EGLBoolean                   Terminate() override;
     EGLBoolean                   CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) override;
     void                         AllocateSurfaceImages(EGLSurface_t *surface) override;
-    void                         DestroySurfaceImages(EGLSurface_t *eglSurface) override;
-    void                         DestroySurface(EGLSurface_t *eglSurface) override;
+    void                         DestroySurfaceImages(EGLSurface_t *surface) override;
+    void                         DestroySurface(EGLSurface_t *surface) override;
     EGLBoolean                   AcquireNextImage(EGLSurface_t *surface, uint32_t *imageIndex) override;
-    EGLBoolean                   PresentImage(EGLSurface_t *eglSurface) override;
+    EGLBoolean                   PresentImage(EGLSurface_t *surface) override;
 
     /// Set Functions
     inline void                  SetWSI(VulkanWSI *vkWSI)                       { mVkWSI = vkWSI; }

@@ -82,6 +82,8 @@ Context::~Context()
 void
 Context::ReleaseSystemFBO(void)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+    
     if(mSystemFBO) {
         for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
             if(mSystemTextures[i]) {

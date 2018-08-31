@@ -374,6 +374,8 @@ DisplayDriver::SwapBuffers(EGLDisplay dpy, EGLSurface surface)
 void
 DisplayDriver::UpdateSurface(EGLDisplay dpy, EGLSurface surface)
 {
+    FUN_ENTRY(DEBUG_DEPTH);
+
     EGLSurface_t *eglSurface = reinterpret_cast<EGLSurface_t *>(surface);
 
     mActiveContext->Release();
