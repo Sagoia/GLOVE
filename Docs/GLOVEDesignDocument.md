@@ -69,6 +69,7 @@ typedef struct rendering_api_interface {
     set_write_surface_cb_t set_write_surface_cb;
     set_read_surface_cb_t set_read_surface_cb;
     delete_context_cb_t delete_context_cb;
+    release_system_fbo_cb_t release_system_fbo_cb;
     set_next_image_index_cb_t set_next_image_index_cb;
     finish_cb_t finish_cb;
 } rendering_api_interface_t;
@@ -94,7 +95,7 @@ GLOVE EGL can be connected to any window platform via the platform hooks in EGL/
 
 
 ```cpp
-classPlatformWindowInterface
+class PlatformWindowInterface
 {
 public:
     PlatformWindowInterface() { }
@@ -105,18 +106,19 @@ public:
     virtual EGLBoolean           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
     virtual void                 AllocateSurfaceImages(EGLSurface_t *surface) = 0;
     virtual void                 DestroySurfaceImages(EGLSurface_t *eglSurface) = 0;
-    virtual uint                 AcquireNextImage(EGLSurface_t *surface) = 0;
+    virtual void                 DestroySurface(EGLSurface_t *eglSurface) = 0;
+    virtual EGLBoolean           AcquireNextImage(EGLSurface_t *surface, uint32_t *imageIndex) = 0;
     virtual EGLBoolean           PresentImage(EGLSurface_t *eglSurface) = 0;
 };
 
 ```
 
 ```cpp
-classPlatformResources
+class PlatformResources
 {
 public:
-    PlatformResources() { FUN_ENTRY(LogTrace); }
-    virtual ~PlatformResources() { FUN_ENTRY(LogTrace); }
+    PlatformResources()          { }
+    virtual ~PlatformResources() { }
 
     virtual uint32_t    GetSwapchainImageCount() = 0;
     virtualvoid        *GetSwapchainImages() = 0;
@@ -159,4 +161,3 @@ GLLogger::SetLoggerImpl()
 }
 
 ```
-
