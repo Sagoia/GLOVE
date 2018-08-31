@@ -362,10 +362,8 @@ DisplayDriver::SwapBuffers(EGLDisplay dpy, EGLSurface surface)
     }
 
     uint32_t imageIndex;
-    if(mWindowInterface->AcquireNextImage(eglSurface, &imageIndex) == EGL_FALSE) {
+    while(mWindowInterface->AcquireNextImage(eglSurface, &imageIndex) == EGL_FALSE) {
         UpdateSurface(dpy, surface);
-
-        mWindowInterface->AcquireNextImage(eglSurface, &imageIndex);
     }
 
     mActiveContext->SetNextImageIndex(imageIndex);
