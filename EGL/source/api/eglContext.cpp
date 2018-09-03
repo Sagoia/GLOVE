@@ -39,6 +39,14 @@ EGLContext_t::~EGLContext_t()
     FUN_ENTRY(EGL_LOG_TRACE);
 }
 
+void
+EGLContext_t::Release()
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    mAPIInterface->release_system_fbo_cb(mAPIContext);
+}
+
 EGLenum
 EGLContext_t::GetClientVersionFromConfig(const EGLint *attribList)
 {

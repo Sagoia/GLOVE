@@ -24,7 +24,7 @@
 #include "vulkanResources.h"
 
 VulkanResources::VulkanResources()
-    : mSwapchain(VK_NULL_HANDLE), mSurface(VK_NULL_HANDLE),
+    : mSurface(VK_NULL_HANDLE), mSwapchain(VK_NULL_HANDLE),
       mSwapChainImageCount(0), mSwapChainImages(nullptr)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -32,9 +32,19 @@ VulkanResources::VulkanResources()
 
 VulkanResources::~VulkanResources()
 {
-    if(mSwapChainImages != nullptr) {
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    Release();
+}
+
+void
+VulkanResources::Release(void)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    if(mSwapChainImages) {
         delete[] mSwapChainImages;
         mSwapChainImages = nullptr;
         mSwapChainImageCount = 0;
-    }
+   } 
 }

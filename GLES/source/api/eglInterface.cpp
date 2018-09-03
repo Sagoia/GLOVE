@@ -33,6 +33,7 @@ api_context_t         create_context();
 void                  set_write_surface(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface);
 void                  set_read_surface(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface);
 void                  delete_context(api_context_t api_context);
+void                  release_system_fbo(api_context_t api_context);
 void                  set_next_image_index(api_context_t api_context, uint32_t index);
 void                  finish(api_context_t api_context);
 
@@ -46,6 +47,7 @@ rendering_api_interface_t GLES2Interface = {
     set_write_surface,
     set_read_surface,
     delete_context,
+    release_system_fbo,
     set_next_image_index,
     finish
 };
@@ -114,6 +116,14 @@ void delete_context(api_context_t api_context)
 
     Context *ctx = reinterpret_cast<Context *>(api_context);
     delete ctx;
+}
+
+void release_system_fbo(api_context_t api_context)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    Context *ctx = reinterpret_cast<Context *>(api_context);
+    ctx->ReleaseSystemFBO();
 }
 
 void set_next_image_index(api_context_t api_context, uint32_t index)

@@ -39,15 +39,19 @@ public:
     VulkanResources();
     ~VulkanResources() override;
 
+           void                      Release();
+
+    // Get Functions
     inline VkSurfaceKHR              GetSurface()                                   const { return mSurface; }
     inline VkSwapchainKHR            GetSwapchain()                                 const { return mSwapchain; }
     inline uint32_t                  GetSwapchainImageCount()                    override { return mSwapChainImageCount; }
     inline void *                    GetSwapchainImages()                        override { return reinterpret_cast<void *>(mSwapChainImages); }
 
-    inline void                      SetSurface(VkSurfaceKHR surface)                     { mSurface = surface; }
-    inline void                      SetSwapchain(VkSwapchainKHR swapchain)               { mSwapchain = swapchain; }
-    inline void                      SetSwapChainImageCount(uint32_t swapChainImageCount) { mSwapChainImageCount = swapChainImageCount; }
-    inline void                      SetSwapChainImages(VkImage *swapChainImages)         { mSwapChainImages = swapChainImages; }
+    // Set Functions
+    inline void                      SetSurface(VkSurfaceKHR surface)                     { mSurface              = surface; }
+    inline void                      SetSwapchain(VkSwapchainKHR swapchain)               { mSwapchain            = swapchain; }
+    inline void                      SetSwapChainImageCount(uint32_t swapChainImageCount) { mSwapChainImageCount  = swapChainImageCount; }
+    inline void                      SetSwapChainImages(VkImage *swapChainImages)         { mSwapChainImages      = swapChainImages; }
 };
 
 #endif // #define __VULKAN_RESOURCES_H__

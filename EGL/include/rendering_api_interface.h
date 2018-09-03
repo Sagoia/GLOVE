@@ -51,6 +51,7 @@ typedef api_context_t (*create_context_cb_t)();
 typedef void (*set_write_surface_cb_t)(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface);
 typedef void (*set_read_surface_cb_t)(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface);
 typedef void (*delete_context_cb_t)(api_context_t api_context);
+typedef void (*release_system_fbo_cb_t)(api_context_t api_context);
 typedef void (*set_next_image_index_cb_t)(api_context_t api_context, uint32_t index);
 typedef void (*finish_cb_t)(api_context_t api_context);
 
@@ -62,6 +63,7 @@ typedef struct rendering_api_interface {
     set_write_surface_cb_t set_write_surface_cb;
     set_read_surface_cb_t set_read_surface_cb;
     delete_context_cb_t delete_context_cb;
+    release_system_fbo_cb_t release_system_fbo_cb;
     set_next_image_index_cb_t set_next_image_index_cb;
     finish_cb_t finish_cb;
 } rendering_api_interface_t;

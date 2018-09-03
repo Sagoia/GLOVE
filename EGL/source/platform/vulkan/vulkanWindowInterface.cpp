@@ -101,6 +101,8 @@ VulkanWindowInterface::SetSwapchainExtent(EGLSurface_t* surface, VkSurfaceCapabi
         swapChainExtent.height = surface->GetHeight();
     } else {
         swapChainExtent = surfCapabilities->currentExtent;
+        surface->SetWidth(swapChainExtent.width);
+        surface->SetHeight(swapChainExtent.height);
     }
 
     return swapChainExtent;
@@ -230,7 +232,7 @@ VulkanWindowInterface::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EG
 }
 
 void
-VulkanWindowInterface::AllocateSurfaceImages(EGLSurface_t *surface)
+VulkanWindowInterface::CreateSwapchain(EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -248,13 +250,14 @@ VulkanWindowInterface::AllocateSurfaceImages(EGLSurface_t *surface)
     swapChainExtent = SetSwapchainExtent(surface, &surfCapabilities);
     swapchainPresentMode = SetSwapchainPresentMode(surface);
     CreateVkSwapchain(surface, swapchainPresentMode, swapChainExtent, surfCapabilities);
-    SetEGLSurfaceVkSwapchainImages(surface);
 }
 
 void
-VulkanWindowInterface::SetEGLSurfaceVkSwapchainImages(EGLSurface_t* surface)
+VulkanWindowInterface::AllocateSurfaceImages(EGLSurface_t* surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
+
+    CreateSwapchain(surface);
 
     EGLBoolean ASSERT_ONLY wsiSuccess;
     uint32_t swapChainImageCount = 0;
@@ -274,16 +277,47 @@ VulkanWindowInterface::SetEGLSurfaceVkSwapchainImages(EGLSurface_t* surface)
     vkResources->SetSwapChainImages(swapChainImages);
 }
 
-uint32_t
-VulkanWindowInterface::AcquireNextImage(EGLSurface_t *surface)
+EGLBoolean
+VulkanWindowInterface::AcquireNextImage(EGLSurface_t *surface, uint32_t *imageIndex)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    uint32_t imageIndex = UINT32_MAX;
-    mVkAPI->AcquireNextImage(dynamic_cast<const VulkanResources *>(surface->GetPlatformResources()), &imageIndex);
-    surface->SetCurrentImageIndex(imageIndex);
+    VkResult res = mVkAPI->AcquireNextImage(dynamic_cast<const VulkanResources *>(surface->GetPlatformResources()), imageIndex);
+    if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+        mVkAPI->DeviceWaitIdle();
 
-    return imageIndex;
+        return EGL_FALSE;
+    }
+
+    surface->SetCurrentImageIndex(*imageIndex);
+
+    return EGL_TRUE;
+}
+
+void
+VulkanWindowInterface::DestroySwapchain(EGLSurface_t *eglSurface)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    VulkanResources *vkResources = dynamic_cast<VulkanResources *>(eglSurface->GetPlatformResources());
+    if(vkResources && vkResources->GetSwapchain() != VK_NULL_HANDLE) {
+        mVkAPI->DestroySwapchain(vkResources);
+        vkResources->SetSwapchain(VK_NULL_HANDLE);
+    }
+
+    vkResources->Release();
+}
+
+void
+VulkanWindowInterface::DestroySurface(EGLSurface_t *eglSurface)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    VulkanResources *vkResources = dynamic_cast<VulkanResources *>(eglSurface->GetPlatformResources());
+    if(vkResources && vkResources->GetSurface() != VK_NULL_HANDLE) {
+        mVkAPI->DestroyPlatformSurface(vkResources);
+        vkResources->SetSurface(VK_NULL_HANDLE);
+    }
 }
 
 void
@@ -291,21 +325,7 @@ VulkanWindowInterface::DestroySurfaceImages(EGLSurface_t *eglSurface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VulkanResources *vkResources = dynamic_cast<VulkanResources *>(eglSurface->GetPlatformResources());
-
-    if(!vkResources) {
-        return;
-    }
-
-    if(vkResources->GetSwapchain() != VK_NULL_HANDLE) {
-        mVkAPI->DestroySwapchain(vkResources);
-        vkResources->SetSwapchain(VK_NULL_HANDLE);
-    }
-
-    if(vkResources->GetSurface() != VK_NULL_HANDLE) {
-        mVkAPI->DestroyPlatformSurface(vkResources);
-        vkResources->SetSurface(VK_NULL_HANDLE);
-    }
+    DestroySwapchain(eglSurface);
 }
 
 EGLBoolean
@@ -318,14 +338,16 @@ VulkanWindowInterface::PresentImage(EGLSurface_t *eglSurface)
         pSems.push_back(mVkInterface->vkSyncItems->vkDrawSemaphore);
     }
 
-    uint32_t imageIndex = eglSurface->GetCurrentImageIndex();
-
     mVkInterface->vkSyncItems->acquireSemaphoreFlag = true;
     mVkInterface->vkSyncItems->drawSemaphoreFlag = false;
 
-    EGLBoolean ASSERT_ONLY mWsiSuccess;
-    mWsiSuccess = mVkAPI->PresentImage(dynamic_cast<const VulkanResources *>(eglSurface->GetPlatformResources()), imageIndex, pSems);
-    assert(EGL_TRUE == mWsiSuccess);
+    uint32_t imageIndex = eglSurface->GetCurrentImageIndex();
+    VkResult res = mVkAPI->PresentImage(dynamic_cast<const VulkanResources *>(eglSurface->GetPlatformResources()), imageIndex, pSems);
+    if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+        mVkAPI->DeviceWaitIdle();
+
+        return EGL_FALSE;
+    }
 
     return EGL_TRUE;
 }

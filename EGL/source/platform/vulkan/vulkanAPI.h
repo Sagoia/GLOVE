@@ -50,7 +50,8 @@ public:
                                                  VkSurfaceCapabilitiesKHR surfCapabilities,
                                                  VkExtent2D swapChainExtent,
                                                  VkPresentModeKHR swapchainPresentMode,
-                                                 VkFormat surfaceColorFormat);
+                                                 VkFormat surfaceColorFormat,
+                                                 VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE);
 
     EGLBoolean                   GetSwapChainImages(const VulkanResources *vkResources, uint32_t imageCount, VkImage *images);
     uint32_t                     GetSwapChainImagesCount(const VulkanResources *vkResources);
@@ -60,13 +61,14 @@ public:
     EGLBoolean                   GetPhysicalDevPresentModes(const VulkanResources *vkResources, uint32_t presentModeCount, VkPresentModeKHR *presentModes);
     uint32_t                     GetPhysicalDevPresentModesCount(const VulkanResources *vkResources);
     EGLBoolean                   GetPhysicalDevSurfaceCapabilities(const VulkanResources *vkResources, VkSurfaceCapabilitiesKHR *surfCapabilities);
-    EGLBoolean                   AcquireNextImage(const VulkanResources *vkResources, uint32_t *imageIndex);
-    EGLBoolean                   PresentImage(const VulkanResources *vkResources, uint32_t imageIndex, std::vector<VkSemaphore> &vkSemaphores);
+    VkResult                     AcquireNextImage(const VulkanResources *vkResources, uint32_t *imageIndex);
+    VkResult                     PresentImage(const VulkanResources *vkResources, uint32_t imageIndex, std::vector<VkSemaphore> &vkSemaphores);
 
     void                         DestroySwapchain(const VulkanResources *vkResources);
     void                         DestroyPlatformSurface(const VulkanResources *vkResources);
 
     void                         SetWSICallbacks(const VulkanWSI::wsiCallbacks_t *wsiCallbacks) { mWsiCallbacks = wsiCallbacks; }
+    VkResult                     DeviceWaitIdle(void)                                           { return vkDeviceWaitIdle(mVkInterface->vkDevice); }
 };
 
 

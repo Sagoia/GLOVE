@@ -66,17 +66,7 @@ Context::~Context()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(mSystemFBO) {
-        for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
-            if(mSystemTextures[i]) {
-                delete mSystemTextures[i];
-                mSystemTextures[i] = nullptr;
-            }
-        }
-        mSystemTextures.clear();
-
-        delete mSystemFBO;
-    }
+    ReleaseSystemFBO();
 
     if(mShaderCompiler != nullptr) {
         delete mShaderCompiler;
@@ -87,6 +77,23 @@ Context::~Context()
     delete mPipeline;
     delete mClearPass;
     delete mExplicitIbo;
+}
+
+void
+Context::ReleaseSystemFBO(void)
+{
+    if(mSystemFBO) {
+        for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
+            if(mSystemTextures[i]) {
+                delete mSystemTextures[i];
+                mSystemTextures[i] = nullptr;
+            }
+        }
+        mSystemTextures.clear();
+
+        delete mSystemFBO;
+        mSystemFBO = nullptr;
+    }
 }
 
 void

@@ -112,7 +112,8 @@ public:
     ~Context();
 
     void                    DeleteShader(Shader *shaderPtr);
-
+    void                    ReleaseSystemFBO(void);
+    
 // Get Functions
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
 

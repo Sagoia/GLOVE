@@ -49,6 +49,7 @@ public:
     EGLBoolean                   MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read);
     void                         SetNextImageIndex(uint32_t index);
     void                         Finish();
+    void                         Release();
 
     inline EGLDisplay            getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
     inline EGLSurface            getReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }

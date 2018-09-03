@@ -49,6 +49,7 @@ private:
     EGLImageKHR                  CreateImageNativeBufferAndroid(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
     void                         CreateEGLSurfaceInterface(EGLSurface_t *surface);
     EGLenum                      SetErrorAndReturn(EGLenum error);
+    void                         UpdateSurface(EGLDisplay dpy, EGLSurface surface);
 
 public:
 

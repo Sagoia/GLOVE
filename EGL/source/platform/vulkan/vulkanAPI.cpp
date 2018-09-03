@@ -52,7 +52,8 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
                                     VkSurfaceCapabilitiesKHR surfCapabilities,
                                     VkExtent2D swapChainExtent,
                                     VkPresentModeKHR swapchainPresentMode,
-                                    VkFormat surfaceColorFormat)
+                                    VkFormat surfaceColorFormat,
+                                    VkSwapchainKHR oldSwapchain)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -93,7 +94,7 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
     swapChainCreateInfo.compositeAlpha        = compositeAlphaFlag;
     swapChainCreateInfo.imageArrayLayers      = 1;
     swapChainCreateInfo.presentMode           = swapchainPresentMode;
-    swapChainCreateInfo.oldSwapchain          = VK_NULL_HANDLE;
+    swapChainCreateInfo.oldSwapchain          = oldSwapchain;
     swapChainCreateInfo.clipped               = true;
     swapChainCreateInfo.imageColorSpace       = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     swapChainCreateInfo.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -191,7 +192,7 @@ VulkanAPI::GetPhysicalDevSurfaceCapabilities(const VulkanResources *vkResources,
     return (VK_SUCCESS == res) ? EGL_TRUE : EGL_FALSE;
 }
 
-EGLBoolean
+VkResult
 VulkanAPI::AcquireNextImage(const VulkanResources *vkResources, uint32_t *imageIndex)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -205,10 +206,10 @@ VulkanAPI::AcquireNextImage(const VulkanResources *vkResources, uint32_t *imageI
 
     assert(*imageIndex != UINT32_MAX);
 
-    return (VK_SUCCESS == res) ? EGL_TRUE : EGL_FALSE;
+    return res;
 }
 
-EGLBoolean
+VkResult
 VulkanAPI::PresentImage(const VulkanResources *vkResources, uint32_t imageIndex, std::vector<VkSemaphore> &vkSemaphores)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -226,13 +227,7 @@ VulkanAPI::PresentImage(const VulkanResources *vkResources, uint32_t imageIndex,
 
     VkResult res = mWsiCallbacks->fpQueuePresentKHR(mVkInterface->vkQueue, &presentInfo);
 
-    if(res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
-        assert(0);
-    } else {
-        assert(!res);
-    }
-
-    return (VK_SUCCESS == res) ? EGL_TRUE : EGL_FALSE;
+    return res;
 }
 
 void

@@ -17,7 +17,7 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      Interface class to connect to a window platform. It should implement functions for creating/destroying 
+ *  @brief      Interface class to connect to a window platform. It should implement functions for creating/destroying
  *              a window surface and relative resources.
  *
  */
@@ -40,7 +40,8 @@ public:
     virtual EGLBoolean           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
     virtual void                 AllocateSurfaceImages(EGLSurface_t *surface) = 0;
     virtual void                 DestroySurfaceImages(EGLSurface_t *eglSurface) = 0;
-    virtual uint                 AcquireNextImage(EGLSurface_t *surface) = 0;
+    virtual void                 DestroySurface(EGLSurface_t *eglSurface) = 0;
+    virtual EGLBoolean           AcquireNextImage(EGLSurface_t *surface, uint32_t *imageIndex) = 0;
     virtual EGLBoolean           PresentImage(EGLSurface_t *eglSurface) = 0;
 };
 

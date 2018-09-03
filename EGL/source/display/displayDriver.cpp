@@ -180,11 +180,14 @@ DisplayDriver::CreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWi
 
     if(mWindowInterface->CreateSurface(dpy, win, eglSurface) == EGL_FALSE) {
         delete eglSurface;
+
         return EGL_NO_SURFACE;
     }
 
     mWindowInterface->AllocateSurfaceImages(eglSurface);
-    mWindowInterface->AcquireNextImage(eglSurface);
+
+    uint32_t imageNext;
+    mWindowInterface->AcquireNextImage(eglSurface, &imageNext);
 
     CreateEGLSurfaceInterface(eglSurface);
 
@@ -263,6 +266,7 @@ DisplayDriver::DestroySurface(EGLDisplay dpy, EGLSurface surface)
 
     if(eglSurface) {
         mWindowInterface->DestroySurfaceImages(eglSurface);
+        mWindowInterface->DestroySurface(eglSurface);
 
         delete eglSurface->GetPlatformResources();
         delete eglSurface;
@@ -345,10 +349,7 @@ DisplayDriver::SwapBuffers(EGLDisplay dpy, EGLSurface surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    assert(surface);
-
     EGLSurface_t *eglSurface = reinterpret_cast<EGLSurface_t *>(surface);
-    uint32_t imageIndex = 0;
 
     if(eglSurface->GetType() != EGL_WINDOW_BIT) {
         return EGL_TRUE;
@@ -356,14 +357,32 @@ DisplayDriver::SwapBuffers(EGLDisplay dpy, EGLSurface surface)
 
     mActiveContext->Finish();
 
-    if(EGL_FALSE == mWindowInterface->PresentImage(eglSurface)) {
-        return EGL_FALSE;
+    if(mWindowInterface->PresentImage(eglSurface) == EGL_FALSE) {
+        UpdateSurface(dpy, surface);
     }
 
-    imageIndex = mWindowInterface->AcquireNextImage(eglSurface);
+    uint32_t imageIndex;
+    if(mWindowInterface->AcquireNextImage(eglSurface, &imageIndex) == EGL_FALSE) {
+        UpdateSurface(dpy, surface);
+
+        mWindowInterface->AcquireNextImage(eglSurface, &imageIndex);
+    }
+
     mActiveContext->SetNextImageIndex(imageIndex);
 
     return EGL_TRUE;
+}
+
+void
+DisplayDriver::UpdateSurface(EGLDisplay dpy, EGLSurface surface)
+{
+    EGLSurface_t *eglSurface = reinterpret_cast<EGLSurface_t *>(surface);
+
+    mActiveContext->Release();
+    mWindowInterface->DestroySurfaceImages(eglSurface);
+    mWindowInterface->AllocateSurfaceImages(eglSurface);
+    CreateEGLSurfaceInterface(eglSurface);
+    mActiveContext->MakeCurrent(dpy, surface, surface);
 }
 
 EGLBoolean
