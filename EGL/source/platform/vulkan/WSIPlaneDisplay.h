@@ -25,19 +25,32 @@
 #define __WSI_PLANE_DISPLAY_H__
 
 #include "vulkanWSI.h"
+#include <vector>
 
 class WSIPlaneDisplay : public VulkanWSI
 {
 protected:
-    EGLBoolean         SetSurfaceCallback() override;
+    typedef struct wsiPlaneDisplayCallbacks {
+        // VK_KHR_display functions
+        PFN_vkCreateDisplayPlaneSurfaceKHR              fpCreateDisplayPlaneSurfaceKHR;
+        PFN_vkGetPhysicalDeviceDisplayPropertiesKHR     fpGetPhysicalDeviceDisplayPropertiesKHR;
+    }wsiPlaneDisplayCallbacks_t;
+
+    wsiPlaneDisplayCallbacks_t                          mWsiPlaneDisplayCallbacks;
+    std::vector<VkDisplayPropertiesKHR>                 mDisplayPropertiesList;
+
+    void               SetPhysicalDeviceDisplayProperties();
+    EGLBoolean         SetPlaneDisplayCallbacks();
 
 public:
     WSIPlaneDisplay() {}
-    ~WSIPlaneDisplay() {}
+    ~WSIPlaneDisplay() override {}
 
+    EGLBoolean         Initialize() override;
     VkSurfaceKHR       CreateSurface(EGLDisplay dpy,
                                      EGLNativeWindowType win,
                                      EGLSurface_t *surface) override;
+
 
 
 };

@@ -64,7 +64,7 @@ private:
 public:
 
     VulkanWindowInterface(void);
-    ~VulkanWindowInterface(void);
+    ~VulkanWindowInterface(void) override;
 
     /// EGL API core functions
     EGLBoolean                   Initialize() override;

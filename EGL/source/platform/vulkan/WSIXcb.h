@@ -41,12 +41,20 @@ private:
     void               GetXCBConnection(xcbContext *xcb);
 
 protected:
-    EGLBoolean         SetSurfaceCallback() override;
+    typedef struct wsiXCBCallbacks {
+        // VK_KHR_xcb_surface functions
+        PFN_vkCreateXcbSurfaceKHR                       fpCreateXcbSurfaceKHR;
+    }wsiXCBCallbacks_t;
+
+    wsiXCBCallbacks_t                                   mWsiXCBCallbacks;
+
+    EGLBoolean                                          SetXCBCallbacks();
 
 public:
     WSIXcb()  {}
-    ~WSIXcb() {}
+    ~WSIXcb() override {}
 
+    EGLBoolean         Initialize() override;
     VkSurfaceKHR       CreateSurface(EGLDisplay dpy,
                                     EGLNativeWindowType win,
                                     EGLSurface_t *surface) override;

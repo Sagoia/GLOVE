@@ -36,8 +36,8 @@ private:
     VkImage                         *mSwapChainImages;
 
 public:
-    VulkanResources() : mSwapchain(VK_NULL_HANDLE), mSurface(VK_NULL_HANDLE), mSwapChainImageCount(0), mSwapChainImages(nullptr) { }
-    ~VulkanResources() { if(mSwapChainImages) { delete[] mSwapChainImages; mSwapChainImageCount = 0; } }
+    VulkanResources();
+    ~VulkanResources() override;
 
     inline VkSurfaceKHR              GetSurface()                                   const { return mSurface; }
     inline VkSwapchainKHR            GetSwapchain()                                 const { return mSwapchain; }

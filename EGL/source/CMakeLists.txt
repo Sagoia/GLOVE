@@ -11,10 +11,12 @@ set(SOURCES
     display/displayDriversContainer.cpp
     thread/renderingThread.cpp
     platform/platformFactory.cpp
-    platform/vulkan/WSIPlaneDisplay.cpp
     platform/vulkan/vulkanWindowInterface.cpp
     platform/vulkan/vulkanWSI.cpp
     platform/vulkan/vulkanAPI.cpp
+    platform/vulkan/vulkanResources.cpp
+    platform/vulkan/WSIPlaneDisplay.cpp
+    platform/vulkan/WSIXcb.cpp
     rendering_api/rendering_api.c
     utils/eglLogger.cpp
 )
@@ -25,20 +27,23 @@ set(LIBS
     ${Vulkan_LIBRARY}
 )
 
-find_package(X11)
-if(X11_FOUND)
-    find_package(ECM REQUIRED NO_MODULE)
-    ecm_use_find_modules(DIR "${CMAKE_SOURCE_DIR}/CMake"
-                         MODULES FindXCB.cmake)
-    find_package(XCB REQUIRED XCB)
+if(USE_SURFACE STREQUAL "XCB")
+    find_package(X11)
+    if(X11_FOUND)
+        find_package(ECM REQUIRED NO_MODULE)
+        ecm_use_find_modules(DIR "${CMAKE_SOURCE_DIR}/CMake"
+                             MODULES FindXCB.cmake)
+        find_package(XCB REQUIRED XCB)
 
-    set(SOURCES ${SOURCES} platform/vulkan/WSIXcb.cpp)
+        set(SOURCES ${SOURCES} platform/vulkan/WSIXcb.cpp)
 
-    set(LIBS ${LIBS} X11-xcb)
-else()
-    # Take action for other platforms
-    message(FATAL_ERROR "Implement EGL for your platform")
+        set(LIBS ${LIBS} X11-xcb)
+    else()
+        # Take action for other platforms
+        message(FATAL_ERROR "Implement EGL for your platform")
+    endif()
 endif()
+
 
 include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_SOURCE_DIR}/EGL/include

@@ -34,15 +34,19 @@ namespace vulkanAPI {
 
 #define GLOVE_VK_VALIDATION_LAYERS                      false
 
-#define ARRAY_SIZE(array)   (int)(sizeof(array) / sizeof(array[0]))
-
 #ifdef VK_USE_PLATFORM_XCB_KHR
-static const char *requiredInstanceExtensions[] =     {VK_KHR_SURFACE_EXTENSION_NAME,
-                                                       VK_KHR_XCB_SURFACE_EXTENSION_NAME};
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_KHR_XCB_SURFACE_EXTENSION_NAME};
+#elif defined (VK_USE_PLATFORM_ANDROID_KHR)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_KHR_ANDROID_SURFACE_EXTENSION_NAME};
+#else // native
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_KHR_DISPLAY_EXTENSION_NAME};
 #endif
 
-static const char  *requiredDeviceExtensions[]      = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-                                                       "VK_KHR_maintenance1"};
+static const std::vector<const char*> requiredDeviceExtensions  = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+                                                                   "VK_KHR_maintenance1"};
 static       char **enabledInstanceLayers           = NULL;
 
 static vkContext_t GloveVkContext;
@@ -124,11 +128,11 @@ CheckVkInstanceExtensions(void)
         res = vkEnumerateInstanceExtensionProperties(NULL, &extensionCount, vkExtensionProperties);
     } while(res == VK_INCOMPLETE);
 
-    bool extensionsAvailable[ARRAY_SIZE(requiredInstanceExtensions)] = {false};
+    std::vector<bool> requiredExtensionsAvailable(requiredInstanceExtensions.size(), false);
     for(uint32_t i = 0; i < extensionCount; ++i) {
-        for(uint32_t j = 0; j < ARRAY_SIZE(requiredInstanceExtensions); ++j) {
+        for(uint32_t j = 0; j < requiredInstanceExtensions.size(); ++j) {
             if(!strcmp(requiredInstanceExtensions[j], vkExtensionProperties[i].extensionName)) {
-                extensionsAvailable[j] = true;
+                requiredExtensionsAvailable[j] = true;
                 break;
             }
         }
@@ -139,8 +143,8 @@ CheckVkInstanceExtensions(void)
         vkExtensionProperties = nullptr;
     }
 
-    for(uint32_t j = 0; j < ARRAY_SIZE(requiredInstanceExtensions); ++j) {
-        if(!extensionsAvailable[j]) {
+    for(uint32_t j = 0; j < requiredInstanceExtensions.size(); ++j) {
+        if(!requiredExtensionsAvailable[j]) {
             return false;
         }
     }
@@ -172,11 +176,11 @@ CheckVkDeviceExtensions(void)
         res = vkEnumerateDeviceExtensionProperties(GloveVkContext.vkGpus[0], NULL, &extensionCount, vkExtensionProperties);
     } while(res == VK_INCOMPLETE);
 
-    bool extensionsAvailable[ARRAY_SIZE(requiredDeviceExtensions)] = {false};
+    std::vector<bool> requiredExtensionsAvailable(requiredDeviceExtensions.size(), false);
     for(uint32_t i = 0; i < extensionCount; ++i) {
-        for(uint32_t j = 0; j < ARRAY_SIZE(requiredDeviceExtensions); ++j) {
+        for(uint32_t j = 0; j < requiredDeviceExtensions.size(); ++j) {
             if(!strcmp(requiredDeviceExtensions[j], vkExtensionProperties[i].extensionName)) {
-                extensionsAvailable[j] = true;
+                requiredExtensionsAvailable[j] = true;
                 break;
             }
         }
@@ -187,8 +191,8 @@ CheckVkDeviceExtensions(void)
         vkExtensionProperties = nullptr;
     }
 
-    for(uint32_t j = 0; j < ARRAY_SIZE(requiredDeviceExtensions); ++j) {
-        if(!extensionsAvailable[j]) {
+    for(uint32_t j = 0; j < requiredDeviceExtensions.size(); ++j) {
+        if(!requiredExtensionsAvailable[j]) {
             printf("\n%s extension is mandatory for GLOVE\n", requiredDeviceExtensions[j]);
             printf("Please link GLOVE to a Vulkan driver which supports the latter\n");
             return false;
@@ -227,8 +231,8 @@ CreateVkInstance(void)
     instanceInfo.pApplicationInfo         = &applicationInfo;
     instanceInfo.enabledLayerCount        = enabledLayerCount;
     instanceInfo.ppEnabledLayerNames      = enabledInstanceLayers;
-    instanceInfo.enabledExtensionCount    = ARRAY_SIZE(requiredInstanceExtensions);
-    instanceInfo.ppEnabledExtensionNames  = requiredInstanceExtensions;
+    instanceInfo.enabledExtensionCount    = static_cast<uint32_t>(requiredInstanceExtensions.size());
+    instanceInfo.ppEnabledExtensionNames  = requiredInstanceExtensions.data();
 
     VkResult err = vkCreateInstance(&instanceInfo, NULL, &GloveVkContext.vkInstance);
     assert(!err);
@@ -321,8 +325,8 @@ CreateVkDevice(void)
     deviceInfo.pQueueCreateInfos       = &queueInfo;
     deviceInfo.enabledLayerCount       = 0;
     deviceInfo.ppEnabledLayerNames     = NULL;
-    deviceInfo.enabledExtensionCount   = ARRAY_SIZE(requiredDeviceExtensions);
-    deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions;
+    deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
+    deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
     deviceInfo.pEnabledFeatures        = NULL;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, NULL, &GloveVkContext.vkDevice);
@@ -422,7 +426,8 @@ InitContext()
         !CreateVkDevice()             ||
         !CreateVkCommandBuffers()     ||
         !CreateVkSemaphores()          ) {
-          return false;
+        assert(false);
+        return false;
     }
     InitVkQueue();
 

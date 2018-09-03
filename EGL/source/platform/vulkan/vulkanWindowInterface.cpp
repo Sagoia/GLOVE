@@ -22,7 +22,6 @@
  */
 
 #include "vulkanWindowInterface.h"
-#include "WSIXcb.h"
 #include "api/eglSurface.h"
 #include "EGL/egl.h"
 #include "rendering_api/rendering_api.h"
@@ -58,7 +57,9 @@ VulkanWindowInterface::InitializeVulkanAPI()
 
         mVkAPI = new VulkanAPI(mVkInterface);
 
-        if(EGL_FALSE == mVkWSI->Initialize(mVkInterface->vkInstance, mVkInterface->vkDevice)) {
+        mVkWSI->SetVkInterface(mVkInterface);
+
+        if(mVkWSI->Initialize() == EGL_FALSE) {
             return EGL_FALSE;
         }
 
@@ -178,6 +179,7 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
             }
         }
     }
+    assert(res != VK_FORMAT_UNDEFINED);
 
     /// Query if the selected format is actually supported by the physical device
     VkFormatProperties formatDeviceProps;
@@ -187,6 +189,7 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
        !(formatDeviceProps.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)) {
         format = VK_FORMAT_UNDEFINED;
     }
+    assert(res != VK_FORMAT_UNDEFINED);
 
     free(surfFormats);
 
@@ -223,8 +226,8 @@ VulkanWindowInterface::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EG
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VkSurfaceKHR newSurface = mVkWSI->CreateSurface(dpy, win, surface);
     VulkanResources *vkResources = dynamic_cast<VulkanResources *>(surface->GetPlatformResources());
+    VkSurfaceKHR newSurface = mVkWSI->CreateSurface(dpy, win, surface);
 
     if(VK_NULL_HANDLE == newSurface) {
         return EGL_FALSE;

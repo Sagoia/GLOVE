@@ -28,11 +28,11 @@
 #include <vulkan/vulkan.h>
 #include "api/eglSurface.h"
 
-#define GET_WSI_FUNCTION_PTR(entrypoint)                                                     \
+#define GET_WSI_FUNCTION_PTR(callbackstr, entrypoint)                                                     \
 {                                                                                                        \
-    mWsiCallbacks.fp##entrypoint = (PFN_vk##entrypoint) vkGetInstanceProcAddr(mVkInstance, "vk"#entrypoint);    \
-    if(mWsiCallbacks.fp##entrypoint == nullptr) {                                                        \
-        assert(mWsiCallbacks.fp##entrypoint && "Could not get function pointer to "#entrypoint);         \
+    callbackstr.fp##entrypoint = (PFN_vk##entrypoint) vkGetInstanceProcAddr(mVkInterface->vkInstance, "vk"#entrypoint);    \
+    if(callbackstr.fp##entrypoint == nullptr) {                                                        \
+        assert(callbackstr.fp##entrypoint && "Could not get function pointer to "#entrypoint);         \
         return EGL_FALSE;                                                                                \
     }                                                                                                    \
 }
@@ -41,36 +41,32 @@ class VulkanWSI
 {
 public:
 typedef struct wsiCallbacks {
+    // VK_KHR_surface functions
     PFN_vkGetPhysicalDeviceSurfaceSupportKHR        fpGetPhysicalDeviceSurfaceSupportKHR;
     PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR   fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
     PFN_vkGetPhysicalDeviceSurfaceFormatsKHR        fpGetPhysicalDeviceSurfaceFormatsKHR;
     PFN_vkGetPhysicalDeviceSurfacePresentModesKHR   fpGetPhysicalDeviceSurfacePresentModesKHR;
+    // VK_KHR_swapchain functions
     PFN_vkCreateSwapchainKHR                        fpCreateSwapchainKHR;
     PFN_vkDestroySwapchainKHR                       fpDestroySwapchainKHR;
     PFN_vkGetSwapchainImagesKHR                     fpGetSwapchainImagesKHR;
     PFN_vkAcquireNextImageKHR                       fpAcquireNextImageKHR;
     PFN_vkQueuePresentKHR                           fpQueuePresentKHR;
-    void *                                          fpCreateSurface;
 }wsiCallbacks_t;
 
 protected:
-    VkInstance                                      mVkInstance;
-    VkDevice                                        mVkDevice;
+
+    const vkInterface_t                             *mVkInterface;
     wsiCallbacks_t                                  mWsiCallbacks;
 
-    virtual EGLBoolean                              SetSurfaceCallback() = 0;
-
 public:
-    VulkanWSI() {}
-    virtual ~VulkanWSI() {}
+    VulkanWSI();
+    virtual ~VulkanWSI() = default;
 
-    EGLBoolean                                      Initialize(const VkInstance vkInstance,
-                                                               const VkDevice vkDevice);
+    virtual EGLBoolean                             Initialize();
+    virtual VkSurfaceKHR                           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
 
-    virtual VkSurfaceKHR                            CreateSurface(EGLDisplay dpy,
-                                                                 EGLNativeWindowType win,
-                                                                 EGLSurface_t *surface) = 0;
-
+    void                                            SetVkInterface(const vkInterface_t* vkInterface) { mVkInterface = vkInterface; }
     const wsiCallbacks_t                           *GetWsiCallbacks() { return &mWsiCallbacks; }
 };
 

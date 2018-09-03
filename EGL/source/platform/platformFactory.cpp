@@ -24,7 +24,9 @@
 #include "platformFactory.h"
 #include "platform/vulkan/vulkanWindowInterface.h"
 #include "platform/vulkan/vulkanResources.h"
+#ifdef VK_USE_PLATFORM_XCB_KHR
 #include "platform/vulkan/WSIXcb.h"
+#endif
 #include "platform/vulkan/WSIPlaneDisplay.h"
 
 PlatformFactory *PlatformFactory::mInstance = nullptr;
@@ -72,11 +74,15 @@ PlatformFactory::ChoosePlatform()
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
     platformFactory->SetPlatformType(PlatformFactory::WSI_XCB);
+    return;
 #endif
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     platformFactory->SetPlatformType(PlatformFactory::WSI_ANDROID);
-#endif 
+    return;
+#endif
+
+    platformFactory->SetPlatformType(PlatformFactory::WSI_PLANE_DISPLAY);
 }
 
 PlatformWindowInterface *
@@ -88,16 +94,14 @@ PlatformFactory::GetWindowInterface()
     PlatformType platformType = platformFactory->GetPlatformType();
 
     switch(platformType) {
+#ifdef VK_USE_PLATFORM_XCB_KHR
         case WSI_XCB: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
             WSIXcb *vulkanWSI = new WSIXcb();
             windowInterface->SetWSI(vulkanWSI);
             return windowInterface;
         }
-
-        case WSI_ANDROID:
-            NOT_IMPLEMENTED();
-            return nullptr;
+#endif
 
         case WSI_PLANE_DISPLAY: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
@@ -105,6 +109,14 @@ PlatformFactory::GetWindowInterface()
             windowInterface->SetWSI(vulkanWSI);
             return windowInterface;
         }
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+        case WSI_ANDROID: {
+            NOT_IMPLEMENTED();
+            return nullptr;
+        }
+#endif
+
         case UNKNOWN_PLATFORM:
         default:
             NOT_REACHED();
@@ -123,14 +135,14 @@ PlatformFactory::GetResources()
 
     switch(platformType) {
         case WSI_XCB:
+        case WSI_PLANE_DISPLAY:
             return new VulkanResources();
 
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
         case WSI_ANDROID:
             NOT_IMPLEMENTED();
             return nullptr;
-
-        case WSI_PLANE_DISPLAY:
-            return new VulkanResources();
+#endif
 
         case UNKNOWN_PLATFORM:
         default:

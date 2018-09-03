@@ -67,13 +67,17 @@ eglGetDisplay(EGLNativeDisplayType display_id)
     return EGL_NO_DISPLAY;
 #else
     eglDisplay_t *eglDisplay = new eglDisplay_t();
+#ifdef VK_USE_PLATFORM_XCB_KHR
     if(EGL_DEFAULT_DISPLAY) {
         eglDisplay->nativeDisplay = XOpenDisplay(NULL);
     } else {
         eglDisplay->nativeDisplay = display_id;
     }
-
+#else
+    eglDisplay->nativeDisplay = 0;
+#endif
     return static_cast<EGLDisplay>(eglDisplay);
+
 #endif
 
     return nullptr;

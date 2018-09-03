@@ -23,25 +23,31 @@
 
 #include "vulkanWSI.h"
 
+VulkanWSI::VulkanWSI():
+    mVkInterface(nullptr)
+{
+
+}
+
 EGLBoolean
-VulkanWSI::Initialize(const VkInstance vkInstance, const VkDevice vkDevice)
+VulkanWSI::Initialize()
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    mVkInstance = vkInstance;
-    mVkDevice   = vkDevice;
-
     memset(&mWsiCallbacks, 0, sizeof(mWsiCallbacks));
 
-    GET_WSI_FUNCTION_PTR(GetPhysicalDeviceSurfaceSupportKHR);
-    GET_WSI_FUNCTION_PTR(GetPhysicalDeviceSurfaceCapabilitiesKHR);
-    GET_WSI_FUNCTION_PTR(GetPhysicalDeviceSurfaceFormatsKHR);
-    GET_WSI_FUNCTION_PTR(GetPhysicalDeviceSurfacePresentModesKHR);
-    GET_WSI_FUNCTION_PTR(CreateSwapchainKHR);
-    GET_WSI_FUNCTION_PTR(DestroySwapchainKHR);
-    GET_WSI_FUNCTION_PTR(GetSwapchainImagesKHR);
-    GET_WSI_FUNCTION_PTR(AcquireNextImageKHR);
-    GET_WSI_FUNCTION_PTR(QueuePresentKHR);
+    // VK_KHR_surface functions
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, GetPhysicalDeviceSurfaceSupportKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, GetPhysicalDeviceSurfaceCapabilitiesKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, GetPhysicalDeviceSurfaceFormatsKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, GetPhysicalDeviceSurfacePresentModesKHR);
 
-    return SetSurfaceCallback();
+    // VK_KHR_swapchain functions
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, CreateSwapchainKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, DestroySwapchainKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, GetSwapchainImagesKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, AcquireNextImageKHR);
+    GET_WSI_FUNCTION_PTR(mWsiCallbacks, QueuePresentKHR);
+
+    return EGL_TRUE;
 }

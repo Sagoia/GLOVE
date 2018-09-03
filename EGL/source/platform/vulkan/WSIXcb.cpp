@@ -21,7 +21,30 @@
  *
  */
 
+#ifdef VK_USE_PLATFORM_XCB_KHR
 #include "WSIXcb.h"
+
+EGLBoolean
+WSIXcb::Initialize()
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    VulkanWSI::Initialize();
+    this->SetXCBCallbacks();
+
+    return EGL_TRUE;
+}
+
+EGLBoolean
+WSIXcb::SetXCBCallbacks(void)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    // VK_KHR_xcb_surface functions
+    GET_WSI_FUNCTION_PTR(mWsiXCBCallbacks, CreateXcbSurfaceKHR);
+
+    return EGL_TRUE;
+}
 
 void
 WSIXcb::GetXCBConnection(xcbContext *xcb)
@@ -51,24 +74,6 @@ WSIXcb::GetXCBConnection(xcbContext *xcb)
     }
 }
 
-EGLBoolean
-WSIXcb::SetSurfaceCallback(void)
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-
-    PFN_vkCreateXcbSurfaceKHR fpCreateXcbSurfaceKHR = nullptr;
-
-    fpCreateXcbSurfaceKHR = (PFN_vkCreateXcbSurfaceKHR) vkGetInstanceProcAddr(mVkInstance, "vkCreateXcbSurfaceKHR");
-    if(fpCreateXcbSurfaceKHR == nullptr) {
-        assert(fpCreateXcbSurfaceKHR && "Could not get function pointer to CreateXcbSurfaceKHR");
-        return EGL_FALSE;
-    }
-
-    mWsiCallbacks.fpCreateSurface = reinterpret_cast<void *>(fpCreateXcbSurfaceKHR);
-
-    return EGL_TRUE;
-}
-
 VkSurfaceKHR
 WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface)
 {
@@ -77,8 +82,6 @@ WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *sur
     if(!surface) {
         return VK_NULL_HANDLE;
     }
-
-    PFN_vkCreateXcbSurfaceKHR fpCreateXcbSurfaceKHR = reinterpret_cast<PFN_vkCreateXcbSurfaceKHR>(mWsiCallbacks.fpCreateSurface);
 
     xcbContext xcb = {(eglDisplay_t *)dpy, NULL, NULL};
     GetXCBConnection(&xcb);
@@ -104,9 +107,10 @@ WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *sur
     surfaceCreateInfo.connection = xcb.connection;
     surfaceCreateInfo.window     = (xcb_window_t)win;
 
-    if(VK_SUCCESS != fpCreateXcbSurfaceKHR(mVkInstance, &surfaceCreateInfo, NULL, &vkSurface)) {
+    if(VK_SUCCESS != mWsiXCBCallbacks.fpCreateXcbSurfaceKHR(mVkInterface->vkInstance, &surfaceCreateInfo, NULL, &vkSurface)) {
         return VK_NULL_HANDLE;
     }
 
     return vkSurface;
 }
+#endif // VK_USE_PLATFORM_XCB_KHR

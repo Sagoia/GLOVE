@@ -22,21 +22,33 @@
  */
 
 #include "WSIPlaneDisplay.h"
+#include "vulkanResources.h"
 
 EGLBoolean
-WSIPlaneDisplay::SetSurfaceCallback(void)
+WSIPlaneDisplay::Initialize()
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    PFN_vkCreateDisplayPlaneSurfaceKHR fpCreateDisplayPlaneSurfaceKHR = nullptr;
-
-    fpCreateDisplayPlaneSurfaceKHR = (PFN_vkCreateDisplayPlaneSurfaceKHR) vkGetInstanceProcAddr(mVkInstance, "vkCreateDisplayPlaneSurfaceKHR");
-    if(fpCreateDisplayPlaneSurfaceKHR == nullptr) {
-        assert(fpCreateDisplayPlaneSurfaceKHR && "Could not get function pointer to CreateDisplayPlaneSurfaceKHR");
+    if (VulkanWSI::Initialize() == EGL_FALSE) {
         return EGL_FALSE;
     }
 
-    mWsiCallbacks.fpCreateSurface = reinterpret_cast<void *>(fpCreateDisplayPlaneSurfaceKHR);
+    memset(&mWsiPlaneDisplayCallbacks, 0, sizeof(mWsiPlaneDisplayCallbacks));
+
+    SetPlaneDisplayCallbacks();
+    SetPhysicalDeviceDisplayProperties();
+
+    return EGL_TRUE;
+}
+
+EGLBoolean
+WSIPlaneDisplay::SetPlaneDisplayCallbacks(void)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    // VK_KHR_display functions
+    GET_WSI_FUNCTION_PTR(mWsiPlaneDisplayCallbacks, CreateDisplayPlaneSurfaceKHR);
+    GET_WSI_FUNCTION_PTR(mWsiPlaneDisplayCallbacks, GetPhysicalDeviceDisplayPropertiesKHR);
 
     return EGL_TRUE;
 }
@@ -50,20 +62,40 @@ WSIPlaneDisplay::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurfa
         return VK_NULL_HANDLE;
     }
 
-    PFN_vkCreateDisplayPlaneSurfaceKHR fpCreateDisplayPlaneSurfaceKHR = reinterpret_cast<PFN_vkCreateDisplayPlaneSurfaceKHR>(mWsiCallbacks.fpCreateSurface);
+    assert(mDisplayPropertiesList.size() > 0);
+
+    surface->SetWidth(mDisplayPropertiesList[0].physicalResolution.width);
+    surface->SetHeight(mDisplayPropertiesList[0].physicalResolution.height);
 
     /// Create a vk surface
     VkSurfaceKHR vkSurface;
     VkDisplaySurfaceCreateInfoKHR surfaceCreateInfo;
-    memset((void *)&surfaceCreateInfo, 0 ,sizeof(surfaceCreateInfo));
+    memset(static_cast<void *>(&surfaceCreateInfo), 0 ,sizeof(surfaceCreateInfo));
     surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.pNext = NULL;
-    surfaceCreateInfo.imageExtent.width = surface->GetWidth();
-    surfaceCreateInfo.imageExtent.height = surface->GetHeight();
+    surfaceCreateInfo.pNext = nullptr;
+    surfaceCreateInfo.imageExtent.width = static_cast<uint32_t>(surface->GetWidth());
+    surfaceCreateInfo.imageExtent.height = static_cast<uint32_t>(surface->GetHeight());
 
-    if(VK_SUCCESS != fpCreateDisplayPlaneSurfaceKHR(mVkInstance, &surfaceCreateInfo, NULL, &vkSurface)) {
+    if(VK_SUCCESS != mWsiPlaneDisplayCallbacks.fpCreateDisplayPlaneSurfaceKHR(mVkInterface->vkInstance, &surfaceCreateInfo, NULL, &vkSurface)) {
         return VK_NULL_HANDLE;
     }
 
     return vkSurface;
+}
+
+void
+WSIPlaneDisplay::SetPhysicalDeviceDisplayProperties()
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    EGLBoolean ASSERT_ONLY displaySuccess;
+
+    VkResult ASSERT_ONLY res;
+    uint32_t physicalDeviceDisplayPropertiesCount = 0;
+    res = mWsiPlaneDisplayCallbacks.fpGetPhysicalDeviceDisplayPropertiesKHR(mVkInterface->vkGpus[0], &physicalDeviceDisplayPropertiesCount, nullptr);
+    assert(!res);
+
+    mDisplayPropertiesList.resize(physicalDeviceDisplayPropertiesCount);
+    res = mWsiPlaneDisplayCallbacks.fpGetPhysicalDeviceDisplayPropertiesKHR(mVkInterface->vkGpus[0], &physicalDeviceDisplayPropertiesCount, mDisplayPropertiesList.data());
+    assert(!res);
 }

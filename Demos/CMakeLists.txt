@@ -23,12 +23,18 @@ set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} ${C_REDUCE_ERRORS} ${DEBUG} ${PROFILE}
 # need to be linked against to.
 set(LIBS
     m
-    X11
-    X11-xcb
-    xcb
     EGL
     GLESv2
 )
+
+if(USE_SURFACE STREQUAL "XCB")
+    set(LIBS
+        ${LIBS}
+        X11
+        X11-xcb
+        xcb
+    )
+endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/EGL/include
                     ${CMAKE_SOURCE_DIR}/GLES/include)
