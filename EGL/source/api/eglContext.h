@@ -28,12 +28,6 @@
 #include "rendering_api/rendering_api.h"
 #include "utils/eglLogger.h"
 
-#ifdef DEBUG_DEPTH
-#   undef DEBUG_DEPTH
-#endif // DEBUG_DEPTH
-#define DEBUG_DEPTH              EGL_LOG_DEBUG
-
-
 class EGLContext_t {
 private:
     api_context_t                mAPIContext;
@@ -50,16 +44,15 @@ public:
     EGLContext_t(EGLenum rendering_api, const EGLint *attribList);
     ~EGLContext_t();
 
-    EGLDisplay                   getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
-    EGLSurface                   getReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
-    EGLSurface                   getDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
-
-    EGLBoolean                   CreateRenderingContext();
-    EGLBoolean                   DestroyRenderingContext();
+    EGLBoolean                   Create();
+    EGLBoolean                   Destroy();
     EGLBoolean                   MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read);
     void                         SetNextImageIndex(uint32_t index);
     void                         Finish();
 
+    inline EGLDisplay            getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
+    inline EGLSurface            getReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
+    inline EGLSurface            getDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
 };
 
 #endif // __EGL_CONTEXT_H__

@@ -68,6 +68,7 @@ api_state_t init_API()
     vulkanAPI::InitContext();
 
     FillInVkInterface(vulkanAPI::GetContext());
+
     return reinterpret_cast<api_state_t>(&vkInterface);
 }
 
@@ -77,7 +78,6 @@ void terminate_API()
 
     vulkanAPI::TerminateContext();
     GLLogger::Shutdown();
-
 }
 
 api_context_t create_context()

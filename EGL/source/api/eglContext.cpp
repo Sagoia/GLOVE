@@ -52,29 +52,25 @@ EGLContext_t::GetClientVersionFromConfig(const EGLint *attribList)
 }
 
 EGLBoolean
-EGLContext_t::CreateRenderingContext()
+EGLContext_t::Create()
 {
-    FUN_ENTRY(DEBUG_DEPTH);
+    FUN_ENTRY(EGL_LOG_DEBUG);
 
     rendering_api_return_e ret = RENDERING_API_init_api(mRenderingAPI, mClientVersion, &mAPIInterface);
 
-    if(RENDERING_API_INIT_SUCCESS != ret && RENDERING_API_ALREADY_INIT != ret) {
+    if(ret != RENDERING_API_INIT_SUCCESS && ret != RENDERING_API_ALREADY_INIT) {
         return EGL_FALSE;
     }
 
     mAPIContext = mAPIInterface->create_context_cb();
 
-    if(!mAPIContext) {
-        return EGL_FALSE;
-    }
-
-    return EGL_TRUE;
+    return mAPIContext != nullptr ? EGL_TRUE : EGL_FALSE;
 }
 
 EGLBoolean
-EGLContext_t::DestroyRenderingContext()
+EGLContext_t::Destroy()
 {
-    FUN_ENTRY(DEBUG_DEPTH);
+    FUN_ENTRY(EGL_LOG_DEBUG);
 
     if (mAPIInterface == nullptr) {
         return EGL_FALSE;
@@ -83,13 +79,14 @@ EGLContext_t::DestroyRenderingContext()
     //TODO: Include Error Handling in Final implementation
     mAPIInterface->finish_cb(mAPIContext);
     mAPIInterface->delete_context_cb(mAPIContext);
+
     return EGL_TRUE;
 }
 
 EGLBoolean
 EGLContext_t::MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read)
 {
-    FUN_ENTRY(DEBUG_DEPTH);
+    FUN_ENTRY(EGL_LOG_DEBUG);
 
     //TODO: Include Error Handling in Final implementation
     mDisplay = dpy;
@@ -126,7 +123,7 @@ EGLContext_t::SetNextImageIndex(uint32_t index)
 void
 EGLContext_t::Finish()
 {
-    FUN_ENTRY(DEBUG_DEPTH);
+    FUN_ENTRY(EGL_LOG_DEBUG);
 
     mAPIInterface->finish_cb(mAPIContext);
 }

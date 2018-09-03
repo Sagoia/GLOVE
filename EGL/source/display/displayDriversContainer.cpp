@@ -118,6 +118,7 @@ DisplayDriversContainer::GetDisplayDriver(EGLDisplay display)
     FUN_ENTRY(EGL_LOG_TRACE);
 
     DisplayDriversContainer *displayDrivers = DisplayDriversContainer::GetInstance();
+
     return displayDrivers->GetDriver(display);
 }
 

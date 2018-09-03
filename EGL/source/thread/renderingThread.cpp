@@ -41,9 +41,8 @@ const char * const RenderingThread::EGLErrors[] = {   "EGL_SUCCESS",
                                                       "EGL_BAD_SURFACE",
                                                       "EGL_CONTEXT_LOST"};
 
-
 RenderingThread::RenderingThread()
-    : mCurrentAPI(EGL_OPENGL_ES_API), mLastError(EGL_SUCCESS)
+: mCurrentAPI(EGL_OPENGL_ES_API), mLastError(EGL_SUCCESS)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 }
@@ -64,11 +63,11 @@ RenderingThread::GetError(void)
     FUN_ENTRY(EGL_LOG_TRACE);
 
     if(mLastError != 0x3000) {
-        printf("Error: %s\n", EGLErrors[mLastError - 0x3000]);
+        printf("Error: %s\n", EGLErrors[mLastError - 0x3000]); // TODO: to be removed
     }
 
     EGLint result = mLastError;
-    mLastError = EGL_SUCCESS;
+    mLastError    = EGL_SUCCESS;
 
     return result;
 }
@@ -80,6 +79,7 @@ RenderingThread::BindAPI(EGLenum api)
 
     if(api != EGL_OPENGL_API && api != EGL_OPENGL_ES_API && api != EGL_OPENVG_API) {
         RecordError(EGL_BAD_PARAMETER);
+
         return EGL_FALSE;
     }
 
@@ -128,7 +128,7 @@ RenderingThread::GetCurrentContext(void)
 
     switch(mCurrentAPI) {
         case EGL_OPENGL_ES_API:    return mGLESCurrentContext; break;
-        case EGL_OPENVG_API:       return mVGCurrentContext; break;
+        case EGL_OPENVG_API:       return mVGCurrentContext;   break;
         default:                   return nullptr;
     }
 }
@@ -171,9 +171,9 @@ RenderingThread::CreateContext(EGLDisplay dpy, EGLConfig config, EGLContext shar
     FUN_ENTRY(EGL_LOG_TRACE);
 
     EGLContext_t *eglContext = new EGLContext_t(mCurrentAPI, attrib_list);
-
-    if(EGL_FALSE == eglContext->CreateRenderingContext()) {
+    if(eglContext->Create() == EGL_FALSE) {
         delete eglContext;
+
         return nullptr;
     }
 
@@ -186,17 +186,18 @@ RenderingThread::DestroyContext(EGLDisplay dpy, EGLContext ctx)
     FUN_ENTRY(EGL_LOG_TRACE);
 
     EGLContext_t *eglContext = static_cast<EGLContext_t *>(ctx);
-    assert(ctx);
-    if (eglContext == nullptr) {
+    if(eglContext == nullptr) {
         RecordError(EGL_BAD_CONTEXT);
+
         return EGL_FALSE;
     }
 
-    if(EGL_FALSE == eglContext->DestroyRenderingContext()) {
+    if(eglContext->Destroy() == EGL_FALSE) {
         return EGL_FALSE;
     }
 
     delete eglContext;
+
     return EGL_TRUE;
 }
 
@@ -220,16 +221,18 @@ RenderingThread::MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, E
     }
 
     EGLContext_t *eglContext = static_cast<EGLContext_t *>(ctx);
-    assert(eglContext);
     if(eglContext == nullptr) {
         RecordError(EGL_BAD_CONTEXT);
+
         return EGL_FALSE;
     }
+
     EGLSurface_t *drawSurface = static_cast<EGLSurface_t *>(draw);
     EGLSurface_t *readSurface = static_cast<EGLSurface_t *>(read);
 
     if (drawSurface == nullptr || readSurface == nullptr) {
         RecordError(EGL_BAD_SURFACE);
+
         return EGL_FALSE;
     }
 
@@ -238,12 +241,9 @@ RenderingThread::MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, E
     }
 
     switch(mCurrentAPI) {
-        case EGL_OPENGL_ES_API:
-            mGLESCurrentContext = eglContext;
-            break;
-        case EGL_OPENVG_API:
-            mVGCurrentContext = eglContext;
-            break;
+        case EGL_OPENGL_ES_API: mGLESCurrentContext = eglContext; break;
+        case EGL_OPENVG_API:    mVGCurrentContext   = eglContext; break;
+        default:                break;
     }
 
     return EGL_TRUE;
@@ -255,9 +255,10 @@ RenderingThread::WaitGL(void)
     FUN_ENTRY(DEBUG_DEPTH);
 
     EGLBoolean ret = EGL_FALSE;
+
     EGLenum api = mCurrentAPI;
     mCurrentAPI = EGL_OPENGL_ES_API;
-    ret = WaitClient();
+    ret         = WaitClient();
     mCurrentAPI = api;
 
     return ret;

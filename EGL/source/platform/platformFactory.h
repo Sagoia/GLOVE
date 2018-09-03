@@ -45,16 +45,14 @@ private:
     ~PlatformFactory();
 
     inline PlatformType                GetPlatformType()                            { FUN_ENTRY(EGL_LOG_TRACE); return mPlatformType; }
-
+    inline void                        SetPlatformType(PlatformType platformType)   { FUN_ENTRY(EGL_LOG_TRACE); mPlatformType = platformType; }
 public:
     static PlatformFactory            *GetInstance();
     static void                        DestroyInstance();
 
     static void                        ChoosePlatform();
     static PlatformWindowInterface    *GetWindowInterface();
-    static PlatformResources          *GetResources();
-
-    void                               SetPlatformType(PlatformType platformType)   { FUN_ENTRY(EGL_LOG_TRACE); mPlatformType = platformType; }
+    static PlatformResources          *GetResources();    
 };
 
 #endif // __PLATFORM_FACTORY_H__

@@ -64,7 +64,7 @@ DisplayDriver::Initialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     PlatformFactory::ChoosePlatform();
     mWindowInterface = PlatformFactory::GetWindowInterface();
 
-    if(EGL_FALSE == mWindowInterface->Initialize()) {
+    if(mWindowInterface->Initialize() == EGL_FALSE) {
         return SetErrorAndReturn(EGL_NOT_INITIALIZED);
     }
 
@@ -82,7 +82,7 @@ DisplayDriver::Terminate(EGLDisplay dpy)
     }
 #endif
 
-    if(EGL_FALSE == mWindowInterface->Terminate()) {
+    if(mWindowInterface->Terminate() == EGL_FALSE) {
         return EGL_FALSE;
     }
 
@@ -164,12 +164,14 @@ DisplayDriver::CreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWi
     if(!eglSurface) {
         assert(0);
         callingThread->RecordError(EGL_BAD_ALLOC);
+
         return EGL_NO_SURFACE;
     }
 
     if(eglSurface->InitSurface(EGL_WINDOW_BIT, (EGLConfig_t *)config, attrib_list) != EGL_TRUE) {
         callingThread->RecordError(EGL_BAD_PARAMETER);
         delete eglSurface;
+
         return EGL_NO_SURFACE;
     }
 
@@ -198,12 +200,14 @@ DisplayDriver::CreatePbufferSurface(EGLDisplay dpy, EGLConfig config, const EGLi
     if(!eglSurface) {
         assert(0);
         callingThread->RecordError(EGL_BAD_ALLOC);
+
         return EGL_NO_SURFACE;
     }
 
     if(eglSurface->InitSurface(EGL_PBUFFER_BIT, (EGLConfig_t *)config, attrib_list) != EGL_TRUE) {
         callingThread->RecordError(EGL_BAD_PARAMETER);
         delete eglSurface;
+
         return EGL_NO_SURFACE;
     }
 
@@ -228,8 +232,8 @@ DisplayDriver::CreateEGLSurfaceInterface(EGLSurface_t *surface)
 
     surfaceInterface->surface = reinterpret_cast<void *>(surface);
     if(surface->GetType() == EGL_WINDOW_BIT) {
-        surfaceInterface->images = surface->GetPlatformSurfaceImages();
-        surfaceInterface->imageCount = surface->GetPlatformSurfaceImageCount();
+        surfaceInterface->images          = surface->GetPlatformSurfaceImages();
+        surfaceInterface->imageCount      = surface->GetPlatformSurfaceImageCount();
     }
     surfaceInterface->type                = surface->GetType();
     surfaceInterface->width               = surface->GetWidth();
@@ -416,7 +420,6 @@ DisplayDriver::CreateImageNativeBufferAndroid(EGLDisplay dpy, EGLContext ctx, EG
 #endif
 }
 
-
 EGLImageKHR
 DisplayDriver::CreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
@@ -471,6 +474,7 @@ EGLSyncKHR
 DisplayDriver::CreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
+
     return ((EGLSyncKHR)0xFE4CE000);
 }
 
@@ -478,6 +482,7 @@ EGLBoolean
 DisplayDriver::DestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
+
     return EGL_TRUE;
 }
 
@@ -485,6 +490,7 @@ EGLint
 DisplayDriver::ClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
+
     return EGL_CONDITION_SATISFIED_KHR;
 }
 

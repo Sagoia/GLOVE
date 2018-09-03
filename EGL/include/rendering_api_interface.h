@@ -30,8 +30,8 @@
 #include "vulkan/vulkan.h"
 
 typedef struct EGLSurfaceInterface_t {
-    void *surface;
-    void *images;
+    void    *surface;
+    void    *images;
     uint32_t imageCount;
     uint32_t nextImageIndex;
     uint32_t surfaceColorFormat;
@@ -40,7 +40,7 @@ typedef struct EGLSurfaceInterface_t {
     uint32_t height;
     uint32_t depthSize;
     uint32_t stencilSize;
-}EGLSurfaceInterface;
+} EGLSurfaceInterface;
 
 typedef void * api_state_t;
 typedef void * api_context_t;

@@ -52,7 +52,7 @@ typedef struct wsiCallbacks {
     PFN_vkGetSwapchainImagesKHR                     fpGetSwapchainImagesKHR;
     PFN_vkAcquireNextImageKHR                       fpAcquireNextImageKHR;
     PFN_vkQueuePresentKHR                           fpQueuePresentKHR;
-}wsiCallbacks_t;
+} wsiCallbacks_t;
 
 protected:
 

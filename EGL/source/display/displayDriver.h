@@ -71,7 +71,7 @@ public:
     EGLBoolean                   DestroySurface(EGLDisplay dpy, EGLSurface surface);
     EGLBoolean                   QuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value);
     EGLSurface                   CreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list);
-    EGLBoolean                   SurfaceAttrib(EGLDisplay dpy, EGLSurface surface,EGLint attribute, EGLint value);
+    EGLBoolean                   SurfaceAttrib(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value);
     EGLBoolean                   BindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer);
     EGLBoolean                   ReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer);
     EGLBoolean                   SwapInterval(EGLDisplay dpy, EGLint interval);

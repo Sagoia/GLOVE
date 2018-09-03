@@ -22,11 +22,6 @@
  */
 
 #include "vulkanWindowInterface.h"
-#include "api/eglSurface.h"
-#include "EGL/egl.h"
-#include "rendering_api/rendering_api.h"
-
-#include <vector>
 
 VulkanWindowInterface::VulkanWindowInterface(void)
 : mVkInitialized(false), mGLES2Interface(nullptr), mVkAPI(nullptr), mVkWSI(nullptr)
@@ -87,11 +82,7 @@ VulkanWindowInterface::InitSwapchainExtension(const EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    if(!mVkAPI->DoesSupportPresent(dynamic_cast<const VulkanResources *>(surface->GetPlatformResources()))) {
-        return EGL_FALSE;
-    }
-
-    return EGL_TRUE;
+    return mVkAPI->DoesSupportPresent(dynamic_cast<const VulkanResources *>(surface->GetPlatformResources())) ? EGL_TRUE : EGL_FALSE;
 }
 
 VkExtent2D

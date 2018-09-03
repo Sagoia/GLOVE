@@ -25,15 +25,12 @@
 #define __VULKAN_WINDOW_INTERFACE_H__
 
 #include "platform/platformWindowInterface.h"
-#include "utils/egl_defs.h"
-#include "EGL/egl.h"
-#include "EGL/eglext.h"
 #include "vulkanAPI.h"
 
 #ifdef DEBUG_DEPTH
 #   undef DEBUG_DEPTH
 #endif // DEBUG_DEPTH
-#define DEBUG_DEPTH                                 EGL_LOG_DEBUG
+#define DEBUG_DEPTH              EGL_LOG_DEBUG
 
 class VulkanWindowInterface : public PlatformWindowInterface
 {

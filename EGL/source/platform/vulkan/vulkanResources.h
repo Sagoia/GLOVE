@@ -17,7 +17,7 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      It hosts vulkan surface & swapchain. It implements PlatformResources interface class. 
+ *  @brief      It hosts vulkan surface & swapchain. It implements PlatformResources interface class.
  *
  */
 
@@ -30,8 +30,8 @@
 class VulkanResources : public PlatformResources
 {
 private:
-    VkSwapchainKHR                   mSwapchain;
     VkSurfaceKHR                     mSurface;
+    VkSwapchainKHR                   mSwapchain;
     uint32_t                         mSwapChainImageCount;
     VkImage                         *mSwapChainImages;
 
