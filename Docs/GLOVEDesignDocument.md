@@ -121,7 +121,7 @@ public:
     virtual ~PlatformResources() { }
 
     virtual uint32_t    GetSwapchainImageCount() = 0;
-    virtualvoid        *GetSwapchainImages() = 0;
+    virtual void       *GetSwapchainImages()     = 0;
 };
 
 ```
