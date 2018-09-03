@@ -25,6 +25,7 @@
 #define __VKCBMANAGER_H__
 
 #include "context.h"
+#include "fence.h"
 
 namespace vulkanAPI {
 
@@ -70,7 +71,7 @@ private:
     typedef struct State {
         vector<VkCommandBuffer>         commandBuffer;
         vector<cmdBufferState_t>        commandBufferState;
-        vector<VkFence>                 fence;
+        vector<Fence>                   fence;
 
         State()  { FUN_ENTRY(GL_LOG_TRACE); }
         ~State() { FUN_ENTRY(GL_LOG_TRACE); }

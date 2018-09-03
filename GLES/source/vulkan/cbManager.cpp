@@ -87,9 +87,7 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
     FUN_ENTRY(GL_LOG_TRACE);
 
     for(uint32_t i = 0; i < mVkCommandBuffers.fence.size(); ++i) {
-        if(mVkCommandBuffers.fence[i] != VK_NULL_HANDLE) {
-            vkDestroyFence(mVkContext->vkDevice, mVkCommandBuffers.fence[i], NULL);
-        }
+        mVkCommandBuffers.fence[i].Release();
     }
 
     vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
@@ -214,18 +212,11 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
         return false;
     }
 
-    VkFenceCreateInfo fenceInfo;
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.pNext = NULL;
-    fenceInfo.flags = 0;
-
     for(uint32_t i = 0; i < GLOVE_NUM_COMMAND_BUFFERS; ++i) {
         mVkCommandBuffers.commandBufferState[i] = CMD_BUFFER_INITIAL_STATE;
 
-        err = vkCreateFence(mVkContext->vkDevice, &fenceInfo, NULL, &mVkCommandBuffers.fence[i]);
-        assert(!err);
-
-        if(err != VK_SUCCESS) {
+        mVkCommandBuffers.fence[i].SetContext(mVkContext);
+        if(!mVkCommandBuffers.fence[i].Create(false)) {
             return false;
         }
     }
@@ -309,7 +300,7 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
     mVkContext->vkSyncItems->drawSemaphoreFlag    = true;
     mVkContext->vkSyncItems->acquireSemaphoreFlag = false;
 
-    VkResult err = vkQueueSubmit(mVkContext->vkQueue, 1, &submitInfo, mVkCommandBuffers.fence[mActiveCmdBuffer]);
+    VkResult err = vkQueueSubmit(mVkContext->vkQueue, 1, &submitInfo, mVkCommandBuffers.fence[mActiveCmdBuffer].GetFence());
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -331,23 +322,14 @@ CommandBufferManager::WaitLastSubmition(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err;
-
     if(mLastSubmittedBuffer != GLOVE_NO_BUFFER_TO_WAIT) {
 
-        do
-        {
-            err = vkWaitForFences(mVkContext->vkDevice, 1, &mVkCommandBuffers.fence[mLastSubmittedBuffer], VK_TRUE, GLOVE_FENCE_WAIT_TIMEOUT);
-        }
-        while (err == VK_TIMEOUT);
-        assert(!err);
+        if(!mVkCommandBuffers.fence[mLastSubmittedBuffer].Wait(VK_TRUE, GLOVE_FENCE_WAIT_TIMEOUT))
+            return false;
 
         FreeResources();
 
-        err = vkResetFences(mVkContext->vkDevice, 1, &mVkCommandBuffers.fence[mLastSubmittedBuffer]);
-        assert(!err);
-
-        if(err != VK_SUCCESS) {
+        if(!mVkCommandBuffers.fence[mLastSubmittedBuffer].Reset()) {
             return false;
         }
 
