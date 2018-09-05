@@ -268,7 +268,9 @@ DisplayDriver::DestroySurface(EGLDisplay dpy, EGLSurface surface)
         mWindowInterface->DestroySurfaceImages(eglSurface);
         mWindowInterface->DestroySurface(eglSurface);
 
-        delete eglSurface->GetPlatformResources();
+        if(eglSurface->GetPlatformResources() != nullptr) {
+            delete eglSurface->GetPlatformResources();
+        }
         delete eglSurface;
     }
 
