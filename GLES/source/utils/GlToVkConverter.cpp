@@ -364,7 +364,7 @@ GlAttribTypeToVkFormat(GLenum type)
 }
 
 VkFormat
-GlAttribPointerToVkFormat(size_t nElements, GLenum type)
+GlAttribPointerToVkFormat(size_t nElements, GLenum type, GLboolean normalized)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -377,7 +377,6 @@ GlAttribPointerToVkFormat(size_t nElements, GLenum type)
         case 4:                             return VK_FORMAT_R32G32B32A32_SFLOAT;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_INT:
         switch(nElements) {
@@ -387,7 +386,6 @@ GlAttribPointerToVkFormat(size_t nElements, GLenum type)
         case 4:                             return VK_FORMAT_R32G32B32A32_SINT;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_UNSIGNED_INT:
         switch(nElements) {
@@ -397,59 +395,52 @@ GlAttribPointerToVkFormat(size_t nElements, GLenum type)
         case 4:                             return VK_FORMAT_R32G32B32A32_UINT;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_BYTE:
         switch(nElements) {
-        case 1:                             return VK_FORMAT_R8_SNORM;
-        case 2:                             return VK_FORMAT_R8G8_SNORM;
-        case 3:                             return VK_FORMAT_R8G8B8_SNORM;
-        case 4:                             return VK_FORMAT_R8G8B8A8_SNORM;
+        case 1:                             return normalized ? VK_FORMAT_R8_SNORM : VK_FORMAT_R8_SSCALED;
+        case 2:                             return normalized ? VK_FORMAT_R8G8_SNORM : VK_FORMAT_R8G8_SSCALED;
+        case 3:                             return normalized ? VK_FORMAT_R8G8B8_SNORM : VK_FORMAT_R8G8B8_SSCALED;
+        case 4:                             return normalized ? VK_FORMAT_R8G8B8A8_SNORM : VK_FORMAT_R8G8B8A8_SSCALED;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_UNSIGNED_BYTE:
         switch(nElements) {
-        case 1:                             return VK_FORMAT_R8_UNORM;
-        case 2:                             return VK_FORMAT_R8G8_UNORM;
-        case 3:                             return VK_FORMAT_R8G8B8_UNORM;
-        case 4:                             return VK_FORMAT_R8G8B8A8_UNORM;
+        case 1:                             return normalized ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8_USCALED;
+        case 2:                             return normalized ? VK_FORMAT_R8G8_UNORM : VK_FORMAT_R8G8_USCALED;
+        case 3:                             return normalized ? VK_FORMAT_R8G8B8_UNORM : VK_FORMAT_R8G8B8_USCALED;
+        case 4:                             return normalized ? VK_FORMAT_R8G8B8A8_UNORM : VK_FORMAT_R8G8B8A8_USCALED;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_SHORT:
         switch(nElements) {
-        case 1:                             return VK_FORMAT_R16_SINT;
-        case 2:                             return VK_FORMAT_R16G16_SINT;
-        case 3:                             return VK_FORMAT_R16G16B16_SINT;
-        case 4:                             return VK_FORMAT_R16G16B16A16_SINT;
+        case 1:                             return normalized ? VK_FORMAT_R16_SNORM : VK_FORMAT_R16_SSCALED;
+        case 2:                             return normalized ? VK_FORMAT_R16G16_SNORM : VK_FORMAT_R16G16_SSCALED;
+        case 3:                             return normalized ? VK_FORMAT_R16G16B16_SNORM : VK_FORMAT_R16G16B16_SSCALED;
+        case 4:                             return normalized ? VK_FORMAT_R16G16B16A16_SNORM : VK_FORMAT_R16G16B16A16_SSCALED;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_UNSIGNED_SHORT:
         switch(nElements) {
-        case 1:                             return VK_FORMAT_R16_UINT;
-        case 2:                             return VK_FORMAT_R16G16_UINT;
-        case 3:                             return VK_FORMAT_R16G16B16_UINT;
-        case 4:                             return VK_FORMAT_R16G16B16A16_UINT;
+        case 1:                             return normalized ? VK_FORMAT_R16_UNORM : VK_FORMAT_R16_USCALED;
+        case 2:                             return normalized ? VK_FORMAT_R16G16_UNORM : VK_FORMAT_R16G16_USCALED;
+        case 3:                             return normalized ? VK_FORMAT_R16G16B16_UNORM : VK_FORMAT_R16G16B16_USCALED;
+        case 4:                             return normalized ? VK_FORMAT_R16G16B16A16_UNORM : VK_FORMAT_R16G16B16A16_USCALED;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-    break;
 
     case GL_FIXED:
         switch(nElements) {
-        case 1:                             return VK_FORMAT_R16_SSCALED;
-        case 2:                             return VK_FORMAT_R16G16_SSCALED;
-        case 3:                             return VK_FORMAT_R16G16B16_SSCALED;
-        case 4:                             return VK_FORMAT_R16G16B16A16_SSCALED;
+        case 1:                             return VK_FORMAT_R32_SFLOAT;
+        case 2:                             return VK_FORMAT_R32G32_SFLOAT;
+        case 3:                             return VK_FORMAT_R32G32B32_SFLOAT;
+        case 4:                             return VK_FORMAT_R32G32B32A32_SFLOAT;
     default: { NOT_REACHED();               return VK_FORMAT_UNDEFINED; }
 	}
 
     default: { NOT_REACHED();               return VK_FORMAT_UNDEFINED; }
     }
-
-    return VK_FORMAT_UNDEFINED;
 }

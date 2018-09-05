@@ -29,65 +29,6 @@
 #include "utils/glLogger.h"
 #include "utils/parser_helpers.h"
 
-VkFormat
-VkIntFormatToVkFloatFormat(VkFormat format)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    switch(format) {
-    case VK_FORMAT_R32_SFLOAT:
-    case VK_FORMAT_R32G32_SFLOAT:
-    case VK_FORMAT_R32G32B32_SFLOAT:
-    case VK_FORMAT_R32G32B32A32_SFLOAT:
-    // TODO: The formats below should NOT be here (VkIntFormatToVkFloatFormat).
-    // They should be handled properly at this level and changed as needed
-    // in the lower layers
-    case VK_FORMAT_R8_SNORM:
-    case VK_FORMAT_R8_UNORM:
-    case VK_FORMAT_R8G8_SNORM:
-    case VK_FORMAT_R8G8_UNORM:
-    case VK_FORMAT_R8G8B8_SNORM:
-    case VK_FORMAT_R8G8B8_UNORM:
-    case VK_FORMAT_R8G8B8A8_SNORM:
-    case VK_FORMAT_R8G8B8A8_UNORM:
-                                            return format;
-
-    case VK_FORMAT_R8_SINT:
-    case VK_FORMAT_R8_UINT:
-    case VK_FORMAT_R16_SINT:
-    case VK_FORMAT_R16_UINT:
-    case VK_FORMAT_R32_SINT:
-    case VK_FORMAT_R32_UINT:
-    case VK_FORMAT_R16_SSCALED:             return VK_FORMAT_R32_SFLOAT;
-
-    case VK_FORMAT_R8G8_SINT:
-    case VK_FORMAT_R8G8_UINT:
-    case VK_FORMAT_R16G16_SINT:
-    case VK_FORMAT_R16G16_UINT:
-    case VK_FORMAT_R32G32_SINT:
-    case VK_FORMAT_R32G32_UINT:
-    case VK_FORMAT_R16G16_SSCALED:          return VK_FORMAT_R32G32_SFLOAT;
-
-    case VK_FORMAT_R8G8B8_SINT:
-    case VK_FORMAT_R8G8B8_UINT:
-    case VK_FORMAT_R16G16B16_SINT:
-    case VK_FORMAT_R16G16B16_UINT:
-    case VK_FORMAT_R32G32B32_SINT:
-    case VK_FORMAT_R32G32B32_UINT:
-    case VK_FORMAT_R16G16B16_SSCALED:       return VK_FORMAT_R32G32B32_SFLOAT;
-
-    case VK_FORMAT_R8G8B8A8_SINT:
-    case VK_FORMAT_R8G8B8A8_UINT:
-    case VK_FORMAT_R16G16B16A16_SINT:
-    case VK_FORMAT_R16G16B16A16_UINT:
-    case VK_FORMAT_R32G32B32A32_SINT:
-    case VK_FORMAT_R32G32B32A32_UINT:
-    case VK_FORMAT_R16G16B16A16_SSCALED:    return VK_FORMAT_R32G32B32A32_SFLOAT;
-
-    default: { NOT_FOUND_ENUM(format);      return VK_FORMAT_UNDEFINED; }
-    }
-}
-
 bool
 VkFormatIsDepthStencil(VkFormat format)
 {
@@ -147,53 +88,6 @@ VkFormatIsColor(VkFormat format)
     FUN_ENTRY(GL_LOG_TRACE);
 
     return (format != VK_FORMAT_UNDEFINED) && !VkFormatIsDepthStencil(format);
-}
-
-size_t
-nBytesOfVkIntFormat(VkFormat format, bool *unsigned_type)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    switch(format){
-    case VK_FORMAT_R8_SINT:
-    case VK_FORMAT_R8G8_SINT:
-    case VK_FORMAT_R8G8B8_SINT:
-    case VK_FORMAT_R8G8B8A8_SINT:          { *unsigned_type = false; return 1; }
-
-    case VK_FORMAT_R8_UINT:
-    case VK_FORMAT_R8G8_UINT:
-    case VK_FORMAT_R8G8B8_UINT:
-    case VK_FORMAT_R8G8B8A8_UINT:          { *unsigned_type = true; return 1; }
-
-    case VK_FORMAT_R16_SINT:
-    case VK_FORMAT_R16G16_SINT:
-    case VK_FORMAT_R16G16B16_SINT:
-    case VK_FORMAT_R16G16B16A16_SINT:      { *unsigned_type = false; return 2; }
-
-    case VK_FORMAT_R16_UINT:
-    case VK_FORMAT_R16G16_UINT:
-    case VK_FORMAT_R16G16B16_UINT:
-    case VK_FORMAT_R16G16B16A16_UINT:      { *unsigned_type = true; return 2; }
-
-    case VK_FORMAT_R16_SSCALED:
-    case VK_FORMAT_R16G16_SSCALED:
-    case VK_FORMAT_R16G16B16_SSCALED:
-    case VK_FORMAT_R16G16B16A16_SSCALED:
-
-    case VK_FORMAT_R32_SINT:
-    case VK_FORMAT_R32G32_SINT:
-    case VK_FORMAT_R32G32B32_SINT:
-    case VK_FORMAT_R32G32B32A32_SINT:       { *unsigned_type = false; return 4; }
-
-    case VK_FORMAT_R32_UINT:
-    case VK_FORMAT_R32G32_UINT:
-    case VK_FORMAT_R32G32B32_UINT:
-    case VK_FORMAT_R32G32B32A32_UINT:       { *unsigned_type = true; return 4; }
-
-    default: { NOT_FOUND_ENUM(format);                               return 0; }
-    }
-
-    return 0;
 }
 
 #define CASE_STR(c)                     case VK_ ##c: return "VK_" STRINGIFY(c);

@@ -492,22 +492,21 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
         assert(location < GLOVE_MAX_VERTEX_ATTRIBS);
 
         if(genericVertAttribs->GetVertexAttribEnabled(location)) {
-            /// Calculate stride if not given from user
-            if(!genericVertAttribs->GetVertexAttribStride(location)) {
-                // gva->stride = gva->nElements * glDataTypeToBpp(gva->dataType);
-                // shaders only accept floats
-                size_t stride = genericVertAttribs->GetVertexAttribSize(location) * sizeof(glsl_float_t);
+
+            // Calculate stride if not given from user based on the actual data type
+            if(genericVertAttribs->GetVertexAttribStride(location) == 0) {
+                size_t stride = genericVertAttribs->GetVertexAttribNumElements(location) *
+                        GlAttribTypeToElementSize(genericVertAttribs->GetVertexAttribType(location));
                 genericVertAttribs->SetVertexAttribStride(location, stride);
             }
 
-            /// Create new vbo if user passed pointer to data
-            /// This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
+            // Create new vbo if user passed pointer to data
+            // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
             if(!genericVertAttribs->GetVertexAttribVbo(location)) {
                 BufferObject *vbo = new VertexBufferObject(mVkContext);
-                vbo->Allocate(genericVertAttribs->GetVertexAttribFormat(location),
-                              genericVertAttribs->GetVertexAttribNormalized(location),
-                              (firstVertex + vertCount) * genericVertAttribs->GetVertexAttribStride(location),
-                              (const void *)genericVertAttribs->GetVertexAttribPointer(location));
+                void * data = reinterpret_cast<void*>(genericVertAttribs->GetVertexAttribPointer(location));
+                size_t size = (firstVertex + vertCount) * genericVertAttribs->GetVertexAttribStride(location);
+                vbo->Allocate(size, data);
 
                 genericVertAttribs->SetVertexAttribVbo(location, vbo);
                 genericVertAttribs->SetVertexAttribOffset(location, 0);
@@ -565,7 +564,7 @@ ShaderProgram::GenerateVertexInputProperties(GenericVertexAttributes *genericVer
         mVkVertexInputBinding[binding].stride = genericVertAttribs->GetVertexAttribStride(location);
 
         mVkVertexInputAttribute[i].binding = binding;
-        mVkVertexInputAttribute[i].format = VkIntFormatToVkFloatFormat(genericVertAttribs->GetVertexAttribFormat(location));
+        mVkVertexInputAttribute[i].format = genericVertAttribs->GetVertexAttribFormat(location);
         mVkVertexInputAttribute[i].location = location;
         mVkVertexInputAttribute[i].offset = genericVertAttribs->GetVertexAttribOffset(location);
     }

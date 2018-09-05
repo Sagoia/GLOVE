@@ -36,7 +36,7 @@ public:
     virtual ~PlatformWindowInterface() { }
 
     virtual EGLBoolean           Initialize() = 0;
-    virtual EGLBoolean           Terminate() = 0;;
+    virtual EGLBoolean           Terminate() = 0;
     virtual EGLBoolean           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
     virtual void                 AllocateSurfaceImages(EGLSurface_t *surface) = 0;
     virtual void                 DestroySurfaceImages(EGLSurface_t *eglSurface) = 0;

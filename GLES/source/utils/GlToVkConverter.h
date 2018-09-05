@@ -47,7 +47,7 @@ VkSamplerMipmapMode     GlTexMipMapModeToVkMipMapMode(GLenum mode);
 VkFormat                GlTexInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatStencil);
-VkFormat                GlAttribPointerToVkFormat(size_t nElements, GLenum type);
+VkFormat                GlAttribPointerToVkFormat(size_t nElements, GLenum type, GLboolean normalized);
 VkFormat                GlAttribTypeToVkFormat(GLenum type);
 
 #endif // __GLTOVKCONVERTER_H__

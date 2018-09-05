@@ -33,6 +33,7 @@ GLenum                  GlFormatToGlInternalFormat(GLenum format, GLenum type);
 GLenum                  GlInternalFormatToGlType(GLenum internalFormat);
 GLenum                  GlInternalFormatToGlFormat(GLenum internalFormat);
 size_t                  GlInternalFormatTypeToNumElements(GLenum format, GLenum type);
+size_t                  GlAttribTypeToElementSize(GLenum type);
 size_t                  GlTypeToElementSize(GLenum type);
 void                    GlFormatToStorageBits(GLenum format, GLint     *r_, GLint     *g_, GLint     *b_, GLint     *a_, GLint     *d_, GLint     *s_);
 void                    GlFormatToStorageBits(GLenum format, GLfloat   *r_, GLfloat   *g_, GLfloat   *b_, GLfloat   *a_, GLfloat   *d_, GLfloat   *s_);

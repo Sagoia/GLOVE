@@ -237,6 +237,23 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
 }
 
 size_t
+GlAttribTypeToElementSize(GLenum type)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    switch(type) {
+    case GL_BYTE:                           return sizeof(GLbyte);
+    case GL_UNSIGNED_BYTE:                  return sizeof(GLubyte);
+    case GL_SHORT:                          return sizeof(GLshort);
+    case GL_UNSIGNED_SHORT:                 return sizeof(GLushort);
+    case GL_FIXED:                          return sizeof(GLfixed);
+    case GL_FLOAT:                          return sizeof(GLfloat);
+    default: { NOT_FOUND_ENUM(type);        return sizeof(GLubyte); }
+    }
+}
+
+
+size_t
 GlTypeToElementSize(GLenum type)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

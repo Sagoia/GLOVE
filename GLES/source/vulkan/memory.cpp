@@ -98,6 +98,9 @@ Memory::SetData(VkFormat srcFormat, bool normalize, VkDeviceSize size, VkDeviceS
     assert(!err);
 
     if(data) {
+        memcpy(pData, data, size);
+        // TODO:: legacy code. To be removed
+        /*
         if(srcFormat == VK_FORMAT_UNDEFINED  ||
            srcFormat == VK_FORMAT_R32_SFLOAT ||
            srcFormat == VK_FORMAT_R32G32_SFLOAT ||
@@ -171,6 +174,7 @@ Memory::SetData(VkFormat srcFormat, bool normalize, VkDeviceSize size, VkDeviceS
                 break;
             }
         }
+        */
     } else {
         memset(pData, 0x0, size);
     }

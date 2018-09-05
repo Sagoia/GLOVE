@@ -26,8 +26,6 @@
 
 #include "vulkan/vulkan.h"
 
-size_t                  nBytesOfVkIntFormat(VkFormat format, bool *unsigned_type);
-VkFormat                VkIntFormatToVkFloatFormat(VkFormat format);
 bool                    VkFormatIsDepthStencil(VkFormat format);
 bool                    VkFormatIsDepth(VkFormat format);
 bool                    VkFormatIsStencil(VkFormat format);

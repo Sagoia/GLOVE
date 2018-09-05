@@ -51,7 +51,7 @@ public:
                                                                                                        params[1] = mClearColor[1] == 0.0f ? GL_FALSE : GL_TRUE;
                                                                                                        params[2] = mClearColor[2] == 0.0f ? GL_FALSE : GL_TRUE;
                                                                                                        params[3] = mClearColor[3] == 0.0f ? GL_FALSE : GL_TRUE;}
-      inline void             GetClearColor(GLint *params)              const   { FUN_ENTRY(GL_LOG_TRACE); 
+      inline void             GetClearColor(GLint *params)              const   { FUN_ENTRY(GL_LOG_TRACE);
                                                                                                        params[0] = mClearColor[0] == 1.0f ? 0x7fffffff : static_cast<GLint>(mClearColor[0] * 0x7fffffff);
                                                                                                        params[1] = mClearColor[1] == 1.0f ? 0x7fffffff : static_cast<GLint>(mClearColor[1] * 0x7fffffff);
                                                                                                        params[2] = mClearColor[2] == 1.0f ? 0x7fffffff : static_cast<GLint>(mClearColor[2] * 0x7fffffff);
