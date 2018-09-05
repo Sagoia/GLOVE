@@ -251,8 +251,7 @@ Context::VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean no
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(type != GL_BYTE && type != GL_UNSIGNED_BYTE && type != GL_SHORT && type != GL_UNSIGNED_SHORT && type != GL_FIXED && type != GL_FLOAT &&
-       type != GL_INT  && type != GL_UNSIGNED_INT) {
+    if(type != GL_BYTE && type != GL_UNSIGNED_BYTE && type != GL_SHORT && type != GL_UNSIGNED_SHORT && type != GL_FIXED && type != GL_FLOAT) {
         RecordError(GL_INVALID_ENUM);
         return;
     }
