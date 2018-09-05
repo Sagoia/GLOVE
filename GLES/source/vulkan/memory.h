@@ -67,7 +67,7 @@ public:
     VkResult                          GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
 
 // Set/Update Functions
-    bool                              SetData(VkFormat srcFormat, bool normalize, VkDeviceSize size, VkDeviceSize offset, const void *data);
+    bool                              SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
     void                              UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
 
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }

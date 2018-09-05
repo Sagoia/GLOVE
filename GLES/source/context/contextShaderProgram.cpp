@@ -68,7 +68,7 @@ Context::BindAttribLocation(GLuint program, GLuint index, const char *name)
         return;
     }
 
-    if(!memcmp((void *)name, (void *)"gl_", 3)) {
+    if(!memcmp(static_cast<const void *>(name), static_cast<const void *>("gl_"), 3)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
@@ -87,7 +87,7 @@ Context::CreateProgram(void)
     progPtr->SetGlContext(this);
     progPtr->SetShaderCompiler(mShaderCompiler);
 
-    return mResourceManager->PushShadingObject((ShadingNamespace_t){SHADER_PROGRAM_ID, res});
+    return mResourceManager->PushShadingObject({SHADER_PROGRAM_ID, res});
 }
 
 void

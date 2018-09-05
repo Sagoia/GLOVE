@@ -30,14 +30,14 @@
 #include "context/context.h"
 
 ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext)
-: mGlContext(nullptr)
+: mGLContext(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     mVkContext = vkContext;
 
-    mShaders[0] = NULL;
-    mShaders[1] = NULL;
+    mShaders[0] = nullptr;
+    mShaders[1] = nullptr;
 
     mStagesIDs[0] = -1;
     mStagesIDs[1] = -1;
@@ -49,7 +49,7 @@ ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext)
     mVkShaderModules[1] = VK_NULL_HANDLE;
 
     mVkDescSetLayout = VK_NULL_HANDLE;
-    mVkDescSetLayoutBind = NULL;
+    mVkDescSetLayoutBind = nullptr;
     mVkDescPool = VK_NULL_HANDLE;
     mVkDescSet = VK_NULL_HANDLE;
     mVkPipelineLayout = VK_NULL_HANDLE;
@@ -127,7 +127,7 @@ ShaderProgram::SetPipelineVertexInputStateInfo(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     mVkPipelineVertexInput.sType                            = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    mVkPipelineVertexInput.pNext                            = NULL;
+    mVkPipelineVertexInput.pNext                            = nullptr;
     mVkPipelineVertexInput.flags                            = 0;
     mVkPipelineVertexInput.vertexBindingDescriptionCount    = 0;
     mVkPipelineVertexInput.pVertexBindingDescriptions       = mVkVertexInputBinding;
@@ -194,7 +194,7 @@ ShaderProgram::DetachAndDeleteShaders()
     if(shaderPtr) {
         DetachShader(shaderPtr);
         if(shaderPtr->GetMarkForDeletion()) {
-            ((Context *)mGlContext)->DeleteShader(shaderPtr);
+            mGLContext->DeleteShader(shaderPtr);
         }
     }
 
@@ -202,7 +202,7 @@ ShaderProgram::DetachAndDeleteShaders()
     if(shaderPtr) {
         DetachShader(shaderPtr);
         if(shaderPtr->GetMarkForDeletion()) {
-            ((Context *)mGlContext)->DeleteShader(shaderPtr);
+            mGLContext->DeleteShader(shaderPtr);
         }
     }
 }
@@ -274,7 +274,7 @@ uint32_t
 ShaderProgram::SerializeShadersSpirv(void *binary)
 {
     uint8_t *rawDataPtr = reinterpret_cast<uint8_t *>(binary);
-    uint32_t *u32DataPtr = NULL;
+    uint32_t *u32DataPtr = nullptr;
     uint32_t vsSpirvSize = 4 * mShaderSPVsize[0];
     uint32_t fsSpirvSize = 4 * mShaderSPVsize[1];
 
@@ -296,7 +296,7 @@ uint32_t
 ShaderProgram::DeserializeShadersSpirv(const void *binary)
 {
     const uint8_t *rawDataPtr = reinterpret_cast<const uint8_t *>(binary);
-    const uint32_t *u32DataPtr = NULL;
+    const uint32_t *u32DataPtr = nullptr;
     std::vector<uint32_t> &vsSpirvData = GetVertexShader()->GetSPV();
     std::vector<uint32_t> &fsSpirvData = GetFragmentShader()->GetSPV();
     uint32_t vsSpirvSize = 0;
@@ -936,7 +936,7 @@ ShaderProgram::UpdateDescriptorSet(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     assert(mVkDescSet);
-    assert(mGlContext);
+    assert(mGLContext);
     assert(mVkContext);
 
     if(mShaderResourceInterface.GetLiveUniformBlocks() == 0) {
@@ -987,7 +987,7 @@ void ShaderProgram::UpdateSamplerDescriptors()
                     const glsl_sampler_t textureUnit = *(glsl_sampler_t *)mShaderResourceInterface.GetUniformClientData(i);
 
                     /// Sampler might need an update
-                    Texture *activeTexture = ((Context *)mGlContext)->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
+                    Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
                     mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
 
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {

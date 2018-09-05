@@ -55,7 +55,7 @@ Buffer::Release(void)
 
     mVkSize = 0;
     if(mVkBuffer != VK_NULL_HANDLE) {
-        vkDestroyBuffer(mVkContext->vkDevice, mVkBuffer, NULL);
+        vkDestroyBuffer(mVkContext->vkDevice, mVkBuffer, nullptr);
         mVkBuffer = VK_NULL_HANDLE;
     }
 }
@@ -67,15 +67,15 @@ Buffer::CreateVkBuffer(void)
 
     VkBufferCreateInfo bufferInfo;
     bufferInfo.sType        = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.pNext        = NULL;
+    bufferInfo.pNext        = nullptr;
     bufferInfo.flags        = 0;
     bufferInfo.size         = mVkSize;
     bufferInfo.usage        = mVkBufferUsageFlags;
     bufferInfo.sharingMode  = mVkBufferSharingMode;
     bufferInfo.queueFamilyIndexCount = 0;
-    bufferInfo.pQueueFamilyIndices   = NULL;
+    bufferInfo.pQueueFamilyIndices   = nullptr;
 
-    VkResult err = vkCreateBuffer(mVkContext->vkDevice, &bufferInfo, NULL, &mVkBuffer);
+    VkResult err = vkCreateBuffer(mVkContext->vkDevice, &bufferInfo, nullptr, &mVkBuffer);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

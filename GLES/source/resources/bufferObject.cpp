@@ -57,7 +57,7 @@ BufferObject::Release()
 }
 
 bool
-BufferObject::Allocate(VkFormat srcFormat, bool normalize, size_t size, const void *data)
+BufferObject::Allocate(size_t size, const void *data)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -66,17 +66,9 @@ BufferObject::Allocate(VkFormat srcFormat, bool normalize, size_t size, const vo
     mAllocated = mBuffer->CreateVkBuffer()                                 &&
            mMemory->GetBufferMemoryRequirements(mBuffer->GetVkBuffer())    &&
            mMemory->Allocate()                                             &&
-           mMemory->SetData(srcFormat, normalize, size, 0, data)           &&
+           mMemory->SetData(size, 0, data)                                 &&
            mMemory->BindBufferMemory(mBuffer->GetVkBuffer());
     return mAllocated;
-}
-
-bool
-BufferObject::Allocate(size_t size, const void *data)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return Allocate(VK_FORMAT_UNDEFINED, false, size, data);
 }
 
 void
@@ -123,11 +115,11 @@ BufferObject::SetTarget(GLenum target)
 }
 
 bool
-UniformBufferObject::Allocate(VkFormat srcFormat, bool normalize, size_t size, const void *data)
+UniformBufferObject::Allocate(size_t size, const void *data)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    bool res = BufferObject::Allocate(srcFormat, normalize, size, data);
+    bool res = BufferObject::Allocate(size, data);
 
     if(res) {
         AllocateVkDescriptorBufferInfo();

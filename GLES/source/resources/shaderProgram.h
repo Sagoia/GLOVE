@@ -30,10 +30,8 @@
 
 class ShaderProgram {
 private:
-    const
-    Context *                                           mGlContext;
-    const
-    vulkanAPI::vkContext_t *                            mVkContext;
+    Context *                                           mGLContext;
+    const vulkanAPI::vkContext_t *                      mVkContext;
     VkDescriptorSetLayout                               mVkDescSetLayout;
     VkDescriptorSetLayoutBinding *                      mVkDescSetLayoutBind;
     VkDescriptorPool                                    mVkDescPool;
@@ -133,9 +131,8 @@ public:
     uint32_t                                            GetActiveVertexVkBuffersCount(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffersCount; }
     const VkBuffer *                                    GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
 
-    void                                                SetVkContext(const
-                                                                     vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); assert(!mVkContext); mVkContext = vkContext; }
-    void                                                SetGlContext(const Context *context)                { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGlContext = context; }
+    void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); assert(!mVkContext); mVkContext = vkContext; }
+    void                                                SetGlContext(Context *context)                      { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGLContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != NULL); mShaderCompiler = shaderCompiler; }
     void                                                SetStagesIDs(uint32_t index, uint32_t id)           { FUN_ENTRY(GL_LOG_TRACE); mStagesIDs[index] = id; }
 

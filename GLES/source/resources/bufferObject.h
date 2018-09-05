@@ -51,7 +51,7 @@ public:
     virtual                ~BufferObject();
 
 // Allocate Functions
-    bool                    Allocate(size_t size, const void *data);
+    virtual bool            Allocate(size_t size, const void *data);
 
 // Release Functions
     void                    Release(void);
@@ -75,9 +75,6 @@ public:
                                                                                                            mMemory->SetContext(vkContext); }
 // Has/Is Functions
     inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != VK_NULL_HANDLE; }
-
-// Virtual Functions
-    virtual bool            Allocate(VkFormat srcFormat, bool normalize, size_t size, const void *data);
 };
 
 class IndexBufferObject : public BufferObject
@@ -111,7 +108,7 @@ class UniformBufferObject : public BufferObject
 public:
     explicit                UniformBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr)      : BufferObject(vkContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
-    bool                    Allocate(VkFormat srcFormat, bool normalize, size_t size, const void *data);
+    bool                    Allocate(size_t size, const void *data) override;
     VkDescriptorBufferInfo* GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }
 };
 

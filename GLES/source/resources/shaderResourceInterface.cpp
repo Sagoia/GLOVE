@@ -127,7 +127,7 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
             map<std::string, uniformBlockData>::iterator it = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
             assert(it != mUniformBlockDataInterface.end());
             it->second.pBufferObject = new UniformBufferObject(vkContext);
-            it->second.pBufferObject->BufferObject::Allocate(uniBlock.blockSize, NULL);
+            it->second.pBufferObject->Allocate(uniBlock.blockSize, nullptr);
         }
     }
 

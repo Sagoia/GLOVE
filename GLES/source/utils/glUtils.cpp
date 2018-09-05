@@ -252,7 +252,6 @@ GlAttribTypeToElementSize(GLenum type)
     }
 }
 
-
 size_t
 GlTypeToElementSize(GLenum type)
 {
