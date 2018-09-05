@@ -36,8 +36,8 @@ Context::GetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
     GenericVertexAttributes *genericVertexAttributes = mResourceManager->GetGenericVertexAttributes();
 
     switch(pname) {
-    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribActive(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribSize(index)); break;
+    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribEnabled(index)); break;
+    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribNumElements(index)); break;
     case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribStride(index)); break;
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribType(index)); break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribNormalized(index)); break;
@@ -63,8 +63,8 @@ Context::GetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
     GenericVertexAttributes *genericVertexAttributes = mResourceManager->GetGenericVertexAttributes();
 
     switch(pname) {
-    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribActive(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribSize(index)); break;
+    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribEnabled(index)); break;
+    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribNumElements(index)); break;
     case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribStride(index)); break;
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribType(index)); break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribNormalized(index)); break;
@@ -240,7 +240,7 @@ Context::DisableVertexAttribArray(GLuint index)
 
     GenericVertexAttributes *genericVertexAttributes = mResourceManager->GetGenericVertexAttributes();
 
-    if(genericVertexAttributes->GetVertexAttribActive(index)) {
+    if(genericVertexAttributes->GetVertexAttribEnabled(index)) {
         genericVertexAttributes->DisableVertexAttribute(index);
         mPipeline->SetUpdateVertexAttribVBOs(true);
     }

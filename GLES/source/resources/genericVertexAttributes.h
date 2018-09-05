@@ -32,7 +32,7 @@
 class GenericVertexAttributes {
 private:
     typedef struct {
-        bool                            active;
+        bool                            enabled;
         int                             nElements;
         int                             dataType;
         bool                            normalized;
@@ -59,8 +59,8 @@ public:
     static uint32_t                     LocationIndexPerType(GLenum type);
 
     VkBuffer                            GetVkBuffer(uint32_t location)                            const { FUN_ENTRY(GL_LOG_TRACE); return GetVertexAttribVbo(location)->GetVkBuffer(); }
-    bool                                GetVertexAttribActive(uint32_t location)                  const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].active; }
-    int                                 GetVertexAttribSize(uint32_t location)                    const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].nElements; }
+    bool                                GetVertexAttribEnabled(uint32_t location)                 const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].enabled; }
+    int                                 GetVertexAttribNumElements(uint32_t location)             const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].nElements; }
     int                                 GetVertexAttribType(uint32_t location)                    const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].dataType; }
     bool                                GetVertexAttribNormalized(uint32_t location)              const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].normalized; }
     size_t                              GetVertexAttribStride(uint32_t location)                  const { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes[location].stride; }
@@ -74,8 +74,8 @@ public:
     template<typename T> void           SetGenericVertexAttribute(uint32_t location, const T *ptr);
     void                                SetVertexAttribVbo(uint32_t location, BufferObject *vbo);
     void                                SetVertexAttributePointer(uint32_t location, size_t nElements, int type, bool normalized, size_t stride, const void *ptr, BufferObject *activeVBO);
-    void                                SetVertexAttribActive(uint32_t location, bool active)           { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].active = active; }
-    void                                SetVertexAttribSize(uint32_t location, int nElements)           { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].nElements = nElements; }
+    void                                SetVertexAttribEnabled(uint32_t location, bool enabled)         { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].enabled = enabled; }
+    void                                SetVertexAttribNumElements(uint32_t location, int nElements)    { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].nElements = nElements; }
     void                                SetVertexAttribType(uint32_t location, int dataType)            { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].dataType = dataType; }
     void                                SetVertexAttribNormalized(uint32_t location, bool normalized)   { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].normalized = normalized; }
     void                                SetVertexAttribStride(uint32_t location, size_t stride)         { FUN_ENTRY(GL_LOG_TRACE); mGenericVertexAttributes[location].stride = stride; }

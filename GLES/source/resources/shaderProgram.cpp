@@ -491,7 +491,7 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
         const uint32_t location = mShaderResourceInterface.GetAttributeLocation(i);
         assert(location < GLOVE_MAX_VERTEX_ATTRIBS);
 
-        if(genericVertAttribs->GetVertexAttribActive(location)) {
+        if(genericVertAttribs->GetVertexAttribEnabled(location)) {
             /// Calculate stride if not given from user
             if(!genericVertAttribs->GetVertexAttribStride(location)) {
                 // gva->stride = gva->nElements * glDataTypeToBpp(gva->dataType);

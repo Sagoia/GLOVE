@@ -33,7 +33,7 @@ GenericVertexAttributes::GenericVertexAttributes()
     FUN_ENTRY(GL_LOG_TRACE);
 
     for(uint32_t i = 0; i < GLOVE_MAX_VERTEX_ATTRIBS; ++i) {
-        mGenericVertexAttributes[i].active      = false;
+        mGenericVertexAttributes[i].enabled      = false;
         mGenericVertexAttributes[i].vkFormat    = VK_FORMAT_UNDEFINED;
         mGenericVertexAttributes[i].nElements   = 0;
         mGenericVertexAttributes[i].normalized  = false;
@@ -86,9 +86,8 @@ GenericVertexAttributes::EnableVertexAttribute(uint32_t location, BufferObject *
     assert(location < GLOVE_MAX_VERTEX_ATTRIBS);
 
     CleanupIfInternalVBO(location);
-
-    mGenericVertexAttributes[location].active = true;
-    mGenericVertexAttributes[location].vbo    = vbo;
+    SetVertexAttribEnabled(location, true);
+    SetVertexAttribVbo(location, vbo);
 }
 
 void
@@ -99,8 +98,7 @@ GenericVertexAttributes::DisableVertexAttribute(uint32_t location)
     assert(location < GLOVE_MAX_VERTEX_ATTRIBS);
 
     CleanupIfInternalVBO(location);
-
-    mGenericVertexAttributes[location].active = false;
+    mGenericVertexAttributes[location].enabled = false;
 }
 
 void
@@ -110,15 +108,15 @@ GenericVertexAttributes::SetVertexAttributePointer(uint32_t location, size_t nEl
 
     assert(location < GLOVE_MAX_VERTEX_ATTRIBS);
 
-    mGenericVertexAttributes[location].dataType  = type;
-    mGenericVertexAttributes[location].nElements = nElements;
-    SetVertexAttribFormat(location, GlAttribPointerToVkFormat(nElements, type));
+    SetVertexAttribType(location, type);
+    SetVertexAttribNumElements(location, nElements);
+    SetVertexAttribFormat(location, GlAttribPointerToVkFormat(nElements, type, normalized));
     SetVertexAttribNormalized(location, normalized);
     SetVertexAttribStride(location, stride);
     SetVertexAttribPointer(location, reinterpret_cast<uintptr_t>(ptr));
     SetVertexAttribOffset(location, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(ptr)));
 
-    if(mGenericVertexAttributes[location].active && mGenericVertexAttributes[location].vbo) {
+    if(mGenericVertexAttributes[location].enabled && mGenericVertexAttributes[location].vbo) {
         CleanupIfInternalVBO(location);
     }
 
