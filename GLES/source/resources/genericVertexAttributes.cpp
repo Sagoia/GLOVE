@@ -35,8 +35,9 @@ GenericVertexAttributes::GenericVertexAttributes()
     for(uint32_t i = 0; i < GLOVE_MAX_VERTEX_ATTRIBS; ++i) {
         mGenericVertexAttributes[i].enabled      = false;
         mGenericVertexAttributes[i].vkFormat    = VK_FORMAT_UNDEFINED;
-        mGenericVertexAttributes[i].nElements   = 0;
+        mGenericVertexAttributes[i].nElements   = 4;
         mGenericVertexAttributes[i].normalized  = false;
+        mGenericVertexAttributes[i].dataType    = GL_FLOAT;
         mGenericVertexAttributes[i].stride      = 0;
         mGenericVertexAttributes[i].ptr         = 0;
         mGenericVertexAttributes[i].vbo         = nullptr;

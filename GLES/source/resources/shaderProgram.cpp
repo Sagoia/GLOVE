@@ -518,8 +518,10 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
             BufferObject *vbo = new VertexBufferObject(mVkContext);
             float genericValue[4];
             genericVertAttribs->GetGenericVertexAttribute(location, genericValue);
-            vbo->Allocate(4 * sizeof(float), (const void *)genericValue);
+            vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
 
+            genericVertAttribs->SetVertexAttribNumElements(location, 4);
+            genericVertAttribs->SetVertexAttribType(location, GL_FLOAT);
             genericVertAttribs->SetVertexAttribVbo(location, vbo);
             genericVertAttribs->SetVertexAttribFormat(location, GlAttribTypeToVkFormat(mShaderResourceInterface.GetAttributeType(i)));
             genericVertAttribs->SetVertexAttribStride(location, 0);
