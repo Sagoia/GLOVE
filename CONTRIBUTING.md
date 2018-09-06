@@ -35,9 +35,9 @@ When raising an issue, please keep in mind the set of simple rules mentioned bel
 
 Contributing code to GLOVE project is more than welcome! However, before accepting any code change, we have to deal with some necessary legal stuff.
 
-When contributing code to GLOVE, you have to fill out the [GLOVE Contributor License Agreement](https://think-silicon.com/terms_and_policies/thinksilicon-individual-contributor-license-agreement/). To make your life easier, this procedure is automated by [cla-assistant](https://github.com/cla-assistant/cla-assistant), when submitting a new Pull Request.
+When contributing code to GLOVE, you have to sign the [GLOVE Contributor License Agreement](https://think-silicon.com/terms_and_policies/thinksilicon-individual-contributor-license-agreement/). To make your life easier, this procedure is automated by [cla-assistant](https://github.com/cla-assistant/cla-assistant), when submitting a new Pull Request.
 
-Please follow the instructions prompted by cla-bot to sign the CLA. Once you have finished with these legal stuff, we'll be able to accept your pull requests.
+Please follow the instructions prompted by cla-assistant to sign the CLA. Once you have finished with these legal stuff, we'll be able to accept your pull requests.
 
 ### Issue a Pull Request
 
