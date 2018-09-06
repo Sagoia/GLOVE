@@ -32,6 +32,10 @@ GLOVE has been tested with [GLOVE demos](Demos/README_demos.md) with the followi
 
 You can find a short description on GLOVE SW design as well as "How To extend GLOVE" guidelines in [GLOVE Design Document](Docs/GLOVEDesignDocument.md)
 
+# Contribution
+
+GLOVE project is considered as work in progress, therefore contributions are more than welcome! Guidelines of how to contribute to GLOVE can be found [here](CONTRIBUTING.md)
+
 # Installation Instructions
 
 ## Download the Repository
