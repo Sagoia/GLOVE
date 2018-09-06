@@ -51,7 +51,7 @@ public:
                                                  VkExtent2D swapChainExtent,
                                                  VkPresentModeKHR swapchainPresentMode,
                                                  VkFormat surfaceColorFormat,
-                                                 VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE);
+                                                 VkSwapchainKHR oldSwapchain);
 
     EGLBoolean                   GetSwapChainImages(const VulkanResources *vkResources, uint32_t imageCount, VkImage *images);
     uint32_t                     GetSwapChainImagesCount(const VulkanResources *vkResources);

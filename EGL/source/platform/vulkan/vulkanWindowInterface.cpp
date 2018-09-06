@@ -208,7 +208,8 @@ VulkanWindowInterface::CreateVkSwapchain(EGLSurface_t* surface,
                                                          surfCapabilities,
                                                          swapChainExtent,
                                                          swapchainPresentMode,
-                                                         static_cast<VkFormat>(surface->GetColorFormat()));
+                                                         static_cast<VkFormat>(surface->GetColorFormat()),
+                                                         VK_NULL_HANDLE);
     assert(vkSwapchain != VK_NULL_HANDLE);
 
     vkResources->SetSwapchain(vkSwapchain);
@@ -282,7 +283,12 @@ VulkanWindowInterface::AcquireNextImage(EGLSurface_t *surface, uint32_t *imageIn
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VkResult res = mVkAPI->AcquireNextImage(dynamic_cast<const VulkanResources *>(surface->GetPlatformResources()), imageIndex);
+    const VulkanResources *vkResources = dynamic_cast<const VulkanResources *>(surface->GetPlatformResources());
+    if(vkResources == nullptr) {
+        return EGL_FALSE;
+    }
+
+    VkResult res = mVkAPI->AcquireNextImage(vkResources, imageIndex);
     if(res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
         mVkAPI->DeviceWaitIdle();
 
@@ -305,7 +311,9 @@ VulkanWindowInterface::DestroySwapchain(EGLSurface_t *surface)
         vkResources->SetSwapchain(VK_NULL_HANDLE);
     }
 
-    vkResources->Release();
+    if(vkResources) {
+        vkResources->Release();
+    }
 }
 
 void
