@@ -64,6 +64,7 @@ set(SOURCES
     vulkan/image.cpp
     vulkan/imageView.cpp
     vulkan/pipeline.cpp
+    vulkan/pipelineCache.cpp
     vulkan/framebuffer.cpp
     vulkan/fence.cpp
     vulkan/context.cpp

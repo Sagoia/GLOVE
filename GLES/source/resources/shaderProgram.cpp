@@ -53,7 +53,8 @@ ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext)
     mVkDescPool = VK_NULL_HANDLE;
     mVkDescSet = VK_NULL_HANDLE;
     mVkPipelineLayout = VK_NULL_HANDLE;
-    mVkPipelineCache = VK_NULL_HANDLE;
+
+    mVkPipelineCache = new vulkanAPI::PipelineCache(mVkContext);
 
     mStageCount = 0;
 
@@ -73,7 +74,8 @@ ShaderProgram::~ShaderProgram()
     FUN_ENTRY(GL_LOG_TRACE);
 
     ReleaseVkObjects();
-    ReleaseVkPipelineCache();
+
+    delete mVkPipelineCache;
 }
 
 bool
@@ -356,11 +358,11 @@ ShaderProgram::GetVkPipelineCache(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(mVkPipelineCache == VK_NULL_HANDLE) {
-        CreateVkPipelineCache(nullptr, 0);
+    if(mVkPipelineCache->GetPipelineCache() == VK_NULL_HANDLE) {
+        mVkPipelineCache->Create(nullptr, 0);
     }
 
-    return mVkPipelineCache;
+    return mVkPipelineCache->GetPipelineCache();
 }
 
 const string &
@@ -573,24 +575,6 @@ ShaderProgram::GenerateVertexInputProperties(GenericVertexAttributes *genericVer
     mVkPipelineVertexInput.vertexAttributeDescriptionCount = mShaderResourceInterface.GetLiveAttributes();
 }
 
-bool
-ShaderProgram::CreateVkPipelineCache(const void *initialData, size_t initialDataSize)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    VkPipelineCacheCreateInfo info;
-    info.sType           = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-    info.pNext           = NULL;
-    info.flags           = 0;
-    info.initialDataSize = initialDataSize;
-    info.pInitialData    = initialData;
-
-    VkResult err = vkCreatePipelineCache(mVkContext->vkDevice, &info, NULL, &mVkPipelineCache);
-    assert(!err);
-
-    return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
-}
-
 void
 ShaderProgram::UsePrecompiledBinary(const void *binary, size_t binarySize)
 {
@@ -606,12 +590,7 @@ ShaderProgram::UsePrecompiledBinary(const void *binary, size_t binarySize)
 
     BuildShaderResourceInterface();
 
-    if(mVkPipelineCache != VK_NULL_HANDLE) {
-        vkDestroyPipelineCache(mVkContext->vkDevice, mVkPipelineCache, nullptr);
-        mVkPipelineCache = VK_NULL_HANDLE;
-    }
-
-    CreateVkPipelineCache(vulkanDataPtr, binarySize - reflectionOffset);
+    mVkPipelineCache->Create(vulkanDataPtr, binarySize - reflectionOffset);
 
     mIsPrecompiled = true;
 }
@@ -629,8 +608,8 @@ ShaderProgram::GetBinaryData(void *binary, GLsizei *binarySize)
     uint8_t *vulkanDataPtr = reinterpret_cast<uint8_t *>(binary) + reflectionOffset + spirvOffset;
     size_t vulkanDataSize = *binarySize;
 
-    if(mVkPipelineCache) {
-        vkGetPipelineCacheData(mVkContext->vkDevice, mVkPipelineCache, &vulkanDataSize, reinterpret_cast<void *>(vulkanDataPtr));
+    if(mVkPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
+        mVkPipelineCache->GetData(reinterpret_cast<void *>(vulkanDataPtr), &vulkanDataSize);
         *binarySize = vulkanDataSize + reflectionOffset + spirvOffset;
     } else {
         *binarySize = 0;
@@ -645,8 +624,8 @@ ShaderProgram::GetBinaryLength(void)
     size_t vkPipelineCacheDataLength = 0;
     uint32_t spirvSize = 2 * sizeof(uint32_t) + 4 * (mShaderSPVsize[0] + mShaderSPVsize[1]);
 
-    if(mVkPipelineCache) {
-        vkGetPipelineCacheData(mVkContext->vkDevice, mVkPipelineCache, &vkPipelineCacheDataLength, nullptr);
+    if(mVkPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
+        mVkPipelineCache->GetData(nullptr, &vkPipelineCacheDataLength);
     }
 
     return vkPipelineCacheDataLength + mShaderResourceInterface.GetReflectionSize() + spirvSize;
@@ -735,17 +714,6 @@ ShaderProgram::ReleaseVkObjects(void)
     if(mVkShaderModules[1] != VK_NULL_HANDLE) {
         mVkContext->mCommandBufferManager->UnrefResouce(mVkShaderModules[1]);
         mVkShaderModules[1] = VK_NULL_HANDLE;
-    }
-}
-
-void
-ShaderProgram::ReleaseVkPipelineCache(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(mVkPipelineCache != VK_NULL_HANDLE) {
-        vkDestroyPipelineCache(mVkContext->vkDevice, mVkPipelineCache, nullptr);
-        mVkPipelineCache = VK_NULL_HANDLE;
     }
 }
 
