@@ -36,7 +36,9 @@ ResourceManager::ResourceManager(const vulkanAPI::vkContext_t *vkContext)
 
     CreateDefaultTextures(vkContext);
 
-    mGenericVertexAttributes = new GenericVertexAttributes();
+    for(int i=0; i< GLOVE_MAX_VERTEX_ATTRIBS; i++) {
+        mGenericVertexAttributes[i] = new GenericVertexAttribute();
+    }
 }
 
 ResourceManager::~ResourceManager()
@@ -45,7 +47,10 @@ ResourceManager::~ResourceManager()
 
     delete mDefaultTexture2D;
     delete mDefaultTextureCubeMap;
-    delete mGenericVertexAttributes;
+
+    for(int i=0; i< GLOVE_MAX_VERTEX_ATTRIBS; i++) {
+        delete mGenericVertexAttributes[i];
+    }
 }
 
 void

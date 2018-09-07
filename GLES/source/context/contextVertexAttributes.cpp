@@ -33,19 +33,19 @@ Context::GetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
         return;
     }
 
-    GenericVertexAttributes *genericVertexAttributes = mResourceManager->GetGenericVertexAttributes();
+    GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttributes()[index];
 
     switch(pname) {
-    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribEnabled(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribNumElements(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribStride(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribType(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLfloat>(genericVertexAttributes->GetVertexAttribNormalized(index)); break;
-    case GL_CURRENT_VERTEX_ATTRIB:              genericVertexAttributes->GetGenericVertexAttribute(index, (float *)params); break;
-    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: {
-        const BufferObject *vbo = genericVertexAttributes->GetVertexAttribVbo(index);
-        *params = vbo ? static_cast<GLfloat>(mResourceManager->GetBufferID(vbo)) : 0.0f;
-    } break;
+    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(gVertexAttrib->GetEnabled());     break;
+    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLfloat>(gVertexAttrib->GetNumElements()); break;
+    case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLfloat>(gVertexAttrib->GetStride());      break;
+    case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLfloat>(gVertexAttrib->GetType());        break;
+    case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLfloat>(gVertexAttrib->GetNormalized());  break;
+    case GL_CURRENT_VERTEX_ATTRIB:              gVertexAttrib->GetGenericValue(params);                          break;
+    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: { const BufferObject *vbo = gVertexAttrib->GetVbo();
+                                                  *params = vbo ? static_cast<GLfloat>(mResourceManager->GetBufferID(vbo)) : 0.0f;
+                                                  break;
+                                                }
     default:                                    RecordError(GL_INVALID_ENUM); break;
     }
 }
@@ -60,19 +60,19 @@ Context::GetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
         return;
     }
 
-    GenericVertexAttributes *genericVertexAttributes = mResourceManager->GetGenericVertexAttributes();
+    GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttributes()[index];
 
     switch(pname) {
-    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribEnabled(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribNumElements(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribStride(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribType(index)); break;
-    case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLint>(genericVertexAttributes->GetVertexAttribNormalized(index)); break;
-    case GL_CURRENT_VERTEX_ATTRIB:              genericVertexAttributes->GetGenericVertexAttribute(index, params); break;
-    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: {
-        const BufferObject *vbo = genericVertexAttributes->GetVertexAttribVbo(index);
-        *params = vbo ? static_cast<GLint>(mResourceManager->GetBufferID(vbo)) : 0;
-    } break;
+    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(gVertexAttrib->GetEnabled());          break;
+    case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLint>(gVertexAttrib->GetNumElements());      break;
+    case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLint>(gVertexAttrib->GetStride());           break;
+    case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLint>(gVertexAttrib->GetType());             break;
+    case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLint>(gVertexAttrib->GetNormalized());       break;
+    case GL_CURRENT_VERTEX_ATTRIB:              gVertexAttrib->GetGenericValue(params); break;
+    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: { const BufferObject *vbo = gVertexAttrib->GetVbo();
+                                                  *params = vbo ? static_cast<GLint>(mResourceManager->GetBufferID(vbo)) : 0;
+                                                  break;
+                                                }
     default:                                    RecordError(GL_INVALID_ENUM); break;
     }
 }
@@ -92,7 +92,7 @@ Context::GetVertexAttribPointerv(GLuint index, GLenum pname, void **pointer)
         return;
     }
 
-    *pointer = (void *)mResourceManager->GetGenericVertexAttributes()->GetVertexAttribPointer(index);
+    *pointer = (void *)mResourceManager->GetGenericVertexAttributes()[index]->GetPointer();
 }
 
 void
@@ -105,8 +105,8 @@ Context::VertexAttrib1f(GLuint index, GLfloat x)
         return;
     }
 
-    float vals[4] = {x, 0.0f, 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, vals);
+    GLfloat vals[4] = {x, 0.0f, 0.0f, 1.0f};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -120,8 +120,8 @@ Context::VertexAttrib1fv(GLuint index, const GLfloat* values)
         return;
     }
 
-    float vals[4] = {values[0], 0.0f, 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, vals);
+    GLfloat vals[4] = {values[0], 0.0f, 0.0f, 1.0f};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -135,8 +135,8 @@ Context::VertexAttrib2f(GLuint index, GLfloat x, GLfloat y)
         return;
     }
 
-    float values[4] = {x, y, 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, values);
+    GLfloat vals[4] = {x, y, 0.0f, 1.0f};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -150,8 +150,8 @@ Context::VertexAttrib2fv(GLuint index, const GLfloat* values)
         return;
     }
 
-    float vals[4] = {values[0], values[1], 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, vals);
+    GLfloat vals[4] = {values[0], values[1], 0.0f, 1.0f};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -165,8 +165,8 @@ Context::VertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z)
         return;
     }
 
-    float values[4] = {x, y, z, 1.0f};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, values);
+    GLfloat values[4] = {x, y, z, 1.0f};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(values);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -180,8 +180,8 @@ Context::VertexAttrib3fv(GLuint index, const GLfloat* values)
         return;
     }
 
-    float vals[4] = {values[0], values[1], values[2], 1.0f};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, vals);
+    GLfloat vals[4] = {values[0], values[1], values[2], 1.0f};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -195,8 +195,8 @@ Context::VertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w
         return;
     }
 
-    float values[4] = {x, y, z, w};
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, values);
+    GLfloat values[4] = {x, y, z, w};
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(values);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -210,7 +210,7 @@ Context::VertexAttrib4fv(GLuint index, const GLfloat* values)
         return;
     }
 
-    mResourceManager->GetGenericVertexAttributes()->SetGenericVertexAttribute(index, values);
+    mResourceManager->GetGenericVertexAttributes()[index]->SetGenericValue(values);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -224,8 +224,12 @@ Context::EnableVertexAttribArray(GLuint index)
         return;
     }
 
-    mResourceManager->GetGenericVertexAttributes()->EnableVertexAttribute(index, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER));
-    mPipeline->SetUpdateVertexAttribVBOs(true);
+    GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttributes()[index];
+
+    if(!gVertexAttrib->GetEnabled()) {
+        gVertexAttrib->SetEnabled(true);
+        mPipeline->SetUpdateVertexAttribVBOs(true);
+    }
 }
 
 void
@@ -238,10 +242,10 @@ Context::DisableVertexAttribArray(GLuint index)
         return;
     }
 
-    GenericVertexAttributes *genericVertexAttributes = mResourceManager->GetGenericVertexAttributes();
+    GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttributes()[index];
 
-    if(genericVertexAttributes->GetVertexAttribEnabled(index)) {
-        genericVertexAttributes->DisableVertexAttribute(index);
+    if(gVertexAttrib->GetEnabled()) {
+        gVertexAttrib->SetEnabled(false);
         mPipeline->SetUpdateVertexAttribVBOs(true);
     }
 }
@@ -261,6 +265,6 @@ Context::VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean no
         return;
     }
 
-    mResourceManager->GetGenericVertexAttributes()->SetVertexAttributePointer(index, size, type, normalized, stride, ptr, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER));
+    mResourceManager->GetGenericVertexAttributes()[index]->Set(size, type, normalized, stride, ptr, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER));
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }

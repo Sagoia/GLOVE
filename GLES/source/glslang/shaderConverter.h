@@ -28,6 +28,7 @@
 #include "glslang/glslang_utils.h"
 #include "glslang/Include/ShHandle.h"
 #include "glslangIoMapResolver.h"
+#include "utils/parser_helpers.h"
 
 class ShaderConverter {
 public:

@@ -64,9 +64,9 @@ private:
     ShaderArray                mShaders;
     ShaderProgramArray         mShaderPrograms;
 
-    GenericVertexAttributes*   mGenericVertexAttributes;
-    Texture                *   mDefaultTexture2D;
-    Texture                *   mDefaultTextureCubeMap;
+    Texture                   *mDefaultTexture2D;
+    Texture                   *mDefaultTextureCubeMap;
+    GenericVertexAttribute    *mGenericVertexAttributes[GLOVE_MAX_VERTEX_ATTRIBS];
 
 public:
     ResourceManager(const vulkanAPI::vkContext_t *vkContext);
@@ -88,7 +88,8 @@ public:
 
 // Get Functions
     inline
-    GenericVertexAttributes *  GetGenericVertexAttributes(void)                 { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes; }
+    GenericVertexAttribute   **GetGenericVertexAttributes(void)                 { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes;}
+
     inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
     inline Texture *           GetDefaultTexture(GLenum target)                 { FUN_ENTRY(GL_LOG_TRACE); return target == GL_TEXTURE_2D ? mDefaultTexture2D : mDefaultTextureCubeMap; }
     inline Framebuffer *       GetFramebuffer(GLuint index)                     { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers.GetObject(index); }

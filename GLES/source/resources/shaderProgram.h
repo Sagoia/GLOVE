@@ -26,7 +26,7 @@
 
 #include "shader.h"
 #include "shaderResourceInterface.h"
-#include "genericVertexAttributes.h"
+#include "genericVertexAttribute.h"
 #include "vulkan/pipelineCache.h"
 
 class ShaderProgram {
@@ -84,16 +84,16 @@ private:
     void                                                ResetVulkanVertexInput(void);
     void                                                UpdateAttributeInterface(void);
     void                                                BuildShaderResourceInterface(void);
-    void                                                GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, GenericVertexAttributes *genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings);
-    void                                                GenerateVertexInputProperties(GenericVertexAttributes *genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
+    void                                                GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, GenericVertexAttribute **genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings);
+    void                                                GenerateVertexInputProperties(GenericVertexAttribute **genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
 
 public:
     ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr);
     ~ShaderProgram();
 
-    bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
     void                                                SetPipelineVertexInputStateInfo(void);
-    void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, GenericVertexAttributes *genericVertAttribs);
+    bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
+    void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, GenericVertexAttribute **genericVertAttribs);
     Shader *                                            IsShaderAttached(Shader *shader);
     void                                                AttachShader(Shader *shader);
     void                                                DetachShader(Shader *shader);
