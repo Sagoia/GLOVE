@@ -51,9 +51,9 @@ To create the Pull Request, please follow the below steps:
 4. Make sure that GLOVE demos run successfully.
 5. Create and submit the Pull Request!
 
-GLOVE team members will be assigned to review your pull requests. Once the pull requests are approved and pass our internal continuous integration checks, we will merge the pull requests. 
+GLOVE team members will be assigned to review your pull requests. Once the pull requests are approved and pass our internal continuous integration checks, we will merge the pull requests.
 
 ## Coding Style
 
-All C++ code commited to GLOVE must adhere to [GLOVE Coding Style guide](CodingStyle.md). 
+All C++ code commited to GLOVE must adhere to [GLOVE Coding Style guide](CodingStyle.md).
 
