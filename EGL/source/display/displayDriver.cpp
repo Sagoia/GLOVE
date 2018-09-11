@@ -459,6 +459,7 @@ DisplayDriver::CreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EG
         case EGL_GL_TEXTURE_3D_KHR:
         case EGL_GL_RENDERBUFFER_KHR:
             NOT_IMPLEMENTED();
+            return EGL_NO_IMAGE_KHR;
         default:
             callingThread->RecordError(EGL_BAD_PARAMETER);
             return EGL_NO_IMAGE_KHR;

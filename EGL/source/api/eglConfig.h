@@ -24,6 +24,7 @@
 #ifndef __EGL_CONFIG_H__
 #define __EGL_CONFIG_H__
 
+#include <stddef.h>
 #include "EGL/egl.h"
 #include "EGL/eglext.h"
 #include "utils/egl_defs.h"

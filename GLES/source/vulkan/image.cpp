@@ -221,6 +221,8 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     VkImageMemoryBarrier imageMemoryBarrier;
     imageMemoryBarrier.sType                = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     imageMemoryBarrier.pNext                = NULL;
+    imageMemoryBarrier.srcAccessMask        = 0;
+    imageMemoryBarrier.dstAccessMask        = 0;
     imageMemoryBarrier.oldLayout            = oldImageLayout;
     imageMemoryBarrier.newLayout            = newImageLayout;
     imageMemoryBarrier.srcQueueFamilyIndex  = VK_QUEUE_FAMILY_IGNORED;

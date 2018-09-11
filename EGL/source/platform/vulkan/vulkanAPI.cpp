@@ -96,7 +96,7 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
     swapChainCreateInfo.presentMode           = swapchainPresentMode;
     swapChainCreateInfo.oldSwapchain          = oldSwapchain;
     swapChainCreateInfo.clipped               = true;
-    swapChainCreateInfo.imageColorSpace       = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+    swapChainCreateInfo.imageColorSpace       = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
     swapChainCreateInfo.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     swapChainCreateInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
     swapChainCreateInfo.queueFamilyIndexCount = 0;
