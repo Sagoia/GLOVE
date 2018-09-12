@@ -63,9 +63,12 @@ Pipeline::Destroy()
 }
 
 void
-Pipeline::ComputeViewport(int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth)
+Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    viewportW = std::min(viewportW, fboWidth);
+    viewportH = std::min(viewportH, fboHeight);
 
     int viewportYinv = fboHeight - viewportY;
     int viewportHinv = -viewportH;
@@ -77,9 +80,12 @@ Pipeline::ComputeViewport(int fboHeight, int viewportX, int viewportY, int viewp
                   }
 
 void
-Pipeline::ComputeScissor(int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH)
+Pipeline::ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    scissorW = std::min(scissorW, fboWidth);
+    scissorH = std::min(scissorH, fboHeight);
 
     int scissorYinv = fboHeight - scissorY - scissorH;
 

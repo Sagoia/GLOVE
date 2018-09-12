@@ -166,8 +166,8 @@ public:
           void CreateMultisampleState(VkBool32 alphaToOneEnable, VkBool32 alphaToCoverageEnable, VkSampleCountFlagBits rasterizationSamples, VkBool32 sampleShadingEnable, float minSampleShading);
 
 // Compute Functions
-          void ComputeViewport(int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth);
-          void ComputeScissor(int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH);
+          void ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth);
+          void ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH);
 
 // Bind Functions
           void Bind(VkCommandBuffer *CmdBuffer)                                 { FUN_ENTRY(GL_LOG_TRACE); vkCmdBindPipeline(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mVkPipeline); }

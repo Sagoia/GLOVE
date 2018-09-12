@@ -171,7 +171,8 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     BindVertexBuffers(&activeCmdBuffer, indices, type, indexed, vertCount);
 
     if(mPipeline->GetUpdateViewportState()) {
-        mPipeline->ComputeViewport(mWriteFBO->GetHeight(),
+        mPipeline->ComputeViewport(mWriteFBO->GetWidth(),
+                                   mWriteFBO->GetHeight(),
                                    mStateManager.GetViewportTransformationState()->GetViewportRectX(),
                                    mStateManager.GetViewportTransformationState()->GetViewportRectY(),
                                    mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
@@ -180,13 +181,15 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
                                    mStateManager.GetViewportTransformationState()->GetMaxDepthRange());
 
         if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
-            mPipeline->ComputeScissor(mWriteFBO->GetHeight(),
+            mPipeline->ComputeScissor(mWriteFBO->GetWidth(),
+                                      mWriteFBO->GetHeight(),
                                       mStateManager.GetFragmentOperationsState()->GetScissorRectX(),
                                       mStateManager.GetFragmentOperationsState()->GetScissorRectY(),
                                       mStateManager.GetFragmentOperationsState()->GetScissorRectWidth(),
                                       mStateManager.GetFragmentOperationsState()->GetScissorRectHeight());
         } else {
-            mPipeline->ComputeScissor(mWriteFBO->GetHeight(),
+            mPipeline->ComputeScissor(mWriteFBO->GetWidth(),
+                                      mWriteFBO->GetHeight(),
                                       mStateManager.GetViewportTransformationState()->GetViewportRectX(),
                                       mStateManager.GetViewportTransformationState()->GetViewportRectY(),
                                       mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
