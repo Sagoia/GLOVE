@@ -82,6 +82,7 @@ GLOVE building can be configured according to the options listed in the followin
 | -a \| --arm-compile | _OFF_ | _Enable cross building for ARM platform_ |
 | -d \| --debug | _OFF_ | _Enable building Debug mode_ |
 | -e \| --werror | _OFF_ | _Turn all compilation warnings into errors_ |
+| -f \| --use-surface | _XCB_ |  _Sets the windowing system<br>(Options: XCB, ANDROID, NATIVE)_ |
 | -i \| --install-prefix (dir) | _System Installation Prefix (/usr/local)_ | _Set custom installation prefix path_ |
 | -s \| --sysroot (dir) | _-_ | _Set sysroot for cross compilation_ |
 | -t \| --trace-build | _OFF_ | _Enable logs_ |

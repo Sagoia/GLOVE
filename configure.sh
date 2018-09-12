@@ -15,6 +15,7 @@ INSTALL_PREFIX="/usr/local"
 BUILD_FOLDER=build
 CROSS_COMPILATION_ARM=false
 WORKAROUNDS=ON
+USE_SURFACE=XCB
 
 #########################################################
 ####################### GLOVE ###########################
@@ -25,6 +26,7 @@ function buildGlove() {
 
     cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DVULKAN_LIBRARY=$VULKAN_LIBRARY \
+          -DUSE_SURFACE=$USE_SURFACE \
           -DVULKAN_INCLUDE_PATH=$VULKAN_INCLUDE_PATH \
           -DTRACE_BUILD=$TRACE_BUILD \
           -DWORKAROUNDS=$WORKAROUNDS \
@@ -99,6 +101,16 @@ else
                 VULKAN_LIBRARY=$1
                 echo "Setting Vulkan loader"
                 ;;
+            # option to set surface
+            -f|--use-surface)
+                shift
+                if [ $1 == "XCB" ] || [ $1 == "ANDROID" ] || [ $1 == "NATIVE" ]; then
+                    USE_SURFACE=$1
+                    echo "Setting windowing system to $USE_SURFACE"
+                else
+                    echo "Wrong surface argument $1 provided (Options are: XCB, ANDROID and NATIVE). Using $USE_SURFACE."
+                fi
+                ;;
             # option to disable usage of workarounds
             -w|--no-workarounds)
                 WORKAROUNDS=OFF
@@ -110,6 +122,7 @@ else
                 echo " -a | --arm-compile                   # cross build for ARM platform (default OFF)"
                 echo " -d | --debug                         # build in Debug mode (default Release)"
                 echo " -e | --werror                        # handle warnings as errors (default OFF)"
+                echo " -f | --use-surface                   # set windowing system (Options: XCB, ANDROID, NATIVE) (default XCB)"
                 echo " -i | --install-prefix      (dir)     # set custom installation prefix path"
                 echo " -s | --sysroot             (dir)     # set sysroot for cross compilation"
                 echo " -t | --trace-build                   # activate logs (default OFF)"
