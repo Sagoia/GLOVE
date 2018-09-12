@@ -33,18 +33,21 @@ WSIPlaneDisplay::Initialize()
         return EGL_FALSE;
     }
 
-    memset(&mWsiPlaneDisplayCallbacks, 0, sizeof(mWsiPlaneDisplayCallbacks));
+    if (SetPlatformCallbacks() == EGL_FALSE) {
+        return EGL_FALSE;
+    }
 
-    SetPlaneDisplayCallbacks();
     SetPhysicalDeviceDisplayProperties();
 
     return EGL_TRUE;
 }
 
 EGLBoolean
-WSIPlaneDisplay::SetPlaneDisplayCallbacks(void)
+WSIPlaneDisplay::SetPlatformCallbacks(void)
 {
     FUN_ENTRY(DEBUG_DEPTH);
+
+    memset(&mWsiPlaneDisplayCallbacks, 0, sizeof(mWsiPlaneDisplayCallbacks));
 
     // VK_KHR_display functions
     GET_WSI_FUNCTION_PTR(mWsiPlaneDisplayCallbacks, CreateDisplayPlaneSurfaceKHR);

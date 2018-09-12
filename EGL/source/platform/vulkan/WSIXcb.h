@@ -44,11 +44,11 @@ protected:
     typedef struct wsiXCBCallbacks {
         // VK_KHR_xcb_surface functions
         PFN_vkCreateXcbSurfaceKHR                       fpCreateXcbSurfaceKHR;
-    }wsiXCBCallbacks_t;
+    } wsiXCBCallbacks_t;
 
     wsiXCBCallbacks_t                                   mWsiXCBCallbacks;
 
-    EGLBoolean                                          SetXCBCallbacks();
+    EGLBoolean         SetPlatformCallbacks() override;
 
 public:
     WSIXcb()  {}

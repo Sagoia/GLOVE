@@ -34,6 +34,14 @@ VulkanWSI::Initialize()
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    return SetWSICallbacks();
+}
+
+EGLBoolean
+VulkanWSI::SetWSICallbacks()
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
     memset(&mWsiCallbacks, 0, sizeof(mWsiCallbacks));
 
     // VK_KHR_surface functions

@@ -34,13 +34,13 @@ protected:
         // VK_KHR_display functions
         PFN_vkCreateDisplayPlaneSurfaceKHR              fpCreateDisplayPlaneSurfaceKHR;
         PFN_vkGetPhysicalDeviceDisplayPropertiesKHR     fpGetPhysicalDeviceDisplayPropertiesKHR;
-    }wsiPlaneDisplayCallbacks_t;
+    } wsiPlaneDisplayCallbacks_t;
 
     wsiPlaneDisplayCallbacks_t                          mWsiPlaneDisplayCallbacks;
     std::vector<VkDisplayPropertiesKHR>                 mDisplayPropertiesList;
 
     void               SetPhysicalDeviceDisplayProperties();
-    EGLBoolean         SetPlaneDisplayCallbacks();
+    EGLBoolean         SetPlatformCallbacks() override;
 
 public:
     WSIPlaneDisplay() {}

@@ -59,6 +59,9 @@ protected:
     const vkInterface_t                             *mVkInterface;
     wsiCallbacks_t                                  mWsiCallbacks;
 
+    EGLBoolean                                      SetWSICallbacks();
+    virtual EGLBoolean                              SetPlatformCallbacks() = 0;
+
 public:
     VulkanWSI();
     virtual ~VulkanWSI() = default;
@@ -66,7 +69,7 @@ public:
     virtual EGLBoolean                             Initialize();
     virtual VkSurfaceKHR                           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
 
-    void                                            SetVkInterface(const vkInterface_t* vkInterface) { mVkInterface = vkInterface; }
+    inline void                                    SetVkInterface(const vkInterface_t* vkInterface) { mVkInterface = vkInterface; }
     const wsiCallbacks_t                           *GetWsiCallbacks() { return &mWsiCallbacks; }
 };
 

@@ -29,16 +29,23 @@ WSIXcb::Initialize()
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VulkanWSI::Initialize();
-    this->SetXCBCallbacks();
+    if (VulkanWSI::Initialize() == EGL_FALSE) {
+        return EGL_FALSE;
+    }
+
+    if (SetPlatformCallbacks() == EGL_FALSE) {
+        return EGL_FALSE;
+    }
 
     return EGL_TRUE;
 }
 
 EGLBoolean
-WSIXcb::SetXCBCallbacks(void)
+WSIXcb::SetPlatformCallbacks(void)
 {
     FUN_ENTRY(DEBUG_DEPTH);
+
+    memset(&mWsiXCBCallbacks, 0, sizeof(mWsiXCBCallbacks));
 
     // VK_KHR_xcb_surface functions
     GET_WSI_FUNCTION_PTR(mWsiXCBCallbacks, CreateXcbSurfaceKHR);
