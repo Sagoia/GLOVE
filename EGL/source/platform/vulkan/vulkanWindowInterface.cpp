@@ -116,6 +116,7 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
     EGLBoolean ASSERT_ONLY res;
     uint32_t presentModeCount;
     const VulkanResources *vkResources = dynamic_cast<const VulkanResources *>(surface->GetPlatformResources());
+    assert(vkResources);
 
     presentModeCount = mVkAPI->GetPhysicalDevPresentModesCount(vkResources);
     assert(presentModeCount);
@@ -152,6 +153,7 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
     uint32_t formatCount;
     EGLBoolean ASSERT_ONLY res = EGL_FALSE;
     const VulkanResources *vkResources = dynamic_cast<const VulkanResources *>(surface->GetPlatformResources());
+    assert(vkResources);
 
     formatCount = mVkAPI->GetPhysicalDevFormatsCount(vkResources);
     assert(formatCount);
@@ -204,6 +206,8 @@ VulkanWindowInterface::CreateVkSwapchain(EGLSurface_t* surface,
     uint32_t desiredNumberOfSwapChainImages = 2;
 
     VulkanResources *vkResources = dynamic_cast<VulkanResources *>(surface->GetPlatformResources());
+    assert(vkResources);
+
     VkSwapchainKHR vkSwapchain = mVkAPI->CreateSwapchain(vkResources,
                                                          desiredNumberOfSwapChainImages,
                                                          surfCapabilities,
@@ -267,6 +271,7 @@ VulkanWindowInterface::AllocateSurfaceImages(EGLSurface_t* surface)
     uint32_t swapChainImageCount = 0;
     VkImage *swapChainImages = nullptr;
     VulkanResources *vkResources = dynamic_cast<VulkanResources *>(surface->GetPlatformResources());
+    assert(vkResources);
 
     swapChainImageCount = mVkAPI->GetSwapChainImagesCount(vkResources);
     assert(swapChainImageCount);
