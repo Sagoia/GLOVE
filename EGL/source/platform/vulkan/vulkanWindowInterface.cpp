@@ -120,7 +120,7 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
     presentModeCount = mVkAPI->GetPhysicalDevPresentModesCount(vkResources);
     assert(presentModeCount);
 
-    VkPresentModeKHR *presentModes = (VkPresentModeKHR *)malloc(presentModeCount * sizeof(VkPresentModeKHR));
+    VkPresentModeKHR *presentModes = new VkPresentModeKHR[presentModeCount];
     assert(presentModes);
 
     res = mVkAPI->GetPhysicalDevPresentModes(vkResources, presentModeCount, presentModes);
@@ -138,7 +138,7 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
         }
     }
 
-    free(presentModes);
+    delete[] presentModes;
 
     return swapchainPresentMode;
 }
@@ -156,7 +156,7 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
     formatCount = mVkAPI->GetPhysicalDevFormatsCount(vkResources);
     assert(formatCount);
 
-    VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
+    VkSurfaceFormatKHR *surfFormats = new VkSurfaceFormatKHR[formatCount];
     res = mVkAPI->GetPhysicalDevFormats(vkResources, formatCount, surfFormats);
     assert(res == EGL_TRUE);
 
@@ -165,13 +165,15 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
         format = mVkDefaultFormat;
     } else {
         assert(formatCount >= 1);
-        for(int i=0; i<(int)formatCount; ++i) {
+        for(uint32_t i = 0; i < formatCount; ++i) {
             if (surfFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfFormats[i].colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR) {
                 format = surfFormats[i].format;
                 break;
             }
         }
     }
+    delete[] surfFormats;
+
     assert(res != VK_FORMAT_UNDEFINED);
 
     /// Query if the selected format is actually supported by the physical device
@@ -184,7 +186,6 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
     }
     assert(res != VK_FORMAT_UNDEFINED);
 
-    free(surfFormats);
 
     surface->SetColorFormat(static_cast<EGLint>(format));
 }
@@ -220,14 +221,16 @@ VulkanWindowInterface::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EG
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VulkanResources *vkResources = dynamic_cast<VulkanResources *>(surface->GetPlatformResources());
     VkSurfaceKHR newSurface = mVkWSI->CreateSurface(dpy, win, surface);
 
     if(VK_NULL_HANDLE == newSurface) {
         return EGL_FALSE;
     }
 
-    vkResources->SetSurface(newSurface);
+    VulkanResources *vkResources = dynamic_cast<VulkanResources *>(surface->GetPlatformResources());
+    if(vkResources) {
+        vkResources->SetSurface(newSurface);
+    }
 
     return EGL_TRUE;
 }

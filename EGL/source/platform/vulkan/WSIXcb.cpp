@@ -58,12 +58,12 @@ WSIXcb::GetXCBConnection(xcbContext *xcb)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    xcb->connection = NULL;
+    xcb->connection = nullptr;
 
     if(xcb->dpy->nativeDisplay == EGL_DEFAULT_DISPLAY) {
         int scr;
 
-        if(!(xcb->connection = xcb_connect(NULL, &scr))) {
+        if(!(xcb->connection = xcb_connect(nullptr, &scr))) {
             printf("xcb_connect failed.\n");
             fflush(stdout);
         }
@@ -90,14 +90,14 @@ WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *sur
         return VK_NULL_HANDLE;
     }
 
-    xcbContext xcb = {(eglDisplay_t *)dpy, NULL, NULL};
+    xcbContext xcb = {(eglDisplay_t *)dpy, nullptr, nullptr};
     GetXCBConnection(&xcb);
 
     if(!surface->GetWidth() || !surface->GetHeight()) {
         xcb_get_geometry_reply_t *winProps;
         winProps = xcb_get_geometry_reply(xcb.connection,
                                           xcb_get_geometry(xcb.connection, win),
-                                          NULL);
+                                          nullptr);
         assert(winProps);
 
         surface->SetWidth(winProps->width);
@@ -108,9 +108,9 @@ WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *sur
 
     VkSurfaceKHR vkSurface;
     VkXcbSurfaceCreateInfoKHR surfaceCreateInfo;
-    memset((void *)&surfaceCreateInfo, 0 ,sizeof(surfaceCreateInfo));
+    memset(static_cast<void *>(&surfaceCreateInfo), 0 ,sizeof(surfaceCreateInfo));
     surfaceCreateInfo.sType      = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.pNext      = NULL;
+    surfaceCreateInfo.pNext      = nullptr;
     surfaceCreateInfo.connection = xcb.connection;
     surfaceCreateInfo.window     = (xcb_window_t)win;
 

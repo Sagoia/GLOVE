@@ -282,7 +282,7 @@ DisplayDriver::QuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLSurface_t *eglSurface = (EGLSurface_t *)surface;
+    EGLSurface_t *eglSurface = static_cast<EGLSurface_t *>(surface);
     if(eglSurface->QuerySurface(attribute, value) == EGL_FALSE) {
         callingThread->RecordError(EGL_BAD_ATTRIBUTE);
         return EGL_FALSE;
