@@ -505,7 +505,8 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
 
             // Create new vbo if user passed pointer to data
             // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
-            if(!genericVertAttribs[location]->GetVbo()) {
+            if(genericVertAttribs[location]->GetVbo() == nullptr ||
+               genericVertAttribs[location]->GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
                 BufferObject *vbo = new VertexBufferObject(mVkContext);
                 void * data = reinterpret_cast<void*>(genericVertAttribs[location]->GetPointer());
                 size_t size = (firstVertex + vertCount) * genericVertAttribs[location]->GetStride();
