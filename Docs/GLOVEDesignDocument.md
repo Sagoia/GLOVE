@@ -34,7 +34,7 @@ GLOVE EGL implementation can be connected to one or more window platforms such a
 GLOVE EGL implementation is comprised of 2 parts:
 
 1. **Rendering Thread:** This part implements rendering thread calls such as _eglBindAPI_, _eglQueryAPI_, _eglCreateContext_, etc.  It connects EGL to client APIs and maintains rendering contexts. Currently, GLOVE supports connection to OpenGL ES 2.0 only, but it already hosts hooks enabling to connect to other APIs (see [section 2.1.1](#2-1-1-egl-front-end-client-api-))
-2. **Display Driver:** This part is responsible of creating and maintaining rendering surfaces as well as connecting to a window platform like XCB or Wayland. Platform part is implemented with abstract classes (platformWindowInterface, platformResources) that can be extended to support any desired platform (more details in [section 2.1.2](#2-1-2-egl-back-end-platform-support-)). Currently, GLOVE EGL implements connection to Vulkan WSI, XCB variation.
+2. **Display Driver:** This part is responsible of creating and maintaining rendering surfaces as well as connecting to a window platform like XCB or Wayland. Platform part is implemented with abstract classes (platformWindowInterface, platformResources) that can be extended to support any desired platform (more details in [section 2.1.2](#2-1-2-egl-back-end-platform-support-)). Currently, GLOVE EGL implements connections to Vulkan WSI using XCB and native rendering (useful on embedded platforms) through the **VK\_KHR\_xcb\_surface** and **VK\_KHR_display** extensions, respectively.
 
 EGL folder structure conforms to the above diagram (Figure 3).
 
