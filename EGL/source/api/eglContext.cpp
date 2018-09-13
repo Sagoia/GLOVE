@@ -85,7 +85,6 @@ EGLContext_t::Destroy()
     }
 
     //TODO: Include Error Handling in Final implementation
-    mAPIInterface->finish_cb(mAPIContext);
     mAPIInterface->delete_context_cb(mAPIContext);
 
     return EGL_TRUE;
