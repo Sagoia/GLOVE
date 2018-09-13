@@ -80,15 +80,8 @@ public:
     inline void                 SetDepthAttachment(uint32_t j, float depth)     { FUN_ENTRY(GL_LOG_TRACE); mVkClearAttachments[j].aspectMask                      = VK_IMAGE_ASPECT_DEPTH_BIT;
                                                                                                            mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;
                                                                                                            mVkClearAttachments[j].clearValue.depthStencil.stencil = 0;
-
-#ifdef WORKAROUNDS
-                                                                                                           //workaround for mesa Vulkan Intel driver
-                                                                                                           mVkClearAttachments[j].clearValue.depthStencil.depth   = depth * std::numeric_limits<float>::max();
-
-#else
-                                                                                                           //correct solution
                                                                                                            mVkClearAttachments[j].clearValue.depthStencil.depth   = depth;
-#endif
+
                                                                                                            mUpdateState.Depth   = false; }
     inline void                 SetStencilAttachment(uint32_t j, int stencil)   { FUN_ENTRY(GL_LOG_TRACE); mVkClearAttachments[j].aspectMask                      = VK_IMAGE_ASPECT_STENCIL_BIT;
                                                                                                            mVkClearAttachments[j].colorAttachment                 = VK_ATTACHMENT_UNUSED;

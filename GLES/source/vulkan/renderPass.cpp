@@ -34,9 +34,11 @@ namespace vulkanAPI {
 
 RenderPass::RenderPass(const vkContext_t *vkContext)
 : mVkContext(vkContext),
-  mVkSubpassContents(VK_SUBPASS_CONTENTS_INLINE), mVkPipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS),
+  mVkSubpassContents(VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS), mVkPipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS),
   mVkRenderPass(VK_NULL_HANDLE),
-  mDepthWriteEnabled(true), mStencilWriteEnabled(false), mStarted(false)
+  mColorClearEnabled(false), mDepthClearEnabled(false), mStencilClearEnabled(false),
+  mColorWriteEnabled(true), mDepthWriteEnabled(true), mStencilWriteEnabled(false),
+  mStarted(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -75,8 +77,8 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     attachmentColor.flags           = 0;
     attachmentColor.format          = colorFormat;
     attachmentColor.samples         = VK_SAMPLE_COUNT_1_BIT;
-    attachmentColor.loadOp          = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachmentColor.storeOp         = VK_ATTACHMENT_STORE_OP_STORE;
+    attachmentColor.loadOp          = mColorClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachmentColor.storeOp         = mColorWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachmentColor.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachmentColor.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachmentColor.initialLayout   = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -94,9 +96,9 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
         attachmentDepthStencil.flags          = 0;
         attachmentDepthStencil.format         = depthstencilFormat;
         attachmentDepthStencil.samples        = VK_SAMPLE_COUNT_1_BIT;
-        attachmentDepthStencil.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.loadOp         = mDepthClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentDepthStencil.storeOp        = mDepthWriteEnabled   ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentDepthStencil.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.stencilLoadOp  = mStencilClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentDepthStencil.stencilStoreOp = mStencilWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachmentDepthStencil.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
         attachmentDepthStencil.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -138,21 +140,29 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
 
 
 void
-RenderPass::Begin(VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, uint32_t width, uint32_t height)
+RenderPass::Begin(VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, const VkRect2D *rect,
+                  const float *clearColorValue, float clearDepthValue, uint32_t clearStencilValue)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    VkClearValue clearValues[2];
+    memset((void *)clearValues, 0, sizeof(clearValues));
+
+    clearValues[0].color.float32[0]     = clearColorValue[0];
+    clearValues[0].color.float32[1]     = clearColorValue[1];
+    clearValues[0].color.float32[2]     = clearColorValue[2];
+    clearValues[0].color.float32[3]     = clearColorValue[3];
+    clearValues[1].depthStencil.depth   = clearDepthValue;
+    clearValues[1].depthStencil.stencil = clearStencilValue;
 
     VkRenderPassBeginInfo info;
     info.sType                     = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     info.pNext                     = NULL;
     info.framebuffer               = *framebuffer;
     info.renderPass                = mVkRenderPass;
-    info.renderArea.offset.x       = 0;
-    info.renderArea.offset.y       = 0;
-    info.renderArea.extent.width   = width;
-    info.renderArea.extent.height  = height;
-    info.clearValueCount           = 0;
-    info.pClearValues              = NULL;
+    info.renderArea                = *rect;
+    info.clearValueCount           = 2;
+    info.pClearValues              = clearValues;
 
     vkCmdBeginRenderPass(*activeCmdBuffer, &info, mVkSubpassContents);
 

@@ -31,7 +31,8 @@
 #include "utils/glUtils.h"
 
 Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext)
-: mVkContext(vkContext), mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mUpdated(true), mDepthStencilTexture(nullptr)
+: mVkContext(vkContext), mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0),
+  mRenderState(IDLE), mUpdated(true), mDepthStencilTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -86,6 +87,12 @@ Framebuffer::AddColorAttachment(Texture *texture)
     SetHeight(texture->GetHeight());
 
     mUpdated = true;
+}
+
+void
+Framebuffer::SetRenderState(RenderState renderState)
+{
+    mRenderState = renderState;
 }
 
 void
@@ -169,12 +176,18 @@ Framebuffer::CheckStatus(void)
 }
 
 bool
-Framebuffer::CreateVkRenderPass(bool enableDepthWrite, bool enableStencilWrite)
+Framebuffer::CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
+                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mRenderPass->SetDepthWriteEnabled(enableDepthWrite);
-    mRenderPass->SetStencilWriteEnabled(enableStencilWrite);
+    mRenderPass->SetColorClearEnabled(clearColorEnabled);
+    mRenderPass->SetDepthClearEnabled(clearDepthEnabled);
+    mRenderPass->SetStencilClearEnabled(clearStencilEnabled);
+
+    mRenderPass->SetColorWriteEnabled(writeColorEnabled);
+    mRenderPass->SetDepthWriteEnabled(writeDepthEnabled);
+    mRenderPass->SetStencilWriteEnabled(writeStencilEnabled);
 
     return mRenderPass->Create(mAttachmentColors[mWriteBufferIndex]->GetTexture()->GetVkFormat(),
                                mDepthStencilTexture ? mDepthStencilTexture->GetVkFormat() : VK_FORMAT_UNDEFINED);
@@ -209,35 +222,43 @@ Framebuffer::CreateDepthStencilTexture(void)
 }
 
 void
-Framebuffer::BeginVkRenderPass(bool enableDepthWrite, bool enableStencilWrite)
+Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
+                               bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
+                               const float *colorValue, float depthValue, uint32_t stencilValue,
+                               const VkRect2D *clearRect)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if( mAttachmentColors[0]->GetTexture() && (
         mAttachmentColors[0]->GetTexture()->GetWidth()  != GetWidth()  ||
         mAttachmentColors[0]->GetTexture()->GetHeight() != GetHeight() )) {
-        SetWidth(mAttachmentColors[0]->GetTexture()->GetWidth());
+
+        SetWidth (mAttachmentColors[0]->GetTexture()->GetWidth());
         SetHeight(mAttachmentColors[0]->GetTexture()->GetHeight());
 
         mUpdated = true;
     }
 
     if(mUpdated ||
-       mRenderPass->GetDepthWriteEnabled()   != enableDepthWrite   ||
-       mRenderPass->GetStencilWriteEnabled() != enableStencilWrite
-    ) {
+       mRenderPass->GetColorClearEnabled()   != clearColorEnabled    ||
+       mRenderPass->GetDepthClearEnabled()   != clearDepthEnabled    ||
+       mRenderPass->GetStencilClearEnabled() != clearStencilEnabled  ||
+       mRenderPass->GetColorWriteEnabled()   != writeColorEnabled    ||
+       mRenderPass->GetDepthWriteEnabled()   != writeDepthEnabled    ||
+       mRenderPass->GetStencilWriteEnabled() != writeStencilEnabled) {
+
         if(mUpdated) {
             CreateDepthStencilTexture();
         }
-        CreateVkRenderPass(enableDepthWrite, enableStencilWrite);
+        CreateVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
+                           writeColorEnabled, writeDepthEnabled, writeStencilEnabled);
         Create();
         mUpdated = false;
     }
 
     VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetActiveCommandBuffer();
-    mRenderPass->Begin(&activeCmdBuffer,  mFramebuffers[mWriteBufferIndex]->GetFramebuffer(),
-                                          GetWidth(),
-                                          GetHeight());
+    mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), clearRect,
+                                          colorValue, depthValue, stencilValue);
 }
 
 void

@@ -30,6 +30,14 @@
 #include "vulkan/framebuffer.h"
 
 class Framebuffer {
+public:
+    enum RenderState {
+        IDLE,
+        CLEAR,
+        CLEAR_DRAW,
+        DRAW
+    };
+
 private:
 
     const
@@ -38,6 +46,7 @@ private:
     Rect                            mDims;
     GLenum                          mTarget;
     uint32_t                        mWriteBufferIndex;
+    RenderState                     mRenderState;
     bool                            mUpdated;
 
     vulkanAPI::RenderPass*          mRenderPass;
@@ -59,8 +68,11 @@ public:
     void                    CreateDepthStencilTexture(void);
 
 // RenderPass Functions
-    bool                    CreateVkRenderPass(bool enableDepthWrite, bool enableStencilWrite);
-    void                    BeginVkRenderPass(bool enableDepthWrite, bool enableStencilWrite);
+    bool                    CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
+                                               bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled);
+    void                    BeginVkRenderPass (bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
+                                               bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
+                                               const float *colorValue, float depthValue, uint32_t stencilValue, const VkRect2D *clearRect);
     void                    EndVkRenderPass(void);
     void                    PrepareVkImage(VkImageLayout newImageLayout);
 
@@ -71,6 +83,8 @@ public:
     GLenum                  CheckStatus(void);
 
 // Get Functions
+    inline VkFramebuffer*   GetActiveVkFramebuffer()                    const   { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers[mWriteBufferIndex]->GetFramebuffer(); }
+    inline RenderState      GetRenderState()                            const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderState; }
     inline Rect *           GetRect(void)                                       { FUN_ENTRY(GL_LOG_TRACE); return &mDims; }
     inline int              GetX(void)                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.x; }
     inline int              GetY(void)                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.y; }
@@ -98,6 +112,7 @@ public:
     inline Texture *        GetStencilAttachmentTexture(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentStencil->GetTexture();}
 
 // Set Functions
+           void             SetRenderState(RenderState renderState);
            void             SetColorAttachmentTexture(Texture *texture);
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
