@@ -26,6 +26,8 @@
 
 #include "shaderReflection.h"
 #include "bufferObject.h"
+#include "utils/cacheManager.h"
+#include <vector>
 
 class ShaderResourceInterface {
 public:
@@ -155,6 +157,7 @@ private:
     uniformBlockDataInterface mUniformBlockDataInterface;
 
     attribsLayout_t mCustomAttributesLayout;
+    CacheManager* mCacheManager;
 
     uint32_t OccupiedLocationsPerType(GLenum type);
     void CleanUp(void);
@@ -198,13 +201,14 @@ public:
 
     inline void SetCustomAttribsLayout(const char *name, int index)                   { FUN_ENTRY(GL_LOG_TRACE); mCustomAttributesLayout[std::string(name)] = index; }
     inline void SetReflectionSize(void)                                               { FUN_ENTRY(GL_LOG_TRACE); mReflectionSize = mShaderReflection->GetReflectionSize(); }
+    inline void SetCacheManager(CacheManager *cacheManager)                           { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
 
     void SetUniformClientData(uint32_t location, size_t size, const void *ptr);
-	  void SetSampler(uint32_t location, int count, const int *textureUnit);
+    void SetSampler(uint32_t location, int count, const int *textureUnit);
 
     void AllocateUniformClientData(void);
 	  bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
-	  bool UpdateUniformBufferData(void);
+    bool UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext, bool *allocatedNewBufferObject);
 
     void UpdateAttributeInterface(void);
     void CreateInterface(void);

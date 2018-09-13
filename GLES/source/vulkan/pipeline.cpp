@@ -32,7 +32,8 @@ namespace vulkanAPI {
 
 Pipeline::Pipeline(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkPipeline(VK_NULL_HANDLE), mVkPipelineLayout(VK_NULL_HANDLE),
-mVkPipelineCache(VK_NULL_HANDLE), mVkPipelineVertexInputState(VK_NULL_HANDLE), mVkPipelineShaderStageCount(0)
+  mVkPipelineCache(VK_NULL_HANDLE), mVkPipelineVertexInputState(VK_NULL_HANDLE),
+  mVkPipelineShaderStageCount(0), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -49,6 +50,17 @@ Pipeline::~Pipeline()
     FUN_ENTRY(GL_LOG_TRACE);
 
     Destroy();
+}
+
+void
+Pipeline::MoveToCache()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mVkPipeline != VK_NULL_HANDLE) {
+        mCacheManager->CacheVkPipeline(mVkPipeline);
+        mVkPipeline = VK_NULL_HANDLE;
+    }
 }
 
 void
@@ -309,7 +321,7 @@ Pipeline::CreateGraphicsPipeline(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Destroy();
+    MoveToCache();
 
     VkResult err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, NULL, &mVkPipeline);
     assert(!err);

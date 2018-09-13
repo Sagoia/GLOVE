@@ -54,6 +54,14 @@ ResourceManager::~ResourceManager()
 }
 
 void
+ResourceManager::SetCacheManager(CacheManager *cacheManager)
+{
+    for(int i=0; i< GLOVE_MAX_VERTEX_ATTRIBS; i++) {
+        mGenericVertexAttributes[i]->SetCacheManager(cacheManager);
+    }
+}
+
+void
 ResourceManager::CreateDefaultTextures(const vulkanAPI::vkContext_t *vkContext)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

@@ -25,6 +25,7 @@
 #define __VKPIPELINE_H__
 
 #include "context.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
@@ -66,7 +67,10 @@ private:
     VkBool32                                    Viewport;
     }                                           mUpdateState;
 
+    CacheManager                               *mCacheManager;
+
     void CreateGraphicsPipeline(void);
+    void MoveToCache(void);
     void Destroy(void);
     void SetInfo(VkRenderPass *renderpass);
 
@@ -146,6 +150,7 @@ public:
     inline void SetLayout(VkPipelineLayout layout)                              { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineLayout           = layout; }
     inline void SetVertexInputState(
                             VkPipelineVertexInputStateCreateInfo *vertexInput)  { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineVertexInputState = vertexInput; }
+    inline void SetCacheManager(CacheManager *cacheManager)                     { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
 
 // Create Functions
           void CreateInfo(void);

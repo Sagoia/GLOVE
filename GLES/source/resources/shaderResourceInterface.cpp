@@ -31,7 +31,7 @@
 
 ShaderResourceInterface::ShaderResourceInterface()
 : mLiveAttributes(0), mLiveUniforms(0), mLiveUniformBlocks(0),
-  mActiveAttributeMaxLength(0), mActiveUniformMaxLength(0), mReflectionSize(0)
+  mActiveAttributeMaxLength(0), mActiveUniformMaxLength(0), mReflectionSize(0), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -126,6 +126,7 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
             mUniformBlockDataInterface.insert(make_pair(uniBlock.glslBlockName, uniformBlockData()));
             map<std::string, uniformBlockData>::iterator it = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
             assert(it != mUniformBlockDataInterface.end());
+
             it->second.pBufferObject = new UniformBufferObject(vkContext);
             it->second.pBufferObject->Allocate(uniBlock.blockSize, nullptr);
         }
@@ -144,7 +145,7 @@ ShaderResourceInterface::GetUniformBufferObject(uint32_t index) const
 }
 
 bool
-ShaderResourceInterface::UpdateUniformBufferData(void)
+ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext, bool *allocatedNewBufferObject)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -161,10 +162,18 @@ ShaderResourceInterface::UpdateUniformBufferData(void)
         itBlock = mUniformBlockDataInterface.find(pBlock->glslBlockName);
         size_t size = uniform.arraySize * GlslTypeToSize(uniform.glType);
 
+        if (uniform.reflectionName != "gl_DepthRange.near" &&
+            uniform.reflectionName != "gl_DepthRange.far"  &&
+            uniform.reflectionName != "gl_DepthRange.diff") {
 
-        assert(pBlock);
-        assert(uniform.offset + size <= pBlock->blockSize);
-        assert(itBlock->second.pBufferObject);
+            if(itBlock->second.pBufferObject) {
+                mCacheManager->CacheUniformBufferObject(itBlock->second.pBufferObject);
+                *allocatedNewBufferObject = true;
+            }
+
+            itBlock->second.pBufferObject = new UniformBufferObject(vkContext);
+            itBlock->second.pBufferObject->Allocate(pBlock->blockSize, nullptr);
+        }
 
         itBlock->second.pBufferObject->UpdateData(size, uniform.offset, (void *)itUni->second.pClientData);
         itUni->second.clientDataDirty = false;

@@ -55,6 +55,7 @@ set(SOURCES
     utils/VkToGlConverter.cpp
     utils/glLogger.cpp
     utils/glUtils.cpp
+    utils/cacheManager.cpp
     vulkan/cbManager.cpp
     vulkan/clearPass.cpp
     vulkan/renderPass.cpp

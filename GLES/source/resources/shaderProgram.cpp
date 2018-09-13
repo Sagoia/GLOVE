@@ -680,6 +680,12 @@ ShaderProgram::SetSampler(uint32_t location, int count, const int *textureUnit)
 }
 
 void
+ShaderProgram::SetCacheManager(CacheManager *cacheManager)
+{
+    mShaderResourceInterface.SetCacheManager(cacheManager);
+}
+
+void
 ShaderProgram::ReleaseVkObjects(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -910,7 +916,12 @@ ShaderProgram::UpdateDescriptorSet(void)
 
     /// Transfer any new local uniform data into the buffer objects
     if(mUpdateDescriptorData) {
-        mShaderResourceInterface.UpdateUniformBufferData();
+        bool allocatedNewBufferObject = false;
+        mShaderResourceInterface.UpdateUniformBufferData(mVkContext, &allocatedNewBufferObject);
+        if(allocatedNewBufferObject) {
+            mUpdateDescriptorSets = true;
+        }
+
         mUpdateDescriptorData = false;
     }
 

@@ -26,6 +26,7 @@
 
 #include "shader.h"
 #include "shaderResourceInterface.h"
+#include "utils/cacheManager.h"
 #include "genericVertexAttribute.h"
 #include "vulkan/pipelineCache.h"
 
@@ -141,6 +142,7 @@ public:
     void                                                SetUniformData(uint32_t location, size_t size, const void *ptr);
     void                                                GetUniformData(uint32_t location, size_t size, void *ptr) const;
     void                                                SetSampler(uint32_t location, int count, const int *textureUnit);
+    void                                                SetCacheManager(CacheManager *cacheManager);
     void                                                UpdateDescriptorSet(void);
     void                                                UpdateBuiltInUniformData(float minDepthRange, float maxDepthRange);
 

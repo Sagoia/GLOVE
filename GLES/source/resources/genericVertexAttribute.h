@@ -26,6 +26,7 @@
 
 #include "bufferObject.h"
 #include "utils/GlToVkConverter.h"
+#include "utils/cacheManager.h"
 
 class GenericVertexAttribute {
 private:
@@ -40,13 +41,15 @@ private:
     uintptr_t                           mPtr;
     BufferObject *                      mVbo;
     bool                                mInternalVBO;
+    CacheManager *                      mCacheManager;
 
 public:
     GenericVertexAttribute();
     ~GenericVertexAttribute();
 
     // Release Functions
-           void                         Release(void);
+    void                                MoveToCache(void);
+    void                                Release(void);
 
     // Get Functions
     inline bool                         GetEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mEnabled;    }
@@ -71,18 +74,19 @@ public:
     // Set Functions
            void                         Set(GLint nElements, GLenum type, GLboolean normalized, GLsizei stride, const void *ptr, BufferObject *vbo);
            void                         SetVbo(BufferObject *vbo);
-    inline void                         SetEnabled(bool enabled)                { FUN_ENTRY(GL_LOG_TRACE); mEnabled         = enabled;     }
-    inline void                         SetNumElements(GLint nElements)         { FUN_ENTRY(GL_LOG_TRACE); mElements        = nElements;   }
-    inline void                         SetType(GLenum type)                    { FUN_ENTRY(GL_LOG_TRACE); mType            = type;        }
-    inline void                         SetNormalized(GLboolean normalized)     { FUN_ENTRY(GL_LOG_TRACE); mNormalized      = normalized;  }
-    inline void                         SetStride(GLsizei stride)               { FUN_ENTRY(GL_LOG_TRACE); mStride          = stride;      }
-    inline void                         SetOffset(uint32_t offset)              { FUN_ENTRY(GL_LOG_TRACE); mOffset          = offset;      }
-    inline void                         SetPointer(uintptr_t ptr)               { FUN_ENTRY(GL_LOG_TRACE); mPtr             = ptr;         }
-    inline void                         SetInternalVBO(bool internalVBO)        { FUN_ENTRY(GL_LOG_TRACE); mInternalVBO     = internalVBO; }
-    inline void                         SetGenericValue(const GLfloat *ptr)     { FUN_ENTRY(GL_LOG_TRACE); mGenericValue[0] = ptr[0];
-                                                                                                           mGenericValue[1] = ptr[1];
-                                                                                                           mGenericValue[2] = ptr[2];
-                                                                                                           mGenericValue[3] = ptr[3]; }
+    inline void                         SetEnabled(bool enabled)                    { FUN_ENTRY(GL_LOG_TRACE); mEnabled         = enabled;     }
+    inline void                         SetNumElements(GLint nElements)             { FUN_ENTRY(GL_LOG_TRACE); mElements        = nElements;   }
+    inline void                         SetType(GLenum type)                        { FUN_ENTRY(GL_LOG_TRACE); mType            = type;        }
+    inline void                         SetNormalized(GLboolean normalized)         { FUN_ENTRY(GL_LOG_TRACE); mNormalized      = normalized;  }
+    inline void                         SetStride(GLsizei stride)                   { FUN_ENTRY(GL_LOG_TRACE); mStride          = stride;      }
+    inline void                         SetOffset(uint32_t offset)                  { FUN_ENTRY(GL_LOG_TRACE); mOffset          = offset;      }
+    inline void                         SetPointer(uintptr_t ptr)                   { FUN_ENTRY(GL_LOG_TRACE); mPtr             = ptr;         }
+    inline void                         SetInternalVBO(bool internalVBO)            { FUN_ENTRY(GL_LOG_TRACE); mInternalVBO     = internalVBO; }
+    inline void                         SetCacheManager(CacheManager *cacheManager) { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
+    inline void                         SetGenericValue(const GLfloat *ptr)         { FUN_ENTRY(GL_LOG_TRACE); mGenericValue[0] = ptr[0];
+                                                                                                               mGenericValue[1] = ptr[1];
+                                                                                                               mGenericValue[2] = ptr[2];
+                                                                                                               mGenericValue[3] = ptr[3]; }
 };
 
 #endif // __GENERICVERTEXATTRIBUTE_H__

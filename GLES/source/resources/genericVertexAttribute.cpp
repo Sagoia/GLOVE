@@ -29,7 +29,7 @@
 
 GenericVertexAttribute::GenericVertexAttribute()
 : mElements(4), mType(GL_FLOAT), mNormalized(false), mStride(0), mEnabled(false),
-mOffset(0), mPtr(0), mVbo(nullptr), mInternalVBO(false)
+  mOffset(0), mPtr(0), mVbo(nullptr), mInternalVBO(false), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -44,6 +44,18 @@ GenericVertexAttribute::~GenericVertexAttribute()
     FUN_ENTRY(GL_LOG_TRACE);
 
     Release();
+}
+
+void
+GenericVertexAttribute::MoveToCache(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mVbo != nullptr && mInternalVBO) {
+        mCacheManager->CacheVBO(mVbo);
+        mVbo         = nullptr;
+        mInternalVBO = false;
+    }
 }
 
 void
@@ -63,7 +75,7 @@ GenericVertexAttribute::SetVbo(BufferObject *vbo)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Release();
+    MoveToCache();
 
     mVbo = vbo;
 }

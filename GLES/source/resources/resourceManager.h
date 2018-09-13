@@ -31,6 +31,7 @@
 #include "resources/shader.h"
 #include "resources/texture.h"
 #include "utils/arrays.hpp"
+#include "utils/cacheManager.h"
 
 typedef enum {
     NO_ID,
@@ -103,6 +104,9 @@ public:
     inline uint32_t            GetShaderProgramID(const ShaderProgram *program) { FUN_ENTRY(GL_LOG_TRACE); return mShaderPrograms.GetObjectId(program); }
     inline uint32_t            GetShadingObjectCount(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mShadingObjectCount; }
     inline ShadingNamespace_t  GetShadingObject(GLuint index)                   { FUN_ENTRY(GL_LOG_TRACE); return mShadingObjectPool[index]; }
+    
+// Set Functions
+    void                       SetCacheManager(CacheManager *cacheManager);
 
 // Map Functions
     inline uint32_t            PushShadingObject(ShadingNamespace_t obj)        { FUN_ENTRY(GL_LOG_TRACE); mShadingObjectPool[mShadingObjectCount] = obj; return mShadingObjectCount++;}
