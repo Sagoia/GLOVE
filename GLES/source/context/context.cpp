@@ -44,9 +44,10 @@ Context::Context()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVkContext      = vulkanAPI::GetContext();
+    mVkContext            = vulkanAPI::GetContext();
+    mCommandBufferManager = vulkanAPI::CommandBufferManager::GetInstance(const_cast<vulkanAPI::vkContext_t *>(mVkContext));
 
-    mResourceManager= new ResourceManager(mVkContext);
+    mResourceManager= new ResourceManager(mVkContext, mCommandBufferManager);
     mShaderCompiler = new GlslangShaderCompiler();
     mClearPass      = new vulkanAPI::ClearPass();
     mPipeline       = new vulkanAPI::Pipeline(mVkContext);
@@ -77,8 +78,6 @@ Context::~Context()
         mShaderCompiler = nullptr;
     }
 
-    mCacheManager->CleanUpCaches();
-
     delete mResourceManager;
     delete mPipeline;
     delete mClearPass;
@@ -88,6 +87,10 @@ Context::~Context()
         delete mExplicitIbo;
         mExplicitIbo = nullptr;
     }
+
+    mCacheManager->CleanUpCaches();
+
+    mCommandBufferManager->Release();
 }
 
 void
@@ -106,6 +109,11 @@ Context::ReleaseSystemFBO(void)
 
         delete mSystemFBO;
         mSystemFBO = nullptr;
+    }
+
+    if(mCommandBufferManager) {
+        mCommandBufferManager->DestroyVkCmdBuffers();
+        mCommandBufferManager->AllocateVkCmdBuffers();
     }
 }
 
@@ -150,10 +158,10 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
 
     VkImage *swapChainImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
 
-    Framebuffer *fbo = new Framebuffer(mVkContext);
+    Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
 
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
-        Texture *tex = new Texture(mVkContext);
+        Texture *tex = new Texture(mVkContext, mCommandBufferManager);
 
         GLenum glformat = VkFormatToGlInternalformat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
 
@@ -189,10 +197,10 @@ Context::AllocatePBufferTexture(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Framebuffer *fbo = new Framebuffer(mVkContext);
+    Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
     fbo->SetTarget(GL_FRAMEBUFFER);
 
-    Texture *tex = new Texture(mVkContext);
+    Texture *tex = new Texture(mVkContext, mCommandBufferManager);
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
     tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
@@ -234,7 +242,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
         return nullptr;
     }
 
-    Texture *tex = new Texture(mVkContext);
+    Texture *tex = new Texture(mVkContext, mCommandBufferManager);
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(depthFormat);
     tex->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);

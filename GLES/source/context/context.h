@@ -32,7 +32,7 @@
 #include "resources/resourceManager.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/clearPass.h"
-#include "vulkan/context.h"
+#include "vulkan/cbManager.h"
 #include "rendering_api_interface.h"
 
 typedef enum {
@@ -58,6 +58,7 @@ private:
     ShaderCompiler *                            mShaderCompiler;
     vulkanAPI::Pipeline *                       mPipeline;
     vulkanAPI::ClearPass *                      mClearPass;
+    vulkanAPI::CommandBufferManager            *mCommandBufferManager;
 
 // ------------
     void        *                               mWriteSurface;

@@ -30,9 +30,10 @@
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
 
-Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext)
-: mVkContext(vkContext), mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0),
-  mRenderState(IDLE), mUpdated(true), mDepthStencilTexture(nullptr)
+Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
+: mVkContext(vkContext), mCommandBufferManager(cbManager),
+mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mRenderState(IDLE),
+mUpdated(true), mDepthStencilTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -204,7 +205,7 @@ Framebuffer::CreateDepthStencilTexture(void)
     }
 
     if(mAttachmentDepth->GetTexture() || mAttachmentStencil->GetTexture()) {
-        mDepthStencilTexture = new Texture(mVkContext);
+        mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
         VkFormat vkformat = GlInternalFormatToVkFormat(
@@ -256,7 +257,7 @@ Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, b
         mUpdated = false;
     }
 
-    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetActiveCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), clearRect,
                                           colorValue, depthValue, stencilValue);
 }
@@ -266,7 +267,7 @@ Framebuffer::EndVkRenderPass(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetActiveCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     mRenderPass->End(&activeCmdBuffer);
 }
 

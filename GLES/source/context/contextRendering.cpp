@@ -45,7 +45,7 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
                              mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack();
     }
 
-    mVkContext->mCommandBufferManager->BeginVkDrawCommandBuffer();
+    mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->PrepareVkImage   (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     mWriteFBO->BeginVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
                static_cast<bool>(mStateManager.GetFramebufferOperationsState()->GetColorMask()),
@@ -164,7 +164,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetActiveCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     if(Framebuffer::CLEAR == mWriteFBO->GetRenderState()) {
         mWriteFBO->SetRenderState(Framebuffer::CLEAR_DRAW);
     } else if(Framebuffer::IDLE == mWriteFBO->GetRenderState()){
@@ -175,8 +175,8 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         mWriteFBO->SetRenderState(Framebuffer::DRAW);
     }
 
-    VkCommandBuffer *secondaryCmdBuffer = mVkContext->mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
-    mVkContext->mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
+    VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
+    mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
 
     UpdateVertexAttributes(vertCount, firstVertex);
 
@@ -218,7 +218,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     mPipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
 
     DrawGeometry(secondaryCmdBuffer, indexed, firstVertex, vertCount);
-    mVkContext->mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
+    mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
     vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
 }
 
@@ -418,7 +418,7 @@ Context::Finish(void)
 
     Flush();
 
-    mVkContext->mCommandBufferManager->WaitLastSubmition();
+    mCommandBufferManager->WaitLastSubmition();
 
     if(mWriteFBO == mSystemFBO) {
         mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
@@ -435,6 +435,6 @@ Context::Flush(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     mWriteFBO->EndVkRenderPass();
-    mVkContext->mCommandBufferManager->EndVkDrawCommandBuffer();
-    mVkContext->mCommandBufferManager->SubmitVkDrawCommandBuffer();
+    mCommandBufferManager->EndVkDrawCommandBuffer();
+    mCommandBufferManager->SubmitVkDrawCommandBuffer();
 }

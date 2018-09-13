@@ -54,6 +54,7 @@ Context::BindTexture(GLenum target, GLuint texture)
 
         if(tex->GetTarget() == GL_INVALID_VALUE) {
             tex->SetVkContext(mVkContext);
+            tex->SetCommandBufferManager(mCommandBufferManager);
             tex->SetTarget(target);
             tex->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
             tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));

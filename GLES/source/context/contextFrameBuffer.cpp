@@ -39,6 +39,7 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
         if(fbo->GetTarget() == GL_INVALID_VALUE) {
             fbo->SetTarget(target);
             fbo->SetVkContext(mVkContext);
+            fbo->SetCommandBufferManager(mCommandBufferManager);
         }
     }
 

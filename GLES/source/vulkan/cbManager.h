@@ -112,7 +112,7 @@ public:
     bool AllocateVkCmdPool(void);
     bool AllocateVkCmdBuffers(void);
 
-// Allocate Functions
+// Destroy Functions
     void DestroyVkCmdBuffers(void);
     VkCommandBuffer *AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers);
 

@@ -29,8 +29,9 @@
 #include "renderbuffer.h"
 #include "utils/glUtils.h"
 
-Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext)
-: mVkContext(vkContext), mInternalFormat(GL_RGBA4), mTarget(GL_INVALID_VALUE), mTexture(nullptr)
+Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
+: mVkContext(vkContext), mCommandBufferManager(cbManager),
+mInternalFormat(GL_RGBA4), mTarget(GL_INVALID_VALUE), mTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -64,7 +65,7 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
     mDims.height    = height;
     mInternalFormat = internalformat;
 
-    mTexture = new Texture(mVkContext);
+    mTexture = new Texture(mVkContext, mCommandBufferManager);
     mTexture->SetTarget(GL_TEXTURE_2D);
     mTexture->SetVkFormat(GlInternalFormatToVkFormat(internalformat));
 

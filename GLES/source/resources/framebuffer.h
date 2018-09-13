@@ -41,7 +41,8 @@ public:
 private:
 
     const
-    vulkanAPI::vkContext_t *        mVkContext;
+    vulkanAPI::vkContext_t *         mVkContext;
+    vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
     Rect                            mDims;
     GLenum                          mTarget;
@@ -60,7 +61,7 @@ private:
     void                            Release(void);
 
 public:
-    Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr);
+    Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~Framebuffer();
 
 // Create Functions
@@ -116,6 +117,9 @@ public:
            void             SetColorAttachmentTexture(Texture *texture);
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
+    inline void             SetCommandBufferManager(
+                            vulkanAPI::CommandBufferManager     *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
+
 
     inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget      = target; }
     inline void             SetWidth(int32_t width)                             { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }

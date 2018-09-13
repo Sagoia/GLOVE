@@ -34,14 +34,11 @@ using namespace std;
 
 namespace vulkanAPI {
 
-    class CommandBufferManager;
-
     typedef struct vkContext_t {
         vkContext_t() {
             vkInstance            = VK_NULL_HANDLE;
             vkQueue               = VK_NULL_HANDLE;
             vkDevice              = VK_NULL_HANDLE;
-            mCommandBufferManager = nullptr;
         }
 
         VkInstance                                          vkInstance;
@@ -51,15 +48,11 @@ namespace vulkanAPI {
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
         vkSyncItems_t                                       *vkSyncItems;
-        CommandBufferManager                                *mCommandBufferManager;
     } vkContext_t;
 
     vkContext_t *                     GetContext();
     bool                              InitContext();
     void                              TerminateContext();
-
-    bool                              CreateVkCommandBuffers(void);
-    void                              DestroyVkCommandBuffers(void);
 
     template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 };

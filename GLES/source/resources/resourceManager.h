@@ -70,7 +70,7 @@ private:
     GenericVertexAttribute    *mGenericVertexAttributes[GLOVE_MAX_VERTEX_ATTRIBS];
 
 public:
-    ResourceManager(const vulkanAPI::vkContext_t *vkContext);
+    ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
     ~ResourceManager();
 
 // Allocate/Deallocate Functions
@@ -125,7 +125,7 @@ public:
     uint32_t                   FindShaderID(const Shader *shader);
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
 
-    void                       CreateDefaultTextures(const vulkanAPI::vkContext_t *vkContext);
+    void                       CreateDefaultTextures(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
 
 };
 

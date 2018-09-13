@@ -29,7 +29,10 @@
 class Renderbuffer
 {
 private:
-    const vulkanAPI::vkContext_t *     mVkContext;
+    const
+    vulkanAPI::vkContext_t *         mVkContext;
+    
+    vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
     Rect                    mDims;
     GLenum                  mInternalFormat;
@@ -37,7 +40,7 @@ private:
     Texture *               mTexture;
 
 public:
-    Renderbuffer(const vulkanAPI::vkContext_t *vkContext = nullptr);
+    Renderbuffer(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~Renderbuffer();
 
 // Allocate Functions
@@ -55,6 +58,8 @@ public:
 
 // Set Functions
     void        SetVkContext(const vulkanAPI::vkContext_t *vkContext)           { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    void        SetCommandBufferManager(
+                                   vulkanAPI::CommandBufferManager *cbManager)  { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     void        SetTarget(GLenum target)                                        { FUN_ENTRY(GL_LOG_TRACE); mTarget    = target;    }
 };
 

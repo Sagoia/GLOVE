@@ -52,6 +52,17 @@ CommandBufferManager::CommandBufferManager(vkContext_t *context)
     mVkCmdPool          = VK_NULL_HANDLE;
     mVkAuxCommandBuffer = VK_NULL_HANDLE;
     mVkAuxFence         = VK_NULL_HANDLE;
+
+    if(!AllocateVkCmdPool()) {
+        assert(false);
+        return ;
+    }
+
+    if(!AllocateVkCmdBuffers()) {
+        assert(false);
+        return ;
+    }
+
 }
 
 CommandBufferManager::~CommandBufferManager()
@@ -77,6 +88,7 @@ CommandBufferManager::~CommandBufferManager()
             mVkCmdPool = VK_NULL_HANDLE;
         }
     }
+
 }
 
 void

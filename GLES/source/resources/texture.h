@@ -53,6 +53,8 @@ class Texture {
 private:
     const
     vulkanAPI::vkContext_t *    mVkContext;
+    
+    vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
     GLenum                      mFormat;
     GLenum                      mTarget;
@@ -82,7 +84,7 @@ private:
     void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr,
+    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
             const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     ~Texture();
 
@@ -138,6 +140,9 @@ public:
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
 
 // Set Functions
+    inline void             SetCommandBufferManager(
+                                vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
+
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
                                                                                                            mMemory->SetContext(vkContext);

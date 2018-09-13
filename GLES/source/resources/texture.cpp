@@ -36,8 +36,8 @@
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::vkContext_t *vkContext, const VkFlags vkFlags)
-: mVkContext(vkContext),
+Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
+: mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mIsFboAttached(false)
@@ -412,8 +412,8 @@ void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplev
     oldImageLayout = (oldImageLayout != VK_IMAGE_LAYOUT_UNDEFINED &&
                       oldImageLayout != VK_IMAGE_LAYOUT_PREINITIALIZED) ? oldImageLayout : VK_IMAGE_LAYOUT_GENERAL;
     VkImageLayout newImageLayout = copyToImage ? VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    mVkContext->mCommandBufferManager->BeginVkAuxCommandBuffer();
-    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetAuxCommandBuffer();
+    mCommandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
     {
         mImage->ModifyImageLayout(&activeCmdBuffer, newImageLayout);
         if(copyToImage) {
@@ -423,9 +423,9 @@ void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplev
         }
         mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
     }
-    mVkContext->mCommandBufferManager->EndVkAuxCommandBuffer();
-    mVkContext->mCommandBufferManager->SubmitVkAuxCommandBuffer();
-    mVkContext->mCommandBufferManager->WaitVkAuxCommandBuffer();
+    mCommandBufferManager->EndVkAuxCommandBuffer();
+    mCommandBufferManager->SubmitVkAuxCommandBuffer();
+    mCommandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
@@ -433,15 +433,15 @@ Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mVkContext->mCommandBufferManager->BeginVkAuxCommandBuffer();
-    VkCommandBuffer cmdBuffer = mVkContext->mCommandBufferManager->GetAuxCommandBuffer();
+    mCommandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer cmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
 
     mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
     mImage->ModifyImageLayout(&cmdBuffer, newImageLayout);
 
-    mVkContext->mCommandBufferManager->EndVkAuxCommandBuffer();
-    mVkContext->mCommandBufferManager->SubmitVkAuxCommandBuffer();
-    mVkContext->mCommandBufferManager->WaitVkAuxCommandBuffer();
+    mCommandBufferManager->EndVkAuxCommandBuffer();
+    mCommandBufferManager->SubmitVkAuxCommandBuffer();
+    mCommandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
@@ -516,8 +516,8 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
     imageBlit.dstOffsets[1].y               = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].y >> 1), 1.0));
     imageBlit.dstOffsets[1].z               = 1;
 
-    mVkContext->mCommandBufferManager->BeginVkAuxCommandBuffer();
-    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetAuxCommandBuffer();
+    mCommandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
     {
         VkFilter      filter         = hintMipmapMode == GL_FASTEST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
         VkImageLayout oldImageLayout = mImage->GetImageLayout();
@@ -543,9 +543,9 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
         mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
         mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
     }
-    mVkContext->mCommandBufferManager->EndVkAuxCommandBuffer();
-    mVkContext->mCommandBufferManager->SubmitVkAuxCommandBuffer();
-    mVkContext->mCommandBufferManager->WaitVkAuxCommandBuffer();
+    mCommandBufferManager->EndVkAuxCommandBuffer();
+    mCommandBufferManager->SubmitVkAuxCommandBuffer();
+    mCommandBufferManager->WaitVkAuxCommandBuffer();
 
     // TODO: Fill the 'State_t' with the rest mipLevels
 }

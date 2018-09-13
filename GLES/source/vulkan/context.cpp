@@ -49,20 +49,20 @@ static const std::vector<const char*> requiredDeviceExtensions  = {VK_KHR_SWAPCH
                                                                    "VK_KHR_maintenance1"};
 static       char **enabledInstanceLayers           = NULL;
 
-static vkContext_t GloveVkContext;
+vkContext_t GloveVkContext;
 
-static bool InitVkLayers(uint32_t* nLayers);
-static bool CheckVkInstanceExtensions(void);
-static bool CheckVkDeviceExtensions(void);
-static bool CreateVkInstance(void);
-static bool EnumerateVkGpus(void);
-static bool InitVkQueueFamilyIndex(void);
-static bool CreateVkDevice(void);
-static bool CreateVkCommandPool(void);
-static bool CreateVkSemaphores(void);
-static void InitVkQueue(void);
+bool InitVkLayers(uint32_t* nLayers);
+bool CheckVkInstanceExtensions(void);
+bool CheckVkDeviceExtensions(void);
+bool CreateVkInstance(void);
+bool EnumerateVkGpus(void);
+bool InitVkQueueFamilyIndex(void);
+bool CreateVkDevice(void);
+bool CreateVkCommandPool(void);
+bool CreateVkSemaphores(void);
+void InitVkQueue(void);
 
-static bool
+bool
 InitVkLayers(uint32_t* nLayers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -104,7 +104,7 @@ InitVkLayers(uint32_t* nLayers)
     return true;
 }
 
-static bool
+bool
 CheckVkInstanceExtensions(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -152,7 +152,7 @@ CheckVkInstanceExtensions(void)
     return true;
 }
 
-static bool
+bool
 CheckVkDeviceExtensions(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -202,7 +202,7 @@ CheckVkDeviceExtensions(void)
     return true;
 }
 
-static bool
+bool
 CreateVkInstance(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -245,14 +245,12 @@ CreateVkInstance(void)
     return (err == VK_SUCCESS);
 }
 
-static bool
+bool
 EnumerateVkGpus(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     uint32_t gpuCount;
-
-    assert(GloveVkContext.vkInstance != VK_NULL_HANDLE);
 
     VkResult err;
     err = vkEnumeratePhysicalDevices(GloveVkContext.vkInstance, &gpuCount, NULL);
@@ -276,7 +274,7 @@ EnumerateVkGpus(void)
     return true;
 }
 
-static bool
+bool
 InitVkQueueFamilyIndex(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -303,7 +301,7 @@ InitVkQueueFamilyIndex(void)
     return i < queueFamilyCount ? true : false;
 }
 
-static bool
+bool
 CreateVkDevice(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -335,24 +333,7 @@ CreateVkDevice(void)
     return (err == VK_SUCCESS);
 }
 
-static bool
-CreateVkCommandPool(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    GloveVkContext.mCommandBufferManager = CommandBufferManager::GetInstance(&GloveVkContext);
-    if(!GloveVkContext.mCommandBufferManager) {
-        return false;
-    }
-
-    if(!GloveVkContext.mCommandBufferManager->AllocateVkCmdPool()) {
-        return false;
-    }
-
-    return true;
-}
-
-static bool
+bool
 CreateVkSemaphores(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -386,7 +367,7 @@ CreateVkSemaphores(void)
     return true;
 }
 
-static void
+void
 InitVkQueue(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -416,9 +397,10 @@ InitContext()
         !InitVkQueueFamilyIndex()     ||
         !CheckVkDeviceExtensions()    ||
         !CreateVkDevice()             ||
-        !CreateVkCommandPool()        ||
-        !CreateVkCommandBuffers()     ||
-        !CreateVkSemaphores()          ) {
+        //!CreateVkCommandPool()        ||
+        //!CreateVkCommandBuffers()     ||
+        !CreateVkSemaphores()
+      ) {
         assert(false);
         return false;
     }
@@ -427,29 +409,10 @@ InitContext()
     return true;
 }
 
-bool
-CreateVkCommandBuffers(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return GloveVkContext.mCommandBufferManager->AllocateVkCmdBuffers();
-}
-
-void
-DestroyVkCommandBuffers(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    GloveVkContext.mCommandBufferManager->DestroyVkCmdBuffers();
-}
-
 void
 TerminateContext()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
-
-    GloveVkContext.mCommandBufferManager->Release();
-    GloveVkContext.mCommandBufferManager = nullptr;
 
     if(GloveVkContext.vkSyncItems->vkAcquireSemaphore != VK_NULL_HANDLE) {
         vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkAcquireSemaphore, NULL);
