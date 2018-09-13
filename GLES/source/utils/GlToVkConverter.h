@@ -32,7 +32,7 @@
 VkBool32                GlBooleanToVkBool(GLboolean value);
 VkColorComponentFlagBits GLColorMaskToVkColorComponentFlagBits(GLchar colorMask);
 VkBlendFactor           GlBlendFactorToVkBlendFactor(GLenum mode);
-VkLogicOp           	GlLogicOpToVkLogicOp(GLenum mode);
+VkLogicOp           	  GlLogicOpToVkLogicOp(GLenum mode);
 VkBlendOp               GlBlendEquationToVkBlendOp(GLenum mode);
 VkCompareOp             GlCompareFuncToVkCompareOp(GLenum mode);
 VkCullModeFlagBits      GlCullModeToVkCullMode(GLenum mode);
@@ -47,7 +47,6 @@ VkSamplerMipmapMode     GlTexMipMapModeToVkMipMapMode(GLenum mode);
 VkFormat                GlTexInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatStencil);
-VkFormat                GlAttribPointerToVkFormat(size_t nElements, GLenum type, GLboolean normalized);
-VkFormat                GlAttribTypeToVkFormat(GLenum type);
+VkFormat                GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized);
 
 #endif // __GLTOVKCONVERTER_H__

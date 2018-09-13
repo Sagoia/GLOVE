@@ -61,21 +61,21 @@ Buffer::Release(void)
 }
 
 bool
-Buffer::CreateVkBuffer(void)
+Buffer::Create(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkBufferCreateInfo bufferInfo;
-    bufferInfo.sType        = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.pNext        = nullptr;
-    bufferInfo.flags        = 0;
-    bufferInfo.size         = mVkSize;
-    bufferInfo.usage        = mVkBufferUsageFlags;
-    bufferInfo.sharingMode  = mVkBufferSharingMode;
-    bufferInfo.queueFamilyIndexCount = 0;
-    bufferInfo.pQueueFamilyIndices   = nullptr;
+    VkBufferCreateInfo info;
+    info.sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    info.pNext                 = nullptr;
+    info.flags                 = 0;
+    info.size                  = mVkSize;
+    info.usage                 = mVkBufferUsageFlags;
+    info.sharingMode           = mVkBufferSharingMode;
+    info.queueFamilyIndexCount = 0;
+    info.pQueueFamilyIndices   = nullptr;
 
-    VkResult err = vkCreateBuffer(mVkContext->vkDevice, &bufferInfo, nullptr, &mVkBuffer);
+    VkResult err = vkCreateBuffer(mVkContext->vkDevice, &info, nullptr, &mVkBuffer);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

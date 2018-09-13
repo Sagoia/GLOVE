@@ -30,10 +30,6 @@
 
 #include "memory.h"
 
-#define GLOVE_FIXED_PRECISION                           16
-#define GLOVE_FIXED_ONE                                 (1 << GLOVE_FIXED_PRECISION)
-#define GLOVE_FIXED_TO_FLOAT(x)                         x * (1.0f / static_cast<float>(GLOVE_FIXED_ONE))
-
 namespace vulkanAPI {
 
 Memory::Memory(const vkContext_t *vkContext, VkFlags flags)
@@ -188,7 +184,7 @@ Memory::BindImageMemory(VkImage &image)
 }
 
 bool
-Memory::Allocate()
+Memory::Create()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

@@ -340,7 +340,7 @@ CreateVkCommandPool(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    GloveVkContext.mCommandBufferManager = CommandBufferManager::Get(&GloveVkContext);
+    GloveVkContext.mCommandBufferManager = CommandBufferManager::GetInstance(&GloveVkContext);
     if(!GloveVkContext.mCommandBufferManager) {
         return false;
     }

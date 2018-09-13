@@ -166,8 +166,7 @@ Texture::AllocateVkMemory(void)
 
     mMemory->GetImageMemoryRequirements(mImage->GetImage());
 
-    return  mMemory->Allocate() &&
-            mMemory->BindImageMemory(mImage->GetImage());
+    return mMemory->Create() && mMemory->BindImageMemory(mImage->GetImage());
 }
 
 bool

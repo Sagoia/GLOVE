@@ -49,7 +49,7 @@ public:
     ~Buffer();
 
 // Create Functions
-    bool                              CreateVkBuffer(void);
+    bool                              Create(void);
     void                              CreateVkDescriptorBufferInfo(void);
 
 // Release Functions

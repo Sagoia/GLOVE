@@ -103,10 +103,10 @@ public:
     ~CommandBufferManager();
 
 // Get Functions
-    static CommandBufferManager *Get(vkContext_t *context);
+    static CommandBufferManager *GetInstance(vkContext_t *context);
 
 // Release Functions
-    static void                  Release(void);
+    void Release(void);
 
 // Allocate Functions
     bool AllocateVkCmdPool(void);

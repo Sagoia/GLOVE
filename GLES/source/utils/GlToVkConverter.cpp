@@ -335,36 +335,7 @@ GlInternalFormatToVkFormat(GLenum internalformat)
 }
 
 VkFormat
-GlAttribTypeToVkFormat(GLenum type)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    switch(type) {
-    case GL_BOOL:                           return VK_FORMAT_R8_UINT;
-    case GL_BOOL_VEC2:                      return VK_FORMAT_R8G8_UINT;
-    case GL_BOOL_VEC3:                      return VK_FORMAT_R8G8B8_UINT;
-    case GL_BOOL_VEC4:                      return VK_FORMAT_R8G8B8A8_UINT;
-
-    case GL_INT:                            return VK_FORMAT_R32_SINT;
-    case GL_INT_VEC2:                       return VK_FORMAT_R32G32_SINT;
-    case GL_INT_VEC3:                       return VK_FORMAT_R32G32B32_SINT;
-    case GL_INT_VEC4:                       return VK_FORMAT_R32G32B32A32_SINT;
-
-    case GL_FLOAT:                          return VK_FORMAT_R32_SFLOAT;
-    case GL_FLOAT_VEC2:                     return VK_FORMAT_R32G32_SFLOAT;
-    case GL_FLOAT_VEC3:                     return VK_FORMAT_R32G32B32_SFLOAT;
-    case GL_FLOAT_VEC4:                     return VK_FORMAT_R32G32B32A32_SFLOAT;
-
-    // TODO: missing cases
-    case GL_FLOAT_MAT2:
-    case GL_FLOAT_MAT3:
-    case GL_FLOAT_MAT4:
-    default: { NOT_FOUND_ENUM(type);        return VK_FORMAT_UNDEFINED; }
-    }
-}
-
-VkFormat
-GlAttribPointerToVkFormat(size_t nElements, GLenum type, GLboolean normalized)
+GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

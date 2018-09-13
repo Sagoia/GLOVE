@@ -58,8 +58,6 @@ CommandBufferManager::~CommandBufferManager()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    assert(this == mInstance);
-
     for(uint32_t i = 0; i < mReferencedResources.size(); ++i) {
         mReferencedResources[i]->mRefCount = 0;
     }
@@ -184,7 +182,7 @@ CommandBufferManager::FreeResources(void)
 }
 
 CommandBufferManager *
-CommandBufferManager::Get(vkContext_t *context)
+CommandBufferManager::GetInstance(vkContext_t *context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

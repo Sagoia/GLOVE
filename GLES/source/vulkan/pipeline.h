@@ -71,7 +71,7 @@ private:
 
     void CreateGraphicsPipeline(void);
     void MoveToCache(void);
-    void Destroy(void);
+    void Release(void);
     void SetInfo(VkRenderPass *renderpass);
 
 public:

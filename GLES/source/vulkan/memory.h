@@ -51,7 +51,7 @@ public:
     ~Memory();
 
 // Allocate Functions
-    bool                              Allocate(void);
+    bool                              Create(void);
 
 // Release Functions
     void                              Release(void);

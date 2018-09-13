@@ -49,7 +49,7 @@ Pipeline::~Pipeline()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    Destroy();
+    Release();
 }
 
 void
@@ -64,7 +64,7 @@ Pipeline::MoveToCache()
 }
 
 void
-Pipeline::Destroy()
+Pipeline::Release()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -327,7 +327,7 @@ Pipeline::CreateGraphicsPipeline(void)
     assert(!err);
 
     if(err) {
-        Destroy();
+        Release();
         return;
     }
 
