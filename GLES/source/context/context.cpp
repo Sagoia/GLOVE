@@ -50,10 +50,14 @@ Context::Context()
     mShaderCompiler = new GlslangShaderCompiler();
     mClearPass      = new vulkanAPI::ClearPass();
     mPipeline       = new vulkanAPI::Pipeline(mVkContext);
+    mCacheManager   = new CacheManager(mVkContext);
 
     mStateManager.InitVkPipelineStates(mPipeline);
 
     InitializeDefaultTextures();
+
+    mPipeline->SetCacheManager(mCacheManager);
+    mResourceManager->SetCacheManager(mCacheManager);
 
     mWriteSurface = nullptr;
     mReadSurface  = nullptr;
@@ -73,17 +77,24 @@ Context::~Context()
         mShaderCompiler = nullptr;
     }
 
+    mCacheManager->CleanUpCaches();
+
     delete mResourceManager;
     delete mPipeline;
     delete mClearPass;
-    delete mExplicitIbo;
+    delete mCacheManager;
+
+    if(mExplicitIbo != nullptr) {
+        delete mExplicitIbo;
+        mExplicitIbo = nullptr;
+    }
 }
 
 void
 Context::ReleaseSystemFBO(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
-    
+
     if(mSystemFBO) {
         for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
             if(mSystemTextures[i]) {
@@ -125,7 +136,7 @@ Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
 
     Texture *tex = CreateDepthStencil(eglSurfaceInterface);
     fbo->SetDepthStencilAttachmentTexture(tex);
-    fbo->CreateVkRenderPass(true, false);
+    fbo->CreateVkRenderPass(true, true, false, true, true, false);
     fbo->Create();
     mSystemTextures.push_back(tex);
 
@@ -227,6 +238,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(depthFormat);
     tex->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    tex->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
 

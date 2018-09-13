@@ -24,15 +24,36 @@
 #include "context.h"
 
 void
-Context::BeginRendering(void)
+Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
+    GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
+    if(clearColorEnabled) {
+        mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
+    }
+
+    GLfloat clearDepthValue = 0.0f;
+    if(clearDepthEnabled) {
+        clearDepthValue = mStateManager.GetFramebufferOperationsState()->GetClearDepth();
+    }
+
+    uint32_t clearStencilValue = 0;
+    if(clearStencilEnabled) {
+        clearStencilValue  = mStateManager.GetFramebufferOperationsState()->GetClearStencil();
+        clearStencilValue &= mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
+                             mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack();
+    }
+
     mVkContext->mCommandBufferManager->BeginVkDrawCommandBuffer();
-    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    mWriteFBO->BeginVkRenderPass( mStateManager.GetFramebufferOperationsState()->GetDepthMask(),
-                                  mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
-                                  mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack());
+    mWriteFBO->PrepareVkImage   (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    mWriteFBO->BeginVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
+               static_cast<bool>(mStateManager.GetFramebufferOperationsState()->GetColorMask()),
+                                 mStateManager.GetFramebufferOperationsState()->GetDepthMask(),
+                                 mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
+                                 mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack(),
+                                 clearColorValue, clearDepthValue, clearStencilValue,
+                                 &mClearPass->GetRect()->rect);
 }
 
 void
@@ -78,7 +99,7 @@ Context::SetClearRect(void)
 }
 
 void
-Context::SetClearAttachments(bool clearColor, bool clearDepth, bool clearStencil)
+Context::SetClearAttachments(bool clearColor, bool clearDepth, bool clearStencil) // NOTE: Deprecated function
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -120,37 +141,22 @@ Context::Clear(GLbitfield mask)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    bool clearColor   = (mask & GL_COLOR_BUFFER_BIT);
-    bool clearDepth   = (mask & GL_DEPTH_BUFFER_BIT);
-    bool clearStencil = (mask & GL_STENCIL_BUFFER_BIT);
+    bool clearColorEnabled   = (mask & GL_COLOR_BUFFER_BIT);
+    bool clearDepthEnabled   = (mask & GL_DEPTH_BUFFER_BIT);
+    bool clearStencilEnabled = (mask & GL_STENCIL_BUFFER_BIT);
 
-    if(!clearColor && !clearDepth && !clearStencil) {
+    if(!clearColorEnabled && !clearDepthEnabled && !clearStencilEnabled) {
         RecordError(GL_INVALID_VALUE);
         return;
     }
 
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
+    mWriteFBO->SetRenderState(Framebuffer::CLEAR);
+
     SetClearRect();
-    SetClearAttachments(clearColor, clearDepth, clearStencil);
-
-    if(mClearPass->GetRect()->rect.extent.width == 0 || mClearPass->GetRect()->rect.extent.height == 0) {
-        return;
-    }
-
-    // Clearing attachments via vkCmdClearAttachments is not correct from performance point of view.
-    // TODO: Add clear values in VkRenderPassBeginInfo (currently set to NULL) when calling Begin of Vk Renderpass.
-    BeginRendering();
-    vkCmdClearAttachments(mVkContext->mCommandBufferManager->GetActiveCommandBuffer(),
-                          mClearPass->GetAttachmentsCount(),
-                          mClearPass->GetAttachments(),
-                          mClearPass->GetRectCount(),
-                          mClearPass->GetRect());
-
-    // TODO: Flush Vulkan cmd buffers in eglSwapBuffers for better performance.
-    Finish();
-
-    if(mWriteFBO == mSystemFBO) {
-        mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    }
+    BeginRendering(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
 }
 
 void
@@ -158,18 +164,29 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    BeginRendering();
+    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetActiveCommandBuffer();
+    if(Framebuffer::CLEAR == mWriteFBO->GetRenderState()) {
+        mWriteFBO->SetRenderState(Framebuffer::CLEAR_DRAW);
+    } else if(Framebuffer::IDLE == mWriteFBO->GetRenderState()){
+        mWriteFBO->SetRenderState(Framebuffer::DRAW);
+        SetClearRect();
+        BeginRendering(false,false,false);
+    } else if(Framebuffer::CLEAR_DRAW == mWriteFBO->GetRenderState()) {
+        mWriteFBO->SetRenderState(Framebuffer::DRAW);
+    }
+
+    VkCommandBuffer *secondaryCmdBuffer = mVkContext->mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
+    mVkContext->mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
+
     UpdateVertexAttributes(vertCount, firstVertex);
 
     if(SetPipelineProgramShaderStages(mStateManager.GetActiveShaderProgram())) {
         mPipeline->Create(mWriteFBO->GetVkRenderPass());
     }
 
-    VkCommandBuffer activeCmdBuffer = mVkContext->mCommandBufferManager->GetActiveCommandBuffer();
-    mPipeline->Bind(&activeCmdBuffer);
-    BindUniformDescriptors(&activeCmdBuffer);
-    BindVertexBuffers(&activeCmdBuffer, indices, type, indexed, vertCount);
-
+    mPipeline->Bind(secondaryCmdBuffer);
+    BindUniformDescriptors(secondaryCmdBuffer);
+    BindVertexBuffers(secondaryCmdBuffer, indices, type, indexed, vertCount);
     if(mPipeline->GetUpdateViewportState()) {
         mPipeline->ComputeViewport(mWriteFBO->GetWidth(),
                                    mWriteFBO->GetHeight(),
@@ -198,16 +215,11 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         mPipeline->SetUpdateViewportState(false);
     }
 
-    mPipeline->UpdateDynamicState(&activeCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
+    mPipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
 
-    DrawGeometry(&activeCmdBuffer, indexed, firstVertex, vertCount);
-
-    // TODO: Flush Vulkan cmd buffers in eglSwapBuffers for better performance.
-    Finish();
-
-    if(mWriteFBO == mSystemFBO) {
-        mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    }
+    DrawGeometry(secondaryCmdBuffer, indexed, firstVertex, vertCount);
+    mVkContext->mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
+    vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
 }
 
 void Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
@@ -237,17 +249,24 @@ void Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
 }
 
 bool Context::AllocateExplicitIndexBuffer(const void *data, size_t size, BufferObject** ibo) {
+
+    FUN_ENTRY(GL_LOG_TRACE);
+
     if(mExplicitIbo != nullptr) {
-        delete mExplicitIbo;
+        mCacheManager->CacheVBO(mExplicitIbo);
         mExplicitIbo = nullptr;
     }
+
     mExplicitIbo = new IndexBufferObject(mVkContext);
     mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
     *ibo = mExplicitIbo;
+
     return mExplicitIbo->Allocate(size, data);
 }
 
 bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo) {
+
+    FUN_ENTRY(GL_LOG_TRACE);
 
     uint16_t *converted_indices_u16 = new uint16_t[elementCount];
     size_t actual_size = elementCount * sizeof(uint16_t);
@@ -400,6 +419,14 @@ Context::Finish(void)
     Flush();
 
     mVkContext->mCommandBufferManager->WaitLastSubmition();
+
+    if(mWriteFBO == mSystemFBO) {
+        mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    }
+
+    mWriteFBO->SetRenderState(Framebuffer::IDLE);
+
+    mCacheManager->CleanUpCaches();
 }
 
 void

@@ -72,12 +72,16 @@ Context::ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum form
         (type == GL_UNSIGNED_BYTE                                                 && format != GL_RGBA)) {
         RecordError(GL_INVALID_OPERATION);
         return;
-   }
+    }
 
-   if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
-       RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
-       return;
-   }
+    if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
+        RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
+        return;
+    }
+
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
 
     Texture* activeTexture   = mWriteFBO->GetColorAttachmentTexture();
     GLenum srcInternalFormat = GlFormatToGlInternalFormat(activeTexture->GetFormat(), activeTexture->GetType());

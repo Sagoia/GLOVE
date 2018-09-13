@@ -24,6 +24,7 @@
 #ifndef __VKCBMANAGER_H__
 #define __VKCBMANAGER_H__
 
+#include <vector>
 #include "context.h"
 #include "fence.h"
 
@@ -90,6 +91,7 @@ private:
     VkFence                         mVkAuxFence;
 
     std::vector<resourceBase_t *>   mReferencedResources;
+    std::vector<VkCommandBuffer *>  mSecondaryCmdBuffersCache;
 
     void FreeResources(void);
 
@@ -112,14 +114,17 @@ public:
 
 // Allocate Functions
     void DestroyVkCmdBuffers(void);
+    VkCommandBuffer *AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers);
 
 // Begin Functions
     bool BeginVkAuxCommandBuffer(void);
     bool BeginVkDrawCommandBuffer(void);
+    bool BeginVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer);
 
 // End Functions
     bool EndVkAuxCommandBuffer(void);
     void EndVkDrawCommandBuffer(void);
+    void EndVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer);
 
 // Submit Functions
     bool SubmitVkDrawCommandBuffer(void);

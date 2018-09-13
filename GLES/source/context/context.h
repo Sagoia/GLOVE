@@ -26,6 +26,7 @@
 
 #include "utils/glUtils.h"
 #include "utils/glLogger.h"
+#include "utils/cacheManager.h"
 #include "glslang/glslangShaderCompiler.h"
 #include "state/stateManager.h"
 #include "resources/resourceManager.h"
@@ -53,6 +54,7 @@ private:
 // ------------
     StateManager                                mStateManager;
     ResourceManager *                           mResourceManager;
+    CacheManager *                              mCacheManager;
     ShaderCompiler *                            mShaderCompiler;
     vulkanAPI::Pipeline *                       mPipeline;
     vulkanAPI::ClearPass *                      mClearPass;
@@ -73,10 +75,9 @@ private:
     Framebuffer   *CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface);
     Framebuffer   *InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface);
     Framebuffer   *AllocatePBufferTexture(EGLSurfaceInterface *eglSurfaceInterface);
-
     Texture       *CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface);
 
-    void BeginRendering(void);
+    void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
     void PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices);
     void UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex);
     void BindUniformDescriptors(VkCommandBuffer *CmdBuffer);
@@ -113,7 +114,7 @@ public:
 
     void                    DeleteShader(Shader *shaderPtr);
     void                    ReleaseSystemFBO(void);
-    
+
 // Get Functions
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
 

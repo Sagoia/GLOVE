@@ -42,6 +42,10 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
         }
     }
 
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
+
     mWriteFBO = framebuffer ? fbo : mSystemFBO;
     mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(framebuffer);
     mPipeline->SetUpdatePipeline(true);
@@ -71,6 +75,10 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
+    }
+
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
     }
 
     while(n-- != 0) {

@@ -113,6 +113,10 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
         return;
     }
 
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
+
     while(n-- != 0) {
         uint32_t buffer = *buffers++;
 

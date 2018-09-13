@@ -111,6 +111,33 @@ CommandBufferManager::Release(void)
     mInstance = nullptr;
 }
 
+VkCommandBuffer *
+CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    VkResult err;
+    VkCommandBuffer *commandBuffers = new VkCommandBuffer;
+
+    VkCommandBufferAllocateInfo cmdAllocInfo;
+    cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdAllocInfo.pNext              = NULL;
+    cmdAllocInfo.commandPool        = mVkCmdPool;
+    cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+    cmdAllocInfo.commandBufferCount = numOfBuffers;
+
+    err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, commandBuffers);
+    assert(!err);
+
+    if(err != VK_SUCCESS) {
+        return nullptr;
+    }
+
+    mSecondaryCmdBuffersCache.push_back(commandBuffers);
+
+    return commandBuffers;
+}
+
 void
 CommandBufferManager::FreeResources(void)
 {
@@ -144,6 +171,15 @@ CommandBufferManager::FreeResources(void)
         } else {
             ++it;
         }
+    }
+
+    if(!mSecondaryCmdBuffersCache.empty()) {
+        for(uint32_t i = 0; i < mSecondaryCmdBuffersCache.size(); ++i) {
+            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, mSecondaryCmdBuffersCache[i]);
+            delete mSecondaryCmdBuffersCache[i];
+        }
+
+        mSecondaryCmdBuffersCache.clear();
     }
 }
 
@@ -251,6 +287,37 @@ CommandBufferManager::BeginVkDrawCommandBuffer(void)
     return true;
 }
 
+bool
+CommandBufferManager::BeginVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    VkCommandBufferInheritanceInfo inheritanceInfo;
+    inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+    inheritanceInfo.pNext = NULL;
+    inheritanceInfo.renderPass = renderPass;
+    inheritanceInfo.subpass = 0;
+    inheritanceInfo.framebuffer = framebuffer;
+    inheritanceInfo.occlusionQueryEnable = VK_FALSE;
+    inheritanceInfo.queryFlags = 0;
+    inheritanceInfo.pipelineStatistics = 0;
+
+    VkCommandBufferBeginInfo cmdBeginInfo;
+    cmdBeginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    cmdBeginInfo.pNext            = NULL;
+    cmdBeginInfo.flags            = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+    cmdBeginInfo.pInheritanceInfo = &inheritanceInfo;
+
+    VkResult err = vkBeginCommandBuffer(*cmdBuffer, &cmdBeginInfo);
+
+    if(err != VK_SUCCESS) {
+        return false;
+    }
+
+    return true;
+}
+
+
 void
 CommandBufferManager::EndVkDrawCommandBuffer(void)
 {
@@ -264,6 +331,12 @@ CommandBufferManager::EndVkDrawCommandBuffer(void)
     vkEndCommandBuffer(mVkCommandBuffers.commandBuffer[mActiveCmdBuffer]);
 
     mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_EXECUTABLE_STATE;
+}
+
+void
+CommandBufferManager::EndVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer)
+{
+    vkEndCommandBuffer(*cmdBuffer);
 }
 
 bool

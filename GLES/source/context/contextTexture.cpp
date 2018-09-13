@@ -59,7 +59,7 @@ Context::BindTexture(GLenum target, GLuint texture)
             tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetVkImageTarget(target == GL_TEXTURE_2D ? vulkanAPI::Image::VK_IMAGE_TARGET_2D : vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);
             tex->SetVkImageTiling();
-            
+
             tex->InitState();
         } else if(tex->GetTarget() != target) {
             RecordError(GL_INVALID_OPERATION);
@@ -83,6 +83,10 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
+    }
+
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
     }
 
     while (n-- != 0) {
@@ -494,6 +498,10 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
         return;
     }
 
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
+
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
 
@@ -550,6 +558,10 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     if((target >= GL_TEXTURE_CUBE_MAP_POSITIVE_X && target <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z) && (width != height)) {
         RecordError(GL_INVALID_VALUE);
         return;
+    }
+
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
     }
 
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);

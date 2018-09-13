@@ -86,6 +86,7 @@ Context::CreateProgram(void)
     progPtr->SetVkContext(mVkContext);
     progPtr->SetGlContext(this);
     progPtr->SetShaderCompiler(mShaderCompiler);
+    progPtr->SetCacheManager(mCacheManager);
 
     return mResourceManager->PushShadingObject({SHADER_PROGRAM_ID, res});
 }
@@ -102,6 +103,11 @@ Context::DeleteProgram(GLuint program)
     ShaderProgram *progPtr = GetProgramPtr(program);
     if(!progPtr) {
         return;
+    }
+
+
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
     }
 
     if(progPtr != mStateManager.GetActiveShaderProgram()) {
