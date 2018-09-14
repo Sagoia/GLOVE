@@ -14,7 +14,6 @@ CXX_FLAGS=""
 INSTALL_PREFIX="/usr/local"
 BUILD_FOLDER=build
 CROSS_COMPILATION_ARM=false
-WORKAROUNDS=ON
 USE_SURFACE=XCB
 
 #########################################################
@@ -29,7 +28,6 @@ function buildGlove() {
           -DUSE_SURFACE=$USE_SURFACE \
           -DVULKAN_INCLUDE_PATH=$VULKAN_INCLUDE_PATH \
           -DTRACE_BUILD=$TRACE_BUILD \
-          -DWORKAROUNDS=$WORKAROUNDS \
           -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
           -DCMAKE_SYSROOT=$SYSROOT \
           -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
@@ -110,11 +108,6 @@ else
                 else
                     echo "Wrong surface argument $1 provided (Options are: XCB, ANDROID and NATIVE). Using $USE_SURFACE."
                 fi
-                ;;
-            # option to disable usage of workarounds
-            -w|--no-workarounds)
-                WORKAROUNDS=OFF
-                echo "Disabling workarounds"
                 ;;
             *)
                 echo "Unrecognized option: $option"

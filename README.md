@@ -2,7 +2,7 @@
 
 ![GLOVE functionality](Docs/Images/GLOVEfunction.jpg)
 
-GLOVE (GL Over Vulkan) is a software library that acts as an intermediate layer between an OpenGL ES application and Vulkan.
+GLOVE (GL Over Vulkan) is a cross-platform software library that acts as an intermediate layer between an OpenGL ES application and Vulkan.
 
 GLOVE is focused towards embedded systems and is comprised of OpenGL ES and EGL implementations, which translate at runtime all OpenGL ES / EGL calls & ESSL shaders to Vulkan commands &amp; SPIR-V shader respectively and finally relays them to the underlying Vulkan driver.
 
@@ -12,7 +12,6 @@ GLOVE is considered as a work-in-progress and is open-sourced under the LGPL v3 
 
 Future planned extensions of GLOVE include the support for OpenGL ES 3.x and OpenGL applications.
 
-
 # Prerequisites
 
 As a prerequisite for correct functioning, GLOVE must be linked to a Vulkan driver implementation which supports **VK_KHR_maintenance1** extension, mandatory for OpenGL to Vulkan Coordinates conversion (left handed to right handed coordinate system).
@@ -20,13 +19,16 @@ Also, the minimum Vulkan loader version must be 1.0.24.
 
 # Tested with the following configurations
 
-GLOVE has been tested with [GLOVE demos](Demos/README_demos.md) with the following configurations
+GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) with the following configurations
 
-| **GL version** | **Vulkan Driver** | **Vulkan API version** | **OS** | **Windows Platform** | **Graphics Card** | **status** | **notes** |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Open GL ES 2.0 |MESA Vulkan Intel driver (version 0x4402008) | 1.0.54 | Ubuntu 16.04 | XCB | Intel Ivybridge Desktop | success | - |
-| Open GL ES 2.0 |MESA Vulkan Intel driver (version 0x4800001)| 1.0.57 | Ubuntu 16.04 | XCB | Intel HD Graphics 530 (Skylake GT2) | success | applied depth buffer workaround |
-| Open GL ES 2.0 |NVIDIA Vulkan driver (version 384.130)| 1.0.49 | Ubuntu 16.04 | XCB |NVIDIA GeForce 940M | ongoing |see issue [#5](https://github.com/Think-Silicon/GLOVE/issues/5) |
+| **GL version**  | **Graphics Card** | **Vulkan Driver** | **Vulkan API** | **OS** | **Windows Platform** | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| ES 2.0  | Intel Ivybridge Desktop             | Mesa 17.3.3          | 1.0.54 | Ubuntu 16.04  | XCB | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2) | Mesa 18.0.5        | 1.0.57 | Ubuntu 16.04  | XCB | success |
+| ES 2.0  | GeForce 940M                        | NVIDIA 396.51      | 1.1.70 | Ubuntu 16.04  | XCB | success |
+| ES 2.0  | GeForce GTX 670                     | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB | success |
+| ES 2.0  | Mali-G71                            | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android |  [ongoing](https://github.com/Think-Silicon/GLOVE/issues/17) |
+| ES 2.0  | Mali-G71                            | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android |  [ongoing](https://github.com/Think-Silicon/GLOVE/issues/17) |
 
 # SW Design
 
@@ -88,8 +90,6 @@ GLOVE building can be configured according to the options listed in the followin
 | -t \| --trace-build | _OFF_ | _Enable logs_ |
 | -u \| --vulkan-include-path (dir) | _System Include Path_ | _Set custom Vulkan include path_ |
 | -v \| --vulkan-loader (lib) | _System Vulkan Loader_ | _Set custom Vulkan loader library_ |
-| -w \| --no-workarounds | _OFF_ | _Disable workarounds_ |
-
 
 ## Build Project
 
