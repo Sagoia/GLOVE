@@ -65,7 +65,7 @@ double GpuTimer						(const char *title)
     if(totalTimeFPS >= (float)FPS_TIME_PERIOD) {
         float fps = (float)frames / (float)totalTimeFPS;
         float ms  = (float)totalTimePerFrame/(float)frames;
-        sprintf(str, "%s (%6.3f fps) (%6.3f ms)\n", title, fps, ms);
+        sprintf(str, "%s (%2.3f fps) (%2.2f ms)\n", title, fps, ms);
 #ifdef FPS_DISPLAY
         _eglutStoreName(str);
 #elif  INFO_DISPLAY
