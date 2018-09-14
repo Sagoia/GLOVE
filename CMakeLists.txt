@@ -59,14 +59,6 @@ else()
     remove_definitions(-DTRACE_BUILD)
 endif()
 
-option(WORKAROUNDS "Enable GLOVE's workarounds" ON)
-if(WORKAROUNDS)
-    add_definitions(-DWORKAROUNDS)
-else()
-    message(STATUS "Disabling GLOVE's workarounds")
-    remove_definitions(-DWORKAROUNDS)
-endif()
-
 # Set c/cpp flag definitions for the compiler.
 set(C_REDUCE_ERRORS "-Wno-unused-parameter -Wno-unused-function")
 set(CXX_REDUCE_ERRORS "-Wno-unused-parameter -Wno-unused-function")

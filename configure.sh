@@ -121,7 +121,6 @@ else
                 echo " -t | --trace-build                   # activate logs (default OFF)"
                 echo " -u | --vulkan-include-path (dir)     # set custom Vulkan include path"
                 echo " -v | --vulkan-loader       (lib)     # set custom Vulkan loader library"
-                echo " -w | --no-workarounds                # not use workarounds (default OFF)"
                 exit 1
                 ;;
         esac
