@@ -88,8 +88,6 @@ Context::~Context()
         mExplicitIbo = nullptr;
     }
 
-    mCacheManager->CleanUpCaches();
-
     mCommandBufferManager->Release();
 }
 
@@ -110,6 +108,8 @@ Context::ReleaseSystemFBO(void)
         delete mSystemFBO;
         mSystemFBO = nullptr;
     }
+
+    mCacheManager->CleanUpCaches();
 
     if(mCommandBufferManager) {
         mCommandBufferManager->DestroyVkCmdBuffers();

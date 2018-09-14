@@ -69,7 +69,7 @@ private:
 
     CacheManager                               *mCacheManager;
 
-    void CreateGraphicsPipeline(void);
+    bool CreateGraphicsPipeline(void);
     void MoveToCache(void);
     void Release(void);
     void SetInfo(VkRenderPass *renderpass);
@@ -178,7 +178,7 @@ public:
           void Bind(VkCommandBuffer *CmdBuffer)                                 { FUN_ENTRY(GL_LOG_TRACE); vkCmdBindPipeline(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mVkPipeline); }
 
 // Create Functions
-          void Create(VkRenderPass *renderpass);
+          bool Create(VkRenderPass *renderpass);
 // Update Functions
           void UpdateDynamicState(VkCommandBuffer *CmdBuffer, float lineWidth);
 };

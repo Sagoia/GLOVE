@@ -164,7 +164,6 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     if(Framebuffer::CLEAR == mWriteFBO->GetRenderState()) {
         mWriteFBO->SetRenderState(Framebuffer::CLEAR_DRAW);
     } else if(Framebuffer::IDLE == mWriteFBO->GetRenderState()){
@@ -175,14 +174,17 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         mWriteFBO->SetRenderState(Framebuffer::DRAW);
     }
 
-    VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
-    mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
-
     UpdateVertexAttributes(vertCount, firstVertex);
 
     if(SetPipelineProgramShaderStages(mStateManager.GetActiveShaderProgram())) {
-        mPipeline->Create(mWriteFBO->GetVkRenderPass());
+        if(!mPipeline->Create(mWriteFBO->GetVkRenderPass())) {
+            Finish();
+            return;
+        }
     }
+
+    VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
+    mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
 
     mPipeline->Bind(secondaryCmdBuffer);
     BindUniformDescriptors(secondaryCmdBuffer);
@@ -219,6 +221,8 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 
     DrawGeometry(secondaryCmdBuffer, indexed, firstVertex, vertCount);
     mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
+
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
 }
 

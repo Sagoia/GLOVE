@@ -305,18 +305,20 @@ Pipeline::UpdateDynamicState(VkCommandBuffer *CmdBuffer, float lineWidth)
     vkCmdSetLineWidth (*CmdBuffer, lineWidth);
 }
 
-void
+bool
 Pipeline::Create(VkRenderPass *renderpass)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mUpdateState.Pipeline) {
         SetInfo(renderpass);
-        CreateGraphicsPipeline();
+        return CreateGraphicsPipeline();
     }
+
+    return true;
 }
 
-void
+bool
 Pipeline::CreateGraphicsPipeline(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -325,13 +327,10 @@ Pipeline::CreateGraphicsPipeline(void)
 
     VkResult err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, NULL, &mVkPipeline);
     assert(!err);
-
-    if(err) {
-        Release();
-        return;
-    }
-
+    
     mUpdateState.Pipeline = false;
+
+    return (err == VK_SUCCESS);
 }
 
 }

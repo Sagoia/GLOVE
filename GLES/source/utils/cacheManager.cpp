@@ -13,11 +13,14 @@
 void
 CacheManager::CleanUpUniformBufferObjectCache(void)
 {
-    FUN_ENTRY(GL_LOG_DEBUG);
+    FUN_ENTRY(GL_LOG_TRACE);
 
     if(!mUniformBufferObjectCache.empty()) {
         for(uint32_t i = 0; i < mUniformBufferObjectCache.size(); ++i) {
-            delete mUniformBufferObjectCache[i];
+            if(mUniformBufferObjectCache[i] != nullptr) {
+                delete mUniformBufferObjectCache[i];
+                mUniformBufferObjectCache[i] = nullptr;
+            }
         }
 
         mUniformBufferObjectCache.clear();
@@ -31,7 +34,10 @@ CacheManager::CleanUpVBOCache()
 
     if(!mVBOCache.empty()) {
         for(uint32_t i = 0; i < mVBOCache.size(); ++i) {
-            delete mVBOCache[i];
+            if(mVBOCache[i] != nullptr) {
+                delete mVBOCache[i];
+                mVBOCache[i] = nullptr;
+            }
         }
 
         mVBOCache.clear();
@@ -45,7 +51,10 @@ CacheManager::CleanUpVkPipelineCache()
 
     if(!mVkPipelineCache.empty()) {
         for(uint32_t i = 0; i < mVkPipelineCache.size(); ++i) {
-            vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineCache[i], NULL);
+            if(mVkPipelineCache[i] != VK_NULL_HANDLE){
+                vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineCache[i], NULL);
+                mVkPipelineCache[i] = VK_NULL_HANDLE;
+            }
         }
 
         mVkPipelineCache.clear();
@@ -55,13 +64,16 @@ CacheManager::CleanUpVkPipelineCache()
 void
 CacheManager::CacheUniformBufferObject(UniformBufferObject *uniformBufferObject)
 {
-    mUniformBufferObjectCache.push_back(uniformBufferObject);    
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mUniformBufferObjectCache.push_back(uniformBufferObject);
 }
 
 void
 CacheManager::CacheVBO(BufferObject *vbo)
 {
     FUN_ENTRY(GL_LOG_TRACE);
+
     mVBOCache.push_back(vbo);
 }
 
@@ -69,12 +81,15 @@ void
 CacheManager::CacheVkPipeline(VkPipeline pipeline)
 {
     FUN_ENTRY(GL_LOG_TRACE);
+
     mVkPipelineCache.push_back(pipeline);
 }
 
 void
 CacheManager::CleanUpCaches()
 {
+    FUN_ENTRY(GL_LOG_TRACE);
+
     CleanUpUniformBufferObjectCache();
     CleanUpVBOCache();
     CleanUpVkPipelineCache();
