@@ -176,7 +176,7 @@ public:
     inline uint32_t GetReflectionSize(void)                                     const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionSize; }
 
     int GetAttributeLocation(const char *name) const;
-    inline int GetAttributeLocation(uint32_t index)                             const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].location; }
+    inline uint32_t GetAttributeLocation(uint32_t index)                        const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].location; }
     inline GLenum GetAttributeType(uint32_t index)                              const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].glType; }
     int GetAttributeType(int index) const;
     const string & GetAttributeName(int index) const;

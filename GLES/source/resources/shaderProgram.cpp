@@ -465,13 +465,13 @@ ShaderProgram::LinkProgram()
 }
 
 void
-ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, GenericVertexAttribute **genericVertAttribs)
+ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(firstVertex) {
-        for(int i=0; i<GLOVE_MAX_VERTEX_ATTRIBS; i++) {
-            genericVertAttribs[i]->Release();
+        for(auto& gva : genericVertAttribs) {
+            gva.Release();
         }
     }
 
@@ -486,61 +486,56 @@ ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t first
     GenerateVertexInputProperties(genericVertAttribs, vboLocationBindings);
 }
 
-void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, GenericVertexAttribute **genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings)
+void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings)
 {
     // store attribute locations containing the same VkBuffer and stride
     // as they are directly associated with vertex input bindings
-    typedef std::pair<VkBuffer, uint32_t> BUFFER_STRIDE_PAIR;
+    typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
     std::map<BUFFER_STRIDE_PAIR, std::vector<uint32_t>> unique_buffer_stride_map;
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t location = mShaderResourceInterface.GetAttributeLocation(i);
+        GenericVertexAttribute& gva = genericVertAttribs[location];
 
-        if(genericVertAttribs[location]->GetEnabled()) {
-
+        if(gva.GetEnabled()) {
             // Calculate stride if not given from user based on the actual data type
-            if(genericVertAttribs[location]->GetStride() == 0) {
-                GLsizei stride = genericVertAttribs[location]->GetNumElements() *
-                        GlAttribTypeToElementSize(genericVertAttribs[location]->GetType());
-                genericVertAttribs[location]->SetStride(stride);
+            if(gva.GetStride() == 0) {
+                GLsizei stride = gva.GetNumElements() * GlAttribTypeToElementSize(gva.GetType());
+                gva.SetStride(stride);
             }
-
             // Create new vbo if user passed pointer to data
             // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
-            if(genericVertAttribs[location]->GetVbo() == nullptr ||
-               genericVertAttribs[location]->GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
+            if(gva.GetVbo() == nullptr || gva.GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
                 BufferObject *vbo = new VertexBufferObject(mVkContext);
-                void * data = reinterpret_cast<void*>(genericVertAttribs[location]->GetPointer());
-                size_t size = (firstVertex + vertCount) * genericVertAttribs[location]->GetStride();
+                void * data = reinterpret_cast<void*>(gva.GetPointer());
+                size_t size = (firstVertex + vertCount) * static_cast<uint32_t>(gva.GetStride());
                 vbo->Allocate(size, data);
-
-                genericVertAttribs[location]->SetVbo(vbo);
-                genericVertAttribs[location]->SetOffset(0);
-                genericVertAttribs[location]->SetInternalVBO(true);
+                gva.SetOffset(0);
+                gva.SetVbo(vbo);
+                gva.SetInternalVBOStatus(true);
             }
         } else {
-            /// Use the generic vertex attribute value registered to that location
+            // Use the generic vertex attribute value registered to that location
             BufferObject *vbo = new VertexBufferObject(mVkContext);
             GLfloat genericValue[4];
-            genericVertAttribs[location]->GetGenericValue(genericValue);
+            gva.GetGenericValue(genericValue);
             vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
-
-            genericVertAttribs[location]->SetNumElements(4);
-            genericVertAttribs[location]->SetType(GL_FLOAT);
-            genericVertAttribs[location]->SetVbo(vbo);
-            genericVertAttribs[location]->SetStride(0);
-            genericVertAttribs[location]->SetInternalVBO(true);
+            gva.SetNumElements(4);
+            gva.SetType(GL_FLOAT);
+            gva.SetStride(0);
+            gva.SetVbo(vbo);
+            gva.SetInternalVBOStatus(true);
         }
 
         // store each location
-        VkBuffer bo          = genericVertAttribs[location]->GetVbo()->GetVkBuffer();
-        uint32_t stride      = genericVertAttribs[location]->GetStride();
+        VkBuffer bo          = gva.GetVbo()->GetVkBuffer();
+        int32_t stride      = gva.GetStride();
         BUFFER_STRIDE_PAIR p = {bo, stride};
         unique_buffer_stride_map[p].push_back(location);
     }
 
     // generate unique bindings for each VKbuffer/stride pair
-    int current_binding = 0;
+    uint32_t current_binding = 0;
     for(const auto& iter : unique_buffer_stride_map) {
         VkBuffer bo = iter.first.first;
         for(const auto& loc_str_iter : iter.second) {
@@ -553,21 +548,22 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
 }
 
 void
-ShaderProgram::GenerateVertexInputProperties(GenericVertexAttribute **genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings)
+ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings)
 {
     // create vertex input bindings and attributes
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t location = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t binding  = vboLocationBindings.at(location);
+        GenericVertexAttribute& gva = genericVertAttribs[location];
 
         mVkVertexInputBinding[binding].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
         mVkVertexInputBinding[binding].binding   = binding;
-        mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(genericVertAttribs[location]->GetStride());
+        mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(gva.GetStride());
 
         mVkVertexInputAttribute[i].binding  = binding;
-        mVkVertexInputAttribute[i].format   = genericVertAttribs[location]->GetVkFormat();
+        mVkVertexInputAttribute[i].format   = gva.GetVkFormat();
         mVkVertexInputAttribute[i].location = location;
-        mVkVertexInputAttribute[i].offset   = genericVertAttribs[location]->GetOffset();
+        mVkVertexInputAttribute[i].offset   = gva.GetOffset();
     }
 
     mVkPipelineVertexInput.vertexBindingDescriptionCount   = mActiveVertexVkBuffersCount;

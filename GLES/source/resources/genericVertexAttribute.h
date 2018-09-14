@@ -61,7 +61,7 @@ public:
     inline uintptr_t                    GetPointer(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mPtr;        }
     inline BufferObject *               GetVbo(void)                      const { FUN_ENTRY(GL_LOG_TRACE); return mVbo;        }
     inline VkFormat                     GetVkFormat(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return GlAttribPointerToVkFormat(mElements, mType, mNormalized); }
-    inline bool                         GetInternalVBO(void)              const { FUN_ENTRY(GL_LOG_TRACE); return mInternalVBO;}
+    inline bool                         GetInternalVBOStatus(void)        const { FUN_ENTRY(GL_LOG_TRACE); return mInternalVBO;}
     inline void                         GetGenericValue(GLint *ptr)       const { FUN_ENTRY(GL_LOG_TRACE); ptr[0] = static_cast<GLint>(mGenericValue[0]);
                                                                                                            ptr[1] = static_cast<GLint>(mGenericValue[1]);
                                                                                                            ptr[2] = static_cast<GLint>(mGenericValue[2]);
@@ -81,7 +81,7 @@ public:
     inline void                         SetStride(GLsizei stride)                   { FUN_ENTRY(GL_LOG_TRACE); mStride          = stride;      }
     inline void                         SetOffset(uint32_t offset)                  { FUN_ENTRY(GL_LOG_TRACE); mOffset          = offset;      }
     inline void                         SetPointer(uintptr_t ptr)                   { FUN_ENTRY(GL_LOG_TRACE); mPtr             = ptr;         }
-    inline void                         SetInternalVBO(bool internalVBO)            { FUN_ENTRY(GL_LOG_TRACE); mInternalVBO     = internalVBO; }
+    inline void                         SetInternalVBOStatus(bool internalVBO)      { FUN_ENTRY(GL_LOG_TRACE); mInternalVBO     = internalVBO; }
     inline void                         SetCacheManager(CacheManager *cacheManager) { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
     inline void                         SetGenericValue(const GLfloat *ptr)         { FUN_ENTRY(GL_LOG_TRACE); mGenericValue[0] = ptr[0];
                                                                                                                mGenericValue[1] = ptr[1];

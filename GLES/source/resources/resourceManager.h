@@ -67,7 +67,7 @@ private:
 
     Texture                   *mDefaultTexture2D;
     Texture                   *mDefaultTextureCubeMap;
-    GenericVertexAttribute    *mGenericVertexAttributes[GLOVE_MAX_VERTEX_ATTRIBS];
+    std::vector<GenericVertexAttribute> mGenericVertexAttributes;
 
 public:
     ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
@@ -88,8 +88,8 @@ public:
     inline void                DeallocateShaderProgram(ShaderProgram *program)  { FUN_ENTRY(GL_LOG_TRACE); mShaderPrograms.Deallocate(mShaderPrograms.GetObjectId(program)); }
 
 // Get Functions
-    inline
-    GenericVertexAttribute   **GetGenericVertexAttributes(void)                 { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes;}
+    inline std::vector<GenericVertexAttribute>& GetGenericVertexAttributes(void) { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes;}
+    inline GenericVertexAttribute* GetGenericVertexAttribute(size_t index)      { FUN_ENTRY(GL_LOG_TRACE); return &mGenericVertexAttributes[index];}
 
     inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
     inline Texture *           GetDefaultTexture(GLenum target)                 { FUN_ENTRY(GL_LOG_TRACE); return target == GL_TEXTURE_2D ? mDefaultTexture2D : mDefaultTextureCubeMap; }

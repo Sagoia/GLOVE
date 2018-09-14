@@ -236,7 +236,7 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
     }
 }
 
-size_t
+int32_t
 GlAttribTypeToElementSize(GLenum type)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

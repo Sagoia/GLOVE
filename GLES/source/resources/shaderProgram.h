@@ -88,8 +88,8 @@ private:
     void                                                ResetVulkanVertexInput(void);
     void                                                UpdateAttributeInterface(void);
     void                                                BuildShaderResourceInterface(void);
-    void                                                GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, GenericVertexAttribute **genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings);
-    void                                                GenerateVertexInputProperties(GenericVertexAttribute **genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
+    void                                                GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings);
+    void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
 
 public:
     ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
@@ -97,7 +97,7 @@ public:
 
     void                                                SetPipelineVertexInputStateInfo(void);
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
-    void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, GenericVertexAttribute **genericVertAttribs);
+    void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs);
     Shader *                                            IsShaderAttached(Shader *shader);
     void                                                AttachShader(Shader *shader);
     void                                                DetachShader(Shader *shader);
