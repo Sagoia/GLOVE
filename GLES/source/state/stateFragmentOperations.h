@@ -102,18 +102,9 @@ public:
       ~StateFragmentOperations();
 
 // Get Functions
-      inline void             GetBlendingColor(GLboolean *params)       const   { FUN_ENTRY(GL_LOG_TRACE); params[0] = mBlendingColor[0] == 0.0f ? GL_FALSE : GL_TRUE;
-                                                                                                       params[1] = mBlendingColor[1] == 0.0f ? GL_FALSE : GL_TRUE;
-                                                                                                       params[2] = mBlendingColor[2] == 0.0f ? GL_FALSE : GL_TRUE;
-                                                                                                       params[3] = mBlendingColor[3] == 0.0f ? GL_FALSE : GL_TRUE;}
-      inline void             GetBlendingColor(GLint *params)           const   { FUN_ENTRY(GL_LOG_TRACE); params[0] = static_cast<GLint>(mBlendingColor[0]);
-                                                                                                       params[1] = static_cast<GLint>(mBlendingColor[1]);
-                                                                                                       params[2] = static_cast<GLint>(mBlendingColor[2]);
-                                                                                                       params[3] = static_cast<GLint>(mBlendingColor[3]);}
-      inline void             GetBlendingColor(GLfloat *params)         const   { FUN_ENTRY(GL_LOG_TRACE); params[0] = mBlendingColor[0];
-                                                                                                       params[1] = mBlendingColor[1];
-                                                                                                       params[2] = mBlendingColor[2];
-                                                                                                       params[3] = mBlendingColor[3];}
+      void                    GetBlendingColor(GLboolean *params)       const;
+      void                    GetBlendingColor(GLint *params)           const;
+      void                    GetBlendingColor(GLfloat *params)         const;
       inline GLenum           GetBlendingLogicOp(void)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mBlendingLogicOp;}
       inline GLboolean        GetBlendingLogicOpEnabled(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mBlendingLogicOpEnabled;}
       inline uint32_t         GetBlendingColorAttachmentCount(void)     const   { FUN_ENTRY(GL_LOG_TRACE); return mBlendingColorAttachmentCount;}
@@ -125,19 +116,10 @@ public:
       inline GLenum           GetBlendingFactorDestinationRGB(void)     const   { FUN_ENTRY(GL_LOG_TRACE); return mBlendingFactorDestinationRGB; }
       inline GLenum           GetBlendingFactorDestinationAlpha(void)   const   { FUN_ENTRY(GL_LOG_TRACE); return mBlendingFactorDestinationAlpha; }
 
+      void                    GetScissorRect(GLboolean *params)         const;
+      void                    GetScissorRect(GLint *params)             const;
+      void                    GetScissorRect(GLfloat *params)           const;
       inline GLboolean        GetScissorTestEnabled(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestEnabled; }
-      inline void             GetScissorRect(GLboolean *params)         const   { FUN_ENTRY(GL_LOG_TRACE); params[0] = mScissorTestRectangle.x      ? GL_TRUE : GL_FALSE;
-                                                                                                       params[1] = mScissorTestRectangle.y      ? GL_TRUE : GL_FALSE;
-                                                                                                       params[2] = mScissorTestRectangle.width  ? GL_TRUE : GL_FALSE;
-                                                                                                       params[3] = mScissorTestRectangle.height ? GL_TRUE : GL_FALSE;  }
-      inline void             GetScissorRect(GLint *params)             const   { FUN_ENTRY(GL_LOG_TRACE); params[0] = mScissorTestRectangle.x;
-                                                                                                       params[1] = mScissorTestRectangle.y;
-                                                                                                       params[2] = mScissorTestRectangle.width;
-                                                                                                       params[3] = mScissorTestRectangle.height; }
-      inline void             GetScissorRect(GLfloat *params)           const   { FUN_ENTRY(GL_LOG_TRACE); params[0] = static_cast<GLfloat>(mScissorTestRectangle.x);
-                                                                                                       params[1] = static_cast<GLfloat>(mScissorTestRectangle.y);
-                                                                                                       params[2] = static_cast<GLfloat>(mScissorTestRectangle.width);
-                                                                                                       params[3] = static_cast<GLfloat>(mScissorTestRectangle.height); }
       inline int              GetScissorRectX(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle.x; }
       inline int              GetScissorRectY(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle.y; }
       inline int              GetScissorRectWidth(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle.width; }
@@ -176,18 +158,9 @@ public:
       inline GLboolean        GetDitheringEnabled(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mDitheringEnabled; }
 
 // Set Functions
-      inline void             SetBlendingColor(GLclampf red,
-                                               GLclampf green,
-                                               GLclampf blue,
-                                               GLclampf alpha)                  { FUN_ENTRY(GL_LOG_TRACE); mBlendingColor[0] = CLAMP_F(red);
-                                                                                                       mBlendingColor[1] = CLAMP_F(green);
-                                                                                                       mBlendingColor[2] = CLAMP_F(blue);
-                                                                                                       mBlendingColor[3] = CLAMP_F(alpha);}
+      void                    SetBlendingColor(GLclampf red, GLclampf green, GLclampf blue,GLclampf alpha);
+      void                    SetScissorRect(const Rect *fbo);
       inline void             SetScissorTestEnabled(GLboolean enable)           { FUN_ENTRY(GL_LOG_TRACE); mScissorTestEnabled = enable; }
-      inline void             SetScissorRect(const Rect *fbo)                   { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.x = fbo->x;
-                                                                                                       mScissorTestRectangle.y = fbo->y;
-                                                                                                       mScissorTestRectangle.width = fbo->width;
-                                                                                                       mScissorTestRectangle.height = fbo->height;}
       inline void             SetScissorRectX(GLint x)                          { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.x = x; }
       inline void             SetScissorRectY(GLint y)                          { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.y = y; }
       inline void             SetScissorRectWidth(GLint width)                  { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.width = width; }
@@ -201,103 +174,21 @@ public:
       inline void             SetDitheringEnabled(GLboolean enable)             { FUN_ENTRY(GL_LOG_TRACE); mDitheringEnabled = enable; }
 
 // Update Functions
-      inline bool             UpdateSampleCoverageEnabled(GLboolean enable)     { FUN_ENTRY(GL_LOG_TRACE); bool res = mSampleCoverageEnabled != enable;
-                                                                                                       mSampleCoverageEnabled = enable;
-                                                                                                       return res; }
-      inline bool             UpdateSampleAlphaToCoverageEnabled(GLboolean enable)
-                                                                                { FUN_ENTRY(GL_LOG_TRACE); bool res = mSampleAlphaToCoverageEnabled != enable;
-                                                                                                       mSampleAlphaToCoverageEnabled = enable;
-                                                                                                       return res; }
-      inline bool             UpdateSampleCoverageValue(GLfloat value)          { FUN_ENTRY(GL_LOG_TRACE); GLfloat v = CLAMP_F(value);
-                                                                                                       bool res = mSampleCoverageValue != v;
-                                                                                                       mSampleCoverageValue = v;
-                                                                                                       return res; }
-
-      inline bool             UpdateSampleCoverageInvert(GLboolean invert)      { FUN_ENTRY(GL_LOG_TRACE); bool res = mSampleCoverageInvert != invert;
-                                                                                                       mSampleCoverageInvert = invert;
-                                                                                                       return res; }
-      inline bool             UpdateScissorRect(GLint x,
-                                                GLint y,
-                                                GLint width,
-                                                GLint height)                   { FUN_ENTRY(GL_LOG_TRACE); bool res = (mScissorTestRectangle.x != x) || (mScissorTestRectangle.y != y) || (mScissorTestRectangle.width != width) || (mScissorTestRectangle.height != height);
-                                                                                                       mScissorTestRectangle.x = x;
-                                                                                                       mScissorTestRectangle.y = y;
-                                                                                                       mScissorTestRectangle.width = width;
-                                                                                                       mScissorTestRectangle.height = height;
-                                                                                                       return res; }
-      inline bool             UpdateDepthTestFunc(GLenum func)                  { FUN_ENTRY(GL_LOG_TRACE); bool res = (mDepthTestFunc != func);
-                                                                                                       mDepthTestFunc = func;
-                                                                                                       return res; }
-      inline bool             UpdateDepthTestEnabled(GLenum enable)             { FUN_ENTRY(GL_LOG_TRACE); bool res = (mDepthTestEnabled != enable);
-                                                                                                       mDepthTestEnabled = enable;
-                                                                                                       return res; }
-      inline bool             UpdateScissorTestEnabled(GLboolean enable)        { FUN_ENTRY(GL_LOG_TRACE); bool res = (mScissorTestEnabled != enable);
-                                                                                                       mScissorTestEnabled = enable;
-                                                                                                       return res; }
-      inline bool             UpdateBlendingEnabled(GLenum enable)              { FUN_ENTRY(GL_LOG_TRACE); bool res = (mBlendingEnabled != enable);
-                                                                                                       mBlendingEnabled = enable;
-                                                                                                       return res; }
-      inline bool             UpdateStencilTestEnabled(GLenum enable)           { FUN_ENTRY(GL_LOG_TRACE); bool res = (mStencilTestEnabled != enable);
-                                                                                                       mStencilTestEnabled = enable;
-                                                                                                       return res; }
-      inline bool             UpdateBlendingEquation(GLenum modeRGB,
-                                                     GLenum modeAlpha)          { FUN_ENTRY(GL_LOG_TRACE); bool res = (mBlendingEquationRGB != modeRGB) || (mBlendingEquationAlpha != modeAlpha);
-                                                                                                       mBlendingEquationRGB = modeRGB;
-                                                                                                       mBlendingEquationAlpha = modeAlpha;
-                                                                                                       return res;}
-      inline bool             UpdateBlendingColor(GLclampf red,
-                                                  GLclampf green,
-                                                  GLclampf blue,
-                                                  GLclampf alpha)               { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                                       GLfloat r = CLAMP_F(red);
-                                                                                                       GLfloat g = CLAMP_F(green);
-                                                                                                       GLfloat b = CLAMP_F(blue);
-                                                                                                       GLfloat a = CLAMP_F(alpha);
-                                                                                                       bool res = (mBlendingColor[0] != r) || (mBlendingColor[1] != g) || (mBlendingColor[2] != b) || (mBlendingColor[3] != a);
-                                                                                                       mBlendingColor[0] = r;
-                                                                                                       mBlendingColor[1] = g;
-                                                                                                       mBlendingColor[2] = b;
-                                                                                                       mBlendingColor[3] = a;
-                                                                                                       return res; }
-      inline bool             UpdateBlendingFactors(GLenum srcRGB,
-                                                    GLenum srcAlpha,
-                                                    GLenum dstRGB,
-                                                    GLenum dstAlpha)            { FUN_ENTRY(GL_LOG_TRACE); bool res = (mBlendingFactorSourceRGB != srcRGB) || (mBlendingFactorSourceAlpha != srcAlpha) || (mBlendingFactorDestinationRGB != dstRGB) || (mBlendingFactorDestinationAlpha != dstAlpha);
-                                                                                                       mBlendingFactorSourceRGB = srcRGB; mBlendingFactorSourceAlpha = srcAlpha; mBlendingFactorDestinationRGB = dstRGB; mBlendingFactorDestinationAlpha = dstAlpha;
-                                                                                                       return res; }
-      inline bool             UpdateStencilTestFunc(GLenum face,
-                                                    GLenum func,
-                                                    GLint  ref,
-                                                    GLuint mask)                { FUN_ENTRY(GL_LOG_TRACE); bool res = false;
-                                                                                                       if(face == GL_FRONT) {
-                                                                                                         res = (mStencilTestFuncCompareFront != func) || (mStencilTestFuncRefFront != ref) || (mStencilTestFuncMaskFront != mask);
-                                                                                                         mStencilTestFuncCompareFront = func;
-                                                                                                         mStencilTestFuncRefFront  = ref;
-                                                                                                         mStencilTestFuncMaskFront = mask;
-                                                                                                       } else {
-                                                                                                         res = (mStencilTestFuncCompareBack != func) || (mStencilTestFuncRefBack != ref) || (mStencilTestFuncMaskBack != mask);
-                                                                                                         mStencilTestFuncCompareBack = func;
-                                                                                                         mStencilTestFuncRefBack  = ref;
-                                                                                                         mStencilTestFuncMaskBack = mask;
-                                                                                                       }
-                                                                                                       return res; }
-
-      inline bool             UpdateStencilTestOp(GLenum face,
-                                                  GLenum fail,
-                                                  GLenum zfail,
-                                                  GLenum zpass)                 { FUN_ENTRY(GL_LOG_TRACE); bool res = false;
-                                                                                                       if(face == GL_FRONT) {
-                                                                                                          res = (mStencilTestOpFailFront != fail) || (mStencilTestOpZfailFront != zfail) || (mStencilTestOpZpassFront != zpass);
-                                                                                                          mStencilTestOpFailFront  = fail;
-                                                                                                          mStencilTestOpZfailFront = zfail;
-                                                                                                          mStencilTestOpZpassFront = zpass;
-                                                                                                       } else {
-                                                                                                          res = (mStencilTestOpFailBack != fail) || (mStencilTestOpZfailBack != zfail) || (mStencilTestOpZpassBack != zpass);
-                                                                                                          mStencilTestOpFailBack  = fail;
-                                                                                                          mStencilTestOpZfailBack = zfail;
-                                                                                                          mStencilTestOpZpassBack = zpass;
-                                                                                                       }
-                                                                                                       return res; }
+      bool                    UpdateSampleCoverageEnabled(GLboolean enable);
+      bool                    UpdateSampleAlphaToCoverageEnabled(GLboolean enable);
+      bool                    UpdateSampleCoverageValue(GLfloat value);
+      bool                    UpdateSampleCoverageInvert(GLboolean invert);
+      bool                    UpdateScissorRect(GLint x, GLint y, GLint width, GLint height);
+      bool                    UpdateDepthTestFunc(GLenum func);
+      bool                    UpdateDepthTestEnabled(GLboolean enable);
+      bool                    UpdateScissorTestEnabled(GLboolean enable);
+      bool                    UpdateBlendingEnabled(GLboolean enable);
+      bool                    UpdateStencilTestEnabled(GLboolean enable);
+      bool                    UpdateBlendingEquation(GLenum modeRGB, GLenum modeAlpha);
+      bool                    UpdateBlendingColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
+      bool                    UpdateBlendingFactors(GLenum srcRGB, GLenum srcAlpha, GLenum dstRGB, GLenum dstAlpha);
+      bool                    UpdateStencilTestFunc(GLenum face, GLenum func, GLint  ref, GLuint mask);
+      bool                    UpdateStencilTestOp(GLenum face, GLenum fail, GLenum zfail, GLenum zpass);
 };
 
 #endif //__STATEFRAGMENTOPERATIONS_H__
