@@ -28,6 +28,10 @@
 
 #define PRINTABLE_LOG_LEVEL EGL_LOG_DEBUG
 
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+#include <android/log.h>
+#endif //VK_USE_PLATFORM_ANDROID_KHR
+
 class SimpleLoggerImpl : public EGLLoggerImpl {
 public:
     SimpleLoggerImpl() { }

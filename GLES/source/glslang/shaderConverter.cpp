@@ -334,7 +334,11 @@ ShaderConverter::ConvertGLToVulkanDepthRange(string& source)
 {
     // Find last "}"
     size_t pos = source.rfind("}");
-
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+    //Andoird 7: the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
+    string GlToVkViewportConversion   = string("    gl_Position.y = -gl_Position.y;\n");
+    source.insert(pos, GlToVkViewportConversion);
+#endif
     string GlToVkDepthRangeConversion = string("    gl_Position.z = (gl_Position.z + gl_Position.w) / 2.0;\n");
     source.insert(pos, GlToVkDepthRangeConversion);
 }

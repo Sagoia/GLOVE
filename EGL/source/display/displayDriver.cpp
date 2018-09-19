@@ -30,6 +30,10 @@
 #include "platform/platformFactory.h"
 #include "EGL/egl.h"
 
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+#include "system/window.h"
+#endif
+
 #define EGL_VERSION_MAJOR   1
 #define EGL_VERSION_MINOR   4
 

@@ -168,10 +168,17 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
     } else {
         assert(formatCount >= 1);
         for(uint32_t i = 0; i < formatCount; ++i) {
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+            if (surfFormats[i].format == VK_FORMAT_R8G8B8A8_SRGB && surfFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                format = surfFormats[i].format;
+                break;
+            }
+#else
             if (surfFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfFormats[i].colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR) {
                 format = surfFormats[i].format;
                 break;
             }
+#endif
         }
     }
     delete[] surfFormats;

@@ -45,8 +45,14 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
                                                                     VK_KHR_DISPLAY_EXTENSION_NAME};
 #endif
 
-static const std::vector<const char*> requiredDeviceExtensions  = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME
+                                                                   };
+#else
+static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
                                                                    "VK_KHR_maintenance1"};
+#endif
+
 static       char **enabledInstanceLayers           = NULL;
 
 vkContext_t GloveVkContext;

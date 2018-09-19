@@ -29,6 +29,10 @@
 #endif
 #include "platform/vulkan/WSIPlaneDisplay.h"
 
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+#include "platform/vulkan/WSIAndroid.h"
+#endif // VK_USE_PLATFORM_ANDROID_KHR
+
 PlatformFactory *PlatformFactory::mInstance = nullptr;
 
 PlatformFactory::PlatformFactory()
@@ -112,8 +116,10 @@ PlatformFactory::GetWindowInterface()
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
         case WSI_ANDROID: {
-            NOT_IMPLEMENTED();
-            return nullptr;
+            VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
+            WSIAndroid *vulkanWSI = new WSIAndroid();
+            windowInterface->SetWSI(vulkanWSI);
+            return windowInterface;
         }
 #endif
 
@@ -140,8 +146,7 @@ PlatformFactory::GetResources()
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
         case WSI_ANDROID:
-            NOT_IMPLEMENTED();
-            return nullptr;
+            return new VulkanResources();
 #endif
 
         case UNKNOWN_PLATFORM:
