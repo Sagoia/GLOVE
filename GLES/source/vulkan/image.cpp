@@ -91,7 +91,7 @@ Image::SetImageTiling(void)
     }
     else {
         // Format not supported
-        assert(0);
+        mVkImageTiling = VK_IMAGE_TILING_OPTIMAL;
     }
 }
 
