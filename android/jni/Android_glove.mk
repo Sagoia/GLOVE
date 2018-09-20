@@ -143,7 +143,8 @@ LOCAL_SRC_FILES := $(SRC_PATH)/EGL/source/api/eglContext.cpp \
 
 LOCAL_C_INCLUDES := $(SRC_PATH)/EGL/source \
                     $(SRC_PATH)/EGL/include \
-                    $(SRC_PATH)/GLES/include
+                    $(SRC_PATH)/GLES/include \
+                    /usr/include/android
 
 LOCAL_SHARED_LIBRARIES :=  libGLESv2
 LOCAL_LDLIBS    +=        -llog -lz -lvulkan -landroid

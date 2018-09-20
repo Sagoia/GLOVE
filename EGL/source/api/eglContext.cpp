@@ -99,7 +99,9 @@ EGLContext_t::MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read)
     mDisplay = dpy;
 
     EGLSurface_t *drawSurface = static_cast<EGLSurface_t *>(draw);
-
+    if(drawSurface == nullptr){
+        return EGL_BAD_SURFACE;
+    }
     // TODO: support correct construction/destruction of pbuffers
     if (drawSurface->GetType() != EGL_WINDOW_BIT) {
         return EGL_TRUE;

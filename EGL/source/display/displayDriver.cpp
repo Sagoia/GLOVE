@@ -355,8 +355,10 @@ DisplayDriver::SwapBuffers(EGLDisplay dpy, EGLSurface surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLSurface_t *eglSurface = reinterpret_cast<EGLSurface_t *>(surface);
-
+    EGLSurface_t *eglSurface = static_cast<EGLSurface_t *>(surface);
+    if(eglSurface == nullptr){
+        return EGL_BAD_SURFACE;
+    }
     if(eglSurface->GetType() != EGL_WINDOW_BIT) {
         return EGL_TRUE;
     }
