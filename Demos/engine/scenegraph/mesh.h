@@ -28,7 +28,7 @@ typedef struct openGL_mesh_t
     GLuint     mVerticesVbo;
     GLuint     mUVsVbo;
     GLuint     mColorsVbo;
-    GLuint     mIndicesEbo;
+    GLuint     mIndicesIbo;
 
     mat4x4     mModelMatrix;
     GLfloat    mSpinAngle;

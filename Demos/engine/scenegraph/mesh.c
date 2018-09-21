@@ -37,28 +37,32 @@ void InitMesh(struct openGL_mesh_t *mesh, const int vertex_components_num, const
     mesh->mSpinAngle = 1.0f;
     mat4x4_identity(mesh->mModelMatrix);
 
-    glGenBuffers(1, &mesh->mVerticesVbo); assert(mesh->mVerticesVbo);
+    glGenBuffers(1, &mesh->mVerticesVbo);
+    assert(mesh->mVerticesVbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->mVerticesVbo);
     glBufferData(GL_ARRAY_BUFFER, vertex_buffer_data_size, vertex_buffer_data, GL_STATIC_DRAW);
 
     mesh->mUVsVbo = 0;
     if(uv_buffer_data_size > 0) {
-        glGenBuffers(1, &mesh->mUVsVbo); assert(mesh->mUVsVbo);
+        glGenBuffers(1, &mesh->mUVsVbo);
+        assert(mesh->mUVsVbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh->mUVsVbo);
         glBufferData(GL_ARRAY_BUFFER, uv_buffer_data_size, uv_buffer_data, GL_STATIC_DRAW);
     }
 
     mesh->mColorsVbo = 0;
     if(color_buffer_data_size > 0) {
-        glGenBuffers(1, &mesh->mColorsVbo); assert(mesh->mColorsVbo);
+        glGenBuffers(1, &mesh->mColorsVbo);
+        assert(mesh->mColorsVbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh->mColorsVbo);
         glBufferData(GL_ARRAY_BUFFER, color_buffer_data_size, color_buffer_data, GL_STATIC_DRAW);
     }
 
-    mesh->mIndicesEbo = 0;
+    mesh->mIndicesIbo = 0;
     if(index_buffer_data_size > 0) {
-        glGenBuffers(1, &mesh->mIndicesEbo); assert(mesh->mIndicesEbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndicesEbo);
+        glGenBuffers(1, &mesh->mIndicesIbo);
+        assert(mesh->mIndicesIbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndicesIbo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_buffer_data_size, index_buffer_data, GL_STATIC_DRAW);
     }
     ASSERT_NO_GL_ERROR();
@@ -93,26 +97,27 @@ void DrawMesh(struct openGL_program_t *program, struct openGL_mesh_t *mesh)
         glBindTexture(GL_TEXTURE_2D, mesh->mTexture[i]->texID);
     }
     // Bind Vertex VBO
+    assert(program->mLocationPos > -1);
     glBindBuffer (GL_ARRAY_BUFFER, mesh->mVerticesVbo);
     glEnableVertexAttribArray (program->mLocationPos);
     glVertexAttribPointer (program->mLocationPos, mesh->mVertexComponentsNum, GL_FLOAT, GL_FALSE, mesh->mVertexComponentsNum * sizeof(float), 0);
 
     // Bind Texture VBO
-    if(mesh->mUVsVbo > 0) {
+    if(mesh->mUVsVbo > 0 && program->mLocationUV > -1) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh->mUVsVbo);
         glEnableVertexAttribArray(program->mLocationUV);
         glVertexAttribPointer    (program->mLocationUV, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
     }
 
     // Bind Color VBO
-    if(mesh->mColorsVbo > 0) {
+    if(mesh->mColorsVbo > 0 && program->mLocationColor > -1) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh->mColorsVbo);
         glEnableVertexAttribArray(program->mLocationColor);
         glVertexAttribPointer(program->mLocationColor, mesh->mVertexComponentsNum, GL_FLOAT, GL_FALSE, mesh->mVertexComponentsNum * sizeof(float), 0);
     }
 
-    if(mesh->mIndicesEbo > 0) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndicesEbo);
+    if(mesh->mIndicesIbo > 0) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndicesIbo);
         glDrawElements(GL_TRIANGLES, mesh->mVerticesNum, GL_UNSIGNED_INT, 0);
     }
     else {
@@ -120,10 +125,12 @@ void DrawMesh(struct openGL_program_t *program, struct openGL_mesh_t *mesh)
     }
 
     glDisableVertexAttribArray(program->mLocationPos);
-    if(mesh->mUVsVbo > 0)
+    if(mesh->mUVsVbo > 0 && program->mLocationUV > -1) {
         glDisableVertexAttribArray(program->mLocationUV);
-    if(mesh->mColorsVbo > 0)
+    }
+    if(mesh->mColorsVbo > 0 && program->mLocationColor > -1) {
         glDisableVertexAttribArray(program->mLocationColor);
+    }
     ASSERT_NO_GL_ERROR();
 }
 
@@ -134,8 +141,8 @@ void DeleteMesh(struct openGL_mesh_t *mesh)
         glDeleteBuffers (1, &mesh->mUVsVbo);
     if(glIsBuffer(mesh->mColorsVbo))
         glDeleteBuffers (1, &mesh->mColorsVbo);
-    if(glIsBuffer(mesh->mIndicesEbo))
-        glDeleteBuffers (1, &mesh->mIndicesEbo);
+    if(glIsBuffer(mesh->mIndicesIbo))
+        glDeleteBuffers (1, &mesh->mIndicesIbo);
 
     for (size_t i = 0; i < (size_t)mesh->mTexturesNum; i++) {
         if(glIsTexture(mesh->mTexture[i]->texID)) {
