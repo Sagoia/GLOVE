@@ -59,6 +59,8 @@ else()
     remove_definitions(-DTRACE_BUILD)
 endif()
 
+add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
+
 # Set c/cpp flag definitions for the compiler.
 set(C_REDUCE_ERRORS "-Wno-unused-parameter -Wno-unused-function")
 set(CXX_REDUCE_ERRORS "-Wno-unused-parameter -Wno-unused-function")
