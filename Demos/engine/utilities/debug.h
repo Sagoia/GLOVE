@@ -43,6 +43,7 @@
         printf("Error GL_OUT_OF_MEMORY. There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded.\n");\
         break;\
     }\
+    assert(err == GL_NO_ERROR); \
 }
 #else
 #define ASSERT_NO_GL_ERROR()
