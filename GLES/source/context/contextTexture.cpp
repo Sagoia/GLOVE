@@ -465,6 +465,10 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
+
     if(target != GL_TEXTURE_2D && (target < GL_TEXTURE_CUBE_MAP_POSITIVE_X || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z)) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -497,10 +501,6 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
-    }
-
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
@@ -551,24 +551,19 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+        Finish();
+    }
+
     if(target != GL_TEXTURE_2D && (target < GL_TEXTURE_CUBE_MAP_POSITIVE_X || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z)) {
         RecordError(GL_INVALID_ENUM);
         return;
     }
 
-    if((target >= GL_TEXTURE_CUBE_MAP_POSITIVE_X && target <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z) && (width != height)) {
-        RecordError(GL_INVALID_VALUE);
-        return;
-    }
-
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
-    }
-
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
     if((level < 0) || (width < 0 || height < 0) || (xoffset < 0 || yoffset < 0) ||
        (activeTexture->GetWidth() < (xoffset + width) || activeTexture->GetHeight() < (yoffset + height)) ||
-       ((width > GLOVE_MAX_TEXTURE_SIZE || height > GLOVE_MAX_TEXTURE_SIZE) && target == GL_TEXTURE_2D) ||
+       ((width > GLOVE_MAX_TEXTURE_SIZE          || height > GLOVE_MAX_TEXTURE_SIZE         ) && target == GL_TEXTURE_2D) ||
        ((width > GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE || height > GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE) && target != GL_TEXTURE_2D)) {
         RecordError(GL_INVALID_VALUE);
         return;
