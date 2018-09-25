@@ -40,7 +40,7 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1), mIsFboAttached(false)
+mMipLevelsCount(1), mLayersCount(1)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

@@ -53,7 +53,7 @@ class Texture {
 private:
     const
     vulkanAPI::vkContext_t *    mVkContext;
-    
+
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
     GLenum                      mFormat;
@@ -78,7 +78,6 @@ private:
     vulkanAPI::ImageView*       mImageView;
 
     static int                  mDefaultInternalAlignment;
-    bool                        mIsFboAttached;
 
     bool                        AllocateVkMemory(void);
     void                        ReleaseVkResources(void);
@@ -149,7 +148,6 @@ public:
                                                                                                            mSampler->SetContext(vkContext);
                                                                                                            mImageView->SetContext(vkContext);
                                                                                                            mImage->SetContext(vkContext); }
-    inline void             SetFramebufferAttachment(bool att)                  { FUN_ENTRY(GL_LOG_TRACE); mIsFboAttached = att; }
     inline void             SetWrapS(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapS(mode)) { \
                                                                                                            mSampler->SetAddressModeU(GlTexAddressToVkTexAddress(mode));}}
     inline void             SetWrapT(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapT(mode)) { \
@@ -180,7 +178,6 @@ public:
                                                                      target)    { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTarget(target); }
 
 // Is Functions
-    inline bool             IsFramebufferAttachment(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mIsFboAttached; }
     inline bool             IsCubeMap(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget  == GL_TEXTURE_CUBE_MAP; }
     inline bool             IsCompressed(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return (mFormat != GL_ALPHA           &&
                                                                                                                    mFormat != GL_RGB             &&
