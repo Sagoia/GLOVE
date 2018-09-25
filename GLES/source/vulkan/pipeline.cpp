@@ -58,7 +58,7 @@ Pipeline::MoveToCache()
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkPipeline != VK_NULL_HANDLE) {
-        mCacheManager->CacheVkPipeline(mVkPipeline);
+        mCacheManager->CacheVkPipelineObject(mVkPipeline);
         mVkPipeline = VK_NULL_HANDLE;
     }
 }

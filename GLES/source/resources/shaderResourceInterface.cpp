@@ -167,7 +167,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
             uniform.reflectionName != "gl_DepthRange.diff") {
 
             if(itBlock->second.pBufferObject) {
-                mCacheManager->CacheUniformBufferObject(itBlock->second.pBufferObject);
+                mCacheManager->CacheUBO(itBlock->second.pBufferObject);
                 *allocatedNewBufferObject = true;
             }
 

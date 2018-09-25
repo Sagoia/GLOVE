@@ -91,12 +91,6 @@ Framebuffer::AddColorAttachment(Texture *texture)
 }
 
 void
-Framebuffer::SetRenderState(RenderState renderState)
-{
-    mRenderState = renderState;
-}
-
-void
 Framebuffer::SetColorAttachmentTexture(Texture *texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

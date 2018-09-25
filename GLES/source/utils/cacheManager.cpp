@@ -1,29 +1,29 @@
 /**
  *  @file       cacheManager.cpp
  *  @author     Think Silicon
- *  @date       25/07/2018
+ *  @date       13/09/2018
  *  @version    1.0
  *
- *  @brief
+ *  @brief      Vulkan objects cache manager. These caches are needed to keep in memory Vulkan objects referred to by secondary command buffers.
  *
  */
 
 #include "cacheManager.h"
 
 void
-CacheManager::CleanUpUniformBufferObjectCache(void)
+CacheManager::CleanUpUBOCache(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!mUniformBufferObjectCache.empty()) {
-        for(uint32_t i = 0; i < mUniformBufferObjectCache.size(); ++i) {
-            if(mUniformBufferObjectCache[i] != nullptr) {
-                delete mUniformBufferObjectCache[i];
-                mUniformBufferObjectCache[i] = nullptr;
+    if(!mUBOCache.empty()) {
+        for(uint32_t i = 0; i < mUBOCache.size(); ++i) {
+            if(mUBOCache[i] != nullptr) {
+                delete mUBOCache[i];
+                mUBOCache[i] = nullptr;
             }
         }
 
-        mUniformBufferObjectCache.clear();
+        mUBOCache.clear();
     }
 }
 
@@ -45,28 +45,28 @@ CacheManager::CleanUpVBOCache()
 }
 
 void
-CacheManager::CleanUpVkPipelineCache()
+CacheManager::CleanUpVkPipelineObjectCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!mVkPipelineCache.empty()) {
-        for(uint32_t i = 0; i < mVkPipelineCache.size(); ++i) {
-            if(mVkPipelineCache[i] != VK_NULL_HANDLE){
-                vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineCache[i], NULL);
-                mVkPipelineCache[i] = VK_NULL_HANDLE;
+    if(!mVkPipelineObjectCache.empty()) {
+        for(uint32_t i = 0; i < mVkPipelineObjectCache.size(); ++i) {
+            if(mVkPipelineObjectCache[i] != VK_NULL_HANDLE){
+                vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineObjectCache[i], NULL);
+                mVkPipelineObjectCache[i] = VK_NULL_HANDLE;
             }
         }
 
-        mVkPipelineCache.clear();
+        mVkPipelineObjectCache.clear();
     }
 }
 
 void
-CacheManager::CacheUniformBufferObject(UniformBufferObject *uniformBufferObject)
+CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mUniformBufferObjectCache.push_back(uniformBufferObject);
+    mUBOCache.push_back(uniformBufferObject);
 }
 
 void
@@ -78,11 +78,11 @@ CacheManager::CacheVBO(BufferObject *vbo)
 }
 
 void
-CacheManager::CacheVkPipeline(VkPipeline pipeline)
+CacheManager::CacheVkPipelineObject(VkPipeline pipeline)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVkPipelineCache.push_back(pipeline);
+    mVkPipelineObjectCache.push_back(pipeline);
 }
 
 void
@@ -90,7 +90,7 @@ CacheManager::CleanUpCaches()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    CleanUpUniformBufferObjectCache();
+    CleanUpUBOCache();
     CleanUpVBOCache();
-    CleanUpVkPipelineCache();
+    CleanUpVkPipelineObjectCache();
 }

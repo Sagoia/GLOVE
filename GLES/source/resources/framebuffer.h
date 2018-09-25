@@ -113,7 +113,7 @@ public:
     inline Texture *        GetStencilAttachmentTexture(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentStencil->GetTexture();}
 
 // Set Functions
-           void             SetRenderState(RenderState renderState);
+    inline void             SetRenderState(RenderState renderState)             { FUN_ENTRY(GL_LOG_TRACE); mRenderState = renderState;}
            void             SetColorAttachmentTexture(Texture *texture);
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }

@@ -47,8 +47,9 @@ public:
     GenericVertexAttribute();
     ~GenericVertexAttribute();
 
-    // Release Functions
     void                                MoveToCache(void);
+
+    // Release Functions
     void                                Release(void);
 
     // Get Functions
