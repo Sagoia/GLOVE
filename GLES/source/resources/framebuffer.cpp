@@ -52,11 +52,13 @@ Framebuffer::~Framebuffer()
 
     if(mDepthStencilTexture) {
         delete mDepthStencilTexture;
+        mDepthStencilTexture = nullptr;
     }
 
     for(auto color : mAttachmentColors) {
         if(color) {
             delete color;
+            color = nullptr;
         }
     }
     mAttachmentColors.clear();
@@ -71,6 +73,7 @@ Framebuffer::Release(void)
 
     for(auto fb : mFramebuffers) {
         delete fb;
+        fb = nullptr;
     }
 
     mFramebuffers.clear();

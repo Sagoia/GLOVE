@@ -293,6 +293,7 @@ GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatSten
         case GL_STENCIL_INDEX1_OES:
         case GL_STENCIL_INDEX4_OES:
         case GL_STENCIL_INDEX8:             return VK_FORMAT_S8_UINT;
+        default: {                          NOT_FOUND_ENUM(internalformatDepth); NOT_FOUND_ENUM(internalformatStencil);}
         }
     }
 

@@ -113,7 +113,7 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
         return;
     }
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
         Finish();
     }
 
