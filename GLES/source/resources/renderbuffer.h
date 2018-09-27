@@ -31,13 +31,13 @@ class Renderbuffer
 private:
     const
     vulkanAPI::vkContext_t *         mVkContext;
-    
+
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
-    Rect                    mDims;
-    GLenum                  mInternalFormat;
-    GLenum                  mTarget;
-    Texture *               mTexture;
+    Rect                             mDims;
+    GLenum                           mInternalFormat;
+    GLenum                           mTarget;
+    Texture *                        mTexture;
 
 public:
     Renderbuffer(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);

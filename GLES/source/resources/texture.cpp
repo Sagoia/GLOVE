@@ -44,7 +44,7 @@ mMipLevelsCount(1), mLayersCount(1)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mState     = NULL;
+    mState     = nullptr;
     mImage     = new vulkanAPI::Image(vkContext);
     mImageView = new vulkanAPI::ImageView(vkContext);
     mMemory    = new vulkanAPI::Memory(vkContext, vkFlags);
@@ -60,9 +60,9 @@ Texture::~Texture()
     delete mImage;
     delete mMemory;
 
-    if(mState != NULL) {
-        delete []mState;
-        mState = NULL;
+    if(mState != nullptr) {
+        delete [] mState;
+        mState = nullptr;
     }
 }
 
@@ -70,6 +70,7 @@ bool
 Texture::IsNPOT(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
     State_t *state = &mState[0][0];
     if(state->format == GL_INVALID_VALUE) {
         return false;
@@ -81,6 +82,8 @@ Texture::IsNPOT(void)
 bool
 Texture::IsNPOTAccessCompleted(void)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     return !(IsNPOT() && ((GetMinFilter() != GL_LINEAR         && GetMinFilter() != GL_NEAREST)    ||
                           (GetWrapS()     != GL_CLAMP_TO_EDGE  || GetWrapT()     != GL_CLAMP_TO_EDGE)));
 }
@@ -98,6 +101,10 @@ Texture::IsCompleted(void)
     // A texture is cube complete if the following conditions all hold true:
     // 1) The level zero arrays of each of the six texture images making up the cube map have identical, positive, and square dimensions.
     // 2) The level zero arrays were each specified with the same format, internal format, and type.
+
+    if(mState == nullptr) {
+        return false;
+    }
 
     State_t *state = &mState[0][0];
     if(state->format == GL_INVALID_VALUE) {
@@ -330,7 +337,7 @@ void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint mip
     // create a buffer at the size of the requested subrectangle
     const size_t srcSize   = srcRect->GetRectBufferSize();
     BufferObject *tbo = new TransferDstBufferObject(mVkContext);
-    tbo->Allocate(srcSize, NULL);
+    tbo->Allocate(srcSize, nullptr);
 
     // use the global rect offsets for transfering the subpixels from Vulkan
     SubmitCopyPixels(srcRect, tbo, miplevel, layer, dstFormat, false);

@@ -48,7 +48,7 @@ Renderbuffer::Release()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mTexture) {
+    if(mTexture != nullptr) {
         delete mTexture;
         mTexture = nullptr;
     }

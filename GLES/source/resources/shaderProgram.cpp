@@ -77,7 +77,10 @@ ShaderProgram::~ShaderProgram()
 
     ReleaseVkObjects();
 
-    delete mVkPipelineCache;
+    if(mVkPipelineCache) {
+        delete mVkPipelineCache;
+        mVkPipelineCache = nullptr;
+    }
 }
 
 bool

@@ -150,7 +150,7 @@ Context::Clear(GLbitfield mask)
         return;
     }
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
         Finish();
     }
     mWriteFBO->SetRenderState(Framebuffer::CLEAR);

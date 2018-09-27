@@ -96,9 +96,9 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
         attachmentDepthStencil.flags          = 0;
         attachmentDepthStencil.format         = depthstencilFormat;
         attachmentDepthStencil.samples        = VK_SAMPLE_COUNT_1_BIT;
-        attachmentDepthStencil.loadOp         = mDepthClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.loadOp         = mDepthClearEnabled   ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentDepthStencil.storeOp        = mDepthWriteEnabled   ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentDepthStencil.stencilLoadOp  = mStencilClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.stencilLoadOp  = mStencilClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentDepthStencil.stencilStoreOp = mStencilWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachmentDepthStencil.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
         attachmentDepthStencil.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
