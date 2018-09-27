@@ -63,6 +63,14 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
         if(index && mResourceManager->RenderbufferExists(index)) {
             Renderbuffer *rbo = mResourceManager->GetRenderbuffer(index);
 
+            if( mWriteFBO != mSystemFBO &&
+               (rbo->GetTexture() == mWriteFBO->GetColorAttachmentTexture()    ||
+                rbo->GetTexture() == mWriteFBO->GetDepthAttachmentTexture()    ||
+                rbo->GetTexture() == mWriteFBO->GetStencilAttachmentTexture()) &&
+                mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+                Finish();
+            }
+
             if(rbo->GetTexture() == mWriteFBO->GetColorAttachmentTexture()) {
                 mWriteFBO->SetColorAttachmentTexture(nullptr);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
@@ -181,6 +189,13 @@ Context::RenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width
     if(!activeRenderbufferId) {
         RecordError(GL_INVALID_OPERATION);
         return;
+    }
+
+    if((activeRenderbufferId == mWriteFBO->GetColorAttachmentName()    ||
+        activeRenderbufferId == mWriteFBO->GetDepthAttachmentName()    ||
+        activeRenderbufferId == mWriteFBO->GetStencilAttachmentName()) &&
+        mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
     }
 
     Renderbuffer* activeRenderbuffer = mResourceManager->GetRenderbuffer(activeRenderbufferId);

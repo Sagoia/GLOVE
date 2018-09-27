@@ -33,7 +33,7 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
         return;
     }
 
-    Framebuffer *fbo;
+    Framebuffer *fbo = mSystemFBO;
     if(framebuffer) {
         fbo = mResourceManager->GetFramebuffer(framebuffer);
         if(fbo->GetTarget() == GL_INVALID_VALUE) {
@@ -43,11 +43,17 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
         }
     }
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
+    if(mWriteFBO == fbo) {
+        return;
+    }
+
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
         Finish();
     }
 
-    mWriteFBO = framebuffer ? fbo : mSystemFBO;
+    mWriteFBO = fbo;
+    mWriteFBO->SetRenderState(Framebuffer::IDLE);
+
     mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(framebuffer);
     mPipeline->SetUpdatePipeline(true);
     mPipeline->SetUpdateViewportState(true);
@@ -78,18 +84,21 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
         return;
     }
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
-    }
-
     while(n-- != 0) {
         uint32_t fboindex = *framebuffers++;
 
         if(fboindex && mResourceManager->FramebufferExists(fboindex)) {
             Framebuffer *fbo = mResourceManager->GetFramebuffer(fboindex);
 
-            if(fbo == mWriteFBO) {
+            if(mWriteFBO == fbo) {
+
+                if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+                    mWriteFBO->SetRenderState(Framebuffer::DELETE);
+                    Finish();
+                }
+
                 mWriteFBO = mSystemFBO;
+                mWriteFBO->SetRenderState(Framebuffer::IDLE);
 
                 mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(0);
                 mPipeline->SetUpdatePipeline(true);
@@ -122,6 +131,15 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         return;
     }
 
+    if(attachment != GL_COLOR_ATTACHMENT0 && attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT) {
+        RecordError(GL_INVALID_ENUM);
+        return;
+    }
+
+    if(renderbuffer != mWriteFBO->GetAttachmentName(attachment) && mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
+    }
+
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0:
         mWriteFBO->SetColorAttachmentTexture(renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
@@ -137,9 +155,6 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         mWriteFBO->SetStencilAttachmentTexture(renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetStencilAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetStencilAttachmentName(renderbuffer);
-        break;
-    default:
-        RecordError(GL_INVALID_ENUM);
         break;
     }
 }
@@ -181,6 +196,15 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         return;
     }
 
+    if(attachment != GL_COLOR_ATTACHMENT0 && attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT) {
+        RecordError(GL_INVALID_ENUM);
+        return;
+    }
+
+    if(texture != mWriteFBO->GetAttachmentName(attachment) && mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
+    }
+
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0:
         mWriteFBO->SetColorAttachmentTexture(texture ? mResourceManager->GetTexture(texture) : nullptr);
@@ -199,9 +223,6 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         mWriteFBO->SetStencilAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetStencilAttachmentName(texture);
         mWriteFBO->SetStencilAttachmentLayer(texture && mResourceManager->GetTexture(texture)->IsCubeMap() ? textarget : GL_TEXTURE_CUBE_MAP_POSITIVE_X);
-        break;
-    default:
-        RecordError(GL_INVALID_ENUM);
         break;
     }
 }

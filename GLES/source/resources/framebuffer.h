@@ -35,7 +35,8 @@ public:
         IDLE,
         CLEAR,
         CLEAR_DRAW,
-        DRAW
+        DRAW,
+        DELETE
     };
 
 private:
@@ -93,6 +94,16 @@ public:
     inline int              GetHeight(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.height; }
     inline GLenum           GetTarget(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget; }
     inline VkRenderPass *   GetVkRenderPass(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderPass->GetRenderPass(); }
+
+    inline uint32_t         GetAttachmentName(GLenum type)              const   { FUN_ENTRY(GL_LOG_TRACE); switch(type) {
+                                                                                                           case GL_COLOR_ATTACHMENT0:
+                                                                                                           return GetColorAttachmentName();
+                                                                                                           case GL_DEPTH_ATTACHMENT:
+                                                                                                           return GetDepthAttachmentName();
+                                                                                                           case GL_STENCIL_ATTACHMENT:
+                                                                                                           return GetStencilAttachmentName();
+                                                                                                           }
+                                                                                                           return 0; }
 
     inline GLenum           GetColorAttachmentType(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentColors.size() ? mAttachmentColors[0]->GetType()  : GL_NONE; }
     inline uint32_t         GetColorAttachmentName(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentColors.size() ? mAttachmentColors[0]->GetName()  : 0; }

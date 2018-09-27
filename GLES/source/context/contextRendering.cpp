@@ -424,8 +424,12 @@ Context::Finish(void)
 
     mCommandBufferManager->WaitLastSubmition();
 
-    if(mWriteFBO == mSystemFBO) {
-        mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    if(mWriteFBO->GetRenderState() != Framebuffer::DELETE) {
+        if(mWriteFBO == mSystemFBO) {
+            mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        } else {
+            mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
     }
 
     mWriteFBO->SetRenderState(Framebuffer::IDLE);
