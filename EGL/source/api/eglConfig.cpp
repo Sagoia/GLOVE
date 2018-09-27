@@ -172,10 +172,10 @@ static const struct {
                                         EGL_NONE },
    { EGL_RECORDABLE_ANDROID,            ATTRIB_TYPE_BOOLEAN,
                                         ATTRIB_CRITERION_EXACT,
-                                        EGL_FALSE },
+                                        EGL_DONT_CARE },
    { EGL_FRAMEBUFFER_TARGET_ANDROID,    ATTRIB_TYPE_BOOLEAN,
                                         ATTRIB_CRITERION_EXACT,
-                                        EGL_FALSE }
+                                        EGL_DONT_CARE }
 };
 static void
 SwapConfigs(const EGLConfig_t **conf1, const EGLConfig_t **conf2)
