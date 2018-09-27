@@ -44,6 +44,7 @@ typedef struct EGLSurfaceInterface_t {
 
 typedef void * api_state_t;
 typedef void * api_context_t;
+typedef void (*GLPROC)(void);
 
 typedef api_state_t (*init_API_cb_t)();
 typedef void (*terminate_API_cb_t)();
@@ -53,6 +54,7 @@ typedef void (*set_read_surface_cb_t)(api_context_t api_context, EGLSurfaceInter
 typedef void (*delete_context_cb_t)(api_context_t api_context);
 typedef void (*release_system_fbo_cb_t)(api_context_t api_context);
 typedef void (*set_next_image_index_cb_t)(api_context_t api_context, uint32_t index);
+typedef GLPROC (*get_proc_addr_cb_t)(const char* procname);
 typedef void (*finish_cb_t)(api_context_t api_context);
 
 typedef struct rendering_api_interface {
@@ -65,6 +67,7 @@ typedef struct rendering_api_interface {
     delete_context_cb_t delete_context_cb;
     release_system_fbo_cb_t release_system_fbo_cb;
     set_next_image_index_cb_t set_next_image_index_cb;
+    get_proc_addr_cb_t get_proc_addr_cb;
     finish_cb_t finish_cb;
 } rendering_api_interface_t;
 

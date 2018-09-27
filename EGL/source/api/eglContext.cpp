@@ -129,6 +129,14 @@ EGLContext_t::SetNextImageIndex(uint32_t index)
     mAPIInterface->set_next_image_index_cb(mAPIContext, index);
 }
 
+GLPROC
+EGLContext_t::GetProcAddr(const char* procname)
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    return mAPIInterface->get_proc_addr_cb(procname);
+}
+
 void
 EGLContext_t::Finish()
 {

@@ -50,6 +50,7 @@ public:
     void                         SetNextImageIndex(uint32_t index);
     void                         Finish();
     void                         Release();
+    GLPROC                       GetProcAddr(const char* procname);
 
     inline EGLDisplay            getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
     inline EGLSurface            getReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }

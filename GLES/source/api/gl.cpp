@@ -892,7 +892,7 @@ glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 }
 
 GL_APICALL void GL_APIENTRY
-glEGLImageTargetRenderBufferStorageOES(GLenum target, GLeglImageOES image)
+glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
 {
     CONTEXT_EXEC(EGLImageTargetRenderBufferStorageOES(target, image));
 }

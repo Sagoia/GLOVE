@@ -25,6 +25,7 @@
 #include "display/displayDriver.h"
 #include "utils/eglLogger.h"
 #include "thread/renderingThread.h"
+#include "eglFunctions.h"
 
 #ifdef DEBUG_DEPTH
 #   undef DEBUG_DEPTH
@@ -292,9 +293,23 @@ eglCopyBuffers(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target)
 EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
 eglGetProcAddress(const char *procname)
 {
-    NOT_IMPLEMENTED();
+    FUN_ENTRY(DEBUG_DEPTH);
 
-    return NULL;
+    __eglMustCastToProperFunctionPointerType fp = GetEGLProcAddr(procname);
+    if(fp != nullptr) {
+        return fp;
+    }
+
+    EGLenum enumAPI = currentThread.QueryAPI();
+    if(enumAPI == EGL_OPENGL_ES_API) {
+        // Assuming only GLES2 for now
+        rendering_api_interface_t* api = RENDERING_API_get_gles2_interface();
+        if(api != nullptr) {
+            return api->get_proc_addr_cb(procname);
+        }
+    }
+
+    return nullptr;
 }
 
 EGLAPI EGLImageKHR EGLAPIENTRY
