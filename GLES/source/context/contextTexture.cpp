@@ -522,7 +522,7 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     }
 
     // transfer the data to the cpu and upload it to a new texture
-    GLenum srcInternalFormat = GlFormatToGlInternalFormat(fbFormat, fbTexture->GetType());
+    GLenum srcInternalFormat = fbTexture->GetExplicitInternalFormat();
     GLenum dstInternalFormat = internalformat;
     GLenum dstType           = GlInternalFormatToGlType(dstInternalFormat);
     ImageRect srcRect(x, y, width, height,
@@ -599,7 +599,7 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     }
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
-     GLenum srcInternalFormat = GlFormatToGlInternalFormat(fbFormat, fbTexture->GetType());
+     GLenum srcInternalFormat = fbTexture->GetExplicitInternalFormat();
      GLenum dstInternalFormat = internalformat;
      ImageRect srcRect(x,       y,       width, height,
                        GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetType()),
