@@ -57,10 +57,14 @@ public:
     Texture *   GetTexture(void)                                          const { FUN_ENTRY(GL_LOG_TRACE); return mTexture;        }
 
 // Set Functions
-    void        SetVkContext(const vulkanAPI::vkContext_t *vkContext)           { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    void        SetVkContext(const vulkanAPI::vkContext_t *vkContext)           { FUN_ENTRY(GL_LOG_TRACE); mVkContext            = vkContext; }
     void        SetCommandBufferManager(
                                    vulkanAPI::CommandBufferManager *cbManager)  { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
-    void        SetTarget(GLenum target)                                        { FUN_ENTRY(GL_LOG_TRACE); mTarget    = target;    }
+    void        SetTarget(GLenum target)                                        { FUN_ENTRY(GL_LOG_TRACE); mTarget               = target;    }
+
+// Init Functions
+    void        InitTexture(void)                                               { FUN_ENTRY(GL_LOG_TRACE); mTexture              = new Texture(mVkContext, mCommandBufferManager);
+                                                                                                           mTexture->InitState();          }
 };
 
 #endif // __RENDERBUFFER_H__
