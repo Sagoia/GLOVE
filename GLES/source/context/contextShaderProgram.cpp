@@ -106,12 +106,12 @@ Context::DeleteProgram(GLuint program)
         return;
     }
 
-
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
-    }
-
     if(progPtr != mStateManager.GetActiveShaderProgram()) {
+
+        if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+            Finish();
+        }
+
         progPtr->DetachAndDeleteShaders();
         mResourceManager->EraseShadingObject(program);
         mResourceManager->DeallocateShaderProgram(progPtr);
@@ -1365,6 +1365,11 @@ Context::UseProgram(GLuint program)
     }
 
     if(mStateManager.GetActiveShaderProgram() && mStateManager.GetActiveShaderProgram()->GetMarkForDeletion()) {
+
+        if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+            Finish();
+        }
+
         mStateManager.GetActiveShaderProgram()->DetachAndDeleteShaders();
         mResourceManager->EraseShadingObject(GetProgramId(mStateManager.GetActiveShaderProgram()));
         mResourceManager->DeallocateShaderProgram(mStateManager.GetActiveShaderProgram());

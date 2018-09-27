@@ -86,29 +86,29 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
         return;
     }
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
-    }
-
     while (n-- != 0) {
         uint32_t texture = *textures++;
 
         if (texture && mResourceManager->TextureExists(texture)) {
             Texture *tex = mResourceManager->GetTexture(texture);
 
-            if(tex == mWriteFBO->GetColorAttachmentTexture()) {
+            if( mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+                Finish();
+            }
+
+            if(texture == mWriteFBO->GetColorAttachmentName()) {
                 mWriteFBO->SetColorAttachmentTexture(nullptr);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
             }
 
-            if(tex == mWriteFBO->GetDepthAttachmentTexture()) {
+            if(texture == mWriteFBO->GetDepthAttachmentName()) {
                 mWriteFBO->SetDepthAttachmentTexture(nullptr);
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
             }
 
-            if(tex == mWriteFBO->GetStencilAttachmentTexture()) {
+            if(texture == mWriteFBO->GetStencilAttachmentName()) {
                 mWriteFBO->SetStencilAttachmentTexture(nullptr);
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
@@ -377,6 +377,14 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
 
+    if( mWriteFBO != mSystemFBO &&
+       (activeTexture == mWriteFBO->GetColorAttachmentTexture()    ||
+        activeTexture == mWriteFBO->GetDepthAttachmentTexture()    ||
+        activeTexture == mWriteFBO->GetStencilAttachmentTexture()) &&
+        mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
+    }
+
     // copy the buffer contents to the texture
     activeTexture->SetState(width, height, level, layer, format, type, mStateManager.GetPixelStorageState()->GetPixelStoreUnpack(), pixels);
 
@@ -465,10 +473,6 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
-    }
-
     if(target != GL_TEXTURE_2D && (target < GL_TEXTURE_CUBE_MAP_POSITIVE_X || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z)) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -501,6 +505,10 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
+    }
+
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
@@ -551,10 +559,6 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(Framebuffer::IDLE != mWriteFBO->GetRenderState()) {
-        Finish();
-    }
-
     if(target != GL_TEXTURE_2D && (target < GL_TEXTURE_CUBE_MAP_POSITIVE_X || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z)) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -578,6 +582,10 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
+    }
+
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
