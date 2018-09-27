@@ -43,6 +43,7 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
         rendbuff->SetVkContext(mVkContext);
         rendbuff->SetCommandBufferManager(mCommandBufferManager);
         rendbuff->SetTarget(target);
+        rendbuff->InitTexture();
     }
     mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(renderbuffer);
 }

@@ -59,15 +59,12 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Release();
-
     mDims.width     = width;
     mDims.height    = height;
     mInternalFormat = internalformat;
 
-    mTexture = new Texture(mVkContext, mCommandBufferManager);
     mTexture->SetTarget(GL_TEXTURE_2D);
-    mTexture->SetVkFormat(GlInternalFormatToVkFormat(internalformat));
+    mTexture->SetVkFormat(GlInternalFormatToVkFormat(mInternalFormat));
 
     if(GlFormatIsColorRenderable(mInternalFormat)) {
         mTexture->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
@@ -78,8 +75,6 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
     }
     mTexture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
     mTexture->SetVkImageTiling();
-
-    mTexture->InitState();
     mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat), GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), NULL);
 
     return mTexture->Allocate();
