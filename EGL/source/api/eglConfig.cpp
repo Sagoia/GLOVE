@@ -664,9 +664,9 @@ FilterConfigArray(EGLConfig_t **configs, EGLint config_size, EGLint *num_config,
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    int i, j, count = 0;
+    int count = 0;
 
-    for(i = 0; i < ARRAY_SIZE(EglConfigs); ++i) {
+    for(int i = 0; i < ARRAY_SIZE(EglConfigs); ++i) {
         if(MatchConfig(&EglConfigs[i], criteria)) {
             ++count;
         }
@@ -676,10 +676,15 @@ FilterConfigArray(EGLConfig_t **configs, EGLint config_size, EGLint *num_config,
         *num_config = count;
     }
 
+    if(configs == nullptr) {
+        return EGL_TRUE;
+    }
+
     count = count > config_size ? config_size : count;
-    i = 0;
-    j = 0;
-    while(j < count && configs) {
+
+    int i = 0;
+    int j = 0;
+    while(j < count) {
         if(MatchConfig(&EglConfigs[i], criteria)) {
             /// NOTE: User now has write access to EglConfigs array
             configs[j] = (EGLConfig_t *)&EglConfigs[i];

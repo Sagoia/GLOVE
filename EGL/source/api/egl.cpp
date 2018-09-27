@@ -68,8 +68,8 @@ eglGetDisplay(EGLNativeDisplayType display_id)
 #else
     eglDisplay_t *eglDisplay = new eglDisplay_t();
 #ifdef VK_USE_PLATFORM_XCB_KHR
-    if(EGL_DEFAULT_DISPLAY) {
-        eglDisplay->nativeDisplay = XOpenDisplay(NULL);
+    if(display_id == EGL_DEFAULT_DISPLAY) {
+        eglDisplay->nativeDisplay = XOpenDisplay(nullptr);
     } else {
         eglDisplay->nativeDisplay = display_id;
     }
@@ -77,10 +77,7 @@ eglGetDisplay(EGLNativeDisplayType display_id)
     eglDisplay->nativeDisplay = 0;
 #endif
     return static_cast<EGLDisplay>(eglDisplay);
-
 #endif
-
-    return nullptr;
 }
 
 EGLAPI EGLint EGLAPIENTRY
@@ -190,18 +187,16 @@ eglQueryString(EGLDisplay dpy, EGLint name)
     FUN_ENTRY(DEBUG_DEPTH);
 
     switch(name) {
-    case EGL_CLIENT_APIS:   return "EGL_OPENGL_ES_API\0"; break;
-    case EGL_VENDOR:        return "GLOVE (GL Over Vulkan)\0"; break;
-    case EGL_VERSION:       return "1.4\0"; break;
+    case EGL_CLIENT_APIS:   return "EGL_OPENGL_ES_API\0";
+    case EGL_VENDOR:        return "GLOVE (GL Over Vulkan)\0";
+    case EGL_VERSION:       return "1.4\0";
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     case EGL_EXTENSIONS:    return "EGL_KHR_image_base EGL_ANDROID_image_native_buffer\0"; break;
 #else
-    case EGL_EXTENSIONS:    return "\0"; break;
+    case EGL_EXTENSIONS:    return "\0";
 #endif
-    default:                return "\0"; break;
+    default:                return "\0";
     }
-
-    return "\0";
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
