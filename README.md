@@ -72,7 +72,7 @@ To get and build the above projects:
 ./update_external_sources.sh
 ```
 
-## Configure Building
+## Configure Building 
 
 GLOVE building can be configured according to the options listed in the following table:
 
@@ -115,6 +115,36 @@ To uninstall the libraries from the system directories (superuser privilege migh
 ```
 make uninstall
 ```
+
+## Building GLOVE for Android
+
+Building GLOVE for Android requires Java 8. An environmental variable must be set
+```
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+```
+Download Android Studio on Ubuntu at https://developer.android.com/studio/
+
+Downgrade Android-SDK to version 25:
+```
+cd <android-sdk-dir>/
+mv tools tools_back
+wget http://dl.google.com/android/repository/tools_r25-linux.zip
+unzip tools_r25-linux.zip
+```
+Required Packages for Android building:
+```
+sudo apt-get install  android-platform-build-headers xcb-proto android-platform-frameworks-native-headers android-platform-system-core-headers android-libcutils-dev ant
+```
+GLOVE building can be configured according to the options listed in the following table:
+
+```
+./android_build.sh  [-options]
+```
+
+| **Option** | **Default** | **Description** |
+| --- | --- | --- |
+| -d \| --debug | _OFF_ | _Enable building Debug mode_ |
+| -t \| --trace-build | _OFF_ | _Enable logs_ |
 
 # Known Issues
 
