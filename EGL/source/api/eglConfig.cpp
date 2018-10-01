@@ -17,11 +17,14 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      EGL Configuration handler module
+ *  @brief      EGL Configuration module (based on Mesa implementation)
  *
  */
 
 #include "eglConfig.h"
+#include "thread/renderingThread.h"
+#include <vector>
+#include <algorithm>
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 #include "eglConfig_android.h"
@@ -177,59 +180,6 @@ static const struct {
                                         ATTRIB_CRITERION_EXACT,
                                         EGL_DONT_CARE }
 };
-static void
-SwapConfigs(const EGLConfig_t **conf1, const EGLConfig_t **conf2)
-{
-    FUN_ENTRY(EGL_LOG_TRACE);
-
-    const EGLConfig_t *tmp = *conf1;
-    *conf1 = *conf2;
-    *conf2 = tmp;
-}
-
-
-/**
- * Quick sort an array of configs.  This differs from the standard
- * qsort() in that the compare function accepts an additional
- * argument.
- */
-static void
-SortConfigs(const EGLConfig_t **configs, EGLint count, EGLint(*compare)(const EGLConfig_t *, const EGLConfig_t *, void *), void *priv_data)
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-
-    const EGLint pivot = 0;
-    EGLint i, j;
-
-    if(count <= 1) {
-        return;
-    }
-
-    SwapConfigs(&configs[pivot], &configs[count / 2]);
-    i = 1;
-    j = count - 1;
-    do {
-        while(i < count && compare(configs[i], configs[pivot], priv_data) < 0) {
-            i++;
-        }
-        while(compare(configs[j], configs[pivot], priv_data) > 0) {
-            j--;
-        }
-        if(i < j) {
-            SwapConfigs(&configs[i], &configs[j]);
-            i++;
-            j--;
-        } else if(i == j) {
-            i++;
-            j--;
-            break;
-        }
-    } while(i <= j);
-
-    SwapConfigs(&configs[pivot], &configs[j]);
-    SortConfigs(configs, j, compare, priv_data);
-    SortConfigs(configs + i, count - i, compare, priv_data);
-}
 
 static EGLBoolean
 IsConfigAttribValid(EGLConfig_t *conf, EGLint attr)
@@ -659,11 +609,28 @@ ParseConfigAttribList(EGLConfig_t *conf, EGLDisplay *dpy, const EGLint *attrib_l
     return EGL_TRUE;
 }
 
+/**
+ * Compare function between two configs based on the conditions specified by CompareConfigs.
+ */
+struct EGLConfigComparator: public std::binary_function<EGLConfig_t, EGLConfig_t, bool>
+{
+    const EGLConfig_t *criteria;
+    EGLConfigComparator(const EGLConfig_t *_criteria):criteria(_criteria) {}
+    bool operator()(const EGLConfig_t* lhs, const EGLConfig_t* rhs) const
+    {
+        return CompareConfigs(lhs, rhs, criteria, EGL_TRUE) < 0;
+    }
+};
+
 EGLBoolean
 FilterConfigArray(EGLConfig_t **configs, EGLint config_size, EGLint *num_config, const EGLConfig_t *criteria)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    if(num_config == nullptr) {
+        currentThread.RecordError(EGL_BAD_PARAMETER);
+        return EGL_FALSE;
+    }
     int count = 0;
 
     for(int i = 0; i < ARRAY_SIZE(EglConfigs); ++i) {
@@ -681,16 +648,29 @@ FilterConfigArray(EGLConfig_t **configs, EGLint config_size, EGLint *num_config,
     }
 
     count = count > config_size ? config_size : count;
+    if(count <= 0) {
+        return EGL_TRUE;
+    }
+
+    std::vector<const EGLConfig_t*> matchedConfigs;
+    matchedConfigs.reserve(count);
 
     int i = 0;
     int j = 0;
     while(j < count) {
         if(MatchConfig(&EglConfigs[i], criteria)) {
-            /// NOTE: User now has write access to EglConfigs array
-            configs[j] = (EGLConfig_t *)&EglConfigs[i];
+            matchedConfigs.push_back(&EglConfigs[i]);
             ++j;
         }
         ++i;
+    }
+
+    // sort configs
+    std::sort(matchedConfigs.begin(), matchedConfigs.end(), EGLConfigComparator(criteria));
+
+    // copy to configs if no error has occured
+    for(size_t i = 0; i < matchedConfigs.size(); ++i) {
+        configs[i] = const_cast<EGLConfig_t*>(matchedConfigs[i]);
     }
 
     return EGL_TRUE;

@@ -59,4 +59,6 @@ public:
     EGLBoolean              WaitNative(EGLint engine);
 };
 
+extern RenderingThread currentThread;
+
 #endif // __RENDERINGTHREAD_H__

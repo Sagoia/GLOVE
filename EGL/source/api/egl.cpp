@@ -32,7 +32,7 @@
 #endif // DEBUG_DEPTH
 #define DEBUG_DEPTH                          EGL_LOG_INFO
 
-static RenderingThread currentThread;
+RenderingThread currentThread;
 
 #define THREAD_EXEC_RETURN(func)             FUN_ENTRY(DEBUG_DEPTH);                                                        \
                                              return currentThread.func;
