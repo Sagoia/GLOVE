@@ -188,13 +188,13 @@ eglQueryString(EGLDisplay dpy, EGLint name)
     FUN_ENTRY(DEBUG_DEPTH);
 
     switch(name) {
-    case EGL_CLIENT_APIS:   return "EGL_OPENGL_ES_API\0";
+    case EGL_CLIENT_APIS:   return "OpenGL_ES\0";
     case EGL_VENDOR:        return "GLOVE (GL Over Vulkan)\0";
     case EGL_VERSION:       return "1.4\0";
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-    case EGL_EXTENSIONS:    return "EGL_KHR_image_base EGL_ANDROID_image_native_buffer\0"; break;
+    case EGL_EXTENSIONS:    return "EGL_EXT_client_extensions EGL_KHR_image_base EGL_ANDROID_image_native_buffer\0"; break;
 #else
-    case EGL_EXTENSIONS:    return "\0";
+    case EGL_EXTENSIONS:    return "EGL_EXT_client_extensions\0";
 #endif
     default:                return "\0";
     }
