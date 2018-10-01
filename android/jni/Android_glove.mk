@@ -129,6 +129,7 @@ LOCAL_CXXFLAGS += -pthread \
                   -Wuninitialized \
                   -Wno-mismatched-tags \
                   -frtti \
+                  -DGL_GLEXT_PROTOTYPES \
                   -DHAVE_PTHREADS
 
 LOCAL_CFLAGS +=   -DVK_USE_PLATFORM_ANDROID_KHR
@@ -164,6 +165,7 @@ LOCAL_SHARED_LIBRARIES :=  libGLESv2_GLOVE
 LOCAL_LDLIBS           +=  -llog -lz -lvulkan -landroid
 LOCAL_CXXFLAGS += -pthread \
                   -DVK_PROTOTYPES \
+                  -DGL_GLEXT_PROTOTYPES \
                   -DVK_USE_PLATFORM_ANDROID_KHR \
                   -Wall \
                   -Wextra \

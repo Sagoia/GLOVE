@@ -3,6 +3,7 @@
 #endif //  EGL_FUNC_PTR
 
 #include "EGL/egl.h"
+#include <iostream>
 #include <unordered_map>
 static const std::unordered_map<std::string, __eglMustCastToProperFunctionPointerType> eglFPMap = {
 #ifdef EGL_VERSION_1_0
