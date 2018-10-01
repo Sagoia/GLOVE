@@ -73,10 +73,6 @@ using namespace std;
 #define GLOVE_NUM_SHADER_BINARY_FORMATS                 0
 #define GLOVE_NUM_PROGRAM_BINARY_FORMATS                1
 
-#define GLOVE_FIXED_PRECISION                           16
-#define GLOVE_FIXED_ONE                                 (1 << GLOVE_FIXED_PRECISION)
-#define GLOVE_FIXED_TO_FLOAT(x)                         x * (1.0f / static_cast<float>(GLOVE_FIXED_ONE))
-
 /// Global switches
 #define GLOVE_SAVE_SHADER_SOURCES_TO_FILES              false
 #define GLOVE_SAVE_PROCESSED_SHADER_SOURCES_TO_FILES    false
