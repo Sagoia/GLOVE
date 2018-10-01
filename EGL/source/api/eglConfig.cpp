@@ -610,7 +610,8 @@ ParseConfigAttribList(EGLConfig_t *conf, EGLDisplay *dpy, const EGLint *attrib_l
 }
 
 /**
- * Compare function between two configs based on the conditions specified by CompareConfigs.
+ * Compare predicate between two configs based on a list of criteria and the conditions
+ * specified by CompareConfigs.
  */
 struct EGLConfigComparator: public std::binary_function<EGLConfig_t, EGLConfig_t, bool>
 {
@@ -622,6 +623,9 @@ struct EGLConfigComparator: public std::binary_function<EGLConfig_t, EGLConfig_t
     }
 };
 
+/**
+ * Returns a list of sorted configs that match the given criteria
+ */
 EGLBoolean
 FilterConfigArray(EGLConfig_t **configs, EGLint config_size, EGLint *num_config, const EGLConfig_t *criteria)
 {
