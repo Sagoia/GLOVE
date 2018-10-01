@@ -1,4 +1,3 @@
-APP_PLATFORM=24
 
 LOCAL_PATH := $(abspath $(call my-dir))
 SRC_PATH := $(LOCAL_PATH)/../..
@@ -34,7 +33,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 # Build libGLESv2.so
 include $(CLEAR_VARS)
-LOCAL_MODULE := libGLESv2
+LOCAL_MODULE := libGLESv2_GLOVE
 LOCAL_SRC_FILES :=  $(SRC_PATH)/GLES/source/api/gl.cpp \
                     $(SRC_PATH)/GLES/source/api/eglInterface.cpp \
                     $(SRC_PATH)/GLES/source/context/context.cpp \
@@ -110,20 +109,35 @@ LOCAL_C_INCLUDES := $(SRC_PATH)/GLES/source \
                     $(LOADER_PATH)/include \
                     /usr/include/android
 
-LOCAL_STATIC_LIBRARIES := glslang-prebuilt \
-                          OSDependent-prebuilt \
-                          OGLCompiler-prebuilt \
-                          SPIRV-prebuilt \
-                          HLSL-prebuilt
+LOCAL_STATIC_LIBRARIES := \
+                    glslang-prebuilt \
+                    OSDependent-prebuilt \
+                    OGLCompiler-prebuilt \
+                    SPIRV-prebuilt \
+                    HLSL-prebuilt
 
-LOCAL_LDLIBS += -llog -lm -lvulkan
-LOCAL_CXXFLAGS += -DVK_USE_PLATFORM_ANDROID_KHR -pthread
+LOCAL_LDLIBS   += -llog \
+                  -lm \
+                  -lvulkan
+
+LOCAL_CXXFLAGS += -pthread \
+                  -DVK_PROTOTYPES \
+                  -DVK_USE_PLATFORM_ANDROID_KHR \
+                  -Wall \
+                  -Wextra \
+                  -Winline \
+                  -Wuninitialized \
+                  -Wno-mismatched-tags \
+                  -frtti \
+                  -DHAVE_PTHREADS
+
+LOCAL_CFLAGS +=   -DVK_USE_PLATFORM_ANDROID_KHR
 
 include $(BUILD_SHARED_LIBRARY)
 
 # Build libEGL.so
 include $(CLEAR_VARS)
-LOCAL_MODULE := libEGL
+LOCAL_MODULE := libEGL_GLOVE
 LOCAL_SRC_FILES := $(SRC_PATH)/EGL/source/api/eglContext.cpp \
                    $(SRC_PATH)/EGL/source/api/eglConfig.cpp \
                    $(SRC_PATH)/EGL/source/api/egl.cpp \
@@ -146,9 +160,20 @@ LOCAL_C_INCLUDES := $(SRC_PATH)/EGL/source \
                     $(SRC_PATH)/GLES/include \
                     /usr/include/android
 
-LOCAL_SHARED_LIBRARIES :=  libGLESv2
-LOCAL_LDLIBS    +=        -llog -lz -lvulkan -landroid
-LOCAL_CXXFLAGS +=         -DVK_USE_PLATFORM_ANDROID_KHR -Wno-unused-private-field
-LOCAL_CFLAGS +=           -DVK_USE_PLATFORM_ANDROID_KHR
+LOCAL_SHARED_LIBRARIES :=  libGLESv2_GLOVE
+LOCAL_LDLIBS           +=  -llog -lz -lvulkan -landroid
+LOCAL_CXXFLAGS += -pthread \
+                  -DVK_PROTOTYPES \
+                  -DVK_USE_PLATFORM_ANDROID_KHR \
+                  -Wall \
+                  -Wextra \
+                  -Winline \
+                  -Wuninitialized \
+                  -Wno-mismatched-tags \
+                  -frtti \
+                  -Wno-unused-private-field \
+                  -DHAVE_PTHREADS
+
+LOCAL_CFLAGS +=   -DVK_USE_PLATFORM_ANDROID_KHR
 
 include $(BUILD_SHARED_LIBRARY)

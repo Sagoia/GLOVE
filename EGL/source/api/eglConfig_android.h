@@ -41,8 +41,8 @@ const EGLConfig_t EglConfigs[4] = {
                     EGL_OPENGL_ES2_BIT,   // RenderableType
                               EGL_NONE,   // MatchNativePixmap
                                    0x4,   // Conformant
-                              EGL_TRUE,   // RecordableAndroid
-                              EGL_TRUE},  // FramebufferTargetAndroid
+                             EGL_FALSE,   // RecordableAndroid
+                             EGL_FALSE},  // FramebufferTargetAndroid
                                    
                                    { 0,   // Display
                                     24,   // BufferSize

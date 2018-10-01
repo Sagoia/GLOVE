@@ -27,7 +27,12 @@
  */
 
 #include "glLogger.h"
-#include "simpleLoggerImpl.h"
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+    #include "androidLoggerImpl.h"
+#else
+    #include "simpleLoggerImpl.h"
+#endif //VK_USE_PLATFORM_ANDROID_KHR
 #include <string.h>
 
 GLLogger *GLLogger::mInstance = nullptr;
@@ -47,7 +52,11 @@ void
 GLLogger::SetLoggerImpl()
 {
     if(!mLoggerImpl) {
-        mLoggerImpl = new SimpleLoggerImpl();
+        #ifdef VK_USE_PLATFORM_ANDROID_KHR
+            mLoggerImpl = new AndroidGLLoggerImpl();
+        #else
+            mLoggerImpl = new SimpleLoggerImpl();
+        #endif //VK_USE_PLATFORM_ANDROID_KHR
     }
 }
 
@@ -91,7 +100,6 @@ GLLogger::CalculateSpacesAfter(const char *func, glLogLevel_e level)
 void
 GLLogger::WriteFunEntry(glLogLevel_e level, const char* filename, const char *func, int line)
 {
-
     char log[200];
     snprintf(log, 200, "%*s%s()%*s  [ %s: %d  Context: c1 ]", CalculateSpacesBefore(level), "", func, CalculateSpacesAfter(func, level), "", filename, line);
     mLoggerImpl->WriteLog(level, log);

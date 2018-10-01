@@ -12,35 +12,35 @@
  */
 
 /**
- *  @file       simpleLoggerImpl.h
+ *  @file       androidLoggerImpl.h
  *  @author     Think Silicon
- *  @date       25/07/2018
+ *  @date
  *  @version    1.0
  *
- *  @brief      A Logger implementation based on printf
+ *  @brief      A Logger implementation for android
  *
  */
 
-#ifndef __SIMPLELOGGERIMPL_H__
-#define __SIMPLELOGGERIMPL_H__
+// #ifndef __ANDROIDLOGGERIMPL_H__
+// #define __ANDROIDLOGGERIMPL_H__
 
 #include "eglLoggerImpl.h"
+#include <android/log.h>
 
 #define PRINTABLE_LOG_LEVEL EGL_LOG_DEBUG
 
-class SimpleLoggerImpl : public EGLLoggerImpl {
+class AndroidEGLLoggerImpl : public EGLLoggerImpl {
 public:
-    SimpleLoggerImpl() { }
-    ~SimpleLoggerImpl() { }
+    AndroidEGLLoggerImpl() { }
+    ~AndroidEGLLoggerImpl() { }
 
     void                   Initialize() override { }
     void                   Destroy() override    { }
     void                   WriteLog(eglLogLevel_e level, const char *log) override
     {
         if(level >= PRINTABLE_LOG_LEVEL) {
-            printf("[EGL] %s\n", log);
+            __android_log_print(ANDROID_LOG_WARN, "GLOVE_EGL", "%s", log);
         }
     }
 };
-
-#endif //__SIMPLELOGGERIMPL_H__
+//#endif //__ANDROIDLOGGERIMPL_H__

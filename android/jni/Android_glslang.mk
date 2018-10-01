@@ -1,10 +1,16 @@
+
 LOCAL_PATH := $(abspath $(call my-dir))
 SRC_PATH := $(LOCAL_PATH)/../../External/glslang
 GLSLANG_OS_FLAGS := -DGLSLANG_OSINCLUDE_UNIX
 
 include $(CLEAR_VARS)
-LOCAL_MODULE:=SPIRV
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
+LOCAL_MODULE := SPIRV
+LOCAL_CXXFLAGS := \
+                -std=c++11 \
+                -fno-exceptions \
+                -fno-rtti \
+                $(GLSLANG_OS_FLAGS)
+
 LOCAL_EXPORT_C_INCLUDES:=$(SRC_PATH)
 LOCAL_SRC_FILES:= \
                 $(SRC_PATH)/SPIRV/GlslangToSpv.cpp \
@@ -14,14 +20,20 @@ LOCAL_SRC_FILES:= \
                 $(SRC_PATH)/SPIRV/SpvBuilder.cpp \
                 $(SRC_PATH)/SPIRV/disassemble.cpp \
                 $(SRC_PATH)/SPIRV/doc.cpp
+
 LOCAL_C_INCLUDES:=$(SRC_PATH) $(SRC_PATH)/glslang/SPIRV
 LOCAL_EXPORT_C_INCLUDES:=$(SRC_PATH)/glslang/SPIRV
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE:=OSDependent
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
-LOCAL_EXPORT_C_INCLUDES:=$(SRC_PATH)
+LOCAL_MODULE := OSDependent
+LOCAL_CXXFLAGS := \
+                -std=c++11 \
+                -fno-exceptions \
+                -fno-rtti \
+                $(GLSLANG_OS_FLAGS)
+
+LOCAL_EXPORT_C_INCLUDES := $(SRC_PATH)
 LOCAL_SRC_FILES:=$(SRC_PATH)/glslang/OSDependent/Unix/ossource.cpp
 LOCAL_C_INCLUDES:=$(SRC_PATH) $(SRC_PATH)/glslang/OSDependent/Unix/
 LOCAL_EXPORT_C_INCLUDES:=$(SRC_PATH)/glslang/OSDependent/Unix/
@@ -29,7 +41,11 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=OGLCompiler
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
+LOCAL_CXXFLAGS:=-std=c++11 \
+                -fno-exceptions \
+                -fno-rtti \
+                $(GLSLANG_OS_FLAGS)
+
 LOCAL_EXPORT_C_INCLUDES:=$(SRC_PATH)
 LOCAL_SRC_FILES:=$(SRC_PATH)/OGLCompilersDLL/InitializeDll.cpp
 LOCAL_C_INCLUDES:=$(SRC_PATH)/OGLCompiler
@@ -55,9 +71,12 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 GLSLANG_OUT_PATH=$(abspath $(TARGET_OUT))
-# GLSLANG_OUT_PATH=$(if $(call host-path-is-absolute,$(TARGET_OUT)),$(TARGET_OUT),$(abspath $(TARGET_OUT)))
 LOCAL_MODULE:=glslang
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
+LOCAL_CXXFLAGS:=-std=c++11 \
+                -fno-exceptions \
+                -fno-rtti \
+                $(GLSLANG_OS_FLAGS)
+
 LOCAL_EXPORT_C_INCLUDES:=$(SRC_PATH)
 LOCAL_SRC_FILES:= \
                 $(SRC_PATH)/glslang/GenericCodeGen/CodeGen.cpp \
@@ -90,8 +109,15 @@ LOCAL_SRC_FILES:= \
                 $(SRC_PATH)/glslang/MachineIndependent/preprocessor/PpScanner.cpp \
                 $(SRC_PATH)/glslang/MachineIndependent/preprocessor/PpTokens.cpp \
 
-LOCAL_C_INCLUDES:=$(SRC_PATH) \
-        $(SRC_PATH)/glslang/MachineIndependent \
-        $(GLSLANG_OUT_PATH)
-LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV HLSL
+LOCAL_C_INCLUDES:= \
+                $(SRC_PATH) \
+                $(SRC_PATH)/glslang/MachineIndependent \
+                $(GLSLANG_OUT_PATH)
+
+LOCAL_STATIC_LIBRARIES:= \
+                OSDependent \
+                OGLCompiler \
+                SPIRV \
+                HLSL
+
 include $(BUILD_STATIC_LIBRARY)

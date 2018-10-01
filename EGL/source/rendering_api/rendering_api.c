@@ -28,6 +28,17 @@
 #include <dlfcn.h>
 #include <stdbool.h>
 
+/*
+There GLESv2 library is defined under a different name on Android platform
+because the dlopen() function gives pririority to system libraries and thus loads the
+system's GLESv2.
+*/
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+    #define GLESv2_LIBRARY_NAME "libGLESv2_GLOVE.so"
+#else
+    #define GLESv2_LIBRARY_NAME "libGLESv2.so"
+#endif //VK_USE_PLATFORM_ANDROID_KHR
+
 typedef struct rendering_api_library_info {
     bool initialized;
     void *handle;
@@ -123,7 +134,7 @@ rendering_api_return_e RENDERING_API_init_api(EGLenum api, uint32_t client_versi
                 api_interface = gles1_interface;
                 library_info = &gles1_library_info;
             } else {
-                api_library_name = "libGLESv2.so";
+                api_library_name = GLESv2_LIBRARY_NAME;
                 api_interface_name = "GLES2Interface";
                 api_interface = gles2_interface;
                 library_info = &gles2_library_info;

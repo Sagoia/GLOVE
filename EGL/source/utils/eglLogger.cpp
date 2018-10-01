@@ -27,7 +27,12 @@
  */
 
 #include "eglLogger.h"
-#include "simpleLoggerImpl.h"
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+    #include "androidLoggerImpl.h"
+#else
+    #include "simpleLoggerImpl.h"
+#endif //VK_USE_PLATFORM_ANDROID_KHR
 #include <string.h>
 
 EGLLogger *EGLLogger::mInstance = nullptr;
@@ -47,7 +52,11 @@ void
 EGLLogger::SetLoggerImpl()
 {
     if(!mLoggerImpl) {
-        mLoggerImpl = new SimpleLoggerImpl();
+        #ifdef VK_USE_PLATFORM_ANDROID_KHR
+            mLoggerImpl = new AndroidEGLLoggerImpl();
+        #else
+            mLoggerImpl = new SimpleLoggerImpl();
+        #endif //VK_USE_PLATFORM_ANDROID_KHR
     }
 }
 
@@ -69,6 +78,10 @@ EGLLogger::DestroyInstance()
     if(mInstance) {
         delete mInstance;
         mInstance = nullptr;
+    }
+
+    if(mLoggerImpl) {
+        delete mLoggerImpl;
     }
 }
 
