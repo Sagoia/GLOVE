@@ -55,7 +55,7 @@ private:
     std::vector<uint32_t> mFragSpv;
 
     void CleanUp(void);
-    const char* ConvertShader(ShaderProgram& program, shader_type_t shaderType);
+    const char* ConvertShader(ShaderProgram& program, shader_type_t shaderType, bool isYInverted);
     void CompileShader400(ShaderProgram& program, shader_type_t shaderType);
     void DumpSlangProgramReflection(const glslang::TProgram* prog) const;
     bool InitializeGlslang(void);
@@ -108,6 +108,7 @@ public:
     bool CompileFragmentShader(const char* const* source) override;
     const char* GetProgramInfoLog(void) override;
     const char* GetShaderInfoLog(shader_type_t shaderType) override;
+    bool PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted) override;
     bool LinkProgram(ShaderProgram& shaderProgram) override;
     void PrepareReflection(void) override;
     uint32_t SerializeReflection(void* binary) override;

@@ -65,6 +65,8 @@ Context::Context()
     mWriteFBO     = nullptr;
     mSystemFBO    = nullptr;
     mExplicitIbo  = nullptr;
+    //If VK_KHR_maintenance1 is supported, then there is no need to invert the Y
+    mIsYInverted  = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
 }
 
 Context::~Context()

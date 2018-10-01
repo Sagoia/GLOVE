@@ -143,7 +143,7 @@ GlslangShaderCompiler::GetShaderInfoLog(shader_type_t shaderType)
 }
 
 const char*
-GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shaderType)
+GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shaderType, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -155,7 +155,7 @@ GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shade
     mShaderConverter->Initialize(ShaderConverter::SHADER_CONVERSION_100_400, shaderType);
     mShaderConverter->SetSlangProgram(mSlangProgLinker->GetSlangProgram());
     mShaderConverter->SetIoMapResolver(mSlangProgLinker->GetIoMapResolver());
-    mShaderConverter->Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection);
+    mShaderConverter->Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection, isYInverted);
     if(mSaveSourceToFiles) {
         SaveShaderSourceToFile(&program, true, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource400.c_str() : mFragSource400.c_str(), shaderType);
     }
@@ -187,7 +187,7 @@ GlslangShaderCompiler::PrepareReflection(void)
 }
 
 bool
-GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
+GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -200,27 +200,31 @@ GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
         SaveShaderSourceToFile(&shaderProgram, false, mFragSource.c_str(), SHADER_TYPE_FRAGMENT);
     }
 
-    Shader* vertex = shaderProgram.GetVertexShader();
-    assert(vertex);
-
     mVertSource400 = string(mVertSource);
-    const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX);
+    const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
     result = mSlangVertCompiler->CompileShader400(&source, &slangShaderResources, EShLangVertex);
     if(!result) {
         return false;
     }
 
-    Shader* fragment = shaderProgram.GetFragmentShader();
-    assert(fragment);
-
     mFragSource400 = string(mFragSource);
-    source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT);
+    source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
     result = mSlangFragCompiler->CompileShader400(&source, &slangShaderResources, EShLangFragment);
     if(!result) {
         return false;
     }
+    return result;
+}
 
-    result = mSlangProgLinker->LinkProgram(mSlangVertCompiler->GetSlangShader400(),
+bool
+GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
+{
+    Shader* vertex = shaderProgram.GetVertexShader();
+    assert(vertex);
+
+    Shader* fragment = shaderProgram.GetFragmentShader();
+    assert(fragment);
+    bool result = mSlangProgLinker->LinkProgram(mSlangVertCompiler->GetSlangShader400(),
                                            mSlangFragCompiler->GetSlangShader400());
     if(!result) {
         return false;

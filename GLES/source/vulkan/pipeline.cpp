@@ -81,20 +81,20 @@ Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewpo
 
     viewportW = std::min(viewportW, fboWidth);
     viewportH = std::min(viewportH, fboHeight);
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-    //Andoird 7: the "VK_KHR_maintenance1" is not supported, so no coordinate conversion is required here
-    int viewportYinv = viewportY;
-    int viewportHinv = viewportH;
-#else
-    int viewportYinv = fboHeight - viewportY;
-    int viewportHinv = -viewportH;
-#endif
+    int viewportYinv = 0, viewportHinv = 0;
+    if(mVkContext->mIsMaintenanceExtSupported) {
+        viewportYinv = fboHeight - viewportY;
+        viewportHinv = -viewportH;
+    } else {
+        viewportYinv = viewportY;
+        viewportHinv = viewportH;
+    }
 
     mVkViewport = {
                    (float)viewportX, (float)viewportYinv,
                    (float)viewportW, (float)viewportHinv,
                    minDepth , maxDepth};
-                  }
+}
 
 void
 Pipeline::ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH)

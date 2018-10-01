@@ -443,7 +443,14 @@ ShaderProgram::LinkProgram()
 
     mShaderCompiler->PrepareReflection();
     UpdateAttributeInterface();
+    mLinked = mShaderCompiler->PreprocessShaders(*this, mGLContext->GetIsYInverted());
+    if(!mLinked) {
+        return false;
+    }
     mLinked = mShaderCompiler->LinkProgram(*this);
+    if(!mLinked) {
+        return false;
+    }
     BuildShaderResourceInterface();
 
     /// A program object will fail to link if the number of active vertex attributes exceeds GL_MAX_VERTEX_ATTRIBS

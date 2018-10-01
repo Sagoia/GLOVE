@@ -40,7 +40,7 @@ public:
     ShaderConverter();
     ~ShaderConverter();
 
-    void Convert(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection);
+    void Convert(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void Initialize(shader_conversion_type_t conversionType, shader_type_t shaderType);
 
     void SetSlangProgram(glslang::TProgram* slangProgram)                       { FUN_ENTRY(GL_LOG_TRACE); mSlangProg = slangProgram; }
@@ -61,11 +61,12 @@ private:
     glslang::TProgram*          mSlangProg;
     const GlslangIoMapResolver *mIoMapResolver;
 
-    void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection);
+    void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void ProcessHeader(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessUniforms(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessVaryings(string& source);
     void ProcessVertexAttributes(string& source, ShaderReflection* reflection);
+    void ConvertGLToVulkanYCoords(string& source, bool isYInverted);
     void ConvertGLToVulkanDepthRange(string& source);
 
 };

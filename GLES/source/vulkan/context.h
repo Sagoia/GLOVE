@@ -48,6 +48,7 @@ namespace vulkanAPI {
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
         vkSyncItems_t                                       *vkSyncItems;
+        bool                                                mIsMaintenanceExtSupported;
     } vkContext_t;
 
     vkContext_t *                     GetContext();

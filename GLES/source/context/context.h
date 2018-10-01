@@ -59,7 +59,7 @@ private:
     vulkanAPI::Pipeline *                       mPipeline;
     vulkanAPI::ClearPass *                      mClearPass;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
-
+    bool                                        mIsYInverted;
 // ------------
     void        *                               mWriteSurface;
     void        *                               mReadSurface;
@@ -118,11 +118,12 @@ public:
 
 // Get Functions
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
+    inline  bool            GetIsYInverted(void)                           const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
 
 // Set Functions
-            void             SetWriteSurface(EGLSurfaceInterface *eglSurfaceInterface);
-            void             SetReadSurface(EGLSurfaceInterface *eglSurfaceInterface);
-    inline  void             SetNextImageIndex(uint32_t imageIndex)               { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
+            void            SetWriteSurface(EGLSurfaceInterface *eglSurfaceInterface);
+            void            SetReadSurface(EGLSurfaceInterface *eglSurfaceInterface);
+    inline  void            SetNextImageIndex(uint32_t imageIndex)               { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
 
 // GL API core functions
     void            ActiveTexture(GLenum texture);

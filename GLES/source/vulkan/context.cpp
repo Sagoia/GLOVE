@@ -45,13 +45,9 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
                                                                     VK_KHR_DISPLAY_EXTENSION_NAME};
 #endif
 
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME
-                                                                   };
-#else
-static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-                                                                   "VK_KHR_maintenance1"};
-#endif
+static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+static const std::vector<const char*> usefulDeviceExtensions     = {"VK_KHR_maintenance1"};
 
 static       char **enabledInstanceLayers           = NULL;
 
@@ -187,6 +183,16 @@ CheckVkDeviceExtensions(void)
         for(uint32_t j = 0; j < requiredDeviceExtensions.size(); ++j) {
             if(!strcmp(requiredDeviceExtensions[j], vkExtensionProperties[i].extensionName)) {
                 requiredExtensionsAvailable[j] = true;
+                break;
+            }
+        }
+    }
+
+    GetContext()->mIsMaintenanceExtSupported = false;
+    for(uint32_t i = 0; i < extensionCount; ++i) {
+        for(uint32_t j = 0; j < usefulDeviceExtensions.size(); ++j) {
+            if(!strcmp(usefulDeviceExtensions[j], vkExtensionProperties[i].extensionName)) {
+                GetContext()->mIsMaintenanceExtSupported = true;
                 break;
             }
         }

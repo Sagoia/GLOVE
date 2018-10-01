@@ -84,19 +84,19 @@ ShaderConverter::~ShaderConverter()
 }
 
 void
-ShaderConverter::Convert(std::string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection)
+ShaderConverter::Convert(std::string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(mConversionType) {
-        case SHADER_CONVERSION_100_400 : Convert100To400(source, uniformBlockMap, reflection); break;
+        case SHADER_CONVERSION_100_400 : Convert100To400(source, uniformBlockMap, reflection, isYInverted); break;
         case INVALID_SHADER_CONVERSION : NOT_REACHED(); break;
         default: break;
     }
 }
 
 void
-ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection)
+ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -106,6 +106,7 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
     ProcessVertexAttributes(source, reflection);
 
     if(mShaderType == SHADER_TYPE_VERTEX) {
+        ConvertGLToVulkanYCoords(source, isYInverted);
         ConvertGLToVulkanDepthRange(source);
     }
 }
@@ -328,17 +329,25 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 
 }
 
-// This adds overhead in Vertex Shader. Is there any better way to convert GL to Vulkan depth range?
+void
+ShaderConverter::ConvertGLToVulkanYCoords(string& source, bool isYInverted)
+{
+    if(!isYInverted){
+        return;
+    }
+    // Find last "}"
+    size_t pos = source.rfind("}");
+    //Android 7: the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
+    string GlToVkViewportConversion   = string("    gl_Position.y = -gl_Position.y;\n");
+    source.insert(pos, GlToVkViewportConversion);
+}
+
 void
 ShaderConverter::ConvertGLToVulkanDepthRange(string& source)
 {
     // Find last "}"
     size_t pos = source.rfind("}");
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-    //Andoird 7: the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
-    string GlToVkViewportConversion   = string("    gl_Position.y = -gl_Position.y;\n");
-    source.insert(pos, GlToVkViewportConversion);
-#endif
+
     string GlToVkDepthRangeConversion = string("    gl_Position.z = (gl_Position.z + gl_Position.w) / 2.0;\n");
     source.insert(pos, GlToVkDepthRangeConversion);
 }

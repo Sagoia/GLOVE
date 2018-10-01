@@ -38,6 +38,7 @@ public:
     virtual bool CompileFragmentShader(const char* const* source) = 0;
     virtual const char* GetProgramInfoLog(void) = 0;
     virtual const char* GetShaderInfoLog(shader_type_t shaderType) = 0;
+    virtual bool PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted) = 0;
     virtual bool LinkProgram(ShaderProgram& shaderProgram) = 0;
     virtual void PrepareReflection(void) = 0;
     virtual uint32_t SerializeReflection(void* binary) = 0;
