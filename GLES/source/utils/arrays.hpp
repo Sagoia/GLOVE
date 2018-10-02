@@ -139,6 +139,15 @@ public:
 
         return ~0;
     }
+
+    /**
+     * @brief Returns the map container for a specific class.
+     * @return The map container.
+     */
+    map<uint32_t, ELEMENT *> *GetObjects(void)
+    {
+        return &mObjects;
+    }
 };
 
 #endif // __ARRAYS_HPP__

@@ -44,6 +44,20 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
         rendbuff->SetCommandBufferManager(mCommandBufferManager);
         rendbuff->SetTarget(target);
         rendbuff->InitTexture();
+
+        ObjectArray<Framebuffer> *fbs = mResourceManager->GetFramebufferArray();
+        for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
+
+            Framebuffer *fb = it->second;
+            if(fb->GetColorAttachmentType() == GL_RENDERBUFFER && renderbuffer == fb->GetColorAttachmentName()) {
+                fb->SetUpdated();
+            } else if(fb->GetDepthAttachmentType()   == GL_RENDERBUFFER && renderbuffer == fb->GetDepthAttachmentName()) {
+                fb->SetUpdated();
+            } else if(fb->GetStencilAttachmentType() == GL_RENDERBUFFER && renderbuffer == fb->GetStencilAttachmentName()) {
+                fb->SetUpdated();
+            }
+        }
     }
     mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(renderbuffer);
 }
@@ -62,30 +76,32 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
         uint32_t index = *renderbuffers++;
 
         if(index && mResourceManager->RenderbufferExists(index)) {
-            Renderbuffer *rbo = mResourceManager->GetRenderbuffer(index);
 
             if( mWriteFBO != mSystemFBO &&
-               (rbo->GetTexture() == mWriteFBO->GetColorAttachmentTexture()    ||
-                rbo->GetTexture() == mWriteFBO->GetDepthAttachmentTexture()    ||
-                rbo->GetTexture() == mWriteFBO->GetStencilAttachmentTexture()) &&
+               (index == mWriteFBO->GetColorAttachmentName()    ||
+                index == mWriteFBO->GetDepthAttachmentName()    ||
+                index == mWriteFBO->GetStencilAttachmentName()) &&
                 mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+
+                if(index == mWriteFBO->GetColorAttachmentName()) {
+                    mWriteFBO->SetRenderState(Framebuffer::DELETE);
+                }
+
                 Finish();
             }
 
-            if(rbo->GetTexture() == mWriteFBO->GetColorAttachmentTexture()) {
+            if(index == mWriteFBO->GetColorAttachmentName()) {
                 mWriteFBO->SetColorAttachmentTexture(nullptr);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
             }
 
-            if(rbo->GetTexture() == mWriteFBO->GetDepthAttachmentTexture()) {
-                mWriteFBO->SetDepthAttachmentTexture(nullptr);
+            if(index == mWriteFBO->GetDepthAttachmentName()) {
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
             }
 
-            if(rbo->GetTexture() == mWriteFBO->GetStencilAttachmentTexture()) {
-                mWriteFBO->SetStencilAttachmentTexture(nullptr);
+            if(index == mWriteFBO->GetStencilAttachmentName()) {
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
             }

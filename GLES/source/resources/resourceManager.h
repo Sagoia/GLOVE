@@ -30,7 +30,6 @@
 #include "resources/renderbuffer.h"
 #include "resources/shader.h"
 #include "resources/texture.h"
-#include "utils/arrays.hpp"
 #include "utils/cacheManager.h"
 
 typedef enum {
@@ -90,6 +89,10 @@ public:
 // Get Functions
     inline std::vector<GenericVertexAttribute>& GetGenericVertexAttributes(void) { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes;}
     inline GenericVertexAttribute* GetGenericVertexAttribute(size_t index)      { FUN_ENTRY(GL_LOG_TRACE); return &mGenericVertexAttributes[index];}
+
+    inline TextureArray       *GetTextureArray(void)                            { FUN_ENTRY(GL_LOG_TRACE); return &mTextures; }
+    inline RenderbufferArray  *GetRenderbufferArray(void)                       { FUN_ENTRY(GL_LOG_TRACE); return &mRenderbuffers; }
+    inline FramebufferArray   *GetFramebufferArray(void)                        { FUN_ENTRY(GL_LOG_TRACE); return &mFramebuffers; }
 
     inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
     inline Texture *           GetDefaultTexture(GLenum target)                 { FUN_ENTRY(GL_LOG_TRACE); return target == GL_TEXTURE_2D ? mDefaultTexture2D : mDefaultTextureCubeMap; }

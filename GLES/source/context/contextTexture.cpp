@@ -51,7 +51,6 @@ Context::BindTexture(GLenum target, GLuint texture)
     if(texture)
     {
         tex = mResourceManager->GetTexture(texture);
-
         if(tex->GetTarget() == GL_INVALID_VALUE) {
             tex->SetVkContext(mVkContext);
             tex->SetCommandBufferManager(mCommandBufferManager);
@@ -66,6 +65,22 @@ Context::BindTexture(GLenum target, GLuint texture)
             RecordError(GL_INVALID_OPERATION);
             return;
         }
+
+        ObjectArray<Framebuffer> *fbs = mResourceManager->GetFramebufferArray();
+        for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
+
+            Framebuffer *fb = it->second;
+
+            if(fb->GetColorAttachmentType() == GL_TEXTURE && texture == fb->GetColorAttachmentName()) {
+                fb->SetUpdated();
+            } else if(fb->GetDepthAttachmentType()   == GL_TEXTURE && texture == fb->GetDepthAttachmentName()) {
+                fb->SetUpdated();
+            } else if(fb->GetStencilAttachmentType() == GL_TEXTURE && texture == fb->GetStencilAttachmentName()) {
+                fb->SetUpdated();
+            }
+        }
+
     } else {
         tex = mResourceManager->GetDefaultTexture(target);
     }
@@ -90,9 +105,12 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
         uint32_t texture = *textures++;
 
         if (texture && mResourceManager->TextureExists(texture)) {
-            Texture *tex = mResourceManager->GetTexture(texture);
 
             if( mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+
+                if(texture == mWriteFBO->GetColorAttachmentName()) {
+                    mWriteFBO->SetRenderState(Framebuffer::DELETE);
+                }
                 Finish();
             }
 
@@ -103,17 +121,16 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
             }
 
             if(texture == mWriteFBO->GetDepthAttachmentName()) {
-                mWriteFBO->SetDepthAttachmentTexture(nullptr);
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
             }
 
             if(texture == mWriteFBO->GetStencilAttachmentName()) {
-                mWriteFBO->SetStencilAttachmentTexture(nullptr);
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
             }
 
+            Texture *tex  = mResourceManager->GetTexture(texture);
             GLenum target = tex->GetTarget();
             for(int i = 0; i < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS && target != GL_INVALID_VALUE; ++i) {
                 if(mStateManager.GetActiveObjectsState()->EqualsActiveTexture(target, i, tex)) {
@@ -374,18 +391,13 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-    Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
-
-    if( mWriteFBO != mSystemFBO &&
-       (activeTexture == mWriteFBO->GetColorAttachmentTexture()    ||
-        activeTexture == mWriteFBO->GetDepthAttachmentTexture()    ||
-        activeTexture == mWriteFBO->GetStencilAttachmentTexture()) &&
-        mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
         Finish();
     }
 
     // copy the buffer contents to the texture
+    Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
+    GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
     activeTexture->SetState(width, height, level, layer, format, type, mStateManager.GetPixelStorageState()->GetPixelStoreUnpack(), pixels);
 
     if(activeTexture->IsCompleted()) {
@@ -444,6 +456,10 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
     // TODO:: We could pass a default subtexture instead
     if(pixels == nullptr) {
         return;
+    }
+
+    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        Finish();
     }
 
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
@@ -512,6 +528,10 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
+    if(fbTexture == nullptr) {
+        return;
+    }
+
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
 
     const GLenum fbFormat = fbTexture->GetFormat();
@@ -526,8 +546,8 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     GLenum dstInternalFormat = internalformat;
     GLenum dstType           = GlInternalFormatToGlType(dstInternalFormat);
     ImageRect srcRect(x, y, width, height,
-                      GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetType()),
-                      GlTypeToElementSize(fbTexture->GetType()),
+                      GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetExplicitType()),
+                      GlTypeToElementSize(fbTexture->GetExplicitType()),
                       Texture::GetDefaultInternalAlignment());
     ImageRect dstRect(0, 0, width, height,
                       GlInternalFormatTypeToNumElements(dstInternalFormat, dstType),
@@ -589,48 +609,50 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
+    if(fbTexture == nullptr) {
+        return;
+    }
 
-    const GLenum fbFormat = fbTexture->GetFormat();
+    const GLenum fbFormat       = fbTexture->GetFormat();
     const GLenum internalformat = activeTexture->GetInternalFormat();
-    if((fbFormat == GL_ALPHA && internalformat != GL_ALPHA) ||
-       (fbFormat == GL_RGB &&(internalformat != GL_LUMINANCE && internalformat != GL_RGB))) {
+    if((fbFormat == GL_ALPHA &&  internalformat != GL_ALPHA) ||
+       (fbFormat == GL_RGB   && (internalformat != GL_LUMINANCE && internalformat != GL_RGB))) {
        RecordError(GL_INVALID_OPERATION);
        return;
     }
+
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
-     GLenum srcInternalFormat = fbTexture->GetExplicitInternalFormat();
-     GLenum dstInternalFormat = internalformat;
-     ImageRect srcRect(x,       y,       width, height,
-                       GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetType()),
-                       GlTypeToElementSize(fbTexture->GetType()),
-                       Texture::GetDefaultInternalAlignment());
-     ImageRect dstRect(xoffset, yoffset, width, height,
-                       GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetType()),
-                       GlTypeToElementSize(activeTexture->GetType()),
-                       Texture::GetDefaultInternalAlignment());
+    GLenum srcInternalFormat = fbTexture->GetExplicitInternalFormat();
+    GLenum dstInternalFormat = internalformat;
+    ImageRect srcRect(x,       y,       width, height,
+                      GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetExplicitType()),
+                      GlTypeToElementSize(fbTexture->GetExplicitType()),
+                      Texture::GetDefaultInternalAlignment());
+    ImageRect dstRect(xoffset, yoffset, width, height,
+                      GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetType()),
+                      GlTypeToElementSize(activeTexture->GetType()),
+                      Texture::GetDefaultInternalAlignment());
 
-     const size_t stageSize = dstRect.GetRectBufferSize();
-     uint8_t *stagePixels = new uint8_t[stageSize];
-     srcRect.y = fbTexture->GetInvertedYOrigin(&srcRect);
+    const size_t stageSize = dstRect.GetRectBufferSize();
+    uint8_t *stagePixels = new uint8_t[stageSize];
+    srcRect.y = fbTexture->GetInvertedYOrigin(&srcRect);
 
-     // copy the framebuffer subcontents to the temp buffer
-     // and convert them to the texture's internal format
-     fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, layer, dstInternalFormat, (void *)stagePixels);
+    // copy the framebuffer subcontents to the temp buffer
+    // and convert them to the texture's internal format
+    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, layer, dstInternalFormat, (void *)stagePixels);
 
-     srcRect = dstRect;
-     srcRect.x = 0; srcRect.y = 0;
-     // now copy the temp buffer contents to the texture
-     // source and destination rectangles have now similar properties except from their x,y offsets
-     activeTexture->SetSubState(&srcRect, &dstRect, level, layer, dstInternalFormat,
-                                stagePixels);
+    srcRect = dstRect;
+    srcRect.x = 0; srcRect.y = 0;
+    // now copy the temp buffer contents to the texture
+    // source and destination rectangles have now similar properties except from their x,y offsets
+    activeTexture->SetSubState(&srcRect, &dstRect, level, layer, dstInternalFormat, stagePixels);
 
-     delete[] stagePixels;
+    delete[] stagePixels;
 
-     if(activeTexture->IsCompleted()) {
-         // pass contents to the driver
-         activeTexture->Allocate();
-     }
+    if(activeTexture->IsCompleted()) {
+        activeTexture->Allocate();
+    }
 }
 
 void
