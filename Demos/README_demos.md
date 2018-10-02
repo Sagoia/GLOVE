@@ -86,4 +86,5 @@ The application will be automatically installed to the Android device.
 
 To execute the application, tap on the application icon named &#39;**GLOVE\_Demo**&#39;.
 
+![](../Docs/Images/GLOVE_Demo_Android.jpg = 100x){:height="250px"}
 
