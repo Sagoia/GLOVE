@@ -14,8 +14,9 @@ Future planned extensions of GLOVE include the support for OpenGL ES 3.x and Ope
 
 # Prerequisites
 
-As a prerequisite for correct functioning, GLOVE must be linked to a Vulkan driver implementation which supports **VK_KHR_maintenance1** extension, mandatory for OpenGL to Vulkan Coordinates conversion (left handed to right handed coordinate system).
-Also, the minimum Vulkan loader version must be 1.0.24.
+The minimum Vulkan loader version must be 1.0.24.
+
+Optionally, GLOVE supports the **VK_KHR_maintenance1** extension, used for OpenGL to Vulkan Coordinates conversion (left handed to right handed coordinate system).
 
 # Tested with the following configurations
 
