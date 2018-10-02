@@ -293,7 +293,7 @@ Context::GetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, G
         break;
     default:
         RecordError(GL_INVALID_ENUM);
-        break;
+        return;
     }
 
     if(type == GL_NONE && pname != GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE) {
