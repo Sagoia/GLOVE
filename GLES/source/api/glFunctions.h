@@ -4,6 +4,7 @@
 
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
+#include <string>
 #include <unordered_map>
 static const std::unordered_map<std::string, GLPROC> glFPMap = {
 GL_FUNC_PTR(glActiveTexture),
