@@ -72,22 +72,25 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     VkAttachmentReference           depthstencil;
     vector<VkAttachmentDescription> attachments;
 
-    /// Color attachment
-    VkAttachmentDescription attachmentColor;
-    attachmentColor.flags           = 0;
-    attachmentColor.format          = colorFormat;
-    attachmentColor.samples         = VK_SAMPLE_COUNT_1_BIT;
-    attachmentColor.loadOp          = mColorClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachmentColor.storeOp         = mColorWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachmentColor.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachmentColor.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachmentColor.initialLayout   = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachmentColor.finalLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    if(colorFormat != VK_FORMAT_UNDEFINED) {
 
-    attachments.push_back(attachmentColor);
+        /// Color attachment
+        VkAttachmentDescription attachmentColor;
+        attachmentColor.flags           = 0;
+        attachmentColor.format          = colorFormat;
+        attachmentColor.samples         = VK_SAMPLE_COUNT_1_BIT;
+        attachmentColor.loadOp          = mColorClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentColor.storeOp         = mColorWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentColor.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentColor.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentColor.initialLayout   = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachmentColor.finalLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    color.attachment           = attachments.size() - 1;
-    color.layout               = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        attachments.push_back(attachmentColor);
+
+        color.attachment           = attachments.size() - 1;
+        color.layout               = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    }
 
     /// Depth/Stencil attachment
     if(depthstencilFormat != VK_FORMAT_UNDEFINED) {
@@ -112,9 +115,9 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     VkSubpassDescription subpass;
     subpass.pipelineBindPoint       = mVkPipelineBindPoint;
     subpass.flags                   = 0;
-    subpass.colorAttachmentCount    = 1;
-    subpass.pColorAttachments       = &color;
-    subpass.pDepthStencilAttachment = depthstencilFormat != VK_FORMAT_UNDEFINED ? &depthstencil : NULL;
+    subpass.colorAttachmentCount    = colorFormat        != VK_FORMAT_UNDEFINED ? 1             : 0;
+    subpass.pColorAttachments       = colorFormat        != VK_FORMAT_UNDEFINED ? &color        : nullptr;
+    subpass.pDepthStencilAttachment = depthstencilFormat != VK_FORMAT_UNDEFINED ? &depthstencil : nullptr;
     subpass.pResolveAttachments     = NULL;
     subpass.inputAttachmentCount    = 0;
     subpass.pInputAttachments       = NULL;
