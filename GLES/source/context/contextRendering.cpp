@@ -99,44 +99,6 @@ Context::SetClearRect(void)
 }
 
 void
-Context::SetClearAttachments(bool clearColor, bool clearDepth, bool clearStencil) // NOTE: Deprecated function
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    uint32_t j=0;
-    if(clearColor) {
-        if(mClearPass->GetUpdateColorState()) {
-            GLfloat color[4];
-            mStateManager.GetFramebufferOperationsState()->GetClearColor(color);
-            mClearPass->SetColorAttachment(j, color);
-        }
-        j++;
-    }
-
-    if(clearDepth && clearStencil) {
-        if(mClearPass->GetUpdateDepthState() || mClearPass->GetUpdateStencilState()) {
-            GLfloat depth = mStateManager.GetFramebufferOperationsState()->GetClearDepth();
-            GLint stencil = mStateManager.GetFramebufferOperationsState()->GetClearStencil();
-            mClearPass->SetDepthStencilAttachment(j, depth, stencil);
-        }
-        j++;
-    } else if(clearDepth) {
-        if(mClearPass->GetUpdateDepthState()) {
-            GLfloat depth = mStateManager.GetFramebufferOperationsState()->GetClearDepth();
-            mClearPass->SetDepthAttachment(j, depth);
-        }
-        j++;
-    } else if(clearStencil) {
-        if(mClearPass->GetUpdateStencilState()) {
-            GLint stencil = mStateManager.GetFramebufferOperationsState()->GetClearStencil();
-            mClearPass->SetStencilAttachment(j, stencil);
-        }
-        j++;
-    }
-    mClearPass->SetAttachmentsCount(j);
-}
-
-void
 Context::Clear(GLbitfield mask)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
