@@ -83,13 +83,17 @@ Context::ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum form
         Finish();
     }
 
-    Texture* activeTexture   = mWriteFBO->GetColorAttachmentTexture();
+    Texture* activeTexture = mWriteFBO->GetColorAttachmentTexture();
+    if(activeTexture == nullptr) {
+        return;
+    }
+
     GLenum srcInternalFormat = activeTexture->GetExplicitInternalFormat();
     GLenum dstInternalFormat = GlFormatToGlInternalFormat(format, type);
 
     ImageRect srcRect(x, y, width, height,
-                      GlInternalFormatTypeToNumElements(srcInternalFormat, activeTexture->GetType()),
-                      GlTypeToElementSize(activeTexture->GetType()),
+                      GlInternalFormatTypeToNumElements(srcInternalFormat, activeTexture->GetExplicitType()),
+                      GlTypeToElementSize(activeTexture->GetExplicitType()),
                       Texture::GetDefaultInternalAlignment());
     ImageRect dstRect(0, 0, width, height,
                       GlInternalFormatTypeToNumElements(dstInternalFormat, type),
