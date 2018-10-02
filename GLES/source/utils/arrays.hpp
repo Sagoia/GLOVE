@@ -96,6 +96,9 @@ public:
      */
     ELEMENT *GetObject(uint32_t index)
     {
+        if(mCounter < index) {
+            mCounter = index;
+        }
         typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
         if(it != mObjects.end()) {
             return it->second;
