@@ -99,7 +99,7 @@ public:
 
 // Helper Functions
     static int              GetDefaultInternalAlignment()                       { FUN_ENTRY(GL_LOG_TRACE); return mDefaultInternalAlignment; }
-    inline float            GetInvertedYOrigin(const Rect* rect)                { FUN_ENTRY(GL_LOG_TRACE); return mDims.height - rect->height - rect->y; }
+    inline int              GetInvertedYOrigin(const Rect* rect)                { FUN_ENTRY(GL_LOG_TRACE); return mDims.height - rect->height - rect->y; }
     void                    PrepareVkImageLayout(VkImageLayout newImageLayout);
 
 // Create Functions
