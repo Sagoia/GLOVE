@@ -92,7 +92,6 @@ private:
     void InitializeDefaultTextures(void);
 
     void SetClearRect(void);
-    void SetClearAttachments(bool clearColor, bool clearDepth, bool clearStencil);
     bool SetPipelineProgramShaderStages(ShaderProgram *progPtr);
     void SetSystemFramebuffer(Framebuffer *FBO);
 
