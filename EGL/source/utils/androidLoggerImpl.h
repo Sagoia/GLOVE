@@ -21,8 +21,8 @@
  *
  */
 
-// #ifndef __ANDROIDLOGGERIMPL_H__
-// #define __ANDROIDLOGGERIMPL_H__
+// #ifndef __ANDROIDEGLLOGGERIMPL_H__
+// #define __ANDROIDEGLLOGGERIMPL_H__
 
 #include "eglLoggerImpl.h"
 #include <android/log.h>
@@ -43,4 +43,4 @@ public:
         }
     }
 };
-//#endif //__ANDROIDLOGGERIMPL_H__
+//#endif //__ANDROIDEGLLOGGERIMPL_H__
