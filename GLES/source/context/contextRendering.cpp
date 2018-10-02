@@ -41,12 +41,11 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
     uint32_t clearStencilValue = 0;
     if(clearStencilEnabled) {
         clearStencilValue  = mStateManager.GetFramebufferOperationsState()->GetClearStencil();
-        clearStencilValue &= mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
-                             mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack();
     }
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
-    mWriteFBO->PrepareVkImage   (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     mWriteFBO->BeginVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
                static_cast<bool>(mStateManager.GetFramebufferOperationsState()->GetColorMask()),
                                  mStateManager.GetFramebufferOperationsState()->GetDepthMask(),
@@ -60,6 +59,8 @@ void
 Context::SetClearRect(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
+
+    mWriteFBO->IsUpdated();
 
     int x = 0;
     int y = 0;
@@ -126,13 +127,15 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(Framebuffer::CLEAR == mWriteFBO->GetRenderState()) {
+    SetClearRect();
+    if(mWriteFBO->GetRenderState() == Framebuffer::CLEAR) {
         mWriteFBO->SetRenderState(Framebuffer::CLEAR_DRAW);
-    } else if(Framebuffer::IDLE == mWriteFBO->GetRenderState()){
+
+    } else if(mWriteFBO->GetRenderState() == Framebuffer::IDLE) {
         mWriteFBO->SetRenderState(Framebuffer::DRAW);
-        SetClearRect();
         BeginRendering(false,false,false);
-    } else if(Framebuffer::CLEAR_DRAW == mWriteFBO->GetRenderState()) {
+
+    } else if(mWriteFBO->GetRenderState() == Framebuffer::CLEAR_DRAW) {
         mWriteFBO->SetRenderState(Framebuffer::DRAW);
     }
 

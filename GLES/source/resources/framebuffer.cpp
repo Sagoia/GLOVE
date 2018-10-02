@@ -33,7 +33,7 @@
 Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mRenderState(IDLE),
-mUpdated(true), mDepthStencilTexture(nullptr)
+mUpdated(true), mSizeUpdated(true), mDepthStencilTexture(nullptr), mIsSystem(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -50,7 +50,7 @@ Framebuffer::~Framebuffer()
     delete mAttachmentDepth;
     delete mAttachmentStencil;
 
-    if(mDepthStencilTexture) {
+    if(!mIsSystem && mDepthStencilTexture != nullptr) {
         delete mDepthStencilTexture;
         mDepthStencilTexture = nullptr;
     }
@@ -79,6 +79,78 @@ Framebuffer::Release(void)
     mFramebuffers.clear();
 }
 
+Texture *
+Framebuffer::GetColorAttachmentTexture(void) const
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if(mIsSystem) {
+        return mAttachmentColors[mWriteBufferIndex]->GetTexture();
+    }
+
+    Texture * tex   = nullptr;
+    GLenum    type  = GetColorAttachmentType();
+    uint32_t  index = GetColorAttachmentName();
+
+    if(index) {
+        if(type == GL_TEXTURE) {
+            tex = mTextureArray->GetObject(index);
+        } else if(type == GL_RENDERBUFFER) {
+            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+        }
+    }
+
+    return tex;
+}
+
+Texture *
+Framebuffer::GetDepthAttachmentTexture(void) const
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mIsSystem) {
+        return mDepthStencilTexture;
+    }
+
+    Texture * tex   = nullptr;
+    GLenum    type  = GetDepthAttachmentType();
+    uint32_t  index = GetDepthAttachmentName();
+
+    if(index) {
+        if(type == GL_TEXTURE) {
+            tex = mTextureArray->GetObject(index);
+        } else if(type == GL_RENDERBUFFER) {
+            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+        }
+    }
+
+    return tex;
+}
+
+Texture *
+Framebuffer::GetStencilAttachmentTexture(void) const
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mIsSystem) {
+        return mDepthStencilTexture;
+    }
+
+    Texture * tex   = nullptr;
+    GLenum    type  = GetStencilAttachmentType();
+    uint32_t  index = GetStencilAttachmentName();
+
+    if(index) {
+        if(type == GL_TEXTURE) {
+            tex = mTextureArray->GetObject(index);
+        } else if(type == GL_RENDERBUFFER) {
+            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+        }
+    }
+
+    return tex;
+}
+
 void
 Framebuffer::AddColorAttachment(Texture *texture)
 {
@@ -99,18 +171,20 @@ Framebuffer::SetColorAttachmentTexture(Texture *texture)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mAttachmentColors.size() == 0) {
-        Attachment *att = new Attachment(texture);
+        Attachment *att = new Attachment();
         mAttachmentColors.push_back(att);
-    } else {
-        mAttachmentColors[0]->SetTexture(texture);
     }
 
     if(texture) {
         SetWidth(texture->GetWidth());
         SetHeight(texture->GetHeight());
     }
-
-    mUpdated = true;
+    else {
+        SetWidth(-1);
+        SetHeight(-1);
+    }
+    mUpdated     = true;
+    mSizeUpdated = true;
 }
 
 GLenum
@@ -118,49 +192,47 @@ Framebuffer::CheckStatus(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    GLenum colorType = mAttachmentColors.size() == 0 ? GL_NONE : mAttachmentColors[0]->GetType();
-
-    if(colorType                      == GL_NONE  &&
-       mAttachmentDepth->GetType()    == GL_NONE  &&
-       mAttachmentStencil->GetType()  == GL_NONE) {
+    if(GetColorAttachmentType()    == GL_NONE  &&
+       GetDepthAttachmentType()    == GL_NONE  &&
+       GetStencilAttachmentType()  == GL_NONE) {
         return GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
     }
 
-    if((colorType != GL_NONE   &&
-        (!GlFormatIsColorRenderable(mAttachmentColors[0]->GetTexture()->GetInternalFormat()) ||
-         mAttachmentColors[0]->GetTexture()->GetWidth()  <= 0   ||
-         mAttachmentColors[0]->GetTexture()->GetHeight() <= 0   )
+    if((GetColorAttachmentType() != GL_NONE   &&
+        (!GlFormatIsColorRenderable(GetColorAttachmentTexture()->GetInternalFormat()) ||
+         GetColorAttachmentTexture()->GetWidth()  <= 0   ||
+         GetColorAttachmentTexture()->GetHeight() <= 0   )
         ) ||
-       (mAttachmentDepth->GetType() != GL_NONE    &&
-        (!GlFormatIsDepthRenderable(mAttachmentDepth->GetTexture()->GetInternalFormat())  ||
-         mAttachmentDepth->GetTexture()->GetWidth()  <= 0 ||
-         mAttachmentDepth->GetTexture()->GetHeight() <= 0)
+       (GetDepthAttachmentType() != GL_NONE    &&
+        (!GlFormatIsDepthRenderable(GetDepthAttachmentTexture()->GetInternalFormat())  ||
+         GetDepthAttachmentTexture()->GetWidth()  <= 0 ||
+         GetDepthAttachmentTexture()->GetHeight() <= 0)
        ) ||
-       (mAttachmentStencil->GetType() != GL_NONE  &&
-        (!GlFormatIsStencilRenderable(mAttachmentStencil->GetTexture()->GetInternalFormat())  ||
-         mAttachmentStencil->GetTexture()->GetWidth()  <= 0 ||
-         mAttachmentStencil->GetTexture()->GetHeight() <= 0))
+       (GetStencilAttachmentType() != GL_NONE  &&
+        (!GlFormatIsStencilRenderable(GetStencilAttachmentTexture()->GetInternalFormat())  ||
+         GetStencilAttachmentTexture()->GetWidth()  <= 0 ||
+         GetStencilAttachmentTexture()->GetHeight() <= 0))
        ) {
         return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
     }
 
-    if(colorType != GL_NONE && mAttachmentDepth->GetType() != GL_NONE) {
-        if(mAttachmentColors[0]->GetTexture()->GetWidth()  != mAttachmentDepth->GetTexture()->GetWidth() ||
-           mAttachmentColors[0]->GetTexture()->GetHeight() != mAttachmentDepth->GetTexture()->GetHeight()) {
+    if(GetColorAttachmentType() != GL_NONE && GetDepthAttachmentType() != GL_NONE) {
+        if(GetColorAttachmentTexture()->GetWidth()  != GetDepthAttachmentTexture()->GetWidth() ||
+           GetColorAttachmentTexture()->GetHeight() != GetDepthAttachmentTexture()->GetHeight()) {
             return GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS;
         }
     }
 
-    if(colorType != GL_NONE && mAttachmentStencil->GetType() != GL_NONE) {
-        if(mAttachmentColors[0]->GetTexture()->GetWidth()  != mAttachmentStencil->GetTexture()->GetWidth() ||
-           mAttachmentColors[0]->GetTexture()->GetHeight() != mAttachmentStencil->GetTexture()->GetHeight()) {
+    if(GetColorAttachmentType() != GL_NONE && GetStencilAttachmentType() != GL_NONE) {
+        if(GetColorAttachmentTexture()->GetWidth()  != GetStencilAttachmentTexture()->GetWidth() ||
+           GetColorAttachmentTexture()->GetHeight() != GetStencilAttachmentTexture()->GetHeight()) {
             return GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS;
         }
     }
 
-    if(mAttachmentDepth->GetType() != GL_NONE && mAttachmentStencil->GetType() != GL_NONE) {
-        if(mAttachmentDepth->GetTexture()->GetWidth()  != mAttachmentStencil->GetTexture()->GetWidth() ||
-           mAttachmentDepth->GetTexture()->GetHeight() != mAttachmentStencil->GetTexture()->GetHeight()) {
+    if(GetDepthAttachmentType() != GL_NONE && GetStencilAttachmentType() != GL_NONE) {
+        if(GetDepthAttachmentTexture()->GetWidth()  != GetStencilAttachmentTexture()->GetWidth() ||
+           GetDepthAttachmentTexture()->GetHeight() != GetStencilAttachmentTexture()->GetHeight()) {
             return GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS;
         }
     }
@@ -187,8 +259,10 @@ Framebuffer::CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, 
     mRenderPass->SetDepthWriteEnabled(writeDepthEnabled);
     mRenderPass->SetStencilWriteEnabled(writeStencilEnabled);
 
-    return mRenderPass->Create(mAttachmentColors[mWriteBufferIndex]->GetTexture()->GetVkFormat(),
-                               mDepthStencilTexture ? mDepthStencilTexture->GetVkFormat() : VK_FORMAT_UNDEFINED);
+    return mRenderPass->Create(GetColorAttachmentTexture() ?
+                               GetColorAttachmentTexture()->GetVkFormat() : VK_FORMAT_UNDEFINED,
+                               mDepthStencilTexture ?
+                               mDepthStencilTexture->GetVkFormat() : VK_FORMAT_UNDEFINED);
 }
 
 void
@@ -196,18 +270,19 @@ Framebuffer::CreateDepthStencilTexture(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mDepthStencilTexture) {
-        delete mDepthStencilTexture;
-        mDepthStencilTexture = nullptr;
-    }
+    if(GetDepthAttachmentTexture() || GetStencilAttachmentTexture()) {
 
-    if(mAttachmentDepth->GetTexture() || mAttachmentStencil->GetTexture()) {
+        if(mDepthStencilTexture != nullptr) {
+            delete mDepthStencilTexture;
+            mDepthStencilTexture = nullptr;
+        }
+
         mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
         VkFormat vkformat = GlInternalFormatToVkFormat(
-            mAttachmentDepth->GetTexture()   ? mAttachmentDepth->GetTexture()->GetInternalFormat()   : GL_INVALID_VALUE,
-            mAttachmentStencil->GetTexture() ? mAttachmentStencil->GetTexture()->GetInternalFormat() : GL_INVALID_VALUE);
+            GetDepthAttachmentTexture()   ? GetDepthAttachmentTexture()->GetInternalFormat()   : GL_INVALID_VALUE,
+            GetStencilAttachmentTexture() ? GetStencilAttachmentTexture()->GetInternalFormat() : GL_INVALID_VALUE);
         mDepthStencilTexture->SetVkFormat(vkformat);
         mDepthStencilTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -220,6 +295,24 @@ Framebuffer::CreateDepthStencilTexture(void)
 }
 
 void
+Framebuffer::IsUpdated()
+{
+    if(GetColorAttachmentTexture()) {
+
+        mUpdated |= GetColorAttachmentTexture()->GetDataUpdated();
+        if( GetColorAttachmentTexture()->GetWidth()  != GetWidth()  ||
+            GetColorAttachmentTexture()->GetHeight() != GetHeight() ) {
+
+            SetWidth (GetColorAttachmentTexture()->GetWidth());
+            SetHeight(GetColorAttachmentTexture()->GetHeight());
+
+            mSizeUpdated = true;
+        }
+        GetColorAttachmentTexture()->SetDataUpdated(false);
+    }
+}
+
+void
 Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
                                const float *colorValue, float depthValue, uint32_t stencilValue,
@@ -227,17 +320,7 @@ Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, b
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if( mAttachmentColors[0]->GetTexture() && (
-        mAttachmentColors[0]->GetTexture()->GetWidth()  != GetWidth()  ||
-        mAttachmentColors[0]->GetTexture()->GetHeight() != GetHeight() )) {
-
-        SetWidth (mAttachmentColors[0]->GetTexture()->GetWidth());
-        SetHeight(mAttachmentColors[0]->GetTexture()->GetHeight());
-
-        mUpdated = true;
-    }
-
-    if(mUpdated ||
+    if(mUpdated || mSizeUpdated ||
        mRenderPass->GetColorClearEnabled()   != clearColorEnabled    ||
        mRenderPass->GetDepthClearEnabled()   != clearDepthEnabled    ||
        mRenderPass->GetStencilClearEnabled() != clearStencilEnabled  ||
@@ -245,12 +328,14 @@ Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, b
        mRenderPass->GetDepthWriteEnabled()   != writeDepthEnabled    ||
        mRenderPass->GetStencilWriteEnabled() != writeStencilEnabled) {
 
-        if(mUpdated) {
+        if(!mIsSystem && mSizeUpdated) {
             CreateDepthStencilTexture();
+            mSizeUpdated = false;
         }
         CreateVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
                            writeColorEnabled, writeDepthEnabled, writeStencilEnabled);
         Create();
+
         mUpdated = false;
     }
 
@@ -273,7 +358,9 @@ Framebuffer::PrepareVkImage(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mAttachmentColors[mWriteBufferIndex]->GetTexture()->PrepareVkImageLayout(newImageLayout);
+    if(GetColorAttachmentTexture()) {
+        GetColorAttachmentTexture()->PrepareVkImageLayout(newImageLayout);
+    }
 }
 
 bool
@@ -287,8 +374,8 @@ Framebuffer::Create(void)
         vulkanAPI::Framebuffer *fb = new vulkanAPI::Framebuffer(mVkContext);
 
         vector<VkImageView> imageViews;
-        if(mAttachmentColors[i]->GetTexture()) {
-            imageViews.push_back(mAttachmentColors[i]->GetTexture()->GetVkImageView());
+        if(GetColorAttachmentTexture(i)) {
+            imageViews.push_back(GetColorAttachmentTexture(i)->GetVkImageView());
         }
         if(mDepthStencilTexture) {
             imageViews.push_back(mDepthStencilTexture->GetVkImageView());

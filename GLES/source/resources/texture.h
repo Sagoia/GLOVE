@@ -71,6 +71,7 @@ private:
     Rect                        mDims;
     Sampler                     mParameters;
     StateMap_t*                 mState;
+    bool                        mDataUpdated;
 
     vulkanAPI::Image*           mImage;
     vulkanAPI::Memory*          mMemory;
@@ -130,6 +131,7 @@ public:
     inline GLenum           GetExplicitInternalFormat(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mExplicitInternalFormat; }
     inline GLint            GetLayersCount(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mLayersCount; }
     inline GLint            GetMipLevelsCount(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mMipLevelsCount; }
+    inline bool             GetDataUpdated(void)                         const  { FUN_ENTRY(GL_LOG_TRACE); return mDataUpdated; }
 
     inline vulkanAPI::Image* GetImage(void)                                     { FUN_ENTRY(GL_LOG_TRACE); return mImage; }
 
@@ -166,6 +168,7 @@ public:
     inline void             SetExplicitType(GLenum type)                        { FUN_ENTRY(GL_LOG_TRACE); mExplicitType = type;  }
     inline void             SetInternalFormat(GLenum format)                    { FUN_ENTRY(GL_LOG_TRACE); mInternalFormat         = format;  }
     inline void             SetExplicitInternalFormat(GLenum format)            { FUN_ENTRY(GL_LOG_TRACE); mExplicitInternalFormat = format;  }
+    inline void             SetDataUpdated(bool updated)                        { FUN_ENTRY(GL_LOG_TRACE); mDataUpdated = updated; }
 
     inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
     inline void             SetVkImage(VkImage image)                           { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImage(image);        }

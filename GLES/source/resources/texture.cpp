@@ -40,11 +40,10 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1)
+mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mState     = nullptr;
     mImage     = new vulkanAPI::Image(vkContext);
     mImageView = new vulkanAPI::ImageView(vkContext);
     mMemory    = new vulkanAPI::Memory(vkContext, vkFlags);
@@ -257,7 +256,7 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
 
     if(mState[layer][level].data) {
         delete [] (uint8_t *)mState[layer][level].data;
-        mState[layer][level].data = NULL;
+        mState[layer][level].data = nullptr;
     }
 
     if(pixels) {
@@ -326,6 +325,8 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
                               &tmp_dstRect, mState[layer][level].data);
         delete[] dstData;
     }
+
+    SetDataUpdated(true);
 }
 
 void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData)

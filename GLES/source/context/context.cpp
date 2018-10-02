@@ -81,9 +81,13 @@ Context::~Context()
     }
 
     delete mResourceManager;
-    delete mPipeline;
-    delete mClearPass;
     delete mCacheManager;
+    delete mClearPass;
+
+    if(mPipeline != nullptr) {
+        delete mPipeline;
+        mPipeline = nullptr;
+    }
 
     if(mExplicitIbo != nullptr) {
         delete mExplicitIbo;
@@ -100,7 +104,7 @@ Context::ReleaseSystemFBO(void)
 
     if(mSystemFBO) {
         for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
-            if(mSystemTextures[i]) {
+            if(mSystemTextures[i] != nullptr) {
                 delete mSystemTextures[i];
                 mSystemTextures[i] = nullptr;
             }
@@ -189,6 +193,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     }
 
     fbo->SetTarget(GL_FRAMEBUFFER);
+    fbo->SetIsSystem();
     fbo->SetWriteBufferIndex(eglSurfaceInterface->nextImageIndex);
 
     return fbo;
@@ -220,6 +225,7 @@ Context::AllocatePBufferTexture(EGLSurfaceInterface *eglSurfaceInterface)
     tex->Allocate();
 
     fbo->AddColorAttachment(tex);
+    fbo->SetIsSystem();
     mSystemTextures.push_back(tex);
 
     return fbo;
