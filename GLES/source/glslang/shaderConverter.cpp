@@ -106,7 +106,7 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
     ProcessVertexAttributes(source, reflection);
 
     if(mShaderType == SHADER_TYPE_VERTEX) {
-        ConvertGLToVulkanYCoords(source, isYInverted);
+        ConvertGLToVulkanCoordSystem(source, isYInverted);
         ConvertGLToVulkanDepthRange(source);
     }
 }
@@ -330,14 +330,14 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 }
 
 void
-ShaderConverter::ConvertGLToVulkanYCoords(string& source, bool isYInverted)
+ShaderConverter::ConvertGLToVulkanCoordSystem(string& source, bool isYInverted)
 {
     if(!isYInverted){
         return;
     }
     // Find last "}"
     size_t pos = source.rfind("}");
-    //Android 7: the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
+    //If the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
     string GlToVkViewportConversion   = string("    gl_Position.y = -gl_Position.y;\n");
     source.insert(pos, GlToVkViewportConversion);
 }

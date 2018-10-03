@@ -446,7 +446,7 @@ ShaderProgram::LinkProgram()
 
     mShaderCompiler->PrepareReflection();
     UpdateAttributeInterface();
-    mLinked = mShaderCompiler->PreprocessShaders(*this, mGLContext->GetIsYInverted());
+    mLinked = mShaderCompiler->PreprocessShaders(*this, mGLContext->IsYInverted());
     if(!mLinked) {
         return false;
     }

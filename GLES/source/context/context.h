@@ -117,7 +117,7 @@ public:
 
 // Get Functions
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
-    inline  bool            GetIsYInverted(void)                           const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
+    inline  bool            IsYInverted(void)                              const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
 
 // Set Functions
             void            SetWriteSurface(EGLSurfaceInterface *eglSurfaceInterface);
