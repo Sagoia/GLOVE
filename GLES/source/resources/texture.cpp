@@ -186,6 +186,10 @@ Texture::CreateVkTexture(void)
         return false;
     }
 
+    if(mMipLevelsCount > 1) {
+        PrepareVkImageLayout(VK_IMAGE_LAYOUT_GENERAL);
+    }
+
     if(!AllocateVkMemory()) {
         mImage->Release();
         return false;
@@ -420,6 +424,7 @@ void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplev
     oldImageLayout = (oldImageLayout != VK_IMAGE_LAYOUT_UNDEFINED &&
                       oldImageLayout != VK_IMAGE_LAYOUT_PREINITIALIZED) ? oldImageLayout : VK_IMAGE_LAYOUT_GENERAL;
     VkImageLayout newImageLayout = copyToImage ? VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
     mCommandBufferManager->BeginVkAuxCommandBuffer();
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
     {
@@ -529,7 +534,8 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
     {
         VkFilter      filter         = hintMipmapMode == GL_FASTEST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
         VkImageLayout oldImageLayout = mImage->GetImageLayout();
-        mImage->ModifyImageSubresourceRange(0, 1, 0, mLayersCount);
+
+        mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
         mImage->ModifyImageLayout(&activeCmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         for(GLint mipLevel = 1; mipLevel < mMipLevelsCount; ++mipLevel) {
             mImage->ModifyImageSubresourceRange(mipLevel, 1, 0, mLayersCount);
