@@ -316,7 +316,7 @@ void
 Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
                                const float *colorValue, float depthValue, uint32_t stencilValue,
-                               const VkRect2D *clearRect)
+                               const Rect  *clearRect)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -340,8 +340,14 @@ Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, b
     }
 
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
-    mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), clearRect,
-                                          colorValue, depthValue, stencilValue);
+
+    const VkRect2D clearRect2D = { {clearRect->x, clearRect->y},
+                                   {(uint32_t)clearRect->width, (uint32_t)clearRect->height}};
+
+    mRenderPass->SetClearArea(&clearRect2D);
+    mRenderPass->SetClearColorValue(colorValue);
+    mRenderPass->SetClearDepthStencilValue(depthValue, stencilValue);
+    mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), true);
 }
 
 void

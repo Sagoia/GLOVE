@@ -28,9 +28,7 @@ Context::ClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFramebufferOperationsState()->UpdateClearColor(red, green, blue, alpha)) {
-        mClearPass->SetUpdateColorState(true);
-    }
+    mStateManager.GetFramebufferOperationsState()->UpdateClearColor(red, green, blue, alpha);
 }
 
 void
@@ -38,9 +36,7 @@ Context::ClearDepthf(GLclampf depth)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFramebufferOperationsState()->UpdateClearDepth(depth)) {
-        mClearPass->SetUpdateDepthState(true);
-    }
+    mStateManager.GetFramebufferOperationsState()->UpdateClearDepth(depth);
 }
 
 void
@@ -48,9 +44,7 @@ Context::ClearStencil(GLint s)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFramebufferOperationsState()->UpdateClearStencil(s)) {
-        mClearPass->SetUpdateStencilState(true);
-    }
+    mStateManager.GetFramebufferOperationsState()->UpdateClearStencil(s);
 }
 
 void

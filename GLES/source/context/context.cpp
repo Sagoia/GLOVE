@@ -47,11 +47,10 @@ Context::Context()
     mVkContext            = vulkanAPI::GetContext();
     mCommandBufferManager = vulkanAPI::CommandBufferManager::GetInstance(const_cast<vulkanAPI::vkContext_t *>(mVkContext));
 
-    mResourceManager= new ResourceManager(mVkContext, mCommandBufferManager);
-    mShaderCompiler = new GlslangShaderCompiler();
-    mClearPass      = new vulkanAPI::ClearPass();
-    mPipeline       = new vulkanAPI::Pipeline(mVkContext);
-    mCacheManager   = new CacheManager(mVkContext);
+    mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
+    mShaderCompiler  = new GlslangShaderCompiler();
+    mPipeline        = new vulkanAPI::Pipeline(mVkContext);
+    mCacheManager    = new CacheManager(mVkContext);
 
     mStateManager.InitVkPipelineStates(mPipeline);
 
@@ -82,7 +81,6 @@ Context::~Context()
 
     delete mResourceManager;
     delete mCacheManager;
-    delete mClearPass;
 
     if(mPipeline != nullptr) {
         delete mPipeline;
