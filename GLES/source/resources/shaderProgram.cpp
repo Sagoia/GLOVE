@@ -690,6 +690,8 @@ ShaderProgram::SetSampler(uint32_t location, int count, const int *textureUnit)
 void
 ShaderProgram::SetCacheManager(CacheManager *cacheManager)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     mShaderResourceInterface.SetCacheManager(cacheManager);
 }
 

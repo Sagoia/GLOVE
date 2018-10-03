@@ -125,3 +125,12 @@ CanTypeBeInUniformBlock(const std::string &token)
 
     return true;
 }
+
+bool
+IsBuildInUniform(const std::string &token)
+{
+  return (!token.compare("gl_DepthRange.near") ||
+          !token.compare("gl_DepthRange.far")  ||
+          !token.compare("gl_DepthRange.diff"));
+
+}
