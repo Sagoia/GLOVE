@@ -81,10 +81,10 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
                (index == mWriteFBO->GetColorAttachmentName()    ||
                 index == mWriteFBO->GetDepthAttachmentName()    ||
                 index == mWriteFBO->GetStencilAttachmentName()) &&
-                mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+                mWriteFBO->IsInDrawState()) {
 
                 if(index == mWriteFBO->GetColorAttachmentName()) {
-                    mWriteFBO->SetRenderState(Framebuffer::DELETE);
+                    mWriteFBO->SetStateDelete();
                 }
 
                 Finish();
@@ -211,7 +211,7 @@ Context::RenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width
     if((activeRenderbufferId == mWriteFBO->GetColorAttachmentName()    ||
         activeRenderbufferId == mWriteFBO->GetDepthAttachmentName()    ||
         activeRenderbufferId == mWriteFBO->GetStencilAttachmentName()) &&
-        mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        mWriteFBO->IsInDrawState()) {
         Finish();
     }
 

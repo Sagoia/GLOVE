@@ -31,16 +31,14 @@
 #include "utils/arrays.hpp"
 
 class Framebuffer {
-public:
-    enum RenderState {
+private:
+    enum State {
         IDLE,
         CLEAR,
         CLEAR_DRAW,
         DRAW,
         DELETE
     };
-
-private:
 
     const
     vulkanAPI::vkContext_t *         mVkContext;
@@ -51,7 +49,7 @@ private:
     Rect                            mDims;
     GLenum                          mTarget;
     uint32_t                        mWriteBufferIndex;
-    RenderState                     mRenderState;
+    State                           mState;
     bool                            mUpdated;
     bool                            mSizeUpdated;
 
@@ -94,7 +92,7 @@ public:
 
 // Get Functions
     inline VkFramebuffer*   GetActiveVkFramebuffer()                    const   { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers[mWriteBufferIndex]->GetFramebuffer(); }
-    inline RenderState      GetRenderState()                            const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderState; }
+    inline State            GetState()                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mState; }
     inline Rect *           GetRect(void)                                       { FUN_ENTRY(GL_LOG_TRACE); return &mDims; }
     inline int              GetX(void)                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.x; }
     inline int              GetY(void)                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.y; }
@@ -140,7 +138,11 @@ public:
 
     inline void             SetUpdated(void)                                    { FUN_ENTRY(GL_LOG_TRACE); mUpdated     = true;   }
     inline void             SetIsSystem(void)                                   { FUN_ENTRY(GL_LOG_TRACE); mIsSystem    = true;   }
-    inline void             SetRenderState(RenderState renderState)             { FUN_ENTRY(GL_LOG_TRACE); mRenderState = renderState;}
+    inline void             SetStateIdle(void)                                  { FUN_ENTRY(GL_LOG_TRACE); mState       = IDLE;   }
+    inline void             SetStateClear(void)                                 { FUN_ENTRY(GL_LOG_TRACE); mState       = CLEAR;  }
+    inline void             SetStateClearDraw(void)                             { FUN_ENTRY(GL_LOG_TRACE); mState       = CLEAR_DRAW;  }
+    inline void             SetStateDraw(void)                                  { FUN_ENTRY(GL_LOG_TRACE); mState       = DRAW;   }
+    inline void             SetStateDelete(void)                                { FUN_ENTRY(GL_LOG_TRACE); mState       = DELETE; }
     inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget      = target; }
     inline void             SetWidth(int32_t width)                             { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int32_t height)                           { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }
@@ -163,6 +165,13 @@ public:
 
     inline void             SetDepthStencilAttachmentTexture(Texture *texture)  { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = texture; }
     inline void             SetWriteBufferIndex(uint32_t buffer)                { FUN_ENTRY(GL_LOG_TRACE); if(mAttachmentColors.size() > 1) {mWriteBufferIndex = buffer;} }
+
+// Is Functions
+    inline bool             IsInIdleState(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return (mState == IDLE); }
+    inline bool             IsInClearState(void)                                { FUN_ENTRY(GL_LOG_TRACE); return (mState == CLEAR); }
+    inline bool             IsInClearDrawState(void)                            { FUN_ENTRY(GL_LOG_TRACE); return (mState == CLEAR_DRAW); }
+    inline bool             IsInDeleteState(void)                               { FUN_ENTRY(GL_LOG_TRACE); return (mState == DELETE); }
+    inline bool             IsInDrawState(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return !IsInIdleState(); }
 };
 
 #endif // __FRAMEBUFFER_H__

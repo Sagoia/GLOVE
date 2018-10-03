@@ -108,7 +108,7 @@ Context::DeleteProgram(GLuint program)
 
     if(progPtr != mStateManager.GetActiveShaderProgram()) {
 
-        if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        if(mWriteFBO->IsInDrawState()) {
             Finish();
         }
 
@@ -1366,7 +1366,7 @@ Context::UseProgram(GLuint program)
 
     if(mStateManager.GetActiveShaderProgram() && mStateManager.GetActiveShaderProgram()->GetMarkForDeletion()) {
 
-        if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+        if(mWriteFBO->IsInDrawState()) {
             Finish();
         }
 

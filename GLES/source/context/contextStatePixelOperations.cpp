@@ -79,7 +79,7 @@ Context::ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum form
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
 

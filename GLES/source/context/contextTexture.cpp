@@ -106,10 +106,9 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
 
         if (texture && mResourceManager->TextureExists(texture)) {
 
-            if( mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
-
+            if(mWriteFBO->IsInDrawState()) {
                 if(texture == mWriteFBO->GetColorAttachmentName()) {
-                    mWriteFBO->SetRenderState(Framebuffer::DELETE);
+                    mWriteFBO->SetStateDelete();
                 }
                 Finish();
             }
@@ -391,7 +390,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
 
@@ -458,7 +457,7 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
 
@@ -523,7 +522,7 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
 
@@ -604,7 +603,7 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
 

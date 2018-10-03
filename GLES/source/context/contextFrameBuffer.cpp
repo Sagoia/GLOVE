@@ -48,12 +48,12 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
 
     mWriteFBO = fbo;
-    mWriteFBO->SetRenderState(Framebuffer::IDLE);
+    mWriteFBO->SetStateIdle();
 
     mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(framebuffer);
     mPipeline->SetUpdatePipeline(true);
@@ -93,12 +93,12 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
 
             if(mWriteFBO == fbo) {
 
-                if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+                if(mWriteFBO->IsInDrawState()) {
                     Finish();
                 }
 
                 mWriteFBO = mSystemFBO;
-                mWriteFBO->SetRenderState(Framebuffer::IDLE);
+                mWriteFBO->SetStateIdle();
 
                 mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(0);
                 mPipeline->SetUpdatePipeline(true);
@@ -136,7 +136,7 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         return;
     }
 
-    if(renderbuffer != mWriteFBO->GetAttachmentName(attachment) && mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(renderbuffer != mWriteFBO->GetAttachmentName(attachment) && mWriteFBO->IsInDrawState()) {
         Finish();
     }
 
@@ -199,7 +199,7 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         return;
     }
 
-    if(texture && texture != mWriteFBO->GetAttachmentName(attachment) && mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(texture && texture != mWriteFBO->GetAttachmentName(attachment) && mWriteFBO->IsInDrawState()) {
         Finish();
     }
 

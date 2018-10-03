@@ -107,10 +107,10 @@ Context::Clear(GLbitfield mask)
         return;
     }
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::IDLE) {
+    if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
-    mWriteFBO->SetRenderState(Framebuffer::CLEAR);
+    mWriteFBO->SetStateClear();
 
     SetClearRect();
     BeginRendering(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
@@ -122,15 +122,15 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     FUN_ENTRY(GL_LOG_TRACE);
 
     SetClearRect();
-    if(mWriteFBO->GetRenderState() == Framebuffer::CLEAR) {
-        mWriteFBO->SetRenderState(Framebuffer::CLEAR_DRAW);
+    if(mWriteFBO->IsInClearState()) {
+        mWriteFBO->SetStateClearDraw();
 
-    } else if(mWriteFBO->GetRenderState() == Framebuffer::IDLE) {
-        mWriteFBO->SetRenderState(Framebuffer::DRAW);
+    } else if(mWriteFBO->IsInIdleState()) {
+        mWriteFBO->SetStateDraw();
         BeginRendering(false,false,false);
 
-    } else if(mWriteFBO->GetRenderState() == Framebuffer::CLEAR_DRAW) {
-        mWriteFBO->SetRenderState(Framebuffer::DRAW);
+    } else if(mWriteFBO->IsInClearDrawState()) {
+        mWriteFBO->SetStateDraw();
     }
 
     UpdateVertexAttributes(vertCount, firstVertex);
@@ -383,15 +383,14 @@ Context::Finish(void)
 
     mCommandBufferManager->WaitLastSubmition();
 
-    if(mWriteFBO->GetRenderState() != Framebuffer::DELETE) {
+    if(!mWriteFBO->IsInDeleteState()) {
         if(mWriteFBO == mSystemFBO) {
             mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         } else {
             mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         }
     }
-
-    mWriteFBO->SetRenderState(Framebuffer::IDLE);
+    mWriteFBO->SetStateIdle();
 
     mCacheManager->CleanUpCaches();
 }
