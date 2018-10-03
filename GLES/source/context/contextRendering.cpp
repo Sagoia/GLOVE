@@ -33,18 +33,10 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
         mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
     }
 
-    GLfloat clearDepthValue = 0.0f;
-    if(clearDepthEnabled) {
-        clearDepthValue = mStateManager.GetFramebufferOperationsState()->GetClearDepth();
-    }
-
-    uint32_t clearStencilValue = 0;
-    if(clearStencilEnabled) {
-        clearStencilValue  = mStateManager.GetFramebufferOperationsState()->GetClearStencil();
-    }
+    GLfloat clearDepthValue    = clearDepthEnabled   ? mStateManager.GetFramebufferOperationsState()->GetClearDepth()   : 0.0f;
+    uint32_t clearStencilValue = clearStencilEnabled ? mStateManager.GetFramebufferOperationsState()->GetClearStencil() : 0;
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
-
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     mWriteFBO->BeginVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
                static_cast<bool>(mStateManager.GetFramebufferOperationsState()->GetColorMask()),
@@ -52,7 +44,7 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
                                  mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
                                  mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack(),
                                  clearColorValue, clearDepthValue, clearStencilValue,
-                                 &mClearPass->GetRect()->rect);
+                                 &mClearRect);
 }
 
 void
@@ -95,8 +87,10 @@ Context::SetClearRect(void)
     w = w < mWriteFBO->GetX()      ? mWriteFBO->GetX() : w;
     h = h < mWriteFBO->GetY()      ? mWriteFBO->GetY() : h;
 
-    mClearPass->SetRect( std::max(mWriteFBO->GetX()    , x), std::max(mWriteFBO->GetY()     , y),
-                         std::min(mWriteFBO->GetWidth(), w), std::min(mWriteFBO->GetHeight(), h));
+    mClearRect.x      = std::max(mWriteFBO->GetX()     , x);
+    mClearRect.y      = std::max(mWriteFBO->GetY()     , y);
+    mClearRect.width  = std::min(mWriteFBO->GetWidth() , w);
+    mClearRect.height = std::min(mWriteFBO->GetHeight(), h);
 }
 
 void

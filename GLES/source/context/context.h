@@ -52,12 +52,12 @@ private:
     const
     vulkanAPI::vkContext_t *                    mVkContext;
 // ------------
+    Rect                                        mClearRect;
     StateManager                                mStateManager;
     ResourceManager *                           mResourceManager;
     CacheManager *                              mCacheManager;
     ShaderCompiler *                            mShaderCompiler;
     vulkanAPI::Pipeline *                       mPipeline;
-    vulkanAPI::ClearPass *                      mClearPass;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
     bool                                        mIsYInverted;
 // ------------

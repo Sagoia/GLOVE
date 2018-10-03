@@ -409,8 +409,6 @@ InitContext()
         !InitVkQueueFamilyIndex()     ||
         !CheckVkDeviceExtensions()    ||
         !CreateVkDevice()             ||
-        //!CreateVkCommandPool()        ||
-        //!CreateVkCommandBuffers()     ||
         !CreateVkSemaphores()
       ) {
         assert(false);

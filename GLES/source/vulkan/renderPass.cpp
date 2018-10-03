@@ -29,18 +29,21 @@
  */
 
 #include "renderPass.h"
+#include "utils.h"
 
 namespace vulkanAPI {
 
 RenderPass::RenderPass(const vkContext_t *vkContext)
 : mVkContext(vkContext),
-  mVkSubpassContents(VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS), mVkPipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS),
+  mVkPipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS),
   mVkRenderPass(VK_NULL_HANDLE),
   mColorClearEnabled(false), mDepthClearEnabled(false), mStencilClearEnabled(false),
   mColorWriteEnabled(true), mDepthWriteEnabled(true), mStencilWriteEnabled(false),
   mStarted(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
+
+    memset((void *)mVkClearValues, 0, sizeof(mVkClearValues));
 }
 
 RenderPass::~RenderPass()
@@ -56,7 +59,7 @@ RenderPass::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkRenderPass != VK_NULL_HANDLE) {
-        vkDestroyRenderPass(mVkContext->vkDevice, mVkRenderPass, NULL);
+        vkDestroyRenderPass(mVkContext->vkDevice, mVkRenderPass, nullptr);
         mVkRenderPass = VK_NULL_HANDLE;
     }
 }
@@ -79,7 +82,7 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
         attachmentColor.flags           = 0;
         attachmentColor.format          = colorFormat;
         attachmentColor.samples         = VK_SAMPLE_COUNT_1_BIT;
-        attachmentColor.loadOp          = mColorClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentColor.loadOp          = mColorClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentColor.storeOp         = mColorWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachmentColor.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentColor.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -94,15 +97,19 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
 
     /// Depth/Stencil attachment
     if(depthstencilFormat != VK_FORMAT_UNDEFINED) {
+
+        bool isDepth   = VkFormatIsDepth(depthstencilFormat);
+        bool isStencil = VkFormatIsStencil(depthstencilFormat);
+
         VkAttachmentDescription attachmentDepthStencil;
 
         attachmentDepthStencil.flags          = 0;
         attachmentDepthStencil.format         = depthstencilFormat;
         attachmentDepthStencil.samples        = VK_SAMPLE_COUNT_1_BIT;
-        attachmentDepthStencil.loadOp         = mDepthClearEnabled   ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentDepthStencil.storeOp        = mDepthWriteEnabled   ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentDepthStencil.stencilLoadOp  = mStencilClearEnabled ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentDepthStencil.stencilStoreOp = mStencilWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentDepthStencil.loadOp         = (isDepth   && mDepthClearEnabled  ) ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.storeOp        = (isDepth   && mDepthWriteEnabled  ) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentDepthStencil.stencilLoadOp  = (isStencil && mStencilClearEnabled) ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.stencilStoreOp = (isStencil && mStencilWriteEnabled) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachmentDepthStencil.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
         attachmentDepthStencil.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -118,24 +125,24 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     subpass.colorAttachmentCount    = colorFormat        != VK_FORMAT_UNDEFINED ? 1             : 0;
     subpass.pColorAttachments       = colorFormat        != VK_FORMAT_UNDEFINED ? &color        : nullptr;
     subpass.pDepthStencilAttachment = depthstencilFormat != VK_FORMAT_UNDEFINED ? &depthstencil : nullptr;
-    subpass.pResolveAttachments     = NULL;
+    subpass.pResolveAttachments     = nullptr;
     subpass.inputAttachmentCount    = 0;
-    subpass.pInputAttachments       = NULL;
+    subpass.pInputAttachments       = nullptr;
     subpass.preserveAttachmentCount = 0;
-    subpass.pPreserveAttachments    = NULL;
+    subpass.pPreserveAttachments    = nullptr;
 
     VkRenderPassCreateInfo info;
     info.sType            = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    info.pNext            = NULL;
+    info.pNext            = nullptr;
     info.flags            = 0;
     info.attachmentCount  = attachments.size();
     info.pAttachments     = attachments.data();
     info.subpassCount     = 1;
     info.pSubpasses       = &subpass;
     info.dependencyCount  = 0;
-    info.pDependencies    = NULL;
+    info.pDependencies    = nullptr;
 
-    VkResult err = vkCreateRenderPass(mVkContext->vkDevice, &info, NULL, &mVkRenderPass);
+    VkResult err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
@@ -143,31 +150,22 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
 
 
 void
-RenderPass::Begin(VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, const VkRect2D *rect,
-                  const float *clearColorValue, float clearDepthValue, uint32_t clearStencilValue)
+RenderPass::Begin(VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, bool hasSecondary)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkClearValue clearValues[2];
-    memset((void *)clearValues, 0, sizeof(clearValues));
-
-    clearValues[0].color.float32[0]     = clearColorValue[0];
-    clearValues[0].color.float32[1]     = clearColorValue[1];
-    clearValues[0].color.float32[2]     = clearColorValue[2];
-    clearValues[0].color.float32[3]     = clearColorValue[3];
-    clearValues[1].depthStencil.depth   = clearDepthValue;
-    clearValues[1].depthStencil.stencil = clearStencilValue;
-
     VkRenderPassBeginInfo info;
     info.sType                     = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    info.pNext                     = NULL;
+    info.pNext                     = nullptr;
     info.framebuffer               = *framebuffer;
     info.renderPass                = mVkRenderPass;
-    info.renderArea                = *rect;
+    info.renderArea                = mVkRenderArea;
     info.clearValueCount           = 2;
-    info.pClearValues              = clearValues;
+    info.pClearValues              = mVkClearValues;
 
-    vkCmdBeginRenderPass(*activeCmdBuffer, &info, mVkSubpassContents);
+    const VkSubpassContents subpassContents = !hasSecondary ? VK_SUBPASS_CONTENTS_INLINE : VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS;
+
+    vkCmdBeginRenderPass(*activeCmdBuffer, &info, subpassContents);
 
     mStarted = true;
 }

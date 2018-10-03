@@ -346,6 +346,8 @@ CommandBufferManager::EndVkDrawCommandBuffer(void)
 void
 CommandBufferManager::EndVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     vkEndCommandBuffer(*cmdBuffer);
 }
 
