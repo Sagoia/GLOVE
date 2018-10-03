@@ -33,6 +33,7 @@ using namespace std;
 
 bool                    IsChar(char c);
 bool                    IsWhiteSpace(char c);
+bool                    IsBuildInUniform(const string &source);
 string::size_type       SkipWhiteSpaces(const string &source, string::size_type pos);
 string::size_type       FindToken(const string &token, const string &source, string::size_type pos);
 string                  GetNextToken(const string &source, string::size_type start);

@@ -26,6 +26,7 @@
  */
 
 #include "shaderResourceInterface.h"
+#include "utils/parser_helpers.h"
 #include "utils/glUtils.h"
 #include "utils/glLogger.h"
 
@@ -162,10 +163,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
         itBlock = mUniformBlockDataInterface.find(pBlock->glslBlockName);
         size_t size = uniform.arraySize * GlslTypeToSize(uniform.glType);
 
-        if (uniform.reflectionName != "gl_DepthRange.near" &&
-            uniform.reflectionName != "gl_DepthRange.far"  &&
-            uniform.reflectionName != "gl_DepthRange.diff") {
-
+        if(!IsBuildInUniform(uniform.reflectionName)) {
             if(itBlock->second.pBufferObject) {
                 mCacheManager->CacheUBO(itBlock->second.pBufferObject);
                 *allocatedNewBufferObject = true;
