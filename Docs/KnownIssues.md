@@ -6,7 +6,6 @@ Most Important Known Issues list:
 
 | **Issue** | **Description** | **Solution/Workaround** | **Status** |
 | --- | --- | --- | --- |
-| GLOVE is not working on platforms/drivers that do not support 'VK_KHR_maintenance1' extension | Flip viewport (Y axis) during the viewport transform | Add ``` gl_Position.z = -gl_Position.y; ``` in Vertex Shader | see issue [#17](https://github.com/Think-Silicon/GLOVE/issues/17) |
 | glColorMask() not working | Enabling or disabling writing of frame buffer color components r, g, b, a not working | TBD | see issue [#20](https://github.com/Think-Silicon/GLOVE/issues/20) |
 | Compressed Textures not supported | glCompressed(Sub)TexImage2D() not implemented | Add missing functionality | see issue [#6](https://github.com/Think-Silicon/GLOVE/issues/6) |
 | Vulkan Textures allocated as RGBA in all cases  | Implicit conversion of all textures to GL_RGBA | Allocate Textures according to the input format | see issue [#7](https://github.com/Think-Silicon/GLOVE/issues/7) |
