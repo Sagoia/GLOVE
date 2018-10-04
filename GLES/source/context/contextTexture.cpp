@@ -193,7 +193,7 @@ Context::TexParameterf(GLenum target, GLenum pname, GLfloat param)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    TexParameteri(target, pname, (GLint)param);
+    TexParameteri(target, pname, static_cast<GLint>(param));
 }
 
 void
@@ -201,7 +201,7 @@ Context::TexParameterfv(GLenum target, GLenum pname, const GLfloat* params)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    TexParameteri(target, pname, (GLint)params[0]);
+    TexParameteri(target, pname, static_cast<GLint>(params[0]));
 }
 
 void
