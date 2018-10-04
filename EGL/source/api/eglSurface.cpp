@@ -23,6 +23,8 @@
 
 #include "eglSurface.h"
 
+#define NUMBER_OF_MIP_LEVELS(w, h)                      (std::floor(std::log2(std::max((w),(h)))) + 1)
+
 EGLSurface_t::EGLSurface_t()
 : Config(nullptr), Type(0), Width(0), Height(0),
 DepthSize(0), StencilSize(0), RedSize(0), GreenSize(0), BlueSize(0), AlphaSize(0),
@@ -327,4 +329,13 @@ EGLSurface_t::QuerySurface(EGLint attribute, EGLint *value)
     }
 
     return EGL_TRUE;
+}
+
+void
+EGLSurface_t::SetMipmapLevel(EGLint mipmapLevel)
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    EGLint maxMipmapLevel = NUMBER_OF_MIP_LEVELS(Width, Height);
+    MipmapLevel = std::max(0, std::min(mipmapLevel, maxMipmapLevel));
 }

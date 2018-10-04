@@ -25,6 +25,8 @@
 #define __EGL_SURFACE_H__
 
 #include "EGL/egl.h"
+#include <cmath>
+#include <algorithm>
 #include "eglContext.h"
 #include "eglConfig.h"
 #include "rendering_api/rendering_api.h"
@@ -98,6 +100,9 @@ public:
     inline void                      SetHeight(EGLint height)                                   { FUN_ENTRY(EGL_LOG_TRACE); Height = height; }
     inline void                      SetColorFormat(EGLint colorFormat)                         { FUN_ENTRY(EGL_LOG_TRACE); ColorFormat = colorFormat; }
     inline void                      SetPlatformResources(PlatformResources *platformResources) { FUN_ENTRY(EGL_LOG_TRACE); mPlatformResources = platformResources; }
+           void                      SetMipmapLevel(EGLint mipmapLevel);
+    inline void                      SetMultisampleResolve(EGLint multisampleResolve)           { FUN_ENTRY(EGL_LOG_TRACE); MultisampleResolve = multisampleResolve; }
+    inline void                      SetSwapBehavior(EGLint swapBehavior)                       { FUN_ENTRY(EGL_LOG_TRACE); SwapBehavior = swapBehavior; }
 
     inline EGLint                    GetType()                                                  { FUN_ENTRY(EGL_LOG_TRACE); return Type; }
     inline EGLint                    GetWidth()                                                 { FUN_ENTRY(EGL_LOG_TRACE); return Width; }

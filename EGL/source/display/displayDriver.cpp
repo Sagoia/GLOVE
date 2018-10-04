@@ -308,11 +308,53 @@ DisplayDriver::CreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EG
 EGLBoolean
 DisplayDriver::SurfaceAttrib(EGLDisplay dpy, EGLSurface surface,EGLint attribute, EGLint value)
 {
+    //TODO: record the errors
     FUN_ENTRY(DEBUG_DEPTH);
 
-    NOT_IMPLEMENTED();
+    const EGLDisplay dp = GetDisplay();
+    if (!dp){
+        //callingThread->RecordError(EGL_NOT_INITIALIZED);
+        return EGL_FALSE;
+    }
+    if (dpy != dp) {
+        //callingThread->RecordError(EGL_BAD_DISPLAY);
+        return EGL_FALSE;
+    }
 
-    return EGL_FALSE;
+    EGLSurface_t *eglSurface = static_cast<EGLSurface_t *>(surface);
+    if(eglSurface == nullptr){
+        //callingThread->RecordError(EGL_BAD_SURFACE);
+        return EGL_FALSE;
+    }
+
+    EGLint val = 0;
+    eglSurface->QuerySurface(EGL_SURFACE_TYPE, &val);
+
+    switch(attribute) {
+        case EGL_MIPMAP_LEVEL:
+            eglSurface->SetMipmapLevel(value);
+            break;
+        case EGL_MULTISAMPLE_RESOLVE:
+            if((value == EGL_MULTISAMPLE_RESOLVE_BOX) && !(val & EGL_MULTISAMPLE_RESOLVE_BOX_BIT)) {
+                //callingThread->RecordError(EGL_BAD_MATCH);
+                return EGL_FALSE;
+            }
+            eglSurface->SetMultisampleResolve(value);
+            break;
+        case EGL_SWAP_BEHAVIOR:
+            if((value ==  EGL_BUFFER_PRESERVED) && !(val & EGL_SWAP_BEHAVIOR_PRESERVED_BIT)) {
+                //callingThread->RecordError(EGL_BAD_MATCH);
+                return EGL_FALSE;
+            }
+            eglSurface->SetSwapBehavior(value);
+            break;
+        default:
+            //callingThread->RecordError(EGL_BAD_ATTRIBUTE);
+            return EGL_FALSE;
+            break;
+    }
+    //If OpenGL ES rendering is not supported by surface, generate EGL_BAD_PARAMETER error
+    return EGL_TRUE;
 }
 
 EGLBoolean
