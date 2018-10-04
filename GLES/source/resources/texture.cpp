@@ -40,7 +40,7 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false)
+mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -358,7 +358,11 @@ void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint mip
     ConvertPixels(srcFormat, dstFormat,
                   &tmp_srcRect, srcData,
                   &tmp_dstRect, dstData);
-    InvertImageYAxis(static_cast<uint8_t *>(dstData), &tmp_dstRect);
+
+    if(!mDataNoInvertion) {
+        InvertImageYAxis(static_cast<uint8_t *>(dstData), &tmp_dstRect);
+    }
+    mDataNoInvertion = false;
 
     delete    tbo;
     delete[]  srcData;

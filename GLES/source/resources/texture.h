@@ -72,6 +72,7 @@ private:
     Sampler                     mParameters;
     StateMap_t*                 mState;
     bool                        mDataUpdated;
+    bool                        mDataNoInvertion;
 
     vulkanAPI::Image*           mImage;
     vulkanAPI::Memory*          mMemory;
@@ -169,6 +170,7 @@ public:
     inline void             SetInternalFormat(GLenum format)                    { FUN_ENTRY(GL_LOG_TRACE); mInternalFormat         = format;  }
     inline void             SetExplicitInternalFormat(GLenum format)            { FUN_ENTRY(GL_LOG_TRACE); mExplicitInternalFormat = format;  }
     inline void             SetDataUpdated(bool updated)                        { FUN_ENTRY(GL_LOG_TRACE); mDataUpdated = updated; }
+    inline void             SetDataNoInvertion(bool updated)                    { FUN_ENTRY(GL_LOG_TRACE); mDataNoInvertion = updated; }
 
     inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
     inline void             SetVkImage(VkImage image)                           { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImage(image);        }

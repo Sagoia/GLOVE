@@ -56,7 +56,9 @@ private:
     ShaderCompiler *                            mShaderCompiler;
     vulkanAPI::Pipeline *                       mPipeline;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
+// ------------
     bool                                        mIsYInverted;
+    bool                                        mIsFullScreenRender;
 // ------------
     void        *                               mWriteSurface;
     void        *                               mReadSurface;
@@ -114,12 +116,15 @@ public:
 
 // Get Functions
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
+    inline  ResourceManager *GetResourceManager(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mResourceManager; }
+    inline  bool            GetFullScreenRender(void)                      const  { FUN_ENTRY(GL_LOG_TRACE); return mIsFullScreenRender; }
     inline  bool            IsYInverted(void)                              const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
 
 // Set Functions
             void            SetWriteSurface(EGLSurfaceInterface *eglSurfaceInterface);
             void            SetReadSurface(EGLSurfaceInterface *eglSurfaceInterface);
     inline  void            SetNextImageIndex(uint32_t imageIndex)               { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
+    inline  void            SetFullScreenRender(bool value)                      { FUN_ENTRY(GL_LOG_TRACE); mIsFullScreenRender = value;}
 
 // GL API core functions
     void            ActiveTexture(GLenum texture);

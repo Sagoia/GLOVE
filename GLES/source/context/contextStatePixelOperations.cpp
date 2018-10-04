@@ -101,6 +101,10 @@ Context::ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum form
                       mStateManager.GetPixelStorageState()->GetPixelStorePack());
 
     // The selected image has to be read with reverted y offset from Vulkan layer
+    if(mWriteFBO == mSystemFBO && GetFullScreenRender()){
+        activeTexture->SetDataNoInvertion(true);
+        SetFullScreenRender(false);
+    }
     srcRect.y = activeTexture->GetInvertedYOrigin(&srcRect);
     activeTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, dstInternalFormat, pixels);
 
