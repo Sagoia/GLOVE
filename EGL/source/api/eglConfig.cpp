@@ -25,6 +25,7 @@
 #include "thread/renderingThread.h"
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 #include "eglConfig_android.h"
