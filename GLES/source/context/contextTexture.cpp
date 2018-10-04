@@ -561,7 +561,7 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 
     // copy the framebuffer contents to the temp buffer
     // and convert them to the texture's internal format
-    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, layer, internalformat, (void *)stagePixels);
+    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, level, layer, internalformat, (void *)stagePixels);
 
     // now copy the temp buffer contents to the texture
     activeTexture->SetState(width, height, level, layer, dstInternalFormat, dstType, Texture::GetDefaultInternalAlignment(), stagePixels);
@@ -639,7 +639,7 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
 
     // copy the framebuffer subcontents to the temp buffer
     // and convert them to the texture's internal format
-    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, layer, dstInternalFormat, (void *)stagePixels);
+    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, level, layer, dstInternalFormat, (void *)stagePixels);
 
     srcRect = dstRect;
     srcRect.x = 0; srcRect.y = 0;
