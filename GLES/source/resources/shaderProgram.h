@@ -31,6 +31,8 @@
 #include "vulkan/pipelineCache.h"
 #include "vulkan/cbManager.h"
 
+class Context;
+
 class ShaderProgram {
 private:
     Context *                                           mGLContext;

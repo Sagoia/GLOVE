@@ -24,8 +24,6 @@
 #ifndef __GLSLANGLINKER_H__
 #define __GLSLANGLINKER_H__
 
-#include "utils/globals.h"
-
 #include "glslang/Include/ShHandle.h"
 #include "glslang/Public/ShaderLang.h"
 #include "SPIRV/GlslangToSpv.h"

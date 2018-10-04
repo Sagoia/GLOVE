@@ -24,7 +24,6 @@
 #ifndef __GLSLANG_UTILS_H__
 #define __GLSLANG_UTILS_H__
 
-#include "utils/globals.h"
 #include "utils/glsl_types.h"
 
 namespace glslang {

@@ -13,7 +13,6 @@
 #include <vector>
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
-#include "utils/globals.h"
 #include "resources/bufferObject.h"
 
 class CacheManager {

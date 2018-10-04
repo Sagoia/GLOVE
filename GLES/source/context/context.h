@@ -42,9 +42,6 @@ typedef enum {
     GLOVE_MAX_BINARY_FORMATS
 } glove_program_binary_formats_e;
 
-Context    *GetCurrentContext(void);
-void        SetCurrentContext(Context *ctx);
-
 class Context {
 
 private:
@@ -278,5 +275,8 @@ public:
     void            ProgramBinaryOES(GLuint program, GLenum binaryFormat, const void *binary, GLint length);
 
 };
+
+Context    *GetCurrentContext(void);
+void        SetCurrentContext(Context *ctx);
 
 #endif // __CONTEXT_H__

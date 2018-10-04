@@ -41,8 +41,6 @@
 #include "rendering_api_interface.h"
 #include "glLogger.h"
 
-using namespace std;
-
 // Compiler
 #ifdef __GNUC__
 #   define ASSERT_ONLY                                  __attribute__((unused))
@@ -103,9 +101,5 @@ using namespace std;
 #endif // GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE
 
 #define VULKAN_DEPTH_RANGE                              vulkan_DepthRange
-
-// TODO : remove
-class Context;
-class CommandBufferManager;
 
 #endif // __GLOBALS_H__
