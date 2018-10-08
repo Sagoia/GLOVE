@@ -36,14 +36,17 @@ const char * const ShaderConverter::shaderPrecision  = "#ifdef GL_ES\n"
                                                        "#endif\n"
                                                        "\n";
 
-const char * const ShaderConverter::shaderTexture2d  = "/// GL_KHR_vulkan_glsl removed texture2D(), texture2Dproj()\n"
+const char * const ShaderConverter::shaderTexture2d  = "/// GL_KHR_vulkan_glsl removed texture2D(), texture2DProj(), textureLod(), textureProjLod()\n"
                                                        "#define texture2D texture\n"
-                                                       "#define texture2Dproj texture\n"
+                                                       "#define texture2DLod textureLod\n"
+                                                       "#define texture2DProj textureProj\n"
+                                                       "#define texture2DProjLod textureProjLod\n"
                                                        "#define samplerExternalOES sampler2D\n"
                                                        "\n";
 
-const char * const ShaderConverter::shaderTextureCube= "/// GL_KHR_vulkan_glsl removed textureCube()\n"
+const char * const ShaderConverter::shaderTextureCube= "/// GL_KHR_vulkan_glsl removed textureCube(), textureCubeLod()\n"
                                                       "#define textureCube texture\n"
+                                                      "#define textureCubeLod textureLod\n"
                                                       "\n";
 
 const char * const ShaderConverter::shaderDepthRange = "/// GL_KHR_vulkan_glsl removed gl_DepthRange as well\n"
