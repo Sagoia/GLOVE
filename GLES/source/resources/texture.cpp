@@ -106,7 +106,7 @@ Texture::IsCompleted(void)
     }
 
     State_t *state = &mState[0][0];
-    if(state->format == GL_INVALID_VALUE) {
+    if(state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
         return false;
     }
 
@@ -117,17 +117,21 @@ Texture::IsCompleted(void)
     GLint  levels = NUMBER_OF_MIP_LEVELS(state->width, state->height);
 
     GLint count = 0;
-    for(GLint layer = 0; layer < mLayersCount; ++layer){
+    for(GLint layer = 0; layer < mLayersCount; ++layer) {
         count = 0;
 
         for(GLint level = 0; level < levels; ++level) {
+
             state = &mState[layer][level];
-            if(state->format != format ||
-               state->type   != type   ||
+
+            if(state->format == GL_INVALID_VALUE ||
+               state->type   == GL_INVALID_VALUE ||
                state->width  != static_cast<GLint>(std::max(floor(width  >> level), 1.0)) ||
-               state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))
-            ) {
+               state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
                 ++count;
+            }
+            else if(state->format != format || state->type != type) {
+                return false;
             }
         }
 
