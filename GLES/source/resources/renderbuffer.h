@@ -44,27 +44,27 @@ public:
     ~Renderbuffer();
 
 // Allocate Functions
-    bool        Allocate(GLint width, GLint height, GLenum internalformat);
+           bool        Allocate(GLint width, GLint height, GLenum internalformat);
 
 // Release Functions
-    void        Release(void);
+           void        Release(void);
 
 // Get Functions
-    int32_t     GetWidth(void)                                            const { FUN_ENTRY(GL_LOG_TRACE); return mDims.width;     }
-    int32_t     GetHeight(void)                                           const { FUN_ENTRY(GL_LOG_TRACE); return mDims.height;    }
-    GLenum      GetTarget(void)                                           const { FUN_ENTRY(GL_LOG_TRACE); return mTarget;         }
-    GLenum      GetInternalFormat(void)                                   const { FUN_ENTRY(GL_LOG_TRACE); return mInternalFormat; }
-    Texture *   GetTexture(void)                                          const { FUN_ENTRY(GL_LOG_TRACE); return mTexture;        }
+    inline int32_t     GetWidth(void)                                     const { FUN_ENTRY(GL_LOG_TRACE); return mDims.width;     }
+    inline int32_t     GetHeight(void)                                    const { FUN_ENTRY(GL_LOG_TRACE); return mDims.height;    }
+    inline GLenum      GetTarget(void)                                    const { FUN_ENTRY(GL_LOG_TRACE); return mTarget;         }
+    inline GLenum      GetInternalFormat(void)                            const { FUN_ENTRY(GL_LOG_TRACE); return mInternalFormat; }
+    inline Texture *   GetTexture(void)                                   const { FUN_ENTRY(GL_LOG_TRACE); return mTexture;        }
 
 // Set Functions
-    void        SetVkContext(const vulkanAPI::vkContext_t *vkContext)           { FUN_ENTRY(GL_LOG_TRACE); mVkContext            = vkContext; }
-    void        SetCommandBufferManager(
+    inline void        SetVkContext(const vulkanAPI::vkContext_t *vkContext)    { FUN_ENTRY(GL_LOG_TRACE); mVkContext            = vkContext; }
+    inline void        SetCommandBufferManager(
                                    vulkanAPI::CommandBufferManager *cbManager)  { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
-    void        SetTarget(GLenum target)                                        { FUN_ENTRY(GL_LOG_TRACE); mTarget               = target;    }
+    inline void        SetTarget(GLenum target)                                 { FUN_ENTRY(GL_LOG_TRACE); mTarget               = target;    }
 
 // Init Functions
-    void        InitTexture(void)                                               { FUN_ENTRY(GL_LOG_TRACE); mTexture              = new Texture(mVkContext, mCommandBufferManager);
-                                                                                                           mTexture->InitState();          }
+           void        InitTexture(void)                                        { FUN_ENTRY(GL_LOG_TRACE); mTexture              = new Texture(mVkContext, mCommandBufferManager);
+                                                                                                           mTexture->InitState();}
 };
 
 #endif // __RENDERBUFFER_H__
