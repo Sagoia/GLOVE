@@ -49,7 +49,7 @@ static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPC
 
 static const std::vector<const char*> usefulDeviceExtensions     = {"VK_KHR_maintenance1"};
 
-static       char **enabledInstanceLayers           = NULL;
+static       char **enabledInstanceLayers           = nullptr;
 
 vkContext_t GloveVkContext;
 
@@ -71,10 +71,10 @@ InitVkLayers(uint32_t* nLayers)
 
     VkResult res;
     uint32_t layerCount = 0;
-    VkLayerProperties *vkLayerProperties = NULL;
+    VkLayerProperties *vkLayerProperties = nullptr;
 
     do {
-        res = vkEnumerateInstanceLayerProperties(&layerCount, NULL);
+        res = vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
         if(!layerCount || res) {
             break;
@@ -113,10 +113,10 @@ CheckVkInstanceExtensions(void)
 
     VkResult res;
     uint32_t extensionCount = 0;
-    VkExtensionProperties *vkExtensionProperties = NULL;
+    VkExtensionProperties *vkExtensionProperties = nullptr;
 
     do {
-        res = vkEnumerateInstanceExtensionProperties(NULL, &extensionCount, NULL);
+        res = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 
         if(!extensionCount || res) {
             break;
@@ -127,7 +127,7 @@ CheckVkInstanceExtensions(void)
             return false;
         }
 
-        res = vkEnumerateInstanceExtensionProperties(NULL, &extensionCount, vkExtensionProperties);
+        res = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensionProperties);
     } while(res == VK_INCOMPLETE);
 
     std::vector<bool> requiredExtensionsAvailable(requiredInstanceExtensions.size(), false);
@@ -161,10 +161,10 @@ CheckVkDeviceExtensions(void)
 
     VkResult res;
     uint32_t extensionCount = 0;
-    VkExtensionProperties *vkExtensionProperties = NULL;
+    VkExtensionProperties *vkExtensionProperties = nullptr;
 
     do {
-        res = vkEnumerateDeviceExtensionProperties(GloveVkContext.vkGpus[0], NULL, &extensionCount, NULL);
+        res = vkEnumerateDeviceExtensionProperties(GloveVkContext.vkGpus[0], nullptr, &extensionCount, nullptr);
 
         if(!extensionCount || res) {
             break;
@@ -175,7 +175,7 @@ CheckVkDeviceExtensions(void)
             return false;
         }
 
-        res = vkEnumerateDeviceExtensionProperties(GloveVkContext.vkGpus[0], NULL, &extensionCount, vkExtensionProperties);
+        res = vkEnumerateDeviceExtensionProperties(GloveVkContext.vkGpus[0], nullptr, &extensionCount, vkExtensionProperties);
     } while(res == VK_INCOMPLETE);
 
     std::vector<bool> requiredExtensionsAvailable(requiredDeviceExtensions.size(), false);
@@ -228,7 +228,7 @@ CreateVkInstance(void)
 
     VkApplicationInfo applicationInfo;
     applicationInfo.sType             = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    applicationInfo.pNext             = NULL;
+    applicationInfo.pNext             = nullptr;
     applicationInfo.pApplicationName  = "GLOVE (GL Over Vulkan)\0";
     applicationInfo.applicationVersion= 1;
     applicationInfo.pEngineName       = "GLOVE (GL Over Vulkan)\0";
@@ -236,9 +236,9 @@ CreateVkInstance(void)
     applicationInfo.apiVersion        = VK_API_VERSION_1_0;
 
     VkInstanceCreateInfo instanceInfo;
-    memset((void *)&instanceInfo, 0 ,sizeof(instanceInfo));
+    memset(static_cast<void *>(&instanceInfo), 0 ,sizeof(instanceInfo));
     instanceInfo.sType                    = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instanceInfo.pNext                    = NULL;
+    instanceInfo.pNext                    = nullptr;
     instanceInfo.flags                    = 0;
     instanceInfo.pApplicationInfo         = &applicationInfo;
     instanceInfo.enabledLayerCount        = enabledLayerCount;
@@ -246,7 +246,7 @@ CreateVkInstance(void)
     instanceInfo.enabledExtensionCount    = static_cast<uint32_t>(requiredInstanceExtensions.size());
     instanceInfo.ppEnabledExtensionNames  = requiredInstanceExtensions.data();
 
-    VkResult err = vkCreateInstance(&instanceInfo, NULL, &GloveVkContext.vkInstance);
+    VkResult err = vkCreateInstance(&instanceInfo, nullptr, &GloveVkContext.vkInstance);
     assert(!err);
 
     for(uint32_t i = 0; i < enabledLayerCount; ++i) {
@@ -265,7 +265,7 @@ EnumerateVkGpus(void)
     uint32_t gpuCount;
 
     VkResult err;
-    err = vkEnumeratePhysicalDevices(GloveVkContext.vkInstance, &gpuCount, NULL);
+    err = vkEnumeratePhysicalDevices(GloveVkContext.vkInstance, &gpuCount, nullptr);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -321,7 +321,7 @@ CreateVkDevice(void)
     float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;
     queueInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueInfo.pNext            = NULL;
+    queueInfo.pNext            = nullptr;
     queueInfo.flags            = 0;
     queueInfo.queueCount       = 1;
     queueInfo.pQueuePriorities = queue_priorities;
@@ -329,17 +329,17 @@ CreateVkDevice(void)
 
     VkDeviceCreateInfo deviceInfo;
     deviceInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceInfo.pNext                   = NULL;
+    deviceInfo.pNext                   = nullptr;
     deviceInfo.flags                   = 0;
     deviceInfo.queueCreateInfoCount    = 1;
     deviceInfo.pQueueCreateInfos       = &queueInfo;
     deviceInfo.enabledLayerCount       = 0;
-    deviceInfo.ppEnabledLayerNames     = NULL;
+    deviceInfo.ppEnabledLayerNames     = nullptr;
     deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
     deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
-    deviceInfo.pEnabledFeatures        = NULL;
+    deviceInfo.pEnabledFeatures        = nullptr;
 
-    VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, NULL, &GloveVkContext.vkDevice);
+    VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
     assert(!err);
 
     return (err == VK_SUCCESS);
@@ -356,17 +356,17 @@ CreateVkSemaphores(void)
 
     VkSemaphoreCreateInfo semaphoreCreateInfo;
     semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    semaphoreCreateInfo.pNext = NULL;
+    semaphoreCreateInfo.pNext = nullptr;
     semaphoreCreateInfo.flags = 0;
 
-    err = vkCreateSemaphore(GloveVkContext.vkDevice, &semaphoreCreateInfo, NULL, &GloveVkContext.vkSyncItems->vkDrawSemaphore);
+    err = vkCreateSemaphore(GloveVkContext.vkDevice, &semaphoreCreateInfo, nullptr, &GloveVkContext.vkSyncItems->vkDrawSemaphore);
     assert(!err);
 
     if(err != VK_SUCCESS) {
         return false;
     }
 
-    err = vkCreateSemaphore(GloveVkContext.vkDevice, &semaphoreCreateInfo, NULL, &GloveVkContext.vkSyncItems->vkAcquireSemaphore);
+    err = vkCreateSemaphore(GloveVkContext.vkDevice, &semaphoreCreateInfo, nullptr, &GloveVkContext.vkSyncItems->vkAcquireSemaphore);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -425,19 +425,19 @@ TerminateContext()
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(GloveVkContext.vkSyncItems->vkAcquireSemaphore != VK_NULL_HANDLE) {
-        vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkAcquireSemaphore, NULL);
+        vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkAcquireSemaphore, nullptr);
         GloveVkContext.vkSyncItems->vkAcquireSemaphore = VK_NULL_HANDLE;
     }
 
     if(GloveVkContext.vkSyncItems->vkDrawSemaphore != VK_NULL_HANDLE) {
-        vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkDrawSemaphore, NULL);
+        vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkDrawSemaphore, nullptr);
         GloveVkContext.vkSyncItems->vkDrawSemaphore = VK_NULL_HANDLE;
     }
 
     if(GloveVkContext.vkDevice != VK_NULL_HANDLE ) {
         vkDeviceWaitIdle(GloveVkContext.vkDevice);
-        vkDestroyDevice(GloveVkContext.vkDevice, NULL);
-        vkDestroyInstance(GloveVkContext.vkInstance, NULL);
+        vkDestroyDevice(GloveVkContext.vkDevice, nullptr);
+        vkDestroyInstance(GloveVkContext.vkInstance, nullptr);
     }
 
     SafeDelete(GloveVkContext.vkSyncItems);
