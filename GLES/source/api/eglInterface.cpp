@@ -141,11 +141,7 @@ GLPROC get_proc_addr(const char* procname)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    GLPROC fp = GetGLProcAddr(procname);
-    if(fp != nullptr) {
-        return fp;
-    }
-    return nullptr;
+    return GetGLProcAddr(procname);
 }
 
 void finish(api_context_t api_context)
