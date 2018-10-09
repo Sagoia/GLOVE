@@ -290,10 +290,10 @@ EGLSurface
 DisplayDriver::CreatePixmapSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
-
+    //TODO: Pixmap is not supported
     NOT_IMPLEMENTED();
 
-    return nullptr;
+    return EGL_NO_SURFACE;
 }
 
 EGLBoolean
@@ -334,10 +334,11 @@ EGLSurface
 DisplayDriver::CreatePbufferFromClientBuffer(EGLDisplay_t* dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig_t* eglConfig, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
+    //TODO: Currently there is no support for OpenVG
 
     NOT_IMPLEMENTED();
 
-    return NULL;
+    return EGL_NO_SURFACE;
 }
 
 EGLBoolean
@@ -379,6 +380,18 @@ DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    EGLint textureFormat = 0;
+    eglSurface->QuerySurface(EGL_TEXTURE_FORMAT, &textureFormat);
+    if(textureFormat == EGL_NO_TEXTURE) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+        return EGL_FALSE;
+    }
+    //TODO: EGL_BAD_ACCESS is generated if buffer is already bound to a texture.
+    if (buffer != EGL_BACK_BUFFER) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+        return EGL_FALSE;
+    }
+
     NOT_IMPLEMENTED();
 
     return EGL_FALSE;
@@ -389,6 +402,16 @@ DisplayDriver::ReleaseTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLi
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    EGLint textureFormat = 0;
+    eglSurface->QuerySurface(EGL_TEXTURE_FORMAT, &textureFormat);
+    if(textureFormat == EGL_NO_TEXTURE) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+        return EGL_FALSE;
+    }
+    if (buffer != EGL_BACK_BUFFER) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+        return EGL_FALSE;
+    }
     NOT_IMPLEMENTED();
 
     return EGL_FALSE;
@@ -459,7 +482,11 @@ DisplayDriver::CopyBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLNativ
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    NOT_IMPLEMENTED();
+    //The implementation does not support native pixmaps
+    currentThread.RecordError(EGL_BAD_NATIVE_PIXMAP);
+
+    //TODO: EGL_BAD_MATCH is generated if the format of native_pixmap is not compatible with the color buffer of surface.
+    //TODO: EGL_CONTEXT_LOST is generated if a power management event has occurred
 
     return EGL_FALSE;
 }
