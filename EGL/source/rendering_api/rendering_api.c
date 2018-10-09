@@ -114,6 +114,26 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
     return RENDERING_API_INIT_SUCCESS;
 }
 
+rendering_api_interface_t *RENDERING_API_get_interface(EGLenum api, uint32_t client_version)
+{
+    rendering_api_interface_t* api_interface = NULL;
+
+    switch(api) {
+        case EGL_OPENGL_ES_API: {
+                if(EGL_GL_VERSION_1 == client_version) {
+                   api_interface = gles1_interface;
+                } else {
+                   api_interface = gles2_interface;
+                }
+                break;
+            }
+        case EGL_OPENVG_API:  api_interface = vg_interface;
+        default:              { NOT_REACHED(); break; }
+    }
+
+    return api_interface;
+}
+
 rendering_api_return_e RENDERING_API_init_api(EGLenum api, uint32_t client_version, rendering_api_interface_t **api_interface_ret)
 {
     rendering_api_interface_t *api_interface = NULL;

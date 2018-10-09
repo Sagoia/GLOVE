@@ -43,6 +43,7 @@ typedef struct {
     EGLNativeDisplayType nativeDisplay;
 } eglDisplay_t;
 
+rendering_api_interface_t *RENDERING_API_get_interface(EGLenum api, uint32_t client_version);
 rendering_api_interface_t *RENDERING_API_get_gles1_interface();
 rendering_api_interface_t *RENDERING_API_get_gles2_interface();
 rendering_api_interface_t *RENDERING_API_get_vg_interface();
