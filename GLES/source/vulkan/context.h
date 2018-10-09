@@ -38,7 +38,14 @@ namespace vulkanAPI {
         vkContext_t() {
             vkInstance            = VK_NULL_HANDLE;
             vkQueue               = VK_NULL_HANDLE;
-            vkDevice              = VK_NULL_HANDLE;
+            mInitialized          = false;
+            vkGraphicsQueueNodeIndex = 0;
+            vkDevice = VK_NULL_HANDLE;
+            vkSyncItems             = nullptr;
+            mIsMaintenanceExtSupported = false;
+            mInitialized            = false;
+            memset(static_cast<void*>(&vkDeviceMemoryProperties), 0,
+                   sizeof(VkPhysicalDeviceMemoryProperties));
         }
 
         VkInstance                                          vkInstance;
@@ -49,11 +56,13 @@ namespace vulkanAPI {
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
         vkSyncItems_t                                       *vkSyncItems;
         bool                                                mIsMaintenanceExtSupported;
+        bool                                                mInitialized;
     } vkContext_t;
 
     vkContext_t *                     GetContext();
     bool                              InitContext();
     void                              TerminateContext();
+    void                              ClearContextResources();
 
     template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 };

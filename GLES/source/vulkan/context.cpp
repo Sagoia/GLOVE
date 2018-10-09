@@ -398,10 +398,31 @@ GetContext()
     return &GloveVkContext;
 }
 
+void
+ResetContextResources()
+{
+    GloveVkContext.vkInstance                   = VK_NULL_HANDLE;
+    GloveVkContext.vkQueue                      = VK_NULL_HANDLE;
+    GloveVkContext.mInitialized                 = false;
+    GloveVkContext.vkGraphicsQueueNodeIndex     = 0;
+    GloveVkContext.vkDevice                     = VK_NULL_HANDLE;
+    GloveVkContext.vkSyncItems                  = nullptr;
+    GloveVkContext.mIsMaintenanceExtSupported   = false;
+    GloveVkContext.mInitialized                 = false;
+    memset(static_cast<void*>(&GloveVkContext.vkDeviceMemoryProperties), 0,
+           sizeof(VkPhysicalDeviceMemoryProperties));
+}
+
 bool
 InitContext()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (GloveVkContext.mInitialized == true) {
+        return true;
+    }
+
+    ResetContextResources();
 
     if( !CheckVkInstanceExtensions()  ||
         !CreateVkInstance()           ||
@@ -416,7 +437,7 @@ InitContext()
     }
     InitVkQueue();
 
-    return true;
+    return GloveVkContext.mInitialized = true;
 }
 
 void
@@ -441,6 +462,8 @@ TerminateContext()
     }
 
     SafeDelete(GloveVkContext.vkSyncItems);
+
+    ResetContextResources();
 }
 
 };
