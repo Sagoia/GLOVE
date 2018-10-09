@@ -42,11 +42,12 @@ system's GLESv2.
 typedef struct rendering_api_library_info {
     bool initialized;
     void *handle;
+    int refCount;
 } rendering_api_library_info_t;
 
-static rendering_api_library_info_t gles1_library_info = { false, NULL };
-static rendering_api_library_info_t gles2_library_info = { false, NULL };
-static rendering_api_library_info_t vg_library_info    = { false, NULL };
+static rendering_api_library_info_t gles1_library_info = { false, NULL, 0 };
+static rendering_api_library_info_t gles2_library_info = { false, NULL, 0 };
+static rendering_api_library_info_t vg_library_info    = { false, NULL, 0 };
 
 static rendering_api_interface_t *gles1_interface = NULL;
 static rendering_api_interface_t *gles2_interface = NULL;
@@ -58,7 +59,7 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
                                                               rendering_api_interface_t **api_interface_ret,
                                                               rendering_api_library_info_t *library_info);
 
-static void rendering_terminate_api(rendering_api_interface_t *api_interface, rendering_api_library_info_t *library_info);
+static bool rendering_terminate_api(rendering_api_interface_t *api_interface, rendering_api_library_info_t *library_info);
 
 static void rendering_api_cache_interface(rendering_api_interface_t* api_interface, uint32_t client_version, EGLenum api)
 {
@@ -89,6 +90,7 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
     char *error = NULL;
 
     if(true == library_info->initialized) {
+        library_info->refCount++;
         return RENDERING_API_ALREADY_INIT;
     }
 
@@ -182,13 +184,27 @@ rendering_api_return_e RENDERING_API_init_api(EGLenum api, uint32_t client_versi
     return ret;
 }
 
-static void rendering_terminate_api(rendering_api_interface_t *api_interface, rendering_api_library_info_t *library_info)
+static bool rendering_terminate_api(rendering_api_interface_t *api_interface, rendering_api_library_info_t *library_info)
 {
+    if(library_info->refCount > 0) {
+        --library_info->refCount;
+        return false;
+    }
+
     if(api_interface->terminate_API_cb) {
         api_interface->terminate_API_cb();
     }
 
     dlclose(library_info->handle);
+    char* error = dlerror();
+    if(error)  {
+        fprintf(stderr, "%s\n", error);
+        return false;
+    }
+
+    library_info->initialized = false;
+    library_info->handle = NULL;
+    return true;
 }
 
 
@@ -209,15 +225,21 @@ rendering_api_interface_t *RENDERING_API_get_vg_interface()
 
 void RENDERING_API_terminate_gles1_api()
 {
-    rendering_terminate_api(gles1_interface, &gles1_library_info);
+    if(rendering_terminate_api(gles1_interface, &gles1_library_info)) {
+        gles1_interface = NULL;
+    }
 }
 
 void RENDERING_API_terminate_gles2_api()
 {
-    rendering_terminate_api(gles2_interface, &gles2_library_info);
+    if(rendering_terminate_api(gles2_interface, &gles2_library_info)) {
+        gles2_interface = NULL;
+    }
 }
 
 void RENDERING_API_terminate_vg_api()
 {
-    rendering_terminate_api(vg_interface, &vg_library_info);
+    if(rendering_terminate_api(vg_interface, &vg_library_info)) {
+        vg_interface = NULL;
+    }
 }
