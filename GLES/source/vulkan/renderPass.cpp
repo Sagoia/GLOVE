@@ -170,7 +170,7 @@ RenderPass::Begin(VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, 
     mStarted = true;
 }
 
-void
+bool
 RenderPass::End(VkCommandBuffer *activeCmdBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -178,6 +178,9 @@ RenderPass::End(VkCommandBuffer *activeCmdBuffer)
     if (mStarted) {
         mStarted = false;
         vkCmdEndRenderPass(*activeCmdBuffer);
+        return true;
+    } else {
+        return false;
     }
 }
 

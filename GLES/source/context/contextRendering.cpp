@@ -379,7 +379,9 @@ Context::Finish(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Flush();
+    if(!Flush()) {
+        return;
+    }
 
     mCommandBufferManager->WaitLastSubmition();
 
@@ -395,12 +397,15 @@ Context::Finish(void)
     mCacheManager->CleanUpCaches();
 }
 
-void
+bool
 Context::Flush(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mWriteFBO->EndVkRenderPass();
-    mCommandBufferManager->EndVkDrawCommandBuffer();
-    mCommandBufferManager->SubmitVkDrawCommandBuffer();
+    if(mWriteFBO && mWriteFBO->EndVkRenderPass()) {
+        mCommandBufferManager->EndVkDrawCommandBuffer();
+        mCommandBufferManager->SubmitVkDrawCommandBuffer();
+        return true;
+    }
+    return false;
 }

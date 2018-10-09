@@ -78,7 +78,7 @@ public:
     void                    BeginVkRenderPass (bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
                                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
                                                const float *colorValue, float depthValue, uint32_t stencilValue, const Rect *clearRect);
-    void                    EndVkRenderPass(void);
+    bool                    EndVkRenderPass(void);
     void                    PrepareVkImage(VkImageLayout newImageLayout);
 
 // Add Functions

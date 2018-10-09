@@ -172,7 +172,7 @@ public:
     void            Enable(GLenum cap);
     void            EnableVertexAttribArray(GLuint index);
     void            Finish(void);
-    void            Flush(void);
+    bool            Flush(void);
     void            FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
     void            FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
     void            FrontFace(GLenum mode);

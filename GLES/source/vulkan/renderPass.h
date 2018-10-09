@@ -62,7 +62,7 @@ public:
 // Begin/End functions
     void                    Begin   (VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, bool hasSecondary);
 
-    void                    End     (VkCommandBuffer *activeCmdBuffer);
+    bool                    End     (VkCommandBuffer *activeCmdBuffer);
 
 // Create functions
     bool                    Create  (VkFormat colorFormat, VkFormat depthstencilFormat);
