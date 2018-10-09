@@ -82,6 +82,7 @@ GLLogger::DestroyInstance()
 
     if(mLoggerImpl) {
         delete mLoggerImpl;
+        mLoggerImpl = nullptr;
     }
 }
 
