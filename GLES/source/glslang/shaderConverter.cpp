@@ -58,9 +58,9 @@ const char * const ShaderConverter::shaderDepthRange = "/// GL_KHR_vulkan_glsl r
                                                        "    ///std140 will force this struct to 16 bytes anyway. Pad it for peace of mind\n"
                                                        "    float pad;\n"
                                                        "};\n"
-                                                       "uniform gl_DepthRangeParameters " STRINGIFY_MACRO(VULKAN_DEPTH_RANGE) ";\n"
+                                                       "uniform gl_DepthRangeParameters " STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE) ";\n"
                                                        "\n"
-                                                       "#define gl_DepthRange " STRINGIFY_MACRO(VULKAN_DEPTH_RANGE) "\n"
+                                                       "#define gl_DepthRange " STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE) "\n"
                                                        "\n";
 
 const char * const ShaderConverter::shaderLimitsBuiltIns = "#define gl_MaxVertexAttribs "              STRINGIFY_MACRO(GLOVE_MAX_VERTEX_ATTRIBS) "\n"
@@ -109,7 +109,9 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
     ProcessVertexAttributes(source, reflection);
 
     if(mShaderType == SHADER_TYPE_VERTEX) {
-        ConvertGLToVulkanCoordSystem(source, isYInverted);
+        if(isYInverted) {
+            ConvertGLToVulkanCoordSystem(source);
+        }
         ConvertGLToVulkanDepthRange(source);
     }
 }
@@ -200,7 +202,7 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
         /// Variable name
         token = GetNextToken(source, found);
 
-        if(!token.compare(STRINGIFY_MACRO(VULKAN_DEPTH_RANGE))) {
+        if(!token.compare(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE))) {
             token = std::string("gl_DepthRange");
         }
 
@@ -333,11 +335,8 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 }
 
 void
-ShaderConverter::ConvertGLToVulkanCoordSystem(string& source, bool isYInverted)
+ShaderConverter::ConvertGLToVulkanCoordSystem(string& source)
 {
-    if(!isYInverted){
-        return;
-    }
     // Find last "}"
     size_t pos = source.rfind("}");
     //If the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here

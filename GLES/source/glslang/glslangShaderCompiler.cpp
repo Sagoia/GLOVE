@@ -578,7 +578,7 @@ GlslangShaderCompiler::SetUniformBlocksOffset(const glslang::TProgram* prog)
             if(uni.pAggregate->name.compare("gl_DepthRange")) {
                 uniName = uni.pAggregate->name + string(".") + uni.variableName;
             } else {
-                uniName = string(STRINGIFY_MACRO(VULKAN_DEPTH_RANGE)) + string(".") + uni.variableName;
+                uniName = string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + string(".") + uni.variableName;
             }
 
             for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformVariables(); ++index) {

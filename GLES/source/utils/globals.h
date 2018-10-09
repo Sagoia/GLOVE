@@ -81,25 +81,12 @@
 #define GLOVE_SAVE_TEXTURES_TO_FILE                     false
 
 #define GLOVE_DUMP_INPUT_SHADER_REFLECTION              false
-
-#ifdef TRACE_BUILD
-#define GLOVE_DUMP_VULKAN_SHADER_REFLECTION             true
-#else
 #define GLOVE_DUMP_VULKAN_SHADER_REFLECTION             false
-#endif
-
 #define GLOVE_DUMP_ORIGINAL_SHADER_SOURCE               false
 #define GLOVE_DUMP_PROCESSED_SHADER_SOURCE              false
 
 #define GLOVE_INVALID_OFFSET                            UINT32_MAX
 
-#ifndef GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE
-#   define GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE       0
-#else
-#   undef GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE
-#   define GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE       1
-#endif // GLOVE_EGL_SUPPORT_ONLY_PBUFFER_SURFACE
-
-#define VULKAN_DEPTH_RANGE                              vulkan_DepthRange
+#define GLOVE_VULKAN_DEPTH_RANGE                        vulkan_DepthRange
 
 #endif // __GLOBALS_H__

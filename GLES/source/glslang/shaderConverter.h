@@ -66,7 +66,7 @@ private:
     void ProcessUniforms(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessVaryings(string& source);
     void ProcessVertexAttributes(string& source, ShaderReflection* reflection);
-    void ConvertGLToVulkanCoordSystem(string& source, bool isYInverted);
+    void ConvertGLToVulkanCoordSystem(string& source);
     void ConvertGLToVulkanDepthRange(string& source);
 
 };
