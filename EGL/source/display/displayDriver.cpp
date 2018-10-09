@@ -584,16 +584,6 @@ DisplayDriver::ClientWaitSyncKHR(EGLDisplay_t* dpy, EGLSyncKHR sync, EGLint flag
     return EGL_CONDITION_SATISFIED_KHR;
 }
 
-__eglMustCastToProperFunctionPointerType
-DisplayDriver::GetProcAddress(const char *procname)
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-
-    NOT_IMPLEMENTED();
-
-    return NULL;
-}
-
 const char *DisplayDriver::GetExtensions()
 {
     return "";

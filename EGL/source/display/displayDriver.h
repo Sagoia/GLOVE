@@ -86,10 +86,7 @@ public:
     EGLBoolean                   SwapInterval(EGLDisplay_t* dpy, EGLint interval);
     EGLBoolean                   SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface);
     EGLBoolean                   CopyBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLNativePixmapType target);
-    __eglMustCastToProperFunctionPointerType
-                                 GetProcAddress(const char *procname);
     const char*                  GetExtensions();
-
 
     /// EGL API extension functions
     EGLImageKHR                  CreateImageKHR(EGLDisplay_t* dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
