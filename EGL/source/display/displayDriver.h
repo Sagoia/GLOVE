@@ -18,7 +18,7 @@
  *  @version    1.0
  *
  *  @brief      EGL Display driver module. It is responsible of communicating to the platform so as to init/terminate a display connection,
- *              create/destroy a Window Surface etc. It connects to the window platform via the abstract class PlatformWindowInterface
+ *              create/destroy a surfaces, etc. It connects to the window platform via the abstract class PlatformWindowInterface.
  *
  */
 
