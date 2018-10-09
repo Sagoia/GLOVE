@@ -24,7 +24,7 @@
 #ifndef __DISPLAY_DRIVERS_CONTAINER_H__
 #define __DISPLAY_DRIVERS_CONTAINER_H__
 
-#include <vector>
+#include <unordered_map>
 #include <stdint.h>
 #include "EGL/egl.h"
 #include "displayDriver.h"
@@ -36,8 +36,7 @@
 
 class DisplayDriversContainer {
 private:
-    using EGLDriverMap     = std::vector<DisplayDriver *>;
-    using EGLDriverMapIter = std::vector<DisplayDriver *>::iterator;
+    using EGLDriverMap     = std::unordered_map<EGLDisplay_t*, DisplayDriver *>;
 
     EGLDriverMap                       mDriverMap;
     uint32_t                           mDriversNumber;
@@ -46,16 +45,17 @@ private:
     DisplayDriversContainer();
     ~DisplayDriversContainer() {}
 
-    DisplayDriver                     *FindDriver(EGLDisplay display);
-    DisplayDriver                     *GetDriver(EGLDisplay display);
-    DisplayDriver                     *RemoveDriver(EGLDisplay display);
+    DisplayDriver                     *FindDriver(EGLDisplay_t* display);
+    DisplayDriver                     *GetDriver(EGLDisplay_t* display);
+    DisplayDriver                     *RemoveDriver(EGLDisplay_t* display);
 
     static DisplayDriversContainer    *GetInstance();
     static void                        DestroyInstance();
 
 public:
-    static DisplayDriver              *GetDisplayDriver(EGLDisplay display);
-    static void                        RemoveDisplayDriver(EGLDisplay display);
+    static DisplayDriver              *FindDisplayDriver(EGLDisplay_t* display);
+    static DisplayDriver              *AddDisplayDriver(EGLDisplay_t* display);
+    static void                        RemoveDisplayDriver(EGLDisplay_t* display);
     static void                        Destroy();
     static EGLBoolean                  IsEmpty();
 

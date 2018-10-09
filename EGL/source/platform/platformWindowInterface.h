@@ -28,6 +28,7 @@
 #include "EGL/egl.h"
 #include "EGL/eglext.h"
 #include "api/eglSurface.h"
+#include "api/eglDisplay.h"
 
 class PlatformWindowInterface
 {
@@ -37,7 +38,7 @@ public:
 
     virtual EGLBoolean           Initialize() = 0;
     virtual EGLBoolean           Terminate() = 0;
-    virtual EGLBoolean           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
+    virtual EGLBoolean           CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
     virtual void                 AllocateSurfaceImages(EGLSurface_t *surface) = 0;
     virtual void                 DestroySurfaceImages(EGLSurface_t *eglSurface) = 0;
     virtual void                 DestroySurface(EGLSurface_t *eglSurface) = 0;

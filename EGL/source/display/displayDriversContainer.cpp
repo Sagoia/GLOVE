@@ -22,6 +22,7 @@
  */
 
 #include "displayDriversContainer.h"
+#include <algorithm>
 
 DisplayDriversContainer *DisplayDriversContainer::mInstance = nullptr;
 
@@ -32,22 +33,16 @@ DisplayDriversContainer::DisplayDriversContainer()
 }
 
 DisplayDriver*
-DisplayDriversContainer::FindDriver(EGLDisplay display)
+DisplayDriversContainer::FindDriver(EGLDisplay_t* display)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLDriverMapIter it;
-    for(it = mDriverMap.begin(); it != mDriverMap.end(); it++) {
-        if(display == (*it)->GetDisplay()) {
-            break;
-        }
-    }
-
-    return (it != mDriverMap.end()) ? *it : nullptr;
+    auto it = mDriverMap.find(display);
+    return (it != mDriverMap.end()) ? it->second : nullptr;
 }
 
 DisplayDriver*
-DisplayDriversContainer::GetDriver(EGLDisplay display)
+DisplayDriversContainer::GetDriver(EGLDisplay_t* display)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -58,31 +53,25 @@ DisplayDriversContainer::GetDriver(EGLDisplay display)
     }
 
     DisplayDriver *newDriver = new DisplayDriver();
-    newDriver->SetDisplay(display);
     mDriversNumber++;
 
-    return *(mDriverMap.insert(mDriverMap.end(), newDriver));
+    mDriverMap[display] = newDriver;
+    return newDriver;
 }
 
 DisplayDriver*
-DisplayDriversContainer::RemoveDriver(EGLDisplay display)
+DisplayDriversContainer::RemoveDriver(EGLDisplay_t* display)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLDriverMapIter it;
     DisplayDriver *removedDriver = nullptr;
 
-    for(it = mDriverMap.begin(); it != mDriverMap.end(); it++) {
-        if(display == (*it)->GetDisplay()) {
-            break;
-        }
-    }
-
+    auto it = mDriverMap.find(display);
     if(mDriverMap.end() == it) {
         return nullptr;
     }
 
-    removedDriver = *it;
+    removedDriver = it->second;
     mDriverMap.erase(it);
     mDriversNumber--;
 
@@ -113,9 +102,27 @@ DisplayDriversContainer::DestroyInstance()
 }
 
 DisplayDriver*
-DisplayDriversContainer::GetDisplayDriver(EGLDisplay display)
+DisplayDriversContainer::FindDisplayDriver(EGLDisplay_t* display)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
+
+    if(display == nullptr) {
+        return nullptr;
+    }
+
+    DisplayDriversContainer *displayDrivers = DisplayDriversContainer::GetInstance();
+
+    return displayDrivers->FindDriver(display);
+}
+
+DisplayDriver*
+DisplayDriversContainer::AddDisplayDriver(EGLDisplay_t* display)
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    if(display == nullptr) {
+        return nullptr;
+    }
 
     DisplayDriversContainer *displayDrivers = DisplayDriversContainer::GetInstance();
 
@@ -123,9 +130,13 @@ DisplayDriversContainer::GetDisplayDriver(EGLDisplay display)
 }
 
 void
-DisplayDriversContainer::RemoveDisplayDriver(EGLDisplay display)
+DisplayDriversContainer::RemoveDisplayDriver(EGLDisplay_t* display)
 {
     FUN_ENTRY(DEBUG_DEPTH);
+
+    if(display == nullptr) {
+        return;
+    }
 
     DisplayDriversContainer *displayDrivers = DisplayDriversContainer::GetInstance();
 

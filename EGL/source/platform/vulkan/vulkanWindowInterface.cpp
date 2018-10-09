@@ -228,7 +228,7 @@ VulkanWindowInterface::CreateVkSwapchain(EGLSurface_t* surface,
 }
 
 EGLBoolean
-VulkanWindowInterface::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface)
+VulkanWindowInterface::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 

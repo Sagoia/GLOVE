@@ -27,34 +27,50 @@
 #include "EGL/egl.h"
 #include "rendering_api/rendering_api.h"
 #include "utils/eglLogger.h"
+#include "vector"
 
 class EGLContext_t {
 private:
     api_context_t                mAPIContext;
     EGLenum                      mRenderingAPI;
-    EGLenum                      mClientVersion;
+    EGLint                       mRenderableAPIbit;
     rendering_api_interface_t   *mAPIInterface;
-    EGLDisplay                   mDisplay;
-    EGLSurface                   mReadSurface;
-    EGLSurface                   mDrawSurface;
+    class EGLDisplay_t          *mDisplay;
+    class EGLSurface_t          *mReadSurface;
+    class EGLSurface_t          *mDrawSurface;
+    struct EGLConfig_t          *mConfig;
+    const EGLint                *mAttribList;
+    EGLenum                      mClientVersion;
 
-    EGLenum                      GetClientVersionFromConfig(const EGLint *attribList);
+    static std::vector<class EGLContext_t*> globalEGLContextList;
+
+    EGLBoolean                   GetAPIRenderableType();
+    EGLBoolean                   ParseAttributeList(const EGLint* attrib_list);
+    EGLBoolean                   Validate();
 
 public:
-    EGLContext_t(EGLenum rendering_api, const EGLint *attribList);
+    EGLContext_t(EGLenum rendering_api, EGLConfig_t* config, const EGLint *attribList);
     ~EGLContext_t();
+
+
+    static EGLBoolean            FindEGLContext(const EGLContext_t* eglContext);
+    static EGLBoolean            GetEGLContext(EGLContext_t* eglContext);
+    static EGLBoolean            RemoveEGLContext(const EGLContext_t* eglContext);
+    static EGLBoolean            CheckBadContext(const EGLContext_t* eglContext);
 
     EGLBoolean                   Create();
     EGLBoolean                   Destroy();
-    EGLBoolean                   MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read);
+    EGLBoolean                   MakeCurrent(class EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
     void                         SetNextImageIndex(uint32_t index);
     void                         Finish();
     void                         Release();
     GLPROC                       GetProcAddr(const char* procname);
 
+    inline EGLenum               GetRenderingAPI()                        const { FUN_ENTRY(EGL_LOG_TRACE); return mRenderingAPI; }
     inline EGLDisplay            getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
     inline EGLSurface            getReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
     inline EGLSurface            getDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
+
 };
 
 #endif // __EGL_CONTEXT_H__

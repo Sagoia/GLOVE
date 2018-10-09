@@ -57,7 +57,7 @@ WSIPlaneDisplay::SetPlatformCallbacks(void)
 }
 
 VkSurfaceKHR
-WSIPlaneDisplay::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface)
+WSIPlaneDisplay::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 

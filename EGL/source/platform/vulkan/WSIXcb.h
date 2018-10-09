@@ -33,9 +33,9 @@ class WSIXcb : public VulkanWSI
 {
 private:
     typedef struct {
-        eglDisplay_t     *  dpy;
-        xcb_connection_t *  connection;
-        xcb_screen_t     *  screen;
+        EGLDisplay_t     *dpy;
+        xcb_connection_t *connection;
+        xcb_screen_t     *screen;
     } xcbContext;
 
     void               GetXCBConnection(xcbContext *xcb);
@@ -55,7 +55,7 @@ public:
     ~WSIXcb() override {}
 
     EGLBoolean         Initialize() override;
-    VkSurfaceKHR       CreateSurface(EGLDisplay dpy,
+    VkSurfaceKHR       CreateSurface(EGLDisplay_t* dpy,
                                     EGLNativeWindowType win,
                                     EGLSurface_t *surface) override;
 };

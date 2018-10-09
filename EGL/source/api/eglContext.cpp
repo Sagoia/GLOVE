@@ -23,15 +23,68 @@
 
 #include "utils/egl_defs.h"
 #include "eglContext.h"
+#include "api/eglDisplay.h"
+#include "eglConfig.h"
 #include "eglSurface.h"
+#include "thread/renderingThread.h"
+#include <algorithm>
 
-EGLContext_t::EGLContext_t(EGLenum rendering_api, const EGLint *attribList)
+std::vector<class EGLContext_t*> EGLContext_t::globalEGLContextList;
+
+EGLBoolean
+EGLContext_t::CheckBadContext(const EGLContext_t* eglContext)
+{
+    if(eglContext == nullptr) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+
+    const auto iter = std::find(globalEGLContextList.begin(), globalEGLContextList.end(), eglContext);
+    if(iter == globalEGLContextList.end()) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+EGLContext_t::FindEGLContext(const EGLContext_t* eglContext)
+{
+    auto iter = std::find(globalEGLContextList.begin(), globalEGLContextList.end(), eglContext);
+    if(iter == globalEGLContextList.end()) {
+        return EGL_FALSE;
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+EGLContext_t::GetEGLContext(EGLContext_t* eglContext)
+{
+    if(FindEGLContext(eglContext) == EGL_FALSE) {
+        globalEGLContextList.push_back(eglContext);
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+EGLContext_t::RemoveEGLContext(const EGLContext_t* eglContext)
+{
+    auto iter = std::find(globalEGLContextList.begin(), globalEGLContextList.end(), eglContext);
+    if(iter == globalEGLContextList.end()) {
+        return EGL_FALSE;
+    }
+    globalEGLContextList.erase(iter);
+    return EGL_TRUE;
+}
+
+EGLContext_t::EGLContext_t(EGLenum rendering_api, EGLConfig_t *config, const EGLint *attribList)
 : mAPIContext(nullptr), mRenderingAPI(rendering_api), mAPIInterface(nullptr),
-mDisplay(EGL_NO_DISPLAY), mReadSurface(EGL_NO_SURFACE), mDrawSurface(EGL_NO_SURFACE)
+mDisplay(nullptr), mReadSurface(nullptr), mDrawSurface(nullptr),
+mConfig(config), mAttribList(attribList), mClientVersion(1)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    mClientVersion = GetClientVersionFromConfig(attribList);
+    GetAPIRenderableType();
 }
 
 EGLContext_t::~EGLContext_t()
@@ -47,16 +100,44 @@ EGLContext_t::Release()
     mAPIInterface->release_system_fbo_cb(mAPIContext);
 }
 
-EGLenum
-EGLContext_t::GetClientVersionFromConfig(const EGLint *attribList)
+EGLBoolean
+EGLContext_t::GetAPIRenderableType()
 {
-    FUN_ENTRY(EGL_LOG_TRACE);
+    switch(mRenderingAPI) {
+    case EGL_OPENGL_ES_API:
+    {
+        switch(mClientVersion) {
+        case 1: mRenderableAPIbit = EGL_OPENGL_ES_BIT; return EGL_TRUE;
+        case 2: mRenderableAPIbit = EGL_OPENGL_ES2_BIT; return EGL_TRUE;
+        default: NOT_REACHED(); return EGL_FALSE;
+        }
+    }
+    case EGL_OPENGL_API: mRenderableAPIbit = EGL_OPENGL_BIT; return EGL_TRUE;
+    case EGL_OPENVG_API: mRenderableAPIbit = EGL_OPENVG_BIT; return EGL_TRUE;
+    default: NOT_REACHED(); return EGL_FALSE;
+    }
+}
 
-    if(!attribList || attribList[0] != EGL_CONTEXT_CLIENT_VERSION) {
-        return EGL_GL_VERSION_1;
+EGLBoolean
+EGLContext_t::Validate()
+{
+    FUN_ENTRY(EGL_LOG_DEBUG);
+
+    // check the attribute list for errors
+    if(ParseAttributeList(mAttribList) == EGL_FALSE) {
+        return EGL_FALSE;
     }
 
-    return attribList[1];
+    // check the config if it is incompatible with the current API
+    GetAPIRenderableType();
+    if(!(mConfig->RenderableType & mRenderableAPIbit)) {
+        currentThread.RecordError(EGL_BAD_CONFIG);
+        return EGL_FALSE;
+    }
+
+    // TODO:: generate EGL_BAD_MATCH for incompatible share_contets
+
+    return EGL_TRUE;
 }
 
 EGLBoolean
@@ -64,9 +145,15 @@ EGLContext_t::Create()
 {
     FUN_ENTRY(EGL_LOG_DEBUG);
 
-    rendering_api_return_e ret = RENDERING_API_init_api(mRenderingAPI, mClientVersion, &mAPIInterface);
+    if(!Validate()) {
+        return EGL_FALSE;
+    }
 
-    if(ret != RENDERING_API_INIT_SUCCESS && ret != RENDERING_API_ALREADY_INIT) {
+    mAPIInterface = RENDERING_API_get_interface(mRenderingAPI, mClientVersion);
+
+    assert(mAPIInterface != nullptr);
+
+    if(mAPIInterface == nullptr) {
         return EGL_FALSE;
     }
 
@@ -91,31 +178,27 @@ EGLContext_t::Destroy()
 }
 
 EGLBoolean
-EGLContext_t::MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read)
+EGLContext_t::MakeCurrent(EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read)
 {
     FUN_ENTRY(EGL_LOG_DEBUG);
 
-    //TODO: Include Error Handling in Final implementation
     mDisplay = dpy;
+    mDrawSurface = draw;
+    mReadSurface = read;
 
-    EGLSurface_t *drawSurface = static_cast<EGLSurface_t *>(draw);
-    if(drawSurface == nullptr){
-        return EGL_BAD_SURFACE;
-    }
     // TODO: support correct construction/destruction of pbuffers
-    if (drawSurface->GetType() != EGL_WINDOW_BIT) {
+    if (mDrawSurface && mDrawSurface->GetType() != EGL_WINDOW_BIT) {
         return EGL_TRUE;
     }
 
-    if(drawSurface) {
+    if(mDrawSurface) {
         mDrawSurface = draw;
-        mAPIInterface->set_write_surface_cb(mAPIContext, drawSurface->GetEGLSurfaceInterface());
+        mAPIInterface->set_write_surface_cb(mAPIContext, mDrawSurface->GetEGLSurfaceInterface());
     }
 
-    EGLSurface_t *readSurface = static_cast<EGLSurface_t *>(read);
-    if(readSurface) {
+    if(mReadSurface) {
         mReadSurface = read;
-        mAPIInterface->set_read_surface_cb(mAPIContext, readSurface->GetEGLSurfaceInterface());
+        mAPIInterface->set_read_surface_cb(mAPIContext, mReadSurface->GetEGLSurfaceInterface());
     }
 
     return EGL_TRUE;
@@ -143,4 +226,34 @@ EGLContext_t::Finish()
     FUN_ENTRY(EGL_LOG_DEBUG);
 
     mAPIInterface->finish_cb(mAPIContext);
+}
+
+EGLBoolean EGLContext_t::ParseAttributeList(const EGLint* attrib_list)
+{
+    if(attrib_list == nullptr || attrib_list[0] == EGL_NONE) {
+       return EGL_TRUE;
+    }
+
+    // EGL_BAD_ATTRIBUTE is generated if there are any entries and API is not OpenGL ES
+    if (mRenderingAPI != EGL_OPENGL_ES_API && attrib_list[0] != EGL_NONE) {
+        currentThread.RecordError(EGL_BAD_ATTRIBUTE);
+        return EGL_FALSE;
+    }
+
+    // EGL_BAD_ATTRIBUTE is also generated if
+    // attribute is not EGL_CONTEXT_CLIENT_VERSION  with values 1 or 2
+    for(int i = 0; attrib_list[i] != EGL_NONE; i++) {
+        EGLint attr = attrib_list[i++];
+        EGLint val = attrib_list[i];
+
+        if(attr == EGL_CONTEXT_CLIENT_VERSION && val == 1) {
+           mClientVersion = EGL_GL_VERSION_1;
+        } else if(attr == EGL_CONTEXT_CLIENT_VERSION && val == 2) {
+            mClientVersion = EGL_GL_VERSION_2;
+        } else {
+            currentThread.RecordError(EGL_BAD_ATTRIBUTE);
+            return EGL_FALSE;
+        }
+    }
+    return EGL_TRUE;
 }

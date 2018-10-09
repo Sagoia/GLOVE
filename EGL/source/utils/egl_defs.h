@@ -32,6 +32,9 @@
 #define EGL_GL_VERSION_1                               1
 #define EGL_GL_VERSION_2                               2
 
+#define EGL_VERSION_MAJOR   1
+#define EGL_VERSION_MINOR   4
+
 #define EGL_FENCE_WAIT_TIMEOUT                         UINT64_MAX
 
 #ifndef EGL_SUPPORT_ONLY_PBUFFER_SURFACE

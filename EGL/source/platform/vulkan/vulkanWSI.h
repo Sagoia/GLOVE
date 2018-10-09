@@ -27,6 +27,7 @@
 #include "EGL/egl.h"
 #include <vulkan/vulkan.h>
 #include "api/eglSurface.h"
+#include "api/eglDisplay.h"
 
 #define GET_WSI_FUNCTION_PTR(callbackstr, entrypoint)                                                     \
 {                                                                                                        \
@@ -67,7 +68,7 @@ public:
     virtual ~VulkanWSI() = default;
 
     virtual EGLBoolean                             Initialize();
-    virtual VkSurfaceKHR                           CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
+    virtual VkSurfaceKHR                           CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface) = 0;
 
     inline void                                    SetVkInterface(const vkInterface_t* vkInterface) { mVkInterface = vkInterface; }
     const wsiCallbacks_t                           *GetWsiCallbacks() { return &mWsiCallbacks; }

@@ -5,6 +5,7 @@ message(STATUS "  Building EGL Library")
 set(SOURCES
     api/eglContext.cpp
     api/eglConfig.cpp
+    api/eglDisplay.cpp
     api/egl.cpp
     api/eglSurface.cpp
     display/displayDriver.cpp
@@ -18,6 +19,7 @@ set(SOURCES
     platform/vulkan/WSIPlaneDisplay.cpp
     platform/vulkan/WSIXcb.cpp
     rendering_api/rendering_api.c
+    utils/eglUtils.cpp
     utils/eglLogger.cpp
 )
 

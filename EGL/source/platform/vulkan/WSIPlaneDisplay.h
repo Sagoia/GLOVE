@@ -47,7 +47,7 @@ public:
     ~WSIPlaneDisplay() override {}
 
     EGLBoolean         Initialize() override;
-    VkSurfaceKHR       CreateSurface(EGLDisplay dpy,
+    VkSurfaceKHR       CreateSurface(EGLDisplay_t* dpy,
                                      EGLNativeWindowType win,
                                      EGLSurface_t *surface) override;
 

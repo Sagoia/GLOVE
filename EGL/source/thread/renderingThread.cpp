@@ -133,6 +133,18 @@ RenderingThread::GetCurrentContext(void)
     }
 }
 
+void
+RenderingThread::SetCurrentContext(EGLContext_t* eglContext)
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    switch(mCurrentAPI) {
+        case EGL_OPENGL_ES_API: mGLESCurrentContext = eglContext; break;
+        case EGL_OPENVG_API:    mVGCurrentContext   = eglContext; break;
+        default:                break;
+    }
+}
+
 EGLSurface
 RenderingThread::GetCurrentSurface(EGLint readdraw)
 {
@@ -144,7 +156,7 @@ RenderingThread::GetCurrentSurface(EGLint readdraw)
     }
 
     EGLContext_t *activeContext = static_cast<EGLContext_t *>(GetCurrentContext());
-    if (activeContext == nullptr) {
+    if(!EGLContext_t::FindEGLContext(activeContext)) {
         return EGL_NO_SURFACE;
     }
 
@@ -166,35 +178,36 @@ RenderingThread::GetCurrentDisplay(void)
 }
 
 EGLContext
-RenderingThread::CreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list)
+RenderingThread::CreateContext(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    EGLContext_t *eglContext = new EGLContext_t(mCurrentAPI, attrib_list);
+    if(mCurrentAPI == EGL_NONE) {
+        RecordError(EGL_BAD_MATCH);
+        return EGL_NO_CONTEXT;
+    }
+
+    EGLContext_t *eglContext = new EGLContext_t(mCurrentAPI, eglConfig, attrib_list);
     if(eglContext->Create() == EGL_FALSE) {
         delete eglContext;
-
-        return nullptr;
+        return EGL_NO_CONTEXT;
     }
+
+    EGLContext_t::GetEGLContext(eglContext);
 
     return eglContext;
 }
 
 EGLBoolean
-RenderingThread::DestroyContext(EGLDisplay dpy, EGLContext ctx)
+RenderingThread::DestroyContext(EGLDisplay_t* dpy, EGLContext_t* eglContext)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
-
-    EGLContext_t *eglContext = static_cast<EGLContext_t *>(ctx);
-    if(eglContext == nullptr) {
-        RecordError(EGL_BAD_CONTEXT);
-
-        return EGL_FALSE;
-    }
 
     if(eglContext->Destroy() == EGL_FALSE) {
         return EGL_FALSE;
     }
+
+    EGLContext_t::RemoveEGLContext(eglContext);
 
     delete eglContext;
 
@@ -202,49 +215,40 @@ RenderingThread::DestroyContext(EGLDisplay dpy, EGLContext ctx)
 }
 
 EGLBoolean
-RenderingThread::QueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value)
+RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    NOT_IMPLEMENTED();
+    switch(attribute) {
+    case EGL_CONFIG_ID:
+    case EGL_CONTEXT_CLIENT_TYPE:
+    case EGL_CONTEXT_CLIENT_VERSION:
+    case EGL_RENDER_BUFFER:
+    {
+        NOT_IMPLEMENTED(); break;
+    }
+    default: { currentThread.RecordError(EGL_BAD_ATTRIBUTE); break; }
+    }
 
     return EGL_FALSE;
 }
 
 EGLBoolean
-RenderingThread::MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
+RenderingThread::MakeCurrent(EGLDisplay_t* dpy, EGLSurface_t* drawSurface, EGLSurface_t* readSurface, EGLContext_t* eglContext)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    if(!ctx) {
+    // Flush commands when changing contexts of the same client API type
+    EGLContext_t* currentContext = static_cast<EGLContext_t*>(GetCurrentContext());
+    if(currentContext && currentContext != eglContext) {
+        currentContext->Finish();
+    }
+
+    if(eglContext && eglContext->MakeCurrent(dpy, drawSurface, readSurface) != EGL_TRUE) {
         return EGL_FALSE;
     }
 
-    EGLContext_t *eglContext = static_cast<EGLContext_t *>(ctx);
-    if(eglContext == nullptr) {
-        RecordError(EGL_BAD_CONTEXT);
-
-        return EGL_FALSE;
-    }
-
-    EGLSurface_t *drawSurface = static_cast<EGLSurface_t *>(draw);
-    EGLSurface_t *readSurface = static_cast<EGLSurface_t *>(read);
-
-    if (drawSurface == nullptr || readSurface == nullptr) {
-        RecordError(EGL_BAD_SURFACE);
-
-        return EGL_FALSE;
-    }
-
-    if(eglContext->MakeCurrent(dpy, draw, read) != EGL_TRUE) {
-        return EGL_FALSE;
-    }
-
-    switch(mCurrentAPI) {
-        case EGL_OPENGL_ES_API: mGLESCurrentContext = eglContext; break;
-        case EGL_OPENVG_API:    mVGCurrentContext   = eglContext; break;
-        default:                break;
-    }
+    SetCurrentContext(eglContext);
 
     return EGL_TRUE;
 }
@@ -269,6 +273,12 @@ RenderingThread::WaitNative(EGLint engine)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    if(engine != EGL_CORE_NATIVE_ENGINE) {
+        RecordError(EGL_BAD_PARAMETER);
+        return EGL_FALSE;
+    }
+
+    // TODO:: implement EGL_BAD_CURRENT_SURFACE
     NOT_IMPLEMENTED();
 
     return EGL_FALSE;

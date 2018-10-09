@@ -26,6 +26,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include "api/eglDisplay.h"
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 #include "eglConfig_android.h"
@@ -34,7 +35,7 @@
 #endif
 
 void
-InitConfig(EGLConfig_t *conf, EGLDisplay *dpy, EGLint id)
+InitConfig(EGLConfig_t *conf, EGLDisplay_t *dpy, EGLint id)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -551,7 +552,7 @@ CompareConfigs(const EGLConfig_t *conf1, const EGLConfig_t *conf2,
  * Return EGL_FALSE if any of the attribute is invalid.
  */
 EGLBoolean
-ParseConfigAttribList(EGLConfig_t *conf, EGLDisplay *dpy, const EGLint *attrib_list)
+ParseConfigAttribList(EGLConfig_t *conf, EGLDisplay_t *dpy, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 

@@ -196,13 +196,13 @@ EGLSurface_t::ParseSurfaceAttribList(const EGLint *attrib_list)
  * \return EGL_TRUE if no errors, EGL_FALSE otherwise.
  */
 EGLBoolean
-EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_list)
+EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_list, EGLint* error)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    *error = EGL_SUCCESS;
     EGLint renderBuffer = EGL_BACK_BUFFER;
     EGLint swapBehavior = EGL_BUFFER_PRESERVED;
-    EGLint err;
 
     switch(type) {
     case EGL_WINDOW_BIT:
@@ -253,8 +253,17 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
 
     PostSubBufferSupportedNV = EGL_FALSE;
 
-    err = ParseSurfaceAttribList(attrib_list);
-    if(err != EGL_SUCCESS) {
+    *error = ParseSurfaceAttribList(attrib_list);
+    if(*error != EGL_SUCCESS) {
+        return EGL_FALSE;
+    }
+
+    // validate Pbuffer attributes
+    if(Type == EGL_PBUFFER_BIT &&
+       (!(conf->SurfaceType & EGL_PBUFFER_BIT) ||
+       (TextureFormat == EGL_NO_TEXTURE && TextureTarget != EGL_NO_TEXTURE) ||
+       (TextureFormat != EGL_NO_TEXTURE && TextureTarget == EGL_NO_TEXTURE))) {
+        *error = EGL_BAD_MATCH;
         return EGL_FALSE;
     }
 

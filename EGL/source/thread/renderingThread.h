@@ -25,6 +25,7 @@
 #define __RENDERINGTHREAD_H__
 
 #include "api/eglContext.h"
+#include "api/eglDisplay.h"
 #include "EGL/egl.h"
 #include "EGL/eglext.h"
 
@@ -36,6 +37,8 @@ private:
     EGLContext_t           *mGLESCurrentContext;
     EGLContext_t           *mVGCurrentContext;
     EGLint                  mLastError;
+
+    void                    SetCurrentContext(EGLContext_t* eglContext);
 
 public:
     RenderingThread(void);
@@ -51,10 +54,10 @@ public:
     EGLContext              GetCurrentContext(void);
     EGLSurface              GetCurrentSurface(EGLint readdraw);
     EGLDisplay              GetCurrentDisplay(void);
-    EGLContext              CreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list);
-    EGLBoolean              DestroyContext(EGLDisplay dpy, EGLContext ctx);
-    EGLBoolean              QueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value);
-    EGLBoolean              MakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx);
+    EGLContext              CreateContext(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list);
+    EGLBoolean              DestroyContext(EGLDisplay_t* dpy, EGLContext_t* eglContext);
+    EGLBoolean              QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLint attribute, EGLint *value);
+    EGLBoolean              MakeCurrent(EGLDisplay_t* dpy, class EGLSurface_t* drawSurface, class EGLSurface_t* readSurface, EGLContext_t* eglContext);
     EGLBoolean              WaitGL(void);
     EGLBoolean              WaitNative(EGLint engine);
 };

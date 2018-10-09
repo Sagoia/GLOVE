@@ -82,7 +82,7 @@ public:
     EGLSurface_t();
     ~EGLSurface_t() {}
 
-    EGLBoolean                       InitSurface(EGLint type, EGLConfig_t *config, const EGLint *attrib_list);
+    EGLBoolean                       InitSurface(EGLint type, EGLConfig_t *config, const EGLint *attrib_list, EGLint* error);
 
     /**
      * Parse the list of surface attributes and return the proper error code.

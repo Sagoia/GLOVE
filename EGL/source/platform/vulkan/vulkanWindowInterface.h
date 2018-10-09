@@ -66,7 +66,7 @@ public:
     /// EGL API core functions
     EGLBoolean                   Initialize() override;
     EGLBoolean                   Terminate() override;
-    EGLBoolean                   CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface) override;
+    EGLBoolean                   CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface) override;
     void                         AllocateSurfaceImages(EGLSurface_t *surface) override;
     void                         DestroySurfaceImages(EGLSurface_t *surface) override;
     void                         DestroySurface(EGLSurface_t *surface) override;

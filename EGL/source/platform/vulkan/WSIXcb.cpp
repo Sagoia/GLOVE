@@ -23,6 +23,7 @@
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
 #include "WSIXcb.h"
+#include "api/eglDisplay.h"
 
 EGLBoolean
 WSIXcb::Initialize()
@@ -60,7 +61,7 @@ WSIXcb::GetXCBConnection(xcbContext *xcb)
 
     xcb->connection = nullptr;
 
-    if(xcb->dpy->nativeDisplay == EGL_DEFAULT_DISPLAY) {
+    if(xcb->dpy->display_id == EGL_DEFAULT_DISPLAY) {
         int scr;
 
         if(!(xcb->connection = xcb_connect(nullptr, &scr))) {
@@ -77,12 +78,12 @@ WSIXcb::GetXCBConnection(xcbContext *xcb)
         xcb->screen = iter.data;
     } else {
         // Get xcb connection from X display
-        xcb->connection = XGetXCBConnection(xcb->dpy->nativeDisplay);
+        xcb->connection = XGetXCBConnection(xcb->dpy->display_id);
     }
 }
 
 VkSurfaceKHR
-WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface)
+WSIXcb::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -90,7 +91,7 @@ WSIXcb::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *sur
         return VK_NULL_HANDLE;
     }
 
-    xcbContext xcb = {(eglDisplay_t *)dpy, nullptr, nullptr};
+    xcbContext xcb = { dpy, nullptr, nullptr };
     GetXCBConnection(&xcb);
 
     if(!surface->GetWidth() || !surface->GetHeight()) {
