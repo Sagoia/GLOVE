@@ -32,13 +32,13 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 | ES 2.0  | Mali-G71                            | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
 | ES 2.0  | Mali-G71                            | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
 
-# SW Design
+# Software Design
 
-You can find a short description on GLOVE SW design as well as "How To extend GLOVE" guidelines in [GLOVE Design Document](Docs/GLOVEDesignDocument.md)
+You can find a short description on GLOVE's software design as well as "How To extend GLOVE" guidelines in the [GLOVE Design Document](Docs/GLOVEDesignDocument.md).
 
 # Contribution
 
-GLOVE project is considered as work in progress, therefore contributions are more than welcome! Guidelines of how to contribute to GLOVE can be found [here](CONTRIBUTING.md)
+GLOVE project is considered as work in progress, therefore contributions are more than welcome! Guidelines of how to contribute to GLOVE can be found [here](CONTRIBUTING.md).
 
 # Installation Instructions
 
@@ -74,20 +74,20 @@ To get and build the above projects:
 ```
 # Building 
 
-View the [Building instructions](BUILD.md).
+View the [Building Instructions](BUILD.md) for detailed instructions on how to configure and build GLOVE on the supported platforms.
 
 # Known Issues
 
 GLOVE is considered as work-in-progress, therefore there are known issues that have to be resolved or improved.
 
-You can see a detailed list of issues in [Known Issues List](Docs/KnownIssues.md)
+You can see a detailed list of issues in the [Known Issues List](Docs/KnownIssues.md).
 
 # Demos
 
-GLOVE is accompanied by a demo SDK that contains fully commented, highly optimized C applications (accompanied by the ESSL shader source code). These demos demonstrate some simple rendering techniques with different geometry complexities, as they were designed with the restrictions of low-power embedded platforms in mind.
+A demo SDK that contains fully commented, highly optimized C applications (accompanied by the ESSL shader source code) is available with GLOVE. These demos demonstrate some simple rendering techniques with different geometry complexities, as they were designed with the restrictions of low-power embedded platforms in mind.
 
-See details in [Demos README](Demos/README_demos.md)
+See details in [Demos README](Demos/README_demos.md).
 
 # Benchmarking
 
-GLOVE is aiming to take advantage of Vulkan in terms of performance. First results are very promising and major performance upgrades are in progress too. Instructions to use some available benchmarks for testing can be found in [Benchmarking README](Benchmarking/README_benchmarking.md)
+GLOVE is aiming to take advantage of Vulkan in terms of performance. Our preliminary results are very promising and further major performance upgrades are also in progress. Instructions to use some available benchmarks for testing can be found in the [Benchmarking README](Benchmarking/README_benchmarking.md).
