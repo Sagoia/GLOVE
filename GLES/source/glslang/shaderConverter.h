@@ -62,8 +62,11 @@ private:
     const GlslangIoMapResolver *mIoMapResolver;
 
     void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
+    void ProcessMacros(std::string& source);
+    void ProcessPragma(std::string& source);
     void ProcessHeader(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessUniforms(string& source, const uniformBlockMap_t &uniformBlockMap);
+    void ProcessInvariantQualifier(std::string& source);
     void ProcessVaryings(string& source);
     void ProcessVertexAttributes(string& source, ShaderReflection* reflection);
     void ConvertGLToVulkanCoordSystem(string& source);

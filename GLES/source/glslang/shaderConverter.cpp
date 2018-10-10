@@ -103,8 +103,15 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    ProcessPragma(source);
+    ProcessMacros(source);
     ProcessHeader(source, uniformBlockMap);
     ProcessUniforms(source, uniformBlockMap);
+
+    if(mShaderType == SHADER_TYPE_FRAGMENT) {
+        ProcessInvariantQualifier(source);
+    }
+
     ProcessVaryings(source);
     ProcessVertexAttributes(source, reflection);
 
@@ -147,6 +154,103 @@ ShaderConverter::ProcessHeader(std::string& source, const uniformBlockMap_t &uni
         source.replace(found, f1 - found, sourceHeader);
     } else {
         source.insert(0, sourceHeader);
+    }
+}
+
+void
+ShaderConverter::ProcessPragma(std::string& source)
+{
+    size_t found;
+
+    const string pragmaStr("#pragma debug(1.23)");
+    found = FindToken(pragmaStr, source, 0);
+    while(found != string::npos) {
+
+        size_t f1 = found;
+        size_t secondNL = source.find ('\n', f1);
+        size_t firstNL  = source.rfind('\n', f1);
+
+        source.erase(firstNL, secondNL - firstNL);
+
+        found = FindToken(pragmaStr, source, secondNL);
+    }
+}
+
+void
+ShaderConverter::ProcessInvariantQualifier(std::string& source)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    size_t found;
+
+    const string invariantStr("invariant");
+    const string invariantVaryingStr("invariant varying");
+    found = FindToken(invariantVaryingStr, source, 0);
+    while(found != string::npos) {
+
+        size_t f1 = found;
+        found = SkipWhiteSpaces(source, found + invariantStr.length());
+
+        source.replace(f1, invariantStr.length(), "");
+
+        found = FindToken(invariantVaryingStr, source, found);
+    }
+}
+
+void
+ShaderConverter::ProcessMacros(std::string& source)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    size_t found;
+
+    bool linedirectiveEnabled=false;
+    const string linedirective("#line");
+    found = FindToken(linedirective, source, 0);
+    if(found != string::npos) {
+        linedirectiveEnabled = true;
+    }
+
+    const string lineStr("__LINE__");
+    found = FindToken(lineStr, source, 0);
+    while(found != string::npos) {
+
+        size_t f1 = found;
+        found = SkipWhiteSpaces(source, found + lineStr.length());
+
+        size_t firstNL  = source.rfind('\n', f1);
+        size_t secondNL = source.rfind('#' , f1);
+
+        // check if is used in a define function
+        if(firstNL >= secondNL && !linedirectiveEnabled) {
+            source.replace(f1, lineStr.length(), "__LINE__ - 29");
+        }
+
+        found = FindToken(lineStr, source, found);
+    }
+
+    const string versionStr("__VERSION__");
+    found = FindToken(versionStr, source, 0);
+    while(found != string::npos) {
+
+        size_t f1 = found;
+        found = SkipWhiteSpaces(source, found + versionStr.length());
+
+        source.replace(f1, versionStr.length(), "__VERSION__ / 4");
+
+        found = FindToken(versionStr, source, found);
+    }
+
+    const  string glStr("GL_ES");
+    found = FindToken(glStr, source, 0);
+    while(found != string::npos) {
+
+        size_t f1 = found;
+        found = SkipWhiteSpaces(source, found + glStr.length());
+
+        source.replace(f1, glStr.length(), "1");
+
+        found = FindToken(glStr, source, found);
     }
 }
 
@@ -289,7 +393,6 @@ ShaderConverter::ProcessVaryings(std::string& source)
 
         found = FindToken(varyingLiteralStr, source, found);
     }
-
 }
 
 void
