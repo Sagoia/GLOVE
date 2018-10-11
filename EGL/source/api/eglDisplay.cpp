@@ -68,7 +68,7 @@ EGLDisplay_t::GetDisplayByID(EGLNativeDisplayType display_id)
         dpy = display_id;
     }
 #else
-    dpy = nativeDisplay = 0;
+    dpy = display_id;
 #endif
 
     dis->display = dpy;
