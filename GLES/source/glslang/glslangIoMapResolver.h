@@ -37,6 +37,7 @@ private:
         const char *                type;
         bool                        hasLocation;
         int                         location;
+        int                         vectorSize;
     };
 
     using VaryingMap = std::vector<VaryingInfo>;
@@ -74,12 +75,15 @@ public:
     const char *                    GetVaryingInType(uint32_t index) const;
     bool                            GetVaryingInHasLocation(uint32_t index) const;
     int                             GetVaryingInLocation(uint32_t index) const;
+    int                             GetVaryingInSize(uint32_t index) const;
+
 
     inline uint32_t                 GetNumLiveVaryingOutVariables() const { return mVaryingOUTMap.size(); }
     const char *                    GetVaryingOutName(uint32_t index) const;
     const char *                    GetVaryingOutType(uint32_t index) const;
     bool                            GetVaryingOutHasLocation(uint32_t index) const;
     int                             GetVaryingOutLocation(uint32_t index) const;
+    int                             GetVaryingOutSize(uint32_t index) const;
 };
 
 #endif // __GLSLANGIOMAPRESOLVER_H__

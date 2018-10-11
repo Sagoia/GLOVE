@@ -378,14 +378,17 @@ ShaderConverter::ProcessVaryings(std::string& source)
     assert(mSlangProg);
 
     int location = 0;
-    map<string, int> varyingsLocationMap;
+    map<string, std::pair<int,bool>> varyingsLocationMap;
     for(uint32_t out = 0; out < mIoMapResolver->GetNumLiveVaryingOutVariables(); ++out) {
         for(uint32_t in = 0; in < mIoMapResolver->GetNumLiveVaryingInVariables(); ++in) {
-            const char *inName = mIoMapResolver->GetVaryingInName(in);
+            const char *inName  = mIoMapResolver->GetVaryingInName(in);
             const char *outName = mIoMapResolver->GetVaryingOutName(out);
+            const int   inSize  = mIoMapResolver->GetVaryingInSize(in);
+            const int   outSize = mIoMapResolver->GetVaryingOutSize(out);
+
             if(!strcmp(inName, outName)) {
                 assert(varyingsLocationMap.find(string(inName)) == varyingsLocationMap.end());
-                varyingsLocationMap[string(inName)] = location;
+                varyingsLocationMap[string(inName)] = make_pair(location, (inSize == outSize));
                 location++;
             }
         }
@@ -404,7 +407,6 @@ ShaderConverter::ProcessVaryings(std::string& source)
             found = SkipWhiteSpaces(source, found + token.length());
             token = GetNextToken(source, found);
         }
-
         /// Definitely type now
         found = SkipWhiteSpaces(source, found + token.length());
 
@@ -413,9 +415,17 @@ ShaderConverter::ProcessVaryings(std::string& source)
 
         if(varyingsLocationMap.find(token) != varyingsLocationMap.end()) {
             string layoutSyntax = string("layout(location = ") +
-                                  to_string(varyingsLocationMap[token]) +
+                                  to_string(varyingsLocationMap[token].first) +
                                   (mShaderType == SHADER_TYPE_VERTEX ? string(") out") : string(") in"));
-            source.replace(f1, varyingLiteralStr.length(), layoutSyntax);
+
+            //  Check for varying type mismatch
+            //  replace line with dummy word in order to make compilation fail.
+            //  TODO: This is a process that should be executed in the linking step! Not here.
+            if(mShaderType == SHADER_TYPE_FRAGMENT && !varyingsLocationMap[token].second) {
+                source.replace(f1, varyingLiteralStr.length(), "xxx");
+            } else {
+                source.replace(f1, varyingLiteralStr.length(), layoutSyntax);
+            }
         } else {
             source.replace(f1, varyingLiteralStr.length(), "");
         }
