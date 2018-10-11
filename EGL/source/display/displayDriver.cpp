@@ -351,25 +351,25 @@ DisplayDriver::SurfaceAttrib(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint
 
     switch(attribute) {
     case EGL_MIPMAP_LEVEL:
-    	eglSurface->SetMipmapLevel(value);
-     	break;
+        eglSurface->SetMipmapLevel(value);
+        break;
     case EGL_MULTISAMPLE_RESOLVE:
-    	if((value == EGL_MULTISAMPLE_RESOLVE_BOX) && !(val & EGL_MULTISAMPLE_RESOLVE_BOX_BIT)) {
-    	    currentThread.RecordError(EGL_BAD_MATCH);
-    	    return EGL_FALSE;
-    	}
-    	eglSurface->SetMultisampleResolve(value);
-    	break;
+        if((value == EGL_MULTISAMPLE_RESOLVE_BOX) && !(val & EGL_MULTISAMPLE_RESOLVE_BOX_BIT)) {
+            currentThread.RecordError(EGL_BAD_MATCH);
+            return EGL_FALSE;
+        }
+        eglSurface->SetMultisampleResolve(value);
+        break;
     case EGL_SWAP_BEHAVIOR:
-    	if((value == EGL_BUFFER_PRESERVED) && !(val & EGL_SWAP_BEHAVIOR_PRESERVED_BIT)) {
-    	    currentThread.RecordError(EGL_BAD_MATCH);
-    	    return EGL_FALSE;
-    	}
-   	eglSurface->SetSwapBehavior(value);
-    	break;
+        if((value == EGL_BUFFER_PRESERVED) && !(val & EGL_SWAP_BEHAVIOR_PRESERVED_BIT)) {
+            currentThread.RecordError(EGL_BAD_MATCH);
+            return EGL_FALSE;
+        }
+   	    eglSurface->SetSwapBehavior(value);
+        break;
     default:
-    	currentThread.RecordError(EGL_BAD_ATTRIBUTE);
-    	return EGL_FALSE;
+        currentThread.RecordError(EGL_BAD_ATTRIBUTE);
+        return EGL_FALSE;
     }
     //TODO: If OpenGL ES rendering is not supported by surface, generate EGL_BAD_PARAMETER error
     return EGL_TRUE;

@@ -202,7 +202,7 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
 
     *error = EGL_SUCCESS;
     EGLint renderBuffer = EGL_BACK_BUFFER;
-    EGLint swapBehavior = EGL_BUFFER_PRESERVED;
+    EGLint swapBehavior = EGL_BUFFER_DESTROYED;
 
     switch(type) {
     case EGL_WINDOW_BIT:
@@ -212,7 +212,7 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
         renderBuffer = EGL_SINGLE_BUFFER;
         break;
     case EGL_PBUFFER_BIT:
-        renderBuffer = EGL_SINGLE_BUFFER;
+        renderBuffer = EGL_BACK_BUFFER;
         break;
     default:
         return EGL_FALSE;
@@ -288,7 +288,9 @@ EGLSurface_t::QuerySurface(EGLint attribute, EGLint *value)
         *value = Config->ConfigID;
         break;
     case EGL_LARGEST_PBUFFER:
-        *value = LargestPbuffer;
+        if(Type == EGL_PBUFFER_BIT) {
+            *value = LargestPbuffer;
+        }
         break;
     case EGL_TEXTURE_FORMAT:
         /* texture attributes: only for pbuffers, no error otherwise */

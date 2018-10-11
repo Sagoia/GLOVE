@@ -24,7 +24,6 @@
 #include "utils/egl_defs.h"
 #include "eglContext.h"
 #include "api/eglDisplay.h"
-#include "eglConfig.h"
 #include "eglSurface.h"
 #include "thread/renderingThread.h"
 #include <algorithm>
@@ -236,7 +235,8 @@ EGLContext_t::BoundToTexture(EGLint bound)
     mAPIInterface->bound_to_texture_cb(mAPIContext, bound);
 }
 
-EGLBoolean EGLContext_t::ParseAttributeList(const EGLint* attrib_list)
+EGLBoolean
+EGLContext_t::ParseAttributeList(const EGLint* attrib_list)
 {
     if(attrib_list == nullptr || attrib_list[0] == EGL_NONE) {
        return EGL_TRUE;
@@ -265,3 +265,4 @@ EGLBoolean EGLContext_t::ParseAttributeList(const EGLint* attrib_list)
     }
     return EGL_TRUE;
 }
+

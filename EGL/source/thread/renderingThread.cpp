@@ -220,17 +220,24 @@ RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLin
     FUN_ENTRY(DEBUG_DEPTH);
 
     switch(attribute) {
-    case EGL_CONFIG_ID:
-    case EGL_CONTEXT_CLIENT_TYPE:
-    case EGL_CONTEXT_CLIENT_VERSION:
-    case EGL_RENDER_BUFFER:
-    {
-        NOT_IMPLEMENTED(); break;
-    }
-    default: { currentThread.RecordError(EGL_BAD_ATTRIBUTE); break; }
+        case EGL_CONFIG_ID:
+            *value = eglContext->getConfigID();
+            break;
+        case EGL_CONTEXT_CLIENT_TYPE:
+            *value = QueryAPI();
+            break;
+        case EGL_CONTEXT_CLIENT_VERSION:
+            *value = eglContext->getClientVersion();
+        case EGL_RENDER_BUFFER:
+            *value = EGL_BACK_BUFFER;
+            break;
+        default:
+            currentThread.RecordError(EGL_BAD_ATTRIBUTE);
+            return EGL_FALSE;
+            break;
     }
 
-    return EGL_FALSE;
+    return EGL_TRUE;
 }
 
 EGLBoolean
