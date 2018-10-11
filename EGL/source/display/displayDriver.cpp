@@ -192,7 +192,7 @@ DisplayDriver::GetConfigAttrib(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLint
     }
 
     *value = GetConfigKey(eglConfig, attribute);
-     return EGL_TRUE;
+    return EGL_TRUE;
 }
 
 EGLSurface
@@ -391,8 +391,19 @@ DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
         currentThread.RecordError(EGL_BAD_MATCH);
         return EGL_FALSE;
     }
+    EGLint surfacetype = eglSurface->GetType();
+    if(surfacetype != EGL_PBUFFER_BIT) {
+        return EGL_FALSE;
+    }
 
-    NOT_IMPLEMENTED();
+    EGLint bindToTextureRGB  = eglSurface->GetBindToTextureRGB();
+    EGLint bindToTextureRGBA = eglSurface->GetBindToTextureRGBA();
+    if (!(bindToTextureRGB || bindToTextureRGBA)) {
+        return EGL_FALSE;
+    }
+    //If display and surface are the display and surface for the calling thread's current context, eglBindTexImage performs an implicit glFlush
+    mActiveContext->Finish();
+    mActiveContext->BoundToTexture(EGL_TRUE);
 
     return EGL_FALSE;
 }
@@ -412,7 +423,7 @@ DisplayDriver::ReleaseTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLi
         currentThread.RecordError(EGL_BAD_MATCH);
         return EGL_FALSE;
     }
-    NOT_IMPLEMENTED();
+    mActiveContext->BoundToTexture(EGL_FALSE);
 
     return EGL_FALSE;
 }
@@ -444,6 +455,10 @@ DisplayDriver::SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)
 
     if(eglSurface->GetType() != EGL_WINDOW_BIT) {
         return EGL_TRUE;
+    }
+
+    if(eglSurface->GetBoundToTexture() == EGL_TRUE) {
+        return EGL_TRUE; //TODO: Is this right?
     }
 
     mActiveContext->Finish();

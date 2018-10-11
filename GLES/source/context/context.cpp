@@ -68,6 +68,8 @@ Context::Context()
     //If VK_KHR_maintenance1 is supported, then there is no need to invert the Y
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsFullScreenRender = false;
+    mSurfaceType = 0;
+    mIsBoundToTexture = false;
 }
 
 Context::~Context()
@@ -140,9 +142,12 @@ Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     Framebuffer *fbo = nullptr;
-    if(EGL_WINDOW_BIT == eglSurfaceInterface->type) {
+    int type = eglSurfaceInterface->type;
+    if(EGL_WINDOW_BIT == type) {
+        mSurfaceType = GLOVE_SURFACE_WINDOW;
         fbo = InitializeFrameBuffer(eglSurfaceInterface);
-    } else if(EGL_PBUFFER_BIT == eglSurfaceInterface->type) {
+    } else if(EGL_PBUFFER_BIT == type) {
+        mSurfaceType = GLOVE_SURFACE_PBUFFER;
         fbo = AllocatePBufferTexture(eglSurfaceInterface);
     } else {
         return nullptr;

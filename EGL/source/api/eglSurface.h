@@ -57,6 +57,8 @@ private:
     EGLenum                          RenderBuffer;
     EGLenum                          VGAlphaFormat;
     EGLenum                          VGColorspace;
+    EGLint                           BindToTextureRGB;
+    EGLint                           BindToTextureRGBA;
 
     /* attributes set by eglSurfaceAttrib */
     EGLint                           MipmapLevel;
@@ -103,19 +105,24 @@ public:
            void                      SetMipmapLevel(EGLint mipmapLevel);
     inline void                      SetMultisampleResolve(EGLint multisampleResolve)           { FUN_ENTRY(EGL_LOG_TRACE); MultisampleResolve = multisampleResolve; }
     inline void                      SetSwapBehavior(EGLint swapBehavior)                       { FUN_ENTRY(EGL_LOG_TRACE); SwapBehavior = swapBehavior; }
+    inline void                      SetBoundToTexture(EGLint boundToTexture)                   { FUN_ENTRY(EGL_LOG_TRACE); BoundToTexture = boundToTexture; }
 
-    inline EGLint                    GetType()                                                  { FUN_ENTRY(EGL_LOG_TRACE); return Type; }
-    inline EGLint                    GetWidth()                                                 { FUN_ENTRY(EGL_LOG_TRACE); return Width; }
-    inline EGLint                    GetHeight()                                                { FUN_ENTRY(EGL_LOG_TRACE); return Height; }
-    inline EGLint                    GetDepthSize()                                             { FUN_ENTRY(EGL_LOG_TRACE); return DepthSize; }
-    inline EGLint                    GetStencilSize()                                           { FUN_ENTRY(EGL_LOG_TRACE); return StencilSize; }
-    inline EGLint                    GetCurrentImageIndex()                                     { FUN_ENTRY(EGL_LOG_TRACE); return CurrentImageIndex; }
-    inline EGLint                    GetColorFormat()                                           { FUN_ENTRY(EGL_LOG_TRACE); return ColorFormat; }
+    inline EGLint                    GetType()                                            const { FUN_ENTRY(EGL_LOG_TRACE); return Type; }
+    inline EGLint                    GetWidth()                                           const { FUN_ENTRY(EGL_LOG_TRACE); return Width; }
+    inline EGLint                    GetHeight()                                          const { FUN_ENTRY(EGL_LOG_TRACE); return Height; }
+    inline EGLint                    GetDepthSize()                                       const { FUN_ENTRY(EGL_LOG_TRACE); return DepthSize; }
+    inline EGLint                    GetStencilSize()                                     const { FUN_ENTRY(EGL_LOG_TRACE); return StencilSize; }
+    inline EGLint                    GetCurrentImageIndex()                               const { FUN_ENTRY(EGL_LOG_TRACE); return CurrentImageIndex; }
+    inline EGLint                    GetColorFormat()                                     const { FUN_ENTRY(EGL_LOG_TRACE); return ColorFormat; }
     inline EGLSurfaceInterface_t    *GetEGLSurfaceInterface()                                   { FUN_ENTRY(EGL_LOG_TRACE); return &SurfaceInterface; }
     inline const PlatformResources  *GetPlatformResources()                               const { FUN_ENTRY(EGL_LOG_TRACE); return mPlatformResources; }
     inline PlatformResources        *GetPlatformResources()                                     { FUN_ENTRY(EGL_LOG_TRACE); return mPlatformResources; }
     inline uint32_t                  GetPlatformSurfaceImageCount()                             { FUN_ENTRY(EGL_LOG_TRACE); return mPlatformResources->GetSwapchainImageCount(); }
     inline void                     *GetPlatformSurfaceImages()                                 { FUN_ENTRY(EGL_LOG_TRACE); return mPlatformResources->GetSwapchainImages(); }
+
+    inline EGLint                    GetBindToTextureRGB()                                const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGB; }
+    inline EGLint                    GetBindToTextureRGBA()                               const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGBA; }
+    inline EGLBoolean                GetBoundToTexture()                                  const { FUN_ENTRY(EGL_LOG_TRACE); return BoundToTexture; }
 };
 
 #endif // __EGL_SURFACE_H__

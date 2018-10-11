@@ -228,6 +228,14 @@ EGLContext_t::Finish()
     mAPIInterface->finish_cb(mAPIContext);
 }
 
+void
+EGLContext_t::BoundToTexture(EGLint bound)
+{
+    FUN_ENTRY(EGL_LOG_DEBUG);
+
+    mAPIInterface->bound_to_texture_cb(mAPIContext, bound);
+}
+
 EGLBoolean EGLContext_t::ParseAttributeList(const EGLint* attrib_list)
 {
     if(attrib_list == nullptr || attrib_list[0] == EGL_NONE) {

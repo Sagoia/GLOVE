@@ -223,17 +223,19 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
         return EGL_FALSE;
     }
 
-    Type        = type;
-    Config      = conf;
+    Type              = type;
+    Config            = conf;
 
-    Width       = 0;
-    Height      = 0;
-    RedSize     = GetConfigKey(conf, EGL_RED_SIZE);
-    BlueSize    = GetConfigKey(conf, EGL_BLUE_SIZE);
-    GreenSize   = GetConfigKey(conf, EGL_GREEN_SIZE);
-    AlphaSize   = GetConfigKey(conf, EGL_ALPHA_SIZE);
-    DepthSize   = GetConfigKey(conf, EGL_DEPTH_SIZE);
-    StencilSize = GetConfigKey(conf, EGL_STENCIL_SIZE);
+    Width             = 0;
+    Height            = 0;
+    RedSize           = GetConfigKey(conf, EGL_RED_SIZE);
+    BlueSize          = GetConfigKey(conf, EGL_BLUE_SIZE);
+    GreenSize         = GetConfigKey(conf, EGL_GREEN_SIZE);
+    AlphaSize         = GetConfigKey(conf, EGL_ALPHA_SIZE);
+    DepthSize         = GetConfigKey(conf, EGL_DEPTH_SIZE);
+    StencilSize       = GetConfigKey(conf, EGL_STENCIL_SIZE);
+    BindToTextureRGB  = GetConfigKey(conf, EGL_BIND_TO_TEXTURE_RGB);
+    BindToTextureRGBA = GetConfigKey(conf, EGL_BIND_TO_TEXTURE_RGBA);
 
     TextureFormat = EGL_NO_TEXTURE;
     TextureTarget = EGL_NO_TEXTURE;

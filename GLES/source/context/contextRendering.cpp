@@ -387,7 +387,13 @@ Context::Finish(void)
 
     if(!mWriteFBO->IsInDeleteState()) {
         if(mWriteFBO == mSystemFBO) {
-            mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+            if(mSurfaceType == GLOVE_SURFACE_WINDOW) {
+                mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+            } else if (mSurfaceType == GLOVE_SURFACE_PBUFFER) {
+                if(mIsBoundToTexture) {
+                    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                }
+            }
         } else {
             mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         }
@@ -395,6 +401,13 @@ Context::Finish(void)
     mWriteFBO->SetStateIdle();
 
     mCacheManager->CleanUpCaches();
+}
+
+void
+Context::BoundToTexture(GLuint bound)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+    mIsBoundToTexture = bound;
 }
 
 bool

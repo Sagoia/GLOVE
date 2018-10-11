@@ -38,6 +38,7 @@ void                  release_system_fbo(api_context_t api_context);
 void                  set_next_image_index(api_context_t api_context, uint32_t index);
 GLPROC                get_proc_addr(const char* procname);
 void                  finish(api_context_t api_context);
+void                  bound_to_texture(api_context_t api_context, uint32_t bound);
 
 static void           FillInVkInterface(vulkanAPI::vkContext_t* vkContext);
 
@@ -52,7 +53,8 @@ rendering_api_interface_t GLES2Interface = {
     release_system_fbo,
     set_next_image_index,
     get_proc_addr,
-    finish
+    finish,
+    bound_to_texture
 };
 
 static void FillInVkInterface(vulkanAPI::vkContext_t* vkContext)
@@ -150,4 +152,12 @@ void finish(api_context_t api_context)
 
     Context *ctx = reinterpret_cast<Context *>(api_context);
     ctx->Finish();
+}
+
+void bound_to_texture(api_context_t api_context, uint32_t bound)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    Context *ctx = reinterpret_cast<Context *>(api_context);
+    ctx->BoundToTexture(bound);
 }

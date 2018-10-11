@@ -63,6 +63,7 @@ public:
     EGLBoolean                   MakeCurrent(class EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
     void                         SetNextImageIndex(uint32_t index);
     void                         Finish();
+    void                         BoundToTexture(EGLint bound);
     void                         Release();
     GLPROC                       GetProcAddr(const char* procname);
 
