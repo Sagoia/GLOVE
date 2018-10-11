@@ -67,6 +67,10 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(nullptr == renderbuffers) {
+        return;
+    }
+
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -118,6 +122,10 @@ void
 Context::GenRenderbuffers(GLsizei n, GLuint *renderbuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(nullptr == renderbuffers) {
+        return;
+    }
 
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);

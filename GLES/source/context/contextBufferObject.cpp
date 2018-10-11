@@ -108,6 +108,10 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(nullptr == buffers) {
+        return;
+    }
+
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -164,6 +168,10 @@ void
 Context::GenBuffers(GLsizei n, GLuint* buffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(nullptr == buffers) {
+        return;
+    }
 
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);

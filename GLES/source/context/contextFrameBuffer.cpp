@@ -80,6 +80,10 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(nullptr == framebuffers) {
+        return;
+    }
+
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -232,6 +236,10 @@ void
 Context::GenFramebuffers(GLsizei n, GLuint* framebuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(nullptr == framebuffers) {
+        return;
+    }
 
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
