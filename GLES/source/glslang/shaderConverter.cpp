@@ -191,6 +191,7 @@ ShaderConverter::ProcessInvariantQualifier(std::string& source)
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + invariantStr.length());
 
+        // remove 'invariant' when found before varying (in fragment shaders)
         source.replace(f1, invariantStr.length(), "");
 
         found = FindToken(invariantVaryingStr, source, found);
@@ -218,11 +219,12 @@ ShaderConverter::ProcessMacros(std::string& source)
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + lineStr.length());
 
-        size_t firstNL  = source.rfind('\n', f1);
-        size_t secondNL = source.rfind('#' , f1);
+        int firstNL  = source.rfind('\n', f1);
+        int secondNL = source.rfind('#' , f1);
 
-        // check if is used in a define function
+        // check if is used in a define function & linedirective is not used
         if(firstNL >= secondNL && !linedirectiveEnabled) {
+            // we have inserted 29 additional lines
             source.replace(f1, lineStr.length(), "__LINE__ - 29");
         }
 
@@ -236,6 +238,7 @@ ShaderConverter::ProcessMacros(std::string& source)
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + versionStr.length());
 
+        // the actual value is 100 = 400/4
         source.replace(f1, versionStr.length(), "__VERSION__ / 4");
 
         found = FindToken(versionStr, source, found);
@@ -248,7 +251,13 @@ ShaderConverter::ProcessMacros(std::string& source)
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + glStr.length());
 
-        source.replace(f1, glStr.length(), "1");
+        // check if is used in a ifdef function
+        int firstNL  = source.rfind('\n', f1);
+        int secondNL = source.rfind("#ifdef" , f1);
+        if(firstNL >= secondNL) {
+            // replace with '1' value
+            source.replace(f1, glStr.length(), "1");
+        }
 
         found = FindToken(glStr, source, found);
     }
