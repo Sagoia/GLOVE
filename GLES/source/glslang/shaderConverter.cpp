@@ -315,6 +315,26 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
         /// Variable name
         token = GetNextToken(source, found);
 
+        // Rename uni* variable cases
+        const string uniStr("uni");
+        const size_t uni_count = (mShaderType == SHADER_TYPE_VERTEX) ? GLOVE_MAX_VERTEX_UNIFORM_VECTORS : GLOVE_MAX_FRAGMENT_UNIFORM_VECTORS;
+        for (size_t i = 0; i < uni_count; i++) {
+            const string uniformStr(uniStr + to_string(i));
+            if(!token.compare(uniformStr)) {
+                size_t f1 = FindToken(uniformStr, source, found);
+                while(f1 != string::npos) {
+
+                    size_t f2 = f1;
+                    f1 = SkipWhiteSpaces(source, f1 + uniformStr.length());
+
+                    source.replace(f2, uniformStr.length(), uniformStr + "_");
+
+                    f1 = FindToken(uniformStr, source, f1);
+                }
+                break;
+            }
+        }
+
         if(!token.compare(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE))) {
             token = std::string("gl_DepthRange");
         }
