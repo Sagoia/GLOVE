@@ -220,6 +220,7 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
 
     if(conf && conf->SurfaceType && (conf->SurfaceType & type) == 0) {
         /* The config can't be used to create a surface of this type */
+        *error = EGL_BAD_MATCH;
         return EGL_FALSE;
     }
 
@@ -262,8 +263,7 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
 
     // validate Pbuffer attributes
     if(Type == EGL_PBUFFER_BIT &&
-       (!(conf->SurfaceType & EGL_PBUFFER_BIT) ||
-       (TextureFormat == EGL_NO_TEXTURE && TextureTarget != EGL_NO_TEXTURE) ||
+       ((TextureFormat == EGL_NO_TEXTURE && TextureTarget != EGL_NO_TEXTURE) ||
        (TextureFormat != EGL_NO_TEXTURE && TextureTarget == EGL_NO_TEXTURE))) {
         *error = EGL_BAD_MATCH;
         return EGL_FALSE;

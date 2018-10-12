@@ -88,7 +88,6 @@ private:
 
     Framebuffer   *CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface);
     Framebuffer   *InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface);
-    Framebuffer   *AllocatePBufferTexture(EGLSurfaceInterface *eglSurfaceInterface);
     Texture       *CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface);
 
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);

@@ -214,7 +214,7 @@ EGLBoolean FilterConfigArray(EGLConfig_t **configs, EGLint config_size, EGLint *
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 extern const EGLConfig_t EglConfigs[4];
 #else
-extern const EGLConfig_t EglConfigs[2];
+extern const EGLConfig_t EglConfigs[1];
 #endif
 
 #endif // __EGL_CONFIG_H__

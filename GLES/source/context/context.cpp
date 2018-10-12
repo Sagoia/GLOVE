@@ -140,21 +140,14 @@ Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Framebuffer *fbo = nullptr;
-    int type = eglSurfaceInterface->type;
-    if(EGL_WINDOW_BIT == type) {
-        mSurfaceType = GLOVE_SURFACE_WINDOW;
-        fbo = InitializeFrameBuffer(eglSurfaceInterface);
-    } else if(EGL_PBUFFER_BIT == type) {
-        mSurfaceType = GLOVE_SURFACE_PBUFFER;
-        fbo = AllocatePBufferTexture(eglSurfaceInterface);
-    } else {
-        return nullptr;
-    }
+    // TODO: Pbuffer/pixmaps are not properly supported
+    assert(eglSurfaceInterface->type == EGL_WINDOW_BIT);
+    mSurfaceType = GLOVE_SURFACE_WINDOW;
 
+    Framebuffer *fbo = InitializeFrameBuffer(eglSurfaceInterface);
     Texture *tex = CreateDepthStencil(eglSurfaceInterface);
     fbo->SetDepthStencilAttachmentTexture(tex);
-    fbo->CreateVkRenderPass(true, true, false, true, true, false);
+    fbo->CreateVkRenderPass(false, false, false, true, true, false);
     fbo->Create();
     mSystemTextures.push_back(tex);
 
@@ -198,38 +191,6 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     fbo->SetTarget(GL_FRAMEBUFFER);
     fbo->SetIsSystem();
     fbo->SetWriteBufferIndex(eglSurfaceInterface->nextImageIndex);
-
-    return fbo;
-}
-
-Framebuffer *
-Context::AllocatePBufferTexture(EGLSurfaceInterface *eglSurfaceInterface)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
-    fbo->SetTarget(GL_FRAMEBUFFER);
-
-    Texture *tex = new Texture(mVkContext, mCommandBufferManager);
-    tex->SetTarget(GL_TEXTURE_2D);
-    tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
-    tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
-    tex->SetVkImageTiling();
-    tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
-    GLenum glformat = VkFormatToGlInternalformat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
-    tex->InitState();
-
-    tex->SetState(eglSurfaceInterface->width, eglSurfaceInterface->height,
-                  0, 0,
-                  GlInternalFormatToGlFormat(glformat),
-                  GlInternalFormatToGlType(glformat),
-                  Texture::GetDefaultInternalAlignment(),
-                  NULL);
-    tex->Allocate();
-
-    fbo->AddColorAttachment(tex);
-    fbo->SetIsSystem();
-    mSystemTextures.push_back(tex);
 
     return fbo;
 }

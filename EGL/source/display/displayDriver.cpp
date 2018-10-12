@@ -94,6 +94,7 @@ DisplayDriver::Initialize(EGLDisplay_t* dpy, EGLint *major, EGLint *minor)
     }
 
     setEGLVersion(major, minor);
+
     mInitialized = true;
     return EGL_TRUE;
 }
@@ -256,11 +257,21 @@ DisplayDriver::CreatePbufferSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, c
         eglSurface->SetHeight(EglConfigs[0].MaxPbufferHeight);
     }
 
-    CreateEGLSurfaceInterface(eglSurface);
+    //TODO: Pbuffer is not supported
+    NOT_IMPLEMENTED();
 
-    mSurfaceList.push_back(eglSurface);
+    return EGL_NO_SURFACE;
+}
 
-    return static_cast<EGLSurface>(eglSurface);
+EGLSurface
+DisplayDriver::CreatePixmapSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    //TODO: Pixmap is not supported
+    NOT_IMPLEMENTED();
+
+    return EGL_NO_SURFACE;
 }
 
 void
@@ -284,16 +295,6 @@ DisplayDriver::CreateEGLSurfaceInterface(EGLSurface_t *eglSurface)
     surfaceInterface->stencilSize         = eglSurface->GetStencilSize();
     surfaceInterface->surfaceColorFormat  = eglSurface->GetColorFormat();
     surfaceInterface->nextImageIndex      = eglSurface->GetCurrentImageIndex();
-}
-
-EGLSurface
-DisplayDriver::CreatePixmapSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list)
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-    //TODO: Pixmap is not supported
-    NOT_IMPLEMENTED();
-
-    return EGL_NO_SURFACE;
 }
 
 EGLBoolean
