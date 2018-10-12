@@ -31,8 +31,7 @@ api_state_t           gles2_state = nullptr;
 api_state_t           init_API();
           void        terminate_API();
 api_context_t         create_context();
-void                  set_write_surface(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface);
-void                  set_read_surface(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface);
+void                  set_read_write_surface(api_context_t api_context, EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
 void                  delete_context(api_context_t api_context);
 void                  release_system_fbo(api_context_t api_context);
 void                  set_next_image_index(api_context_t api_context, uint32_t index);
@@ -47,8 +46,7 @@ rendering_api_interface_t GLES2Interface = {
     init_API,
     terminate_API,
     create_context,
-    set_write_surface,
-    set_read_surface,
+    set_read_write_surface,
     delete_context,
     release_system_fbo,
     set_next_image_index,
@@ -95,22 +93,12 @@ api_context_t create_context()
     return ctx;
 }
 
-void set_write_surface(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface)
+void set_read_write_surface(api_context_t api_context, EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     Context *ctx = reinterpret_cast<Context *>(api_context);
-    ctx->SetWriteSurface(eglSurfaceInterface);
-
-    SetCurrentContext(ctx);
-}
-
-void set_read_surface(api_context_t api_context, EGLSurfaceInterface *eglSurfaceInterface)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    Context *ctx = reinterpret_cast<Context *>(api_context);
-    ctx->SetReadSurface(eglSurfaceInterface);
+    ctx->SetReadWriteSurfaces(eglReadSurfaceInterface, eglWriteSurfaceInterface);
 
     SetCurrentContext(ctx);
 }

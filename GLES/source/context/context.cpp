@@ -104,18 +104,17 @@ Context::ReleaseSystemFBO(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mSystemFBO) {
-        for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
-            if(mSystemTextures[i] != nullptr) {
-                delete mSystemTextures[i];
-                mSystemTextures[i] = nullptr;
-            }
+    for(uint32_t i = 0; i < mSystemTextures.size(); ++i) {
+        if(mSystemTextures[i] != nullptr) {
+            delete mSystemTextures[i];
+            mSystemTextures[i] = nullptr;
         }
-        mSystemTextures.clear();
-
-        delete mSystemFBO;
-        mSystemFBO = nullptr;
     }
+
+    for(auto iter : mSystemFBOMap){
+        delete iter.second;
+    }
+    mSystemFBOMap.clear();
 
     mCacheManager->CleanUpCaches();
 
@@ -167,7 +166,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkImage *swapChainImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
+    VkImage *vkImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
 
     Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
 
@@ -185,14 +184,13 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetType(GlInternalFormatToGlType(glformat));
         tex->SetExplicitType(GlInternalFormatToGlType(glformat));
 
-        tex->SetVkImage(swapChainImages[i]);
         tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
-        tex->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+        tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
         tex->SetVkImageTiling();
         tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
+        tex->SetVkImage(vkImages[i]);
         tex->CreateVkImageSubResourceRange();
         tex->CreateVkImageView();
-
         fbo->AddColorAttachment(tex);
         mSystemTextures.push_back(tex);
     }
@@ -275,22 +273,28 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
 }
 
 void
-Context::SetWriteSurface(EGLSurfaceInterface *eglSurfaceInterface)
+Context::SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mWriteSurface = eglSurfaceInterface->surface;
-    mWriteFBO     = CreateFBOFromEGLSurface(eglSurfaceInterface);
+    // TODO:: TBD as we do not take into account read surface!
+    if(mWriteSurface && mWriteSurface == eglWriteSurfaceInterface->surface) {
+        return;
+    }
 
+    FRAMEBUFFER_SURFACES_PAIR readWritePair = {eglReadSurfaceInterface, eglWriteSurfaceInterface};
+    auto fboIter = mSystemFBOMap.find(readWritePair);
+    if(fboIter != mSystemFBOMap.end()) {
+        mWriteSurface = fboIter->first.first;
+        mReadSurface = fboIter->first.second;
+        mWriteFBO = fboIter->second;
+    } else {
+        mWriteSurface = eglWriteSurfaceInterface->surface;
+        mReadSurface  = eglReadSurfaceInterface->surface;
+        mWriteFBO     = CreateFBOFromEGLSurface(eglWriteSurfaceInterface);
+        mSystemFBOMap[readWritePair] = mWriteFBO;
+    }
     SetSystemFramebuffer(mWriteFBO);
-}
-
-void
-Context::SetReadSurface(EGLSurfaceInterface *eglSurfaceInterface)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    mReadSurface = eglSurfaceInterface->surface;
 }
 
 void

@@ -34,6 +34,8 @@
 #include "vulkan/clearPass.h"
 #include "vulkan/cbManager.h"
 #include "rendering_api_interface.h"
+#include <utility>
+#include <map>
 
 typedef enum {
     GLOVE_HOST_X86_BINARY = 1,
@@ -75,6 +77,10 @@ private:
 
     Framebuffer *                               mSystemFBO;
     vector<Texture *>                           mSystemTextures;
+
+    typedef std::pair<EGLSurfaceInterface*, EGLSurfaceInterface*> FRAMEBUFFER_SURFACES_PAIR;
+    std::map<FRAMEBUFFER_SURFACES_PAIR, Framebuffer*> mSystemFBOMap;
+
 // ------------
 
     Shader        *GetShaderPtr(GLuint shader);
@@ -129,8 +135,7 @@ public:
     inline  bool            IsYInverted(void)                              const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
 
 // Set Functions
-            void            SetWriteSurface(EGLSurfaceInterface *eglSurfaceInterface);
-            void            SetReadSurface(EGLSurfaceInterface *eglSurfaceInterface);
+            void            SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
     inline  void            SetNextImageIndex(uint32_t imageIndex)               { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
     inline  void            SetFullScreenRender(bool value)                      { FUN_ENTRY(GL_LOG_TRACE); mIsFullScreenRender = value;}
 

@@ -185,19 +185,23 @@ EGLContext_t::MakeCurrent(EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *r
     mDrawSurface = draw;
     mReadSurface = read;
 
-    // TODO: support correct construction/destruction of pbuffers
-    if (mDrawSurface && mDrawSurface->GetType() != EGL_WINDOW_BIT) {
+    // TODO: support pbuffers/pixmaps
+    if (draw && draw->GetType() != EGL_WINDOW_BIT) {
         return EGL_TRUE;
     }
 
+    EGLSurfaceInterface* drawSurfaceInterface = nullptr;
     if(mDrawSurface) {
-        mDrawSurface = draw;
-        mAPIInterface->set_write_surface_cb(mAPIContext, mDrawSurface->GetEGLSurfaceInterface());
+        drawSurfaceInterface = mDrawSurface->GetEGLSurfaceInterface();
     }
 
+    EGLSurfaceInterface* readSurfaceInterface = nullptr;
     if(mReadSurface) {
-        mReadSurface = read;
-        mAPIInterface->set_read_surface_cb(mAPIContext, mReadSurface->GetEGLSurfaceInterface());
+        readSurfaceInterface = mReadSurface->GetEGLSurfaceInterface();
+    }
+
+    if(mReadSurface || mDrawSurface) {
+        mAPIInterface->set_read_write_surface_cb(mAPIContext, drawSurfaceInterface, readSurfaceInterface);
     }
 
     return EGL_TRUE;
