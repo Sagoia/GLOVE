@@ -43,8 +43,7 @@ VulkanWindowInterface::InitializeVulkanAPI()
 
     if(!mVkInitialized) {
         rendering_api_return_e ret = RENDERING_API_init_api(EGL_OPENGL_ES_API, EGL_GL_VERSION_2, &mGLES2Interface);
-
-        if(RENDERING_API_INIT_SUCCESS != ret && RENDERING_API_ALREADY_INIT != ret) {
+        if(ret != RENDERING_API_INIT_SUCCESS) {
             return EGL_FALSE;
         }
 

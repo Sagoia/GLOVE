@@ -476,21 +476,28 @@ eglGetProcAddress(const char *procname)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
+    // get EGL function pointers
     __eglMustCastToProperFunctionPointerType fp = GetEGLProcAddr(procname);
-    if(fp != nullptr) {
+    if(fp != nullptr || strncmp(procname, "egl", 3) == 0) {
         return fp;
     }
 
+    // get GL function pointers
     EGLenum enumAPI = currentThread.QueryAPI();
     if(enumAPI == EGL_OPENGL_ES_API) {
         // Assuming only GLES2 for now
-        rendering_api_interface_t* api = RENDERING_API_get_gles2_interface();
-        if(api != nullptr) {
-            return api->get_proc_addr_cb(procname);
+        rendering_api_interface_t* api = nullptr;
+        rendering_api_return_e ret = RENDERING_API_load_api(EGL_OPENGL_ES_API, EGL_GL_VERSION_2, &api);
+        if(ret == RENDERING_API_LOAD_SUCCESS) {
+            fp = api->get_proc_addr_cb(procname);
         }
+        // remove the refCounter for this call
+        RENDERING_API_terminate_gles2_api();
+    } else {
+        NOT_IMPLEMENTED();
     }
 
-    return nullptr;
+    return fp;
 }
 
 EGLAPI EGLImageKHR EGLAPIENTRY

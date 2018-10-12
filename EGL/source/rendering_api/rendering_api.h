@@ -34,7 +34,10 @@ extern "C"
 
 typedef enum rendering_api_return {
     RENDERING_API_INIT_SUCCESS,
-    RENDERING_API_ALREADY_INIT,
+    RENDERING_API_INIT_ERROR,
+    RENDERING_API_LOAD_SUCCESS,
+    RENDERING_API_LOAD_ERROR,
+    RENDERING_API_INPUT_SUCCESS,
     RENDERING_API_INPUT_ERROR,
     RENDERING_API_NOT_FOUND
 } rendering_api_return_e;
@@ -43,7 +46,8 @@ rendering_api_interface_t *RENDERING_API_get_interface(EGLenum api, uint32_t cli
 rendering_api_interface_t *RENDERING_API_get_gles1_interface();
 rendering_api_interface_t *RENDERING_API_get_gles2_interface();
 rendering_api_interface_t *RENDERING_API_get_vg_interface();
-rendering_api_return_e     RENDERING_API_init_api(EGLenum api, uint32_t client_version, rendering_api_interface_t ** api_interface_ret);
+rendering_api_return_e     RENDERING_API_init_api(EGLenum api, uint32_t client_version, rendering_api_interface_t **api_interface_ret);
+rendering_api_return_e     RENDERING_API_load_api(EGLenum api, uint32_t client_version, rendering_api_interface_t **api_interface_ret);
 void                       RENDERING_API_terminate_gles1_api();
 void                       RENDERING_API_terminate_gles2_api();
 void                       RENDERING_API_terminate_vg_api();
