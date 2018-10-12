@@ -160,7 +160,7 @@ RenderingThread::GetCurrentSurface(EGLint readdraw)
         return EGL_NO_SURFACE;
     }
 
-    return (EGL_READ == readdraw) ? activeContext->getReadSurface() : activeContext->getDrawSurface();
+    return (EGL_READ == readdraw) ? activeContext->GetReadSurface() : activeContext->GetDrawSurface();
 
 }
 
@@ -174,7 +174,7 @@ RenderingThread::GetCurrentDisplay(void)
         return EGL_NO_DISPLAY;
     }
 
-    return activeContext->getDisplay();
+    return activeContext->GetDisplay();
 }
 
 EGLContext
@@ -187,7 +187,7 @@ RenderingThread::CreateContext(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLCon
         return EGL_NO_CONTEXT;
     }
 
-    EGLContext_t *eglContext = new EGLContext_t(mCurrentAPI, eglConfig, attrib_list);
+    EGLContext_t *eglContext = new EGLContext_t(dpy, mCurrentAPI, eglConfig, attrib_list);
     if(eglContext->Create() == EGL_FALSE) {
         delete eglContext;
         return EGL_NO_CONTEXT;

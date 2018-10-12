@@ -50,9 +50,8 @@ private:
     EGLBoolean                   Validate();
 
 public:
-    EGLContext_t(EGLenum rendering_api, EGLConfig_t* config, const EGLint *attribList);
+    EGLContext_t(class EGLDisplay_t * display, EGLenum rendering_api, EGLConfig_t* config, const EGLint *attribList);
     ~EGLContext_t();
-
 
     static EGLBoolean            FindEGLContext(const EGLContext_t* eglContext);
     static EGLBoolean            GetEGLContext(EGLContext_t* eglContext);
@@ -68,9 +67,9 @@ public:
     void                         Release();
 
     inline EGLenum               GetRenderingAPI()                        const { FUN_ENTRY(EGL_LOG_TRACE); return mRenderingAPI; }
-    inline EGLDisplay            getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
-    inline EGLSurface            getReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
-    inline EGLSurface            getDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
+    inline EGLDisplay            GetDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
+    inline EGLSurface            GetReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
+    inline EGLSurface            GetDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
     inline EGLint                getConfigID()                            const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONFIG_ID); }
     inline EGLint                getCurrentAPI()                          const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONFIG_ID); }
     inline EGLint                getClientVersion()                       const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONTEXT_CLIENT_VERSION); }

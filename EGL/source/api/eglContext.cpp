@@ -76,9 +76,9 @@ EGLContext_t::RemoveEGLContext(const EGLContext_t* eglContext)
     return EGL_TRUE;
 }
 
-EGLContext_t::EGLContext_t(EGLenum rendering_api, EGLConfig_t *config, const EGLint *attribList)
+EGLContext_t::EGLContext_t(EGLDisplay_t* display, EGLenum rendering_api, EGLConfig_t *config, const EGLint *attribList)
 : mAPIContext(nullptr), mRenderingAPI(rendering_api), mAPIInterface(nullptr),
-mDisplay(nullptr), mReadSurface(nullptr), mDrawSurface(nullptr),
+mDisplay(display), mReadSurface(nullptr), mDrawSurface(nullptr),
 mConfig(config), mAttribList(attribList), mClientVersion(1)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
