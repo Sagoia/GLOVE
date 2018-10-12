@@ -174,7 +174,7 @@ VulkanWindowInterface::SetSurfaceColorFormat(EGLSurface_t *surface)
                 break;
             }
 #else
-            if (surfFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfFormats[i].colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR) {
+            if (surfFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 format = surfFormats[i].format;
                 break;
             }
