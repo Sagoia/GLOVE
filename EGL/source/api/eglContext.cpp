@@ -99,6 +99,17 @@ EGLContext_t::Release()
     mAPIInterface->release_system_fbo_cb(mAPIContext);
 }
 
+EGLint EGLContext_t::GetRenderBuffer() const
+{
+     FUN_ENTRY(EGL_LOG_TRACE);
+
+     EGLSurface_t* currentSurface = mDrawSurface == nullptr ? mReadSurface : mDrawSurface;
+     if(currentSurface == nullptr) {
+        return EGL_NONE;
+     }
+     return currentSurface->GetRenderBuffer();
+}
+
 EGLBoolean
 EGLContext_t::GetAPIRenderableType()
 {

@@ -123,6 +123,7 @@ public:
     inline EGLint                    GetBindToTextureRGB()                                const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGB; }
     inline EGLint                    GetBindToTextureRGBA()                               const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGBA; }
     inline EGLBoolean                GetBoundToTexture()                                  const { FUN_ENTRY(EGL_LOG_TRACE); return BoundToTexture; }
+    inline EGLenum                   GetRenderBuffer()                                    const { FUN_ENTRY(EGL_LOG_TRACE); return RenderBuffer; }
 };
 
 #endif // __EGL_SURFACE_H__

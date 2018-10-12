@@ -231,15 +231,15 @@ RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLin
 
     switch(attribute) {
         case EGL_CONFIG_ID:
-            *value = eglContext->getConfigID();
+            *value = eglContext->GetConfigID();
             break;
         case EGL_CONTEXT_CLIENT_TYPE:
-            *value = QueryAPI();
+            *value = eglContext->GetRenderingAPI();
             break;
         case EGL_CONTEXT_CLIENT_VERSION:
-            *value = eglContext->getClientVersion();
+            *value = eglContext->GetClientVersion();
         case EGL_RENDER_BUFFER:
-            *value = EGL_BACK_BUFFER;
+            *value = eglContext->GetRenderBuffer();
             break;
         default:
             currentThread.RecordError(EGL_BAD_ATTRIBUTE);

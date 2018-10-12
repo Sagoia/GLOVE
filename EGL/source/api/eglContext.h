@@ -70,9 +70,9 @@ public:
     inline EGLDisplay            GetDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
     inline EGLSurface            GetReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
     inline EGLSurface            GetDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
-    inline EGLint                getConfigID()                            const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONFIG_ID); }
-    inline EGLint                getCurrentAPI()                          const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONFIG_ID); }
-    inline EGLint                getClientVersion()                       const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONTEXT_CLIENT_VERSION); }
+    inline EGLint                GetConfigID()                            const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONFIG_ID); }
+    inline EGLint                GetClientVersion()                       const { FUN_ENTRY(EGL_LOG_TRACE); return mClientVersion; }
+           EGLint                GetRenderBuffer()                        const;
 };
 
 #endif // __EGL_CONTEXT_H__
