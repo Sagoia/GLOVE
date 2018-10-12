@@ -103,17 +103,17 @@ EGLBoolean
 EGLContext_t::GetAPIRenderableType()
 {
     switch(mRenderingAPI) {
-    case EGL_OPENGL_ES_API:
-    {
-        switch(mClientVersion) {
-        case 1: mRenderableAPIbit = EGL_OPENGL_ES_BIT; return EGL_TRUE;
-        case 2: mRenderableAPIbit = EGL_OPENGL_ES2_BIT; return EGL_TRUE;
-        default: NOT_REACHED(); return EGL_FALSE;
+        case EGL_OPENGL_ES_API:
+        {
+            switch(mClientVersion) {
+                case 1: mRenderableAPIbit = EGL_OPENGL_ES_BIT; return EGL_TRUE;
+                case 2: mRenderableAPIbit = EGL_OPENGL_ES2_BIT; return EGL_TRUE;
+                default: NOT_REACHED(); return EGL_FALSE;
+            }
         }
-    }
-    case EGL_OPENGL_API: mRenderableAPIbit = EGL_OPENGL_BIT; return EGL_TRUE;
-    case EGL_OPENVG_API: mRenderableAPIbit = EGL_OPENVG_BIT; return EGL_TRUE;
-    default: NOT_REACHED(); return EGL_FALSE;
+        case EGL_OPENGL_API: mRenderableAPIbit = EGL_OPENGL_BIT; return EGL_TRUE;
+        case EGL_OPENVG_API: mRenderableAPIbit = EGL_OPENVG_BIT; return EGL_TRUE;
+        default: NOT_REACHED(); return EGL_FALSE;
     }
 }
 
