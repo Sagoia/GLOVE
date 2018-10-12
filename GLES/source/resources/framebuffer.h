@@ -30,6 +30,11 @@
 #include "vulkan/framebuffer.h"
 #include "utils/arrays.hpp"
 
+typedef enum {
+    GLOVE_SURFACE_WINDOW = 1,
+    GLOVE_SURFACE_PBUFFER
+} glove_surface_type;
+
 class Framebuffer {
 private:
     enum State {
@@ -61,6 +66,8 @@ private:
     Attachment*                     mAttachmentStencil;
     Texture*                        mDepthStencilTexture;
     bool                            mIsSystem;
+    bool                            mBoundToTexture;
+    GLenum                          mSurfaceType;
 
     void                            Release(void);
 
@@ -126,6 +133,8 @@ public:
     inline GLint            GetStencilAttachmentLevel(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentStencil->GetLevel();  }
     inline GLenum           GetStencilAttachmentLayer(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentStencil->GetLayer();  }
            Texture *        GetStencilAttachmentTexture(void)           const;
+    inline GLint            GetBoundToTexture(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mBoundToTexture;                 }
+    inline GLint            GetSurfaceType(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mSurfaceType;                    }
 
 // Set Functions
     inline void             SetVkContext(const
@@ -165,6 +174,8 @@ public:
 
     inline void             SetDepthStencilAttachmentTexture(Texture *texture)  { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = texture; }
     inline void             SetWriteBufferIndex(uint32_t buffer)                { FUN_ENTRY(GL_LOG_TRACE); if(mAttachmentColors.size() > 1) {mWriteBufferIndex = buffer;} }
+    inline void             SetBoundToTexture(GLint boundToTexture)             { FUN_ENTRY(GL_LOG_TRACE); mBoundToTexture = boundToTexture;    }
+    inline void             SetSurfaceType(GLint surfacetype)                   { FUN_ENTRY(GL_LOG_TRACE); mSurfaceType = surfacetype;          }
 
 // Is Functions
     inline bool             IsInIdleState(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return (mState == IDLE); }

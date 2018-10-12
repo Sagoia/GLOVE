@@ -68,8 +68,6 @@ Context::Context()
     //If VK_KHR_maintenance1 is supported, then there is no need to invert the Y
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsFullScreenRender = false;
-    mSurfaceType = 0;
-    mIsBoundToTexture = false;
 }
 
 Context::~Context()
@@ -142,13 +140,13 @@ Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
 
     // TODO: Pbuffer/pixmaps are not properly supported
     assert(eglSurfaceInterface->type == EGL_WINDOW_BIT);
-    mSurfaceType = GLOVE_SURFACE_WINDOW;
 
     Framebuffer *fbo = InitializeFrameBuffer(eglSurfaceInterface);
     Texture *tex = CreateDepthStencil(eglSurfaceInterface);
     fbo->SetDepthStencilAttachmentTexture(tex);
     fbo->CreateVkRenderPass(false, false, false, true, true, false);
     fbo->Create();
+    fbo->SetSurfaceType(GLOVE_SURFACE_WINDOW);
     mSystemTextures.push_back(tex);
 
     return fbo;

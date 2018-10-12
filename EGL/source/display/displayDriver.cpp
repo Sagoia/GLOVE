@@ -406,9 +406,12 @@ DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
     if (!(bindToTextureRGB || bindToTextureRGBA)) {
         return EGL_FALSE;
     }
+
+    //TODO: We are assuming that the BindTexImage refers to the surface that is currently active for GLOVE.
+    //If we have multiple surfaces for GLES, additional information may need to be passed to GLOVE.
+    mActiveContext->BoundToTexture(EGL_TRUE);
     //If display and surface are the display and surface for the calling thread's current context, eglBindTexImage performs an implicit glFlush
     mActiveContext->Finish();
-    mActiveContext->BoundToTexture(EGL_TRUE);
 
     return EGL_FALSE;
 }

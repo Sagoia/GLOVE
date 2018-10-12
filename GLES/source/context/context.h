@@ -44,11 +44,6 @@ typedef enum {
     GLOVE_MAX_BINARY_FORMATS
 } glove_program_binary_formats_e;
 
-typedef enum {
-    GLOVE_SURFACE_PBUFFER = 1,
-    GLOVE_SURFACE_WINDOW
-
-} glove_suface_type;
 
 class Context {
 
@@ -67,8 +62,6 @@ private:
 // ------------
     bool                                        mIsYInverted;
     bool                                        mIsFullScreenRender;
-    bool                                        mIsBoundToTexture;
-    int                                         mSurfaceType;
 // ------------
     void        *                               mWriteSurface;
     void        *                               mReadSurface;
