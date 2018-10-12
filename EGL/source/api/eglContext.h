@@ -66,7 +66,6 @@ public:
     void                         Finish();
     void                         BoundToTexture(EGLint bound);
     void                         Release();
-    GLPROC                       GetProcAddr(const char* procname);
 
     inline EGLenum               GetRenderingAPI()                        const { FUN_ENTRY(EGL_LOG_TRACE); return mRenderingAPI; }
     inline EGLDisplay            getDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
