@@ -169,8 +169,12 @@ DisplayDriver::ChooseConfig(EGLDisplay_t* dpy, const EGLint *attrib_list, EGLCon
         return EGL_FALSE;
     }
 
-    if(FilterConfigArray(reinterpret_cast<EGLConfig_t **>(configs), config_size, num_config, &criteria) == EGL_FALSE || configs == nullptr) {
+    if(FilterConfigArray(reinterpret_cast<EGLConfig_t **>(configs), config_size, num_config, &criteria) == EGL_FALSE) {
         return EGL_FALSE;
+    }
+
+    if(configs == nullptr) {
+        return EGL_TRUE;
     }
 
     // update the config list
