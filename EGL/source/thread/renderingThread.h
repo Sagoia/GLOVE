@@ -38,6 +38,7 @@ private:
     EGLContext_t           *mVGCurrentContext;
     EGLint                  mLastError;
 
+    void                    ResetCurrentContext(EGLContext_t* context);
     void                    SetCurrentContext(EGLContext_t* eglContext);
 
 public:

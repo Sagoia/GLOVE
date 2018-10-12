@@ -121,14 +121,28 @@ RenderingThread::ReleaseThread(void)
     return EGL_FALSE;
 }
 
+void
+RenderingThread::ResetCurrentContext(EGLContext_t* context)
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    if(context == mGLESCurrentContext) {
+        mGLESCurrentContext = nullptr;
+    }
+
+    if(context == mVGCurrentContext) {
+        mVGCurrentContext = nullptr;
+    }
+}
+
 EGLContext
 RenderingThread::GetCurrentContext(void)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
     switch(mCurrentAPI) {
-        case EGL_OPENGL_ES_API:    return mGLESCurrentContext; break;
-        case EGL_OPENVG_API:       return mVGCurrentContext;   break;
+        case EGL_OPENGL_ES_API:    return mGLESCurrentContext;
+        case EGL_OPENVG_API:       return mVGCurrentContext;
         default:                   return nullptr;
     }
 }
@@ -208,7 +222,7 @@ RenderingThread::DestroyContext(EGLDisplay_t* dpy, EGLContext_t* eglContext)
     }
 
     EGLContext_t::RemoveEGLContext(eglContext);
-
+    ResetCurrentContext(eglContext);
     delete eglContext;
 
     return EGL_TRUE;
