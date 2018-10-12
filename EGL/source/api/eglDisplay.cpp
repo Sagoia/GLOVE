@@ -47,34 +47,34 @@ EGLDisplay_t::GetDisplayByID(EGLNativeDisplayType display_id)
        }
 
        // return the next available id
-       if(dis->display == nullptr) {
+       if(dis->created == false && dis->display_id == nullptr) {
            break;
        }
     }
 
-    // create a new display if it does not exist
-    EGLDisplay dpy = nullptr;
+   // create a new display if it does not exist
+   EGLDisplay dpy = nullptr;
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-    if (display_id == EGL_DEFAULT_DISPLAY) {
-        dpy = (EGLDisplay)1;
-    }
-    return nullptr;
+   if (display_id == EGL_DEFAULT_DISPLAY) {
+       dpy = (EGLDisplay)1;
+   }
+   return nullptr;
 #endif
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
-    if(display_id == EGL_DEFAULT_DISPLAY) {
-        dpy = XOpenDisplay(nullptr);
-    } else {
-        dpy = display_id;
-    }
+   if(display_id == EGL_DEFAULT_DISPLAY) {
+       dpy = nullptr;
+   } else {
+       dpy = display_id;
+   }
 #else
-    dpy = display_id;
+   dpy = display_id;
 #endif
 
-    dis->display = dpy;
-    dis->display_id = display_id;
-    dis->created = true;
-    return dis;
+   dis->display = dpy;
+   dis->display_id = display_id;
+   dis->created = true;
+   return dis;
 }
 
 EGLDisplay_t*
@@ -92,6 +92,43 @@ EGLDisplay_t::FindDisplay(EGLDisplay display)
      }
 
     return nullptr;
+}
+
+EGLBoolean
+EGLDisplay_t::InitializeDisplay(EGLDisplay dpy, void* displayDriver)
+{
+    EGLDisplay_t *eglDisplay = EGLDisplay_t::FindDisplay(dpy);
+    if(eglDisplay == nullptr) {
+        return EGL_FALSE;
+    }
+
+    // create a new default display
+#ifdef VK_USE_PLATFORM_XCB_KHR
+    if(eglDisplay->display_id == EGL_DEFAULT_DISPLAY && eglDisplay->display == nullptr) {
+        eglDisplay->display = XOpenDisplay(nullptr);
+    }
+#endif
+
+    eglDisplay->displayDriver = displayDriver;
+
+    return EGL_TRUE;
+}
+
+void EGLDisplay_t::TerminateDisplay(EGLDisplay display)
+{
+    EGLDisplay_t *eglDisplay = EGLDisplay_t::FindDisplay(display);
+    if(eglDisplay == nullptr) {
+        return;
+    }
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+    if(eglDisplay->display_id == EGL_NO_DISPLAY && eglDisplay->display != nullptr) {
+        XCloseDisplay(static_cast<Display*>(eglDisplay->display));
+        eglDisplay->display = nullptr;
+    }
+#endif
+
+    eglDisplay->displayDriver = nullptr;
 }
 
 EGLBoolean

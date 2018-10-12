@@ -262,7 +262,7 @@ eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     DisplayDriver *eglDriver = DisplayDriversContainer::AddDisplayDriver(eglDisplay);
     EGLBoolean res = eglDriver->Initialize(eglDisplay, major, minor);
     if(eglDriver->Initialized()) {
-        eglDisplay->displayDriver = eglDriver;
+        EGLDisplay_t::InitializeDisplay(dpy, eglDriver);
     }
     return res;
 }
@@ -282,10 +282,9 @@ eglTerminate(EGLDisplay dpy)
     DisplayDriversContainer::RemoveDisplayDriver(eglDisplay);
     cleanUpResources();
     if(res == EGL_TRUE) {
-        eglDisplay->displayDriver = nullptr;
-        eglDisplay->created = false;
+       EGLDisplay_t::TerminateDisplay(dpy);
     }
-    
+
     return res;
 }
 
