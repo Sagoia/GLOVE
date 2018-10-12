@@ -80,7 +80,7 @@ private:
 
     static CommandBufferManager    *mInstance;
     VkCommandPool                   mVkCmdPool;
-    vkContext_t                    *mVkContext;
+    const vkContext_t              *mVkContext;
 
     uint32_t                        mActiveCmdBuffer;
     int32_t                         mLastSubmittedBuffer;
@@ -97,13 +97,10 @@ private:
 
 public:
 // Constructor
-    CommandBufferManager(vkContext_t *context = nullptr);
+    CommandBufferManager(const vkContext_t *context = nullptr);
 
 // Destructor
     ~CommandBufferManager();
-
-// Get Functions
-    static CommandBufferManager *GetInstance(vkContext_t *context);
 
 // Release Functions
     void Release(void);

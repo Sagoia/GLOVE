@@ -41,7 +41,7 @@ namespace vulkanAPI {
 
 CommandBufferManager *CommandBufferManager::mInstance = nullptr;
 
-CommandBufferManager::CommandBufferManager(vkContext_t *context)
+CommandBufferManager::CommandBufferManager(const vkContext_t *context)
 : mVkContext(context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -191,18 +191,6 @@ CommandBufferManager::FreeResources(void)
 
         mSecondaryCmdBuffersCache.clear();
     }
-}
-
-CommandBufferManager *
-CommandBufferManager::GetInstance(vkContext_t *context)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    if(mInstance == nullptr) {
-        mInstance = new CommandBufferManager(context);
-    }
-
-    return mInstance;
 }
 
 bool

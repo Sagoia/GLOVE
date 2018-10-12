@@ -45,7 +45,7 @@ Context::Context()
     FUN_ENTRY(GL_LOG_TRACE);
 
     mVkContext            = vulkanAPI::GetContext();
-    mCommandBufferManager = vulkanAPI::CommandBufferManager::GetInstance(const_cast<vulkanAPI::vkContext_t *>(mVkContext));
+    mCommandBufferManager = new vulkanAPI::CommandBufferManager(mVkContext);
 
     mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
     mShaderCompiler  = new GlslangShaderCompiler();
@@ -96,7 +96,7 @@ Context::~Context()
         mExplicitIbo = nullptr;
     }
 
-    mCommandBufferManager->Release();
+    delete mCommandBufferManager;
 }
 
 void
