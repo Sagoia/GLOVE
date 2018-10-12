@@ -29,6 +29,7 @@
 #include "utils/parser_helpers.h"
 #include "utils/glUtils.h"
 #include "utils/glLogger.h"
+#include <algorithm>
 
 ShaderResourceInterface::ShaderResourceInterface()
 : mLiveAttributes(0), mLiveUniforms(0), mLiveUniformBlocks(0),
@@ -321,50 +322,39 @@ ShaderResourceInterface::UpdateAttributeInterface(void)
     vector<int> locations(nLiveAttributes);
     for(i = 0; i < nLiveAttributes; ++i) {
         attribsLayout_t::const_iterator it = mCustomAttributesLayout.find(string(mShaderReflection->GetAttributeName(i)));
-        locations[i] = it == mCustomAttributesLayout.end() ? -1 : it->second;
+        locations[i] = (it == mCustomAttributesLayout.end()) ? -1 : it->second;
     }
 
-    int acc = 0;
+    vector<int> c;
     for(i = 0; i < nLiveAttributes; ++i) {
-        int location = 0;
-
         if((uint32_t)mShaderReflection->GetAttributeLocation(i) == GLOVE_INVALID_OFFSET) {
             if(locations[i] != -1) {
-                location = locations[i];
-            } else {
-                location = locations[i] = acc;
-                for(uint32_t j = 0; j < nLiveAttributes; ++j) {
-                    if(locations[j] == acc) {
-                        acc += OccupiedLocationsPerType(mShaderReflection->GetAttributeType(i));
-                        j = 0;
-                    }
+                int location = locations[i];
+                for(int j = 0; j < (int)OccupiedLocationsPerGlType(mShaderReflection->GetAttributeType(i)); ++j) {
+                    c.push_back(location + j);
                 }
+                mShaderReflection->SetAttributeLocation(location, i);
             }
-            mShaderReflection->SetAttributeLocation(location, i);
         }
     }
-}
 
-uint32_t
-ShaderResourceInterface::OccupiedLocationsPerType(GLenum type)
-{
-    switch(type) {
-        case GL_BOOL:
-        case GL_INT:
-        case GL_FLOAT:
-        case GL_BOOL_VEC2:
-        case GL_INT_VEC2:
-        case GL_FLOAT_VEC2:
-        case GL_BOOL_VEC3:
-        case GL_INT_VEC3:
-        case GL_FLOAT_VEC3:
-        case GL_BOOL_VEC4:
-        case GL_INT_VEC4:
-        case GL_FLOAT_VEC4:         return 1;
-        case GL_FLOAT_MAT2:         return 2;
-        case GL_FLOAT_MAT3:         return 3;
-        case GL_FLOAT_MAT4:         return 4;
-        default: NOT_REACHED();     return 0;
+    for(i = 0; i < nLiveAttributes; ++i) {
+        if((uint32_t)mShaderReflection->GetAttributeLocation(i) == GLOVE_INVALID_OFFSET) {
+            if(locations[i] == -1) {
+                int location = 0;
+                for (int k = 0; k < GLOVE_MAX_VERTEX_ATTRIBS; k++) {
+                    std::vector<int>::iterator it = std::find (c.begin(), c.end(), k);
+                    if (it == c.end()) {
+                        location = k;
+                        for(int j = 0; j < (int)OccupiedLocationsPerGlType(mShaderReflection->GetAttributeType(i)); ++j) {
+                            c.push_back(location + j);
+                        }
+                        break;
+                    }
+                }
+                mShaderReflection->SetAttributeLocation(location, i);
+            }
+        }
     }
 }
 

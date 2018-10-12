@@ -41,5 +41,7 @@ void                    GlFormatToStorageBits(GLenum format, GLboolean *r_, GLbo
 bool                    GlFormatIsDepthRenderable(GLenum format);
 bool                    GlFormatIsStencilRenderable(GLenum format);
 bool                    GlFormatIsColorRenderable(GLenum format);
+uint32_t                OccupiedLocationsPerGlType(GLenum type);
+
 
 #endif // __GLUTILS_H__

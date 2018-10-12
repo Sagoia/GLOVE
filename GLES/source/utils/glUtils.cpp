@@ -676,3 +676,26 @@ GlFormatIsColorRenderable(GLenum format)
     default:                            return false;
     }
 }
+
+uint32_t
+OccupiedLocationsPerGlType(GLenum type)
+{
+    switch(type) {
+        case GL_BOOL:
+        case GL_INT:
+        case GL_FLOAT:
+        case GL_BOOL_VEC2:
+        case GL_INT_VEC2:
+        case GL_FLOAT_VEC2:
+        case GL_BOOL_VEC3:
+        case GL_INT_VEC3:
+        case GL_FLOAT_VEC3:
+        case GL_BOOL_VEC4:
+        case GL_INT_VEC4:
+        case GL_FLOAT_VEC4:         return 1;
+        case GL_FLOAT_MAT2:         return 2;
+        case GL_FLOAT_MAT3:         return 3;
+        case GL_FLOAT_MAT4:         return 4;
+        default: NOT_REACHED();     return 0;
+    }
+}

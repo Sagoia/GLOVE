@@ -159,7 +159,6 @@ private:
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;
 
-    uint32_t OccupiedLocationsPerType(GLenum type);
     void CleanUp(void);
 
 public:
