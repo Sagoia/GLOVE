@@ -62,10 +62,6 @@ RenderingThread::GetError(void)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    if(mLastError != 0x3000) {
-        printf("Error: %s\n", EGLErrors[mLastError - 0x3000]); // TODO: to be removed
-    }
-
     EGLint result = mLastError;
     mLastError    = EGL_SUCCESS;
 
