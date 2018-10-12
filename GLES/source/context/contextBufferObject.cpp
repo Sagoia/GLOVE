@@ -189,10 +189,5 @@ Context::IsBuffer(GLuint buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(buffer && mResourceManager->BufferExists(buffer)) {
-        BufferObject *pBuffer = mResourceManager->GetBuffer(buffer);
-        return (pBuffer && pBuffer->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
-    }
-
-    return GL_FALSE;
+    return (buffer != 0 && mResourceManager->BufferExists(buffer)) ? GL_TRUE : GL_FALSE;
 }

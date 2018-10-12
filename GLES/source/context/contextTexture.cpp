@@ -332,7 +332,7 @@ Context::IsTexture(GLuint texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    return (texture && mResourceManager->TextureExists(texture) && mResourceManager->GetTexture(texture)->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
+    return (texture != 0 && mResourceManager->TextureExists(texture)) ? GL_TRUE : GL_FALSE;
 }
 
 void

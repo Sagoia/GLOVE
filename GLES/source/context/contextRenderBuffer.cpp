@@ -181,12 +181,7 @@ Context::IsRenderbuffer(GLuint renderbuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(renderbuffer && mResourceManager->RenderbufferExists(renderbuffer)) {
-        Renderbuffer *pRenderBuffer = mResourceManager->GetRenderbuffer(renderbuffer);
-        return (pRenderBuffer && pRenderBuffer->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
-    }
-
-    return GL_FALSE;
+    return (renderbuffer != 0 && mResourceManager->RenderbufferExists(renderbuffer)) ? GL_TRUE : GL_FALSE;
 }
 
 void
