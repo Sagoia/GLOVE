@@ -445,6 +445,10 @@ TerminateContext()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(!GloveVkContext.mInitialized) {
+        return;
+    }
+
     if(GloveVkContext.vkSyncItems->vkAcquireSemaphore != VK_NULL_HANDLE) {
         vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkAcquireSemaphore, nullptr);
         GloveVkContext.vkSyncItems->vkAcquireSemaphore = VK_NULL_HANDLE;
