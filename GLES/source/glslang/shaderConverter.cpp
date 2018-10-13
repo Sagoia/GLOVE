@@ -468,9 +468,9 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
             string layoutSyntax = string("layout(location = ") + to_string(location) + string(") in");
             source.replace(f1, attributeLiteralStr.length(), layoutSyntax);
         } else {
-            source.replace(f1, attributeLiteralStr.length(), "");
+            source.erase(f1, attributeLiteralStr.length() + 1);
+            found = f1;
         }
-
         found = FindToken(attributeLiteralStr, source, found);
     }
 
