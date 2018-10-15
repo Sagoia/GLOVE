@@ -31,7 +31,8 @@
 #include "utils/arrays.hpp"
 
 typedef enum {
-    GLOVE_SURFACE_WINDOW = 1,
+    GLOVE_SURFACE_INVALID,
+    GLOVE_SURFACE_WINDOW,
     GLOVE_SURFACE_PBUFFER
 } glove_surface_type;
 
@@ -66,7 +67,7 @@ private:
     Attachment*                     mAttachmentStencil;
     Texture*                        mDepthStencilTexture;
     bool                            mIsSystem;
-    bool                            mBoundToTexture;
+    bool                            mBindToTexture;
     GLenum                          mSurfaceType;
 
     void                            Release(void);
@@ -133,7 +134,7 @@ public:
     inline GLint            GetStencilAttachmentLevel(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentStencil->GetLevel();  }
     inline GLenum           GetStencilAttachmentLayer(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentStencil->GetLayer();  }
            Texture *        GetStencilAttachmentTexture(void)           const;
-    inline GLint            GetBoundToTexture(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mBoundToTexture;                 }
+    inline GLint            GetBindToTexture(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mBindToTexture;                  }
     inline GLint            GetSurfaceType(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mSurfaceType;                    }
 
 // Set Functions
@@ -174,7 +175,7 @@ public:
 
     inline void             SetDepthStencilAttachmentTexture(Texture *texture)  { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = texture; }
     inline void             SetWriteBufferIndex(uint32_t buffer)                { FUN_ENTRY(GL_LOG_TRACE); if(mAttachmentColors.size() > 1) {mWriteBufferIndex = buffer;} }
-    inline void             SetBoundToTexture(GLint boundToTexture)             { FUN_ENTRY(GL_LOG_TRACE); mBoundToTexture = boundToTexture;    }
+    inline void             SetBindToTexture(GLint bindToTexture)               { FUN_ENTRY(GL_LOG_TRACE); mBindToTexture = bindToTexture;      }
     inline void             SetSurfaceType(GLint surfacetype)                   { FUN_ENTRY(GL_LOG_TRACE); mSurfaceType = surfacetype;          }
 
 // Is Functions

@@ -71,7 +71,7 @@ private:
     EGLint                           SwapInterval;
 
     /* True if the surface is bound to an OpenGL ES texture */
-    EGLBoolean                       BoundToTexture;
+    EGLBoolean                       BindToTexture;
 
     EGLBoolean                       PostSubBufferSupportedNV;
     EGLint                           CurrentImageIndex;
@@ -105,7 +105,7 @@ public:
            void                      SetMipmapLevel(EGLint mipmapLevel);
     inline void                      SetMultisampleResolve(EGLint multisampleResolve)           { FUN_ENTRY(EGL_LOG_TRACE); MultisampleResolve = multisampleResolve; }
     inline void                      SetSwapBehavior(EGLint swapBehavior)                       { FUN_ENTRY(EGL_LOG_TRACE); SwapBehavior = swapBehavior; }
-    inline void                      SetBoundToTexture(EGLint boundToTexture)                   { FUN_ENTRY(EGL_LOG_TRACE); BoundToTexture = boundToTexture; }
+    inline void                      SetBindToTexture(EGLint bindToTexture)                     { FUN_ENTRY(EGL_LOG_TRACE); BindToTexture = bindToTexture; }
 
     inline EGLint                    GetType()                                            const { FUN_ENTRY(EGL_LOG_TRACE); return Type; }
     inline EGLint                    GetWidth()                                           const { FUN_ENTRY(EGL_LOG_TRACE); return Width; }
@@ -122,7 +122,7 @@ public:
 
     inline EGLint                    GetBindToTextureRGB()                                const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGB; }
     inline EGLint                    GetBindToTextureRGBA()                               const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGBA; }
-    inline EGLBoolean                GetBoundToTexture()                                  const { FUN_ENTRY(EGL_LOG_TRACE); return BoundToTexture; }
+    inline EGLBoolean                GetBindToTexture()                                   const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTexture; }
     inline EGLenum                   GetRenderBuffer()                                    const { FUN_ENTRY(EGL_LOG_TRACE); return RenderBuffer; }
 };
 

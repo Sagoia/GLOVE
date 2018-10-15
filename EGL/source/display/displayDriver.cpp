@@ -409,11 +409,11 @@ DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
 
     //TODO: We are assuming that the BindTexImage refers to the surface that is currently active for GLOVE.
     //If we have multiple surfaces for GLES, additional information may need to be passed to GLOVE.
-    mActiveContext->BoundToTexture(EGL_TRUE);
+    mActiveContext->BindToTexture(EGL_TRUE);
     //If display and surface are the display and surface for the calling thread's current context, eglBindTexImage performs an implicit glFlush
     mActiveContext->Finish();
 
-    return EGL_FALSE;
+    return EGL_TRUE;
 }
 
 EGLBoolean
@@ -431,9 +431,9 @@ DisplayDriver::ReleaseTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLi
         currentThread.RecordError(EGL_BAD_MATCH);
         return EGL_FALSE;
     }
-    mActiveContext->BoundToTexture(EGL_FALSE);
+    mActiveContext->BindToTexture(EGL_FALSE);
 
-    return EGL_FALSE;
+    return EGL_TRUE;
 }
 
 EGLBoolean
@@ -465,8 +465,8 @@ DisplayDriver::SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)
         return EGL_TRUE;
     }
 
-    if(eglSurface->GetBoundToTexture() == EGL_TRUE) {
-        return EGL_TRUE; //TODO: Is this right?
+    if(eglSurface->GetBindToTexture() == EGL_TRUE) {
+        return EGL_TRUE;
     }
 
     mActiveContext->Finish();

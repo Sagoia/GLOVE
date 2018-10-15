@@ -99,7 +99,8 @@ EGLContext_t::Release()
     mAPIInterface->release_system_fbo_cb(mAPIContext);
 }
 
-EGLint EGLContext_t::GetRenderBuffer() const
+EGLint
+EGLContext_t::GetRenderBuffer() const
 {
      FUN_ENTRY(EGL_LOG_TRACE);
 
@@ -235,11 +236,11 @@ EGLContext_t::Finish()
 }
 
 void
-EGLContext_t::BoundToTexture(EGLint bound)
+EGLContext_t::BindToTexture(EGLint bind)
 {
-    FUN_ENTRY(EGL_LOG_DEBUG);
+    FUN_ENTRY(EGL_LOG_TRACE);
 
-    mAPIInterface->bound_to_texture_cb(mAPIContext, bound);
+    mAPIInterface->bind_to_texture_cb(mAPIContext, bind);
 }
 
 EGLBoolean

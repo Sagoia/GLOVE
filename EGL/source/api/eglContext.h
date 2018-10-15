@@ -63,7 +63,7 @@ public:
     EGLBoolean                   MakeCurrent(class EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
     void                         SetNextImageIndex(uint32_t index);
     void                         Finish();
-    void                         BoundToTexture(EGLint bound);
+    void                         BindToTexture(EGLint bind);
     void                         Release();
 
     inline EGLenum               GetRenderingAPI()                        const { FUN_ENTRY(EGL_LOG_TRACE); return mRenderingAPI; }

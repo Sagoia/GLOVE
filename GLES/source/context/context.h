@@ -128,8 +128,9 @@ public:
 
 // Set Functions
             void            SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
-    inline  void            SetNextImageIndex(uint32_t imageIndex)               { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
-    inline  void            SetFullScreenRender(bool value)                      { FUN_ENTRY(GL_LOG_TRACE); mIsFullScreenRender = value;}
+    inline  void            SetNextImageIndex(uint32_t imageIndex)                { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
+    inline  void            SetFullScreenRender(bool value)                       { FUN_ENTRY(GL_LOG_TRACE); mIsFullScreenRender = value; }
+    inline  void            BindToTexture(GLuint bind)                            { FUN_ENTRY(GL_LOG_DEBUG); mSystemFBO->SetBindToTexture(bind); }
 
 // GL API core functions
     void            ActiveTexture(GLenum texture);
@@ -177,7 +178,6 @@ public:
     void            Enable(GLenum cap);
     void            EnableVertexAttribArray(GLuint index);
     void            Finish(void);
-    void            BoundToTexture(GLuint bound);
     bool            Flush(void);
     void            FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
     void            FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);

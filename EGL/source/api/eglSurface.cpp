@@ -31,7 +31,7 @@ DepthSize(0), StencilSize(0), RedSize(0), GreenSize(0), BlueSize(0), AlphaSize(0
 TextureFormat(0), TextureTarget(0), MipmapTexture(EGL_FALSE),
 LargestPbuffer(EGL_FALSE), RenderBuffer(0), VGAlphaFormat(0), VGColorspace(0),
 MipmapLevel(0), MultisampleResolve(0), SwapBehavior(0), HorizontalResolution(0),
-VerticalResolution(0), AspectRatio(0), SwapInterval(0), BoundToTexture(EGL_FALSE), PostSubBufferSupportedNV(0),
+VerticalResolution(0), AspectRatio(0), SwapInterval(0), BindToTexture(EGL_FALSE), PostSubBufferSupportedNV(0),
 CurrentImageIndex(0), mPlatformResources(nullptr)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
