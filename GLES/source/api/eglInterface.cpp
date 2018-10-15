@@ -36,6 +36,7 @@ void                  delete_context(api_context_t api_context);
 void                  release_system_fbo(api_context_t api_context);
 void                  set_next_image_index(api_context_t api_context, uint32_t index);
 GLPROC                get_proc_addr(const char* procname);
+void                  flush(api_context_t api_context);
 void                  finish(api_context_t api_context);
 void                  bind_to_texture(api_context_t api_context, uint32_t bind);
 
@@ -51,6 +52,7 @@ rendering_api_interface_t GLES2Interface = {
     release_system_fbo,
     set_next_image_index,
     get_proc_addr,
+    flush,
     finish,
     bind_to_texture
 };
@@ -132,6 +134,14 @@ GLPROC get_proc_addr(const char* procname)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     return GetGLProcAddr(procname);
+}
+
+void flush(api_context_t api_context)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    Context *ctx = reinterpret_cast<Context *>(api_context);
+    ctx->Flush();
 }
 
 void finish(api_context_t api_context)

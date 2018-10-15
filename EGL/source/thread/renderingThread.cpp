@@ -258,7 +258,7 @@ RenderingThread::MakeCurrent(EGLDisplay_t* dpy, EGLSurface_t* drawSurface, EGLSu
     // Flush commands when changing contexts of the same client API type
     EGLContext_t* currentContext = static_cast<EGLContext_t*>(GetCurrentContext());
     if(currentContext && currentContext != eglContext) {
-        currentContext->Finish();
+        currentContext->Flush();
     }
 
     if(eglContext && eglContext->MakeCurrent(dpy, drawSurface, readSurface) != EGL_TRUE) {

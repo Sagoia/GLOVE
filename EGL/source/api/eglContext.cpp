@@ -228,6 +228,15 @@ EGLContext_t::SetNextImageIndex(uint32_t index)
 }
 
 void
+EGLContext_t::Flush()
+{
+    FUN_ENTRY(EGL_LOG_DEBUG);
+
+    mAPIInterface->flush_cb(mAPIContext);
+}
+
+
+void
 EGLContext_t::Finish()
 {
     FUN_ENTRY(EGL_LOG_DEBUG);

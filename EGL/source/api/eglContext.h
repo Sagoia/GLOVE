@@ -62,6 +62,7 @@ public:
     EGLBoolean                   Destroy();
     EGLBoolean                   MakeCurrent(class EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
     void                         SetNextImageIndex(uint32_t index);
+    void                         Flush();
     void                         Finish();
     void                         BindToTexture(EGLint bind);
     void                         Release();

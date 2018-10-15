@@ -54,6 +54,7 @@ typedef void (*delete_context_cb_t)(api_context_t api_context);
 typedef void (*release_system_fbo_cb_t)(api_context_t api_context);
 typedef void (*set_next_image_index_cb_t)(api_context_t api_context, uint32_t index);
 typedef GLPROC (*get_proc_addr_cb_t)(const char* procname);
+typedef void (*flush_cb_t)(api_context_t api_context);
 typedef void (*finish_cb_t)(api_context_t api_context);
 typedef void (*bind_to_texture_cb_t)(api_context_t api_context, uint32_t bind);
 
@@ -67,6 +68,7 @@ typedef struct rendering_api_interface {
     release_system_fbo_cb_t release_system_fbo_cb;
     set_next_image_index_cb_t set_next_image_index_cb;
     get_proc_addr_cb_t get_proc_addr_cb;
+    flush_cb_t flush_cb;
     finish_cb_t finish_cb;
     bind_to_texture_cb_t bind_to_texture_cb;
 } rendering_api_interface_t;
