@@ -228,3 +228,17 @@ ShaderReflection::GetAttributeLocation(const char *name) const
 
     return -1;
 }
+
+GLenum
+ShaderReflection::GetAttributeType(const char *name) const
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    for(uint32_t i = 0; i < mReflectionData.mLiveAttributes; ++i) {
+        if(!strcmp(mReflectionData.mAttributeReflection[i].name, name)) {
+                return mReflectionData.mAttributeReflection[i].type;
+        }
+    }
+
+    return -1;
+}

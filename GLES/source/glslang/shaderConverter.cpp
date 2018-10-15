@@ -23,6 +23,7 @@
 
 #include "shaderConverter.h"
 #include "resources/shaderProgram.h"
+#include "utils/glUtils.h"
 #include "utils/glLogger.h"
 
 const char * const ShaderConverter::shaderVersion    = "#version 400\n";
@@ -439,6 +440,8 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    std::vector<int> loc;
+
     if(!reflection->GetLiveAttributes()) {
         return;
     }
@@ -464,9 +467,14 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
         token = GetNextToken(source, found);
 
         int location = reflection->GetAttributeLocation(token.c_str());
-        if(location >=0) {
+
+        std::vector<int>::iterator it = std::find (loc.begin(), loc.end(), location);
+        if(location >=0 && it == loc.end()) {
             string layoutSyntax = string("layout(location = ") + to_string(location) + string(") in");
             source.replace(f1, attributeLiteralStr.length(), layoutSyntax);
+            for (int j = 0; j < (int)OccupiedLocationsPerGlType(reflection->GetAttributeType(token.c_str())); j++) {
+                loc.push_back(location + j);
+            }
         } else {
             source.erase(f1, attributeLiteralStr.length() + 1);
             found = f1;

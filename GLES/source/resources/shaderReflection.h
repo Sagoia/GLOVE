@@ -79,6 +79,7 @@ public:
 
     void ResetReflection(void);
     int GetAttributeLocation(const char *name) const;
+    GLenum GetAttributeType(const char *name) const;
     uint32_t DeserializeReflection(const void *binary);
     uint32_t SerializeReflection(void *binary) const;
     uint32_t GetReflectionSize(void)                                          const { FUN_ENTRY(GL_LOG_TRACE); return sizeof(reflectionData); }
