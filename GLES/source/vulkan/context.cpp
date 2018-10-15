@@ -292,7 +292,7 @@ InitVkQueueFamilyIndex(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     uint32_t queueFamilyCount;
-    vkGetPhysicalDeviceQueueFamilyProperties(GloveVkContext.vkGpus[0], &queueFamilyCount, NULL);
+    vkGetPhysicalDeviceQueueFamilyProperties(GloveVkContext.vkGpus[0], &queueFamilyCount, nullptr);
     assert(queueFamilyCount >= 1);
     if(!queueFamilyCount) {
         return false;
@@ -402,8 +402,8 @@ void
 ResetContextResources()
 {
     GloveVkContext.vkInstance                   = VK_NULL_HANDLE;
+    GloveVkContext.vkGpus.clear();
     GloveVkContext.vkQueue                      = VK_NULL_HANDLE;
-    GloveVkContext.mInitialized                 = false;
     GloveVkContext.vkGraphicsQueueNodeIndex     = 0;
     GloveVkContext.vkDevice                     = VK_NULL_HANDLE;
     GloveVkContext.vkSyncItems                  = nullptr;
@@ -437,7 +437,9 @@ InitContext()
     }
     InitVkQueue();
 
-    return GloveVkContext.mInitialized = true;
+    GloveVkContext.mInitialized = true;
+
+    return GloveVkContext.mInitialized;
 }
 
 void
