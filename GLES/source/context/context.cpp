@@ -120,6 +120,10 @@ Context::ReleaseSystemFBO(void)
         mCommandBufferManager->DestroyVkCmdBuffers();
         mCommandBufferManager->AllocateVkCmdBuffers();
     }
+
+    mReadSurface = nullptr;
+    mWriteSurface = nullptr;
+    mWriteFBO = nullptr;
 }
 
 void
