@@ -912,7 +912,7 @@ glPushGroupMarkerEXT(GLsizei length, const GLchar *marker)
 GL_APICALL void GL_APIENTRY
 glPopGroupMarkerEXT(void)
 {
-    CONTEXT_EXEC(PushGroupMarkerEXT());
+    CONTEXT_EXEC(PopGroupMarkerEXT());
 }
 
 GL_APICALL void GL_APIENTRY glGetProgramBinaryOES(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary)

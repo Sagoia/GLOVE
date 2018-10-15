@@ -281,7 +281,7 @@ public:
     void            EGLImageTargetRenderBufferStorageOES(GLenum target, GLeglImageOES image);
     void            InsertEventMarkerEXT(GLsizei length, const GLchar *marker);
     void            PushGroupMarkerEXT(GLsizei length, const GLchar *marker);
-    void            PushGroupMarkerEXT(void);
+    void            PopGroupMarkerEXT(void);
     void            GetProgramBinaryOES(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary);
     void            ProgramBinaryOES(GLuint program, GLenum binaryFormat, const void *binary, GLint length);
 

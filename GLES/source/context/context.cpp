@@ -308,7 +308,7 @@ Context::PushGroupMarkerEXT(GLsizei length, const GLchar *marker)
 }
 
 void
-Context::PushGroupMarkerEXT(void)
+Context::PopGroupMarkerEXT(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
