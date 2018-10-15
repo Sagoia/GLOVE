@@ -38,6 +38,7 @@ private:
         bool                        hasLocation;
         int                         location;
         int                         vectorSize;
+        int                         matrixCols;
     };
 
     using VaryingMap = std::vector<VaryingInfo>;
@@ -76,7 +77,7 @@ public:
     bool                            GetVaryingInHasLocation(uint32_t index) const;
     int                             GetVaryingInLocation(uint32_t index) const;
     int                             GetVaryingInSize(uint32_t index) const;
-
+    int                             GetVaryingInLocations(uint32_t index) const;
 
     inline uint32_t                 GetNumLiveVaryingOutVariables() const { return mVaryingOUTMap.size(); }
     const char *                    GetVaryingOutName(uint32_t index) const;

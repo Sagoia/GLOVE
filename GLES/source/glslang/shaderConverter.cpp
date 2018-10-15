@@ -389,7 +389,7 @@ ShaderConverter::ProcessVaryings(std::string& source)
             if(!strcmp(inName, outName)) {
                 assert(varyingsLocationMap.find(string(inName)) == varyingsLocationMap.end());
                 varyingsLocationMap[string(inName)] = make_pair(location, (inSize == outSize));
-                location++;
+                location += mIoMapResolver->GetVaryingInLocations(in);
             }
         }
     }

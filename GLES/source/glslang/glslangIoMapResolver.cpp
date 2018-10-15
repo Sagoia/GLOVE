@@ -34,6 +34,7 @@ GlslangIoMapResolver::FillInVaryingInfo(VaryingInfo *varyingInfo, const glslang:
     varyingInfo->hasLocation = type.getQualifier().hasLocation();
     varyingInfo->location = type.getQualifier().hasLocation() ? type.getQualifier().layoutLocation : -1;
     varyingInfo->vectorSize = type.getVectorSize();
+    varyingInfo->matrixCols = type.getMatrixCols();
 }
 
 bool
@@ -175,6 +176,13 @@ GlslangIoMapResolver::GetVaryingInSize(uint32_t index) const
 {
     FUN_ENTRY(GL_LOG_TRACE);
     return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].vectorSize;
+}
+
+int
+GlslangIoMapResolver::GetVaryingInLocations(uint32_t index) const
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].vectorSize > 0 ? 1 : mVaryingINMap[index].matrixCols;
 }
 
 int
