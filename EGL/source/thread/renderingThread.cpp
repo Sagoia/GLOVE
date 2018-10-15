@@ -238,6 +238,7 @@ RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLin
             break;
         case EGL_CONTEXT_CLIENT_VERSION:
             *value = eglContext->GetClientVersion();
+            break;
         case EGL_RENDER_BUFFER:
             *value = eglContext->GetRenderBuffer();
             break;
