@@ -23,6 +23,7 @@
 
 #include "renderingThread.h"
 #include "api/eglSurface.h"
+#include "display/displayDriver.h"
 #include "utils/eglLogger.h"
 
 const char * const RenderingThread::EGLErrors[] = {   "EGL_SUCCESS",
@@ -252,9 +253,74 @@ RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLin
 }
 
 EGLBoolean
-RenderingThread::MakeCurrent(EGLDisplay_t* dpy, EGLSurface_t* drawSurface, EGLSurface_t* readSurface, EGLContext_t* eglContext)
+RenderingThread::ValidateCurrentContext(DisplayDriver* eglDriver, EGLSurface_t* drawSurface, EGLSurface_t* readSurface, EGLContext_t* eglContext)
+{
+    // generate EGL_BAD_MATCH if EGL_NO_CONTEXT and EGL_NO_SURFACE are not specified together
+    if((eglContext == EGL_NO_CONTEXT && (drawSurface != EGL_NO_SURFACE || readSurface != EGL_NO_SURFACE)) ||
+       (eglContext != EGL_NO_CONTEXT && (drawSurface == EGL_NO_SURFACE || readSurface == EGL_NO_SURFACE))) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+        return EGL_FALSE;
+    }
+
+    if(eglContext != EGL_NO_CONTEXT && EGLContext_t::FindEGLContext(eglContext) == EGL_FALSE) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+
+    // check for valid surfaces (that are note EGL_NO_SURFACE)
+    if(drawSurface != EGL_NO_SURFACE && eglDriver->CheckBadSurface(drawSurface) == EGL_FALSE) {
+        return EGL_FALSE;
+    }
+
+    if(readSurface != EGL_NO_SURFACE && eglDriver->CheckBadSurface(readSurface) == EGL_FALSE) {
+        return EGL_FALSE;
+    }
+
+    // generate EGL_BAD_MATCH if read and draw surfaces are not the same on OpenVG
+    if(eglContext && eglContext->GetRenderingAPI() == EGL_OPENVG_API && (readSurface != drawSurface)) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+    }
+
+    // generate EGL_BAD_MATCH if EGL_NO_CONTEXT and EGL_NO_SURFACE are not specified together
+    if((eglContext == EGL_NO_CONTEXT && (drawSurface != EGL_NO_SURFACE || readSurface != EGL_NO_SURFACE)) ||
+       (eglContext != EGL_NO_CONTEXT && drawSurface == EGL_NO_SURFACE && readSurface == EGL_NO_SURFACE)) {
+        currentThread.RecordError(EGL_BAD_MATCH);
+        return EGL_FALSE;
+    }
+
+    // TODO:: If ctx is current to some other thread, or if either draw or read are bound to
+    // contexts in another thread, an EGL_BAD_ACCESS error is generated.
+
+    // TODO:: If binding ctx would exceed the number of current contexts of that client
+    // API type supported by the implementation, an EGL_BAD_ACCESS error is generated
+
+    // TODO:: If either draw or read are pbuffers created with eglCreatePbufferFromClientBuffer,
+    // and the underlying bound client API buffers are in use by the
+    // client API that created them, an EGL_BAD_ACCESS error is generated.
+
+    // TODO:: If a native window underlying either draw or read is no longer valid, an EGL_BAD_NATIVE_WINDOW error is generated.
+
+    // TODO::If the previous context of the calling thread has unflushed commands, and
+    // the previous surface is no longer valid, an EGL_BAD_CURRENT_SURFACE error is generated.
+
+    // TODO:: If the ancillary buffers for draw and read cannot be allocated, an EGL_BAD_ALLOC error is generated
+
+    // TODO:: If a power management event has occurred, an EGL_CONTEXT_LOST error is generated.
+
+    return EGL_TRUE;
+}
+
+EGLBoolean
+RenderingThread::MakeCurrent(DisplayDriver* eglDriver, EGLDisplay_t* dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
 {
     FUN_ENTRY(DEBUG_DEPTH);
+
+    EGLContext_t* eglContext = static_cast<EGLContext_t*>(ctx);
+    EGLSurface_t *eglDrawSurface = static_cast<EGLSurface_t*>(draw);
+    EGLSurface_t *eglReadSurface = static_cast<EGLSurface_t*>(read);
+    if(ValidateCurrentContext(eglDriver, eglDrawSurface, eglReadSurface, eglContext) == EGL_FALSE) {
+        return EGL_FALSE;
+    }
 
     // Flush commands when changing contexts of the same client API type
     EGLContext_t* currentContext = static_cast<EGLContext_t*>(GetCurrentContext());
@@ -262,7 +328,7 @@ RenderingThread::MakeCurrent(EGLDisplay_t* dpy, EGLSurface_t* drawSurface, EGLSu
         currentContext->Flush();
     }
 
-    if(eglContext && eglContext->MakeCurrent(dpy, drawSurface, readSurface) != EGL_TRUE) {
+    if(eglContext && eglContext->MakeCurrent(dpy, eglDrawSurface, eglReadSurface) != EGL_TRUE) {
         return EGL_FALSE;
     }
 

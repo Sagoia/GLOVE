@@ -40,6 +40,7 @@ private:
 
     void                    ResetCurrentContext(EGLContext_t* context);
     void                    SetCurrentContext(EGLContext_t* eglContext);
+    EGLBoolean              ValidateCurrentContext(class DisplayDriver* eglDriver, class EGLSurface_t* drawSurface, class EGLSurface_t* readSurface, EGLContext_t* eglContext);
 
 public:
     RenderingThread(void);
@@ -58,7 +59,7 @@ public:
     EGLContext              CreateContext(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list);
     EGLBoolean              DestroyContext(EGLDisplay_t* dpy, EGLContext_t* eglContext);
     EGLBoolean              QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLint attribute, EGLint *value);
-    EGLBoolean              MakeCurrent(EGLDisplay_t* dpy, class EGLSurface_t* drawSurface, class EGLSurface_t* readSurface, EGLContext_t* eglContext);
+    EGLBoolean              MakeCurrent(class DisplayDriver* eglDriver, EGLDisplay_t* dpy, EGLSurface draw, EGLSurface read, EGLContext ctx);
     EGLBoolean              WaitGL(void);
     EGLBoolean              WaitNative(EGLint engine);
 };

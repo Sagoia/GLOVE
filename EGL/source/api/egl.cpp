@@ -168,62 +168,7 @@ eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
         return EGL_FALSE;
     }
 
-    // generate EGL_BAD_MATCH if EGL_NO_CONTEXT and EGL_NO_SURFACE are not specified together
-    if((ctx == EGL_NO_CONTEXT && (draw != EGL_NO_SURFACE || read != EGL_NO_SURFACE)) ||
-       (ctx != EGL_NO_CONTEXT && (draw == EGL_NO_SURFACE || read == EGL_NO_SURFACE))) {
-        currentThread.RecordError(EGL_BAD_MATCH);
-        return EGL_FALSE;
-    }
-
-    EGLContext_t* eglContext = static_cast<EGLContext_t*>(ctx);
-    if(ctx != EGL_NO_CONTEXT && EGLContext_t::FindEGLContext(eglContext) == EGL_FALSE) {
-        currentThread.RecordError(EGL_BAD_CONTEXT);
-        return EGL_FALSE;
-    }
-
-    // check for valid surfaces (that are note EGL_NO_SURFACE)
-    EGLSurface_t *eglDrawSurface = static_cast<EGLSurface_t*>(draw);
-    if(draw != EGL_NO_SURFACE && eglDriver->CheckBadSurface(eglDrawSurface) == EGL_FALSE) {
-        return EGL_FALSE;
-    }
-
-    EGLSurface_t *eglReadSurface = static_cast<EGLSurface_t*>(read);
-    if(read != EGL_NO_SURFACE && eglDriver->CheckBadSurface(eglReadSurface) == EGL_FALSE) {
-        return EGL_FALSE;
-    }
-
-    // generate EGL_BAD_MATCH if read and draw surfaces are not the same on OpenVG
-    if(eglContext && eglContext->GetRenderingAPI() == EGL_OPENVG_API && (eglReadSurface != eglDrawSurface)) {
-        currentThread.RecordError(EGL_BAD_MATCH);
-    }
-
-    // generate EGL_BAD_MATCH if EGL_NO_CONTEXT and EGL_NO_SURFACE are not specified together
-    if((ctx == EGL_NO_CONTEXT && (draw != EGL_NO_SURFACE || read != EGL_NO_SURFACE)) ||
-       (ctx != EGL_NO_CONTEXT && draw == EGL_NO_SURFACE && read == EGL_NO_SURFACE)) {
-        currentThread.RecordError(EGL_BAD_MATCH);
-        return EGL_FALSE;
-    }
-
-    // TODO:: If ctx is current to some other thread, or if either draw or read are bound to
-    // contexts in another thread, an EGL_BAD_ACCESS error is generated.
-
-    // TODO:: If binding ctx would exceed the number of current contexts of that client
-    // API type supported by the implementation, an EGL_BAD_ACCESS error is generated
-
-    // TODO:: If either draw or read are pbuffers created with eglCreatePbufferFromClientBuffer,
-    // and the underlying bound client API buffers are in use by the
-    // client API that created them, an EGL_BAD_ACCESS error is generated.
-
-    // TODO:: If a native window underlying either draw or read is no longer valid, an EGL_BAD_NATIVE_WINDOW error is generated.
-
-    // TODO::If the previous context of the calling thread has unflushed commands, and
-    // the previous surface is no longer valid, an EGL_BAD_CURRENT_SURFACE error is generated.
-
-    // TODO:: If the ancillary buffers for draw and read cannot be allocated, an EGL_BAD_ALLOC error is generated
-
-    // TODO:: If a power management event has occurred, an EGL_CONTEXT_LOST error is generated.
-
-    EGLBoolean res = currentThread.MakeCurrent(eglDisplay, eglDrawSurface, eglReadSurface, eglContext);
+    EGLBoolean res = currentThread.MakeCurrent(eglDriver, eglDisplay, draw, read, ctx);
     if(res == EGL_TRUE) {
         eglDriver->SetActiveContext(ctx);
     }
