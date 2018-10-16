@@ -151,31 +151,79 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    map<std::string, uniformData>::iterator itUni;
-    map<std::string, uniformBlockData>::iterator itBlock;
+    uint32_t blockIndex=0;
+    bool     blockDataDirty;
 
-    for(auto& uniform : mUniformInterface) {
-        itUni = mUniformDataInterface.find(uniform.reflectionName);
-        if(!itUni->second.clientDataDirty) {
-            continue;
+    struct uniformDirty {
+        size_t       offset;
+        size_t       size;
+        const void * data;
+    };
+
+    for(auto &uniBlock : mUniformBlockInterface) {
+
+        map<std::string, uniformBlockData>::iterator itBlock = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
+
+        blockDataDirty = false;
+        std::vector<struct uniformDirty> uniformInterfaceDirty;
+        for(auto &uniform : mUniformInterface) {
+
+            // if does not belong to Block
+            if(uniform.blockIndex != blockIndex) {
+                continue;
+            }
+
+            map<std::string, uniformData>::iterator itUniform = mUniformDataInterface.find(uniform.reflectionName);
+
+            // check if is updated
+            if(!itUniform->second.clientDataDirty) {
+               continue;
+            }
+            itUniform->second.clientDataDirty = false;
+
+            blockDataDirty = true;
+            if(IsBuildInUniform(uniform.reflectionName)) {
+                blockDataDirty = false;
+            }
+
+            // compute uniform size
+            struct uniformDirty newUniformDirty;
+            newUniformDirty.size   = uniform.arraySize * GlslTypeToSize(uniform.glType);
+            newUniformDirty.offset = uniform.offset;
+            newUniformDirty.data   = (void *)itUniform->second.pClientData;
+
+            uniformInterfaceDirty.push_back(newUniformDirty);
         }
 
-        const uniformBlock *pBlock = &mUniformBlockInterface[uniform.blockIndex];
-        itBlock = mUniformBlockDataInterface.find(pBlock->glslBlockName);
-        size_t size = uniform.arraySize * GlslTypeToSize(uniform.glType);
+        if(blockDataDirty) {
 
-        if(!IsBuildInUniform(uniform.reflectionName)) {
+            size_t   srcsize = 0;
+            uint8_t *srcData = nullptr;
+
             if(itBlock->second.pBufferObject) {
                 mCacheManager->CacheUBO(itBlock->second.pBufferObject);
+
+                // memcopy data
+                srcsize = itBlock->second.pBufferObject->GetSize();
+                srcData = new uint8_t[srcsize];
+                itBlock->second.pBufferObject->GetData(srcsize, 0, srcData);
+
                 *allocatedNewBufferObject = true;
             }
 
             itBlock->second.pBufferObject = new UniformBufferObject(vkContext);
-            itBlock->second.pBufferObject->Allocate(pBlock->blockSize, nullptr);
+            itBlock->second.pBufferObject->Allocate(uniBlock.blockSize, srcData);
+
+            if(srcsize) {
+                delete[] srcData;
+            }
         }
 
-        itBlock->second.pBufferObject->UpdateData(size, uniform.offset, (void *)itUni->second.pClientData);
-        itUni->second.clientDataDirty = false;
+        for (auto &u : uniformInterfaceDirty) {
+            itBlock->second.pBufferObject->UpdateData(u.size, u.offset, u.data);
+        }
+
+        ++blockIndex;
     }
 
     return true;
