@@ -246,7 +246,6 @@ RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLin
         default:
             currentThread.RecordError(EGL_BAD_ATTRIBUTE);
             return EGL_FALSE;
-            break;
     }
 
     return EGL_TRUE;
