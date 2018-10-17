@@ -460,7 +460,7 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
                                     prog->getUniformStages(i) == EShLangVertexMask ? SHADER_TYPE_VERTEX : SHADER_TYPE_FRAGMENT;
 
         mUniforms.emplace_back(string(uniformName, dotPosition != string::npos ? dotPosition + 1 : 0),  /// variableName
-                               uniformName + (arraySize > 1 ? string("[0]") : string("")),              /// reflectionName
+                               uniformName,                                                             /// reflectionName
                                glType,                                                                  /// glType
                                GLOVE_MAX_COMBINED_UNIFORM_VECTORS,                                      /// location (not assigned yet)
                                arraySize,                                                               /// arraySize
@@ -725,8 +725,7 @@ GlslangShaderCompiler::DumpUniforms(void)
         }
 
         /// Rest of variable's name without base aggregate
-        /// If array size > 1 then append [0] in name
-        printf("%s%s\n", uni.variableName.c_str(), uni.arraySize > 1 ? "[0]" : "");
+        printf("%s\n", uni.variableName.c_str());
 
         printf("  reflection name: %s\n", uni.reflectionName.c_str());
         printf("  GL type: 0x%04x\n", uni.glType);

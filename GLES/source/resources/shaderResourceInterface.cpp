@@ -252,10 +252,7 @@ ShaderResourceInterface::GetUniformLocation(const char *name) const
 
     if(name[strlen(name) - 1] != ']') {
         for(auto &uniIt : mUniformInterface) {
-            string testName = uniIt.reflectionName;
-            if(testName.back() == ']' && !strcmp(testName.substr(0, testName.length() - 3).c_str(), name)) {
-                return uniIt.location;
-            } else if(testName.back() != ']' && !strcmp(testName.c_str(), name)) {
+            if(!strcmp(uniIt.reflectionName.c_str(), name)) {
                 return uniIt.location;
             }
         }
@@ -267,7 +264,7 @@ ShaderResourceInterface::GetUniformLocation(const char *name) const
 
         string ptrName = requestedName.substr(0, leftBracketPos);
         for(auto &uniIt : mUniformInterface) {
-            if(!ptrName.compare(uniIt.reflectionName.substr(0, uniIt.reflectionName.length() - 3))) {
+            if(!ptrName.compare(uniIt.reflectionName)) {
                 if(index >= uniIt.arraySize) {
                     return -1;
                 } else {
