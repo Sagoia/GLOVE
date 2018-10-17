@@ -62,7 +62,7 @@
 #define GLOVE_MAX_TEXTURE_IMAGE_UNITS                   32    // MIN VALUE:  8
 #define GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS          GLOVE_MAX_VERTEX_TEXTURE_IMAGE_UNITS + GLOVE_MAX_TEXTURE_IMAGE_UNITS
 
-#define GLOVE_MAX_DRAW_BUFFERS                          4     // MIN VALUE:  1
+#define GLOVE_MAX_DRAW_BUFFERS                          1     // MIN VALUE:  1
 
 #define GLOVE_MAX_TEXTURE_SIZE                          4096
 #define GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE                 4096
