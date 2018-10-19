@@ -962,6 +962,7 @@ void ShaderProgram::UpdateSamplerDescriptors()
 
     /// Get texture units from samplers
     uint32_t samp = 0;
+    std::map<uint32_t, uint32_t> map_block_texDescriptor;
     VkDescriptorImageInfo *textureDescriptors = NULL;
     if(nSamplers) {
         textureDescriptors = new VkDescriptorImageInfo[nSamplers];
@@ -1004,6 +1005,9 @@ void ShaderProgram::UpdateSamplerDescriptors()
                     textureDescriptors[samp].imageLayout = activeTexture->GetVkImageLayout();
                     textureDescriptors[samp].imageView   = activeTexture->GetVkImageView();
 
+                    if(j == 0) {
+                        map_block_texDescriptor[mShaderResourceInterface.GetUniformblockIndex(i)] = samp;
+                    }
                     ++samp;
                 }
             }
@@ -1015,21 +1019,21 @@ void ShaderProgram::UpdateSamplerDescriptors()
     VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
     memset((void*)writes, 0, nLiveUniformBlocks * sizeof(*writes));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
-        writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[i].pNext = NULL;
-        writes[i].dstSet = mVkDescSet;
+
+        writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writes[i].pNext      = NULL;
+        writes[i].dstSet     = mVkDescSet;
         writes[i].dstBinding = mShaderResourceInterface.GetUniformBlockBinding(i);
 
         if(mShaderResourceInterface.IsUniformBlockOpaque(i)) {
-            writes[i].pImageInfo = &textureDescriptors[samp];
-            writes[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            writes[i].pImageInfo      = &textureDescriptors[map_block_texDescriptor[i]];
+            writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             writes[i].descriptorCount = mShaderResourceInterface.GetUniformArraySize(i);
             samp += mShaderResourceInterface.GetUniformArraySize(i);
         } else {
             writes[i].descriptorCount = 1;
-            writes[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            UniformBufferObject* pBufferObject = mShaderResourceInterface.GetUniformBufferObject(i);
-            writes[i].pBufferInfo = pBufferObject->GetBufferDescInfo();
+            writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            writes[i].pBufferInfo     = mShaderResourceInterface.GetUniformBufferObject(i)->GetBufferDescInfo();
         }
     }
     assert(samp == nSamplers);

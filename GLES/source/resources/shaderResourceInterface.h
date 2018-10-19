@@ -180,6 +180,7 @@ public:
     int GetAttributeType(int index) const;
     const string & GetAttributeName(int index) const;
 
+    inline int32_t GetUniformblockIndex(uint32_t index)                         const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].blockIndex; }
     inline int32_t GetUniformArraySize(uint32_t index)                          const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].arraySize; }
     inline GLenum GetUniformType(uint32_t index)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].glType; }
     void GetUniformClientData(uint32_t location, size_t size, void *ptr) const;
