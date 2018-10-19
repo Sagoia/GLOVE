@@ -88,7 +88,6 @@ CommandBufferManager::~CommandBufferManager()
             mVkCmdPool = VK_NULL_HANDLE;
         }
     }
-
 }
 
 void
@@ -110,6 +109,16 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
         vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
         mVkAuxCommandBuffer = VK_NULL_HANDLE;
     }
+
+    uint32_t secondaryBuffersPoolSize = mSecondaryCmdBufferPool.GetSize();
+
+    for(uint32_t i = 0; i < secondaryBuffersPoolSize; ++i) {
+        VkCommandBuffer *removedSecondaryBuffer = mSecondaryCmdBufferPool.RemoveBuffer();
+        if(removedSecondaryBuffer) {
+            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, removedSecondaryBuffer);
+            delete removedSecondaryBuffer;
+        }
+    }
 }
 
 void
@@ -125,6 +134,12 @@ VkCommandBuffer *
 CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    VkCommandBuffer *reusedCommandBuffer = mSecondaryCmdBufferPool.BindNextAvailableBuffer();
+
+    if(nullptr != reusedCommandBuffer) {
+        return reusedCommandBuffer;
+    }
 
     VkResult err;
     VkCommandBuffer *commandBuffers = new VkCommandBuffer;
@@ -143,7 +158,7 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
         return nullptr;
     }
 
-    mSecondaryCmdBuffersCache.push_back(commandBuffers);
+    mSecondaryCmdBufferPool.AddBuffer(commandBuffers);
 
     return commandBuffers;
 }
@@ -183,14 +198,7 @@ CommandBufferManager::FreeResources(void)
         }
     }
 
-    if(!mSecondaryCmdBuffersCache.empty()) {
-        for(uint32_t i = 0; i < mSecondaryCmdBuffersCache.size(); ++i) {
-            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, mSecondaryCmdBuffersCache[i]);
-            delete mSecondaryCmdBuffersCache[i];
-        }
-
-        mSecondaryCmdBuffersCache.clear();
-    }
+    mSecondaryCmdBufferPool.UnbindAllBuffers();
 }
 
 bool
@@ -270,7 +278,7 @@ CommandBufferManager::BeginVkDrawCommandBuffer(void)
     VkCommandBufferBeginInfo info;
     info.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     info.pNext            = NULL;
-    info.flags            = 0;
+    info.flags            = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     info.pInheritanceInfo = NULL;
 
     VkResult err = vkBeginCommandBuffer(mVkCommandBuffers.commandBuffer[mActiveCmdBuffer], &info);

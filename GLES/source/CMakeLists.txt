@@ -57,6 +57,7 @@ set(SOURCES
     utils/glUtils.cpp
     utils/cacheManager.cpp
     vulkan/cbManager.cpp
+    vulkan/commandBufferPool.cpp
     vulkan/clearPass.cpp
     vulkan/renderPass.cpp
     vulkan/buffer.cpp

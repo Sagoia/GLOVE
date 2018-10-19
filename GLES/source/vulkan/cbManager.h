@@ -27,6 +27,7 @@
 #include <vector>
 #include "context.h"
 #include "fence.h"
+#include "commandBufferPool.h"
 
 namespace vulkanAPI {
 
@@ -89,9 +90,9 @@ private:
 
     VkCommandBuffer                 mVkAuxCommandBuffer;
     VkFence                         mVkAuxFence;
+    CommandBufferPool               mSecondaryCmdBufferPool;
 
     std::vector<resourceBase_t *>   mReferencedResources;
-    std::vector<VkCommandBuffer *>  mSecondaryCmdBuffersCache;
 
     void FreeResources(void);
 
