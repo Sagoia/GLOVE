@@ -56,23 +56,34 @@ typedef enum {
     SHADER_TYPE_FRAGMENT = 1 << 1
 } shader_type_t;
 
-class GenericVec4
+inline size_t GlslTypeToAllignment(GLenum type)
 {
-public:
-    union {
-        glsl_bool_t                     bData[4];
-        glsl_int_t                      iData[4];
-        glsl_float_t                    fData[4];
-    } v;
+    switch(type) {
+    case GL_BOOL:
+    case GL_INT:
+    case GL_FLOAT:                          return 16;
 
-    GenericVec4()
-    {
-        v.fData[0] = 0.0f;
-        v.fData[1] = 0.0f;
-        v.fData[2] = 0.0f;
-        v.fData[3] = 1.0f;
+    case GL_BOOL_VEC2:
+    case GL_INT_VEC2:
+    case GL_FLOAT_VEC2:                     return 16;
+
+    case GL_BOOL_VEC3:
+    case GL_INT_VEC3:
+    case GL_FLOAT_VEC3:                     return 16;
+
+    case GL_BOOL_VEC4:
+    case GL_INT_VEC4:
+    case GL_FLOAT_VEC4:                     return 16;
+
+    case GL_FLOAT_MAT2:                     return 16;
+    case GL_FLOAT_MAT3:                     return 48;
+    case GL_FLOAT_MAT4:                     return 64;
+
+    case GL_SAMPLER_2D:
+    case GL_SAMPLER_CUBE:                   return 16;
+    default:                                return 0;
     }
-};
+}
 
 inline size_t GlslTypeToSize(GLenum type)
 {
