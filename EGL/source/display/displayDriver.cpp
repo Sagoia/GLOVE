@@ -403,7 +403,7 @@ DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
 
     EGLint bindToTextureRGB  = eglSurface->GetBindToTextureRGB();
     EGLint bindToTextureRGBA = eglSurface->GetBindToTextureRGBA();
-    if (!(bindToTextureRGB || bindToTextureRGBA)) {
+    if(!(bindToTextureRGB || bindToTextureRGBA)) {
         return EGL_FALSE;
     }
 
