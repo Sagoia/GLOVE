@@ -504,44 +504,52 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
     std::map<BUFFER_STRIDE_PAIR, std::vector<uint32_t>> unique_buffer_stride_map;
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
-        const uint32_t location = mShaderResourceInterface.GetAttributeLocation(i);
-        GenericVertexAttribute& gva = genericVertAttribs[location];
+        const uint32_t location  = mShaderResourceInterface.GetAttributeLocation(i);
+        const uint32_t locations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
+        for(uint32_t j = 0; j < locations; ++j) {
 
-        if(gva.GetEnabled()) {
-            // Calculate stride if not given from user based on the actual data type
-            if(gva.GetStride() == 0) {
-                GLsizei stride = gva.GetNumElements() * GlAttribTypeToElementSize(gva.GetType());
-                gva.SetStride(stride);
-            }
-            // Create new vbo if user passed pointer to data
-            // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
-            if(gva.GetVbo() == nullptr || gva.GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
+            const uint32_t loc = location + j;
+
+            GenericVertexAttribute& gva = genericVertAttribs[loc];
+            if(gva.GetEnabled()) {
+
+                // Calculate stride if not given from user based on the actual data type
+                if(gva.GetStride() == 0) {
+                    GLsizei stride = gva.GetNumElements() * GlAttribTypeToElementSize(gva.GetType());
+                    gva.SetStride(stride);
+                }
+                // Create new vbo if user passed pointer to data
+                // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
+                if(gva.GetVbo() == nullptr || gva.GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
+
+                    BufferObject *vbo = new VertexBufferObject(mVkContext);
+                    void * data = reinterpret_cast<void*>(gva.GetPointer());
+                    size_t size = (firstVertex + vertCount) * static_cast<uint32_t>(gva.GetStride());
+
+                    vbo->Allocate(size, data);
+                    gva.SetOffset(0);
+                    gva.SetVbo(vbo);
+                    gva.SetInternalVBOStatus(true);
+                }
+            } else {
+                // Use the generic vertex attribute value registered to that location
                 BufferObject *vbo = new VertexBufferObject(mVkContext);
-                void * data = reinterpret_cast<void*>(gva.GetPointer());
-                size_t size = (firstVertex + vertCount) * static_cast<uint32_t>(gva.GetStride());
-                vbo->Allocate(size, data);
-                gva.SetOffset(0);
+                GLfloat genericValue[4];
+                gva.GetGenericValue(genericValue);
+                vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
+                gva.SetNumElements(4);
+                gva.SetType(GL_FLOAT);
+                gva.SetStride(0);
                 gva.SetVbo(vbo);
                 gva.SetInternalVBOStatus(true);
             }
-        } else {
-            // Use the generic vertex attribute value registered to that location
-            BufferObject *vbo = new VertexBufferObject(mVkContext);
-            GLfloat genericValue[4];
-            gva.GetGenericValue(genericValue);
-            vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
-            gva.SetNumElements(4);
-            gva.SetType(GL_FLOAT);
-            gva.SetStride(0);
-            gva.SetVbo(vbo);
-            gva.SetInternalVBOStatus(true);
-        }
 
-        // store each location
-        VkBuffer bo          = gva.GetVbo()->GetVkBuffer();
-        int32_t stride      = gva.GetStride();
-        BUFFER_STRIDE_PAIR p = {bo, stride};
-        unique_buffer_stride_map[p].push_back(location);
+            // store each location
+            VkBuffer bo          = gva.GetVbo()->GetVkBuffer();
+            int32_t stride       = gva.GetStride();
+            BUFFER_STRIDE_PAIR p = {bo, stride};
+            unique_buffer_stride_map[p].push_back(loc);
+        }
     }
 
     // generate unique bindings for each VKbuffer/stride pair
@@ -561,23 +569,33 @@ void
 ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings)
 {
     // create vertex input bindings and attributes
+    uint32_t count=0;
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t location = mShaderResourceInterface.GetAttributeLocation(i);
-        const uint32_t binding  = vboLocationBindings.at(location);
-        GenericVertexAttribute& gva = genericVertAttribs[location];
+        const uint32_t locations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
 
-        mVkVertexInputBinding[binding].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        mVkVertexInputBinding[binding].binding   = binding;
-        mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(gva.GetStride());
+        for(uint32_t j = 0; j < locations; ++j) {
 
-        mVkVertexInputAttribute[i].binding  = binding;
-        mVkVertexInputAttribute[i].format   = gva.GetVkFormat();
-        mVkVertexInputAttribute[i].location = location;
-        mVkVertexInputAttribute[i].offset   = gva.GetOffset();
+          const uint32_t loc      = location + j;
+          const uint32_t binding  = vboLocationBindings.at(loc);
+
+          GenericVertexAttribute& gva = genericVertAttribs[loc];
+
+          mVkVertexInputBinding[binding].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+          mVkVertexInputBinding[binding].binding   = binding;
+          mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(gva.GetStride());
+
+          mVkVertexInputAttribute[count].binding  = binding;
+          mVkVertexInputAttribute[count].location = loc;
+          mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
+          mVkVertexInputAttribute[count].offset   = gva.GetOffset();
+
+          count++;
+      }
     }
 
     mVkPipelineVertexInput.vertexBindingDescriptionCount   = mActiveVertexVkBuffersCount;
-    mVkPipelineVertexInput.vertexAttributeDescriptionCount = mShaderResourceInterface.GetLiveAttributes();
+    mVkPipelineVertexInput.vertexAttributeDescriptionCount = count;
 }
 
 void
