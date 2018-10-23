@@ -35,17 +35,17 @@ class Context;
 
 class ShaderProgram {
 private:
-    Context *                                           mGLContext;
-    const vulkanAPI::vkContext_t *                      mVkContext;
+    Context                                            *mGLContext;
+    const vulkanAPI::vkContext_t                       *mVkContext;
     vulkanAPI::CommandBufferManager                    *mCommandBufferManager;
 
     VkDescriptorSetLayout                               mVkDescSetLayout;
-    VkDescriptorSetLayoutBinding *                      mVkDescSetLayoutBind;
+    VkDescriptorSetLayoutBinding                       *mVkDescSetLayoutBind;
     VkDescriptorPool                                    mVkDescPool;
     VkDescriptorSet                                     mVkDescSet;
     VkPipelineLayout                                    mVkPipelineLayout;
 
-    vulkanAPI::PipelineCache *                          mVkPipelineCache;
+    vulkanAPI::PipelineCache                           *mVkPipelineCache;
     CacheManager                                       *mCacheManager;
 
     VkPipelineVertexInputStateCreateInfo                mVkPipelineVertexInput;
@@ -67,13 +67,13 @@ private:
 
     uint32_t                                            mStageCount;
     size_t                                              mShaderSPVsize[2];
-    uint32_t *                                          mShaderSPVdata[2];
+    uint32_t                                           *mShaderSPVdata[2];
     VkShaderModule                                      mVkShaderModules[2];
     VkShaderStageFlagBits                               mVkShaderStages[2];
-    Shader *                                            mShaders[2];
+    Shader                                             *mShaders[2];
     int                                                 mStagesIDs[2];
 
-    ShaderCompiler *                                    mShaderCompiler;
+    ShaderCompiler                                     *mShaderCompiler;
     ShaderResourceInterface                             mShaderResourceInterface;
 
     void                                                DumpGloveShaderVertexInputInterface(void);
@@ -101,11 +101,11 @@ public:
     void                                                SetPipelineVertexInputStateInfo(void);
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
     void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs);
-    Shader *                                            IsShaderAttached(Shader *shader);
+    Shader                                             *IsShaderAttached(Shader *shader);
     void                                                AttachShader(Shader *shader);
     void                                                DetachShader(Shader *shader);
     int                                                 GetInfoLogLength(void) const;
-    char *                                              GetInfoLog(void) const;
+    char                                               *GetInfoLog(void) const;
     bool                                                LinkProgram();
 
     void                                                DetachAndDeleteShaders(void);
@@ -120,24 +120,24 @@ public:
 
     uint32_t                                            GetNumberOfActiveUniforms(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetLiveUniforms(); }
     int                                                 GetUniformLocation(const char *name)        const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformLocation(name); }
-    const ShaderResourceInterface::uniform *            GetUniform(uint32_t index)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniform(index); }
-    const ShaderResourceInterface::uniform *            GetUniformAtLocation(uint32_t location)     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformAtLocation(location); }
+    const ShaderResourceInterface::uniform             *GetUniform(uint32_t index)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniform(index); }
+    const ShaderResourceInterface::uniform             *GetUniformAtLocation(uint32_t location)     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformAtLocation(location); }
     uint32_t                                            GetStageCount(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount; }
     VkShaderStageFlagBits                               GetShaderStage(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderStages[0]; }
     VkShaderModule                                      GetShaderModule(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[0]; }
     VkShaderModule                                      GetVertexShaderModule(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[0]; }
     VkShaderModule                                      GetFragmentShaderModule(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[1]; }
     bool                                                GetMarkForDeletion(void)                    const   { FUN_ENTRY(GL_LOG_TRACE); return mMarkForDeletion; }
-    Shader *                                            GetVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[0]; }
-    Shader *                                            GetFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[1]; }
+    Shader                                             *GetVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[0]; }
+    Shader                                             *GetFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[1]; }
     size_t                                              GetActiveUniformMaxLen(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetActiveUniformMaxLen(); }
     size_t                                              GetActiveAttribMaxLen(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetActiveAttribMaxLen(); }
-    VkPipelineVertexInputStateCreateInfo *              GetVkPipelineVertexInput(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mVkPipelineVertexInput; }
+    VkPipelineVertexInputStateCreateInfo               *GetVkPipelineVertexInput(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mVkPipelineVertexInput; }
     VkPipelineLayout                                    GetVkPipelineLayout(void)                   const   { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineLayout; }
     int                                                 GetStagesIDs(uint32_t index)                const   { FUN_ENTRY(GL_LOG_TRACE); return mStagesIDs[index]; }
-    const VkDescriptorSet *                             GetVkDescSet(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return &mVkDescSet; }
+    const VkDescriptorSet                              *GetVkDescSet(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return &mVkDescSet; }
     uint32_t                                            GetActiveVertexVkBuffersCount(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffersCount; }
-    const VkBuffer *                                    GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
+    const VkBuffer                                     *GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
 
     void                                                SetCommandBufferManager(
                                                         vulkanAPI::CommandBufferManager *cbManager)         { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
@@ -156,7 +156,7 @@ public:
 
     uint32_t                                            GetNumberOfActiveAttributes(void) const;
     const
-    ShaderResourceInterface::attribute *                GetVertexAttribute(int index) const;
+    ShaderResourceInterface::attribute                 *GetVertexAttribute(int index) const;
     const string &                                      GetAttributeName(int index) const;
     int                                                 GetAttributeType(int index) const;
     int                                                 GetAttributeLocation(const char *name) const;
