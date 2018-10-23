@@ -113,10 +113,10 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
     uint32_t secondaryBuffersPoolSize = mSecondaryCmdBufferPool.GetSize();
 
     for(uint32_t i = 0; i < secondaryBuffersPoolSize; ++i) {
-        VkCommandBuffer *removedSecondaryBuffer = mSecondaryCmdBufferPool.RemoveBuffer();
-        if(removedSecondaryBuffer) {
-            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, removedSecondaryBuffer);
-            delete removedSecondaryBuffer;
+        VkCommandBuffer *removingSecondaryBuffer = mSecondaryCmdBufferPool.RemoveBuffer();
+        if(removingSecondaryBuffer) {
+            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, removingSecondaryBuffer);
+            delete removingSecondaryBuffer;
         }
     }
 }
