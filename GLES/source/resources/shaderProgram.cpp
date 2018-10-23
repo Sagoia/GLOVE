@@ -503,16 +503,20 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
     typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
     std::map<BUFFER_STRIDE_PAIR, std::vector<uint32_t>> unique_buffer_stride_map;
 
+    vector<uint32_t> location_used;
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t location  = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t locations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
         for(uint32_t j = 0; j < locations; ++j) {
-
             const uint32_t loc = location + j;
+
+            // if location is currently used then ommit it
+            if (std::find (location_used.begin(), location_used.end(), loc) != location_used.end()) {
+                continue;
+            }
 
             GenericVertexAttribute& gva = genericVertAttribs[loc];
             if(gva.GetEnabled()) {
-
                 // Calculate stride if not given from user based on the actual data type
                 if(gva.GetStride() == 0) {
                     GLsizei stride = gva.GetNumElements() * GlAttribTypeToElementSize(gva.GetType());
@@ -549,6 +553,8 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
             int32_t stride       = gva.GetStride();
             BUFFER_STRIDE_PAIR p = {bo, stride};
             unique_buffer_stride_map[p].push_back(loc);
+
+            location_used.push_back(loc);
         }
     }
 
@@ -570,28 +576,35 @@ ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>
 {
     // create vertex input bindings and attributes
     uint32_t count=0;
+    vector<uint32_t> location_used;
+
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
-        const uint32_t location = mShaderResourceInterface.GetAttributeLocation(i);
+        const uint32_t location  = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t locations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
 
         for(uint32_t j = 0; j < locations; ++j) {
+            const uint32_t loc      = location + j;
+            const uint32_t binding  = vboLocationBindings.at(loc);
 
-          const uint32_t loc      = location + j;
-          const uint32_t binding  = vboLocationBindings.at(loc);
+            // if location is currently used then ommit it
+            if (std::find (location_used.begin(), location_used.end(), loc) != location_used.end()) {
+                continue;
+            }
 
-          GenericVertexAttribute& gva = genericVertAttribs[loc];
+            GenericVertexAttribute& gva = genericVertAttribs[loc];
+            mVkVertexInputBinding[binding].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+            mVkVertexInputBinding[binding].binding   = binding;
+            mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(gva.GetStride());
 
-          mVkVertexInputBinding[binding].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-          mVkVertexInputBinding[binding].binding   = binding;
-          mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(gva.GetStride());
+            mVkVertexInputAttribute[count].binding  = binding;
+            mVkVertexInputAttribute[count].location = loc;
+            mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
+            mVkVertexInputAttribute[count].offset   = gva.GetOffset();
 
-          mVkVertexInputAttribute[count].binding  = binding;
-          mVkVertexInputAttribute[count].location = loc;
-          mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
-          mVkVertexInputAttribute[count].offset   = gva.GetOffset();
+            ++count;
 
-          count++;
-      }
+            location_used.push_back(loc);
+        }
     }
 
     mVkPipelineVertexInput.vertexBindingDescriptionCount   = mActiveVertexVkBuffersCount;
