@@ -61,6 +61,7 @@ private:
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
 // ------------
     bool                                        mIsYInverted;
+    bool                                        mIsModeLineLoop;
     bool                                        mIsFullScreenRender;
 // ------------
     void        *                               mWriteSurface;
@@ -125,6 +126,7 @@ public:
     inline  ResourceManager *GetResourceManager(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mResourceManager; }
     inline  bool            GetFullScreenRender(void)                      const  { FUN_ENTRY(GL_LOG_TRACE); return mIsFullScreenRender; }
     inline  bool            IsYInverted(void)                              const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
+    inline  bool            IsModeLineLoop(void)                           const  { FUN_ENTRY(GL_LOG_TRACE); return mIsModeLineLoop; }
 
 // Set Functions
             void            SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
@@ -223,6 +225,7 @@ public:
     GLboolean       IsTexture(GLuint texture);
     void            LineWidth(GLfloat width);
     void            LinkProgram(GLuint program);
+    void            LineLoopConvertion(void* data, uint32_t vertCount, size_t elementByteSize);
     void            PixelStorei(GLenum pname, GLint param);
     void            PolygonOffset(GLfloat factor, GLfloat units);
     void            ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void* pixels);

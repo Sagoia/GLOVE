@@ -132,6 +132,11 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     } else if(mWriteFBO->IsInClearDrawState()) {
         mWriteFBO->SetStateDraw();
     }
+    //If the primitives are rendered with GL_LINE_LOOP we have to increment the vertCount.
+    //TODO: In future this functionality may be better to stay hidden.
+    if(mStateManager.GetInputAssemblyState()->GetPrimitiveMode() == GL_LINE_LOOP ) {
+        vertCount = vertCount + 1;
+    }
 
     UpdateVertexAttributes(vertCount, firstVertex);
 
@@ -243,6 +248,12 @@ bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCoun
     return validatedBuffer;
 }
 
+void Context::LineLoopConvertion(void * data, uint32_t vertCount, size_t elementByteSize){
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    memcpy((uint8_t*)data + (vertCount-1)*elementByteSize, data, elementByteSize);
+}
+
 void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices, GLenum type, bool indexed, uint32_t vertCount)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -288,6 +299,17 @@ void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices,
         }
     }
 
+    if(mStateManager.GetInputAssemblyState()->GetPrimitiveMode() == GL_LINE_LOOP && ibo->GetTarget() == GL_ELEMENT_ARRAY_BUFFER) {
+            size_t sizeOne = (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
+            void *srcData     = new uint8_t[vertCount*sizeOne];
+
+            ibo->GetData(actual_size - sizeOne, offset, srcData);
+            LineLoopConvertion(srcData, vertCount, sizeOne);
+
+            validatedBuffer = AllocateExplicitIndexBuffer(srcData, actual_size, &ibo);
+            delete[] (uint8_t*)srcData;
+        }
+
     if(validatedBuffer) {
         vkCmdBindIndexBuffer(*CmdBuffer, ibo->GetVkBuffer(), offset, type == GL_UNSIGNED_INT ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
     }
@@ -319,6 +341,10 @@ Context::DrawArrays(GLenum mode, GLint first, GLsizei count)
         return;
     }
 
+    if(mode == GL_LINE_LOOP) {
+        mIsModeLineLoop = true;
+    }
+
     if(CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
@@ -337,6 +363,10 @@ Context::DrawArrays(GLenum mode, GLint first, GLsizei count)
     }
 
     PushGeometry(count, first, false, GL_INVALID_ENUM, NULL);
+
+    if(mode == GL_LINE_LOOP) {
+        mIsModeLineLoop = false;
+    }
 }
 
 void

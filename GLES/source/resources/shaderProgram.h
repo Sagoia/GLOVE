@@ -46,6 +46,7 @@ private:
     VkPipelineLayout                                    mVkPipelineLayout;
 
     vulkanAPI::PipelineCache *                          mVkPipelineCache;
+    CacheManager                                       *mCacheManager;
 
     VkPipelineVertexInputStateCreateInfo                mVkPipelineVertexInput;
     VkVertexInputBindingDescription                     mVkVertexInputBinding[GLOVE_MAX_VERTEX_ATTRIBS];

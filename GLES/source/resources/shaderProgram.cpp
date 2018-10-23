@@ -548,13 +548,35 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
                 gva.SetInternalVBOStatus(true);
             }
 
-            // store each location
-            VkBuffer bo          = gva.GetVbo()->GetVkBuffer();
-            int32_t stride       = gva.GetStride();
-            BUFFER_STRIDE_PAIR p = {bo, stride};
-            unique_buffer_stride_map[p].push_back(loc);
+            //If the primitives are rendered with GL_LINE_LOOP, which is not
+            //supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
+            VkBuffer bo = nullptr;
 
-            location_used.push_back(loc);
+            if(mGLContext->IsModeLineLoop()) {
+                BufferObject* vboLineLoopUpdated = new VertexBufferObject(mVkContext);
+
+                size_t sizeOld = gva.GetVbo()->GetSize();
+                size_t sizeOne = (gva.GetNumElements())* GlAttribTypeToElementSize(gva.GetType());
+                size_t sizeNew = sizeOld + sizeOne;
+
+                size_t offset   = (firstVertex) * sizeOne;
+                uint8_t * dataNew = new uint8_t[sizeNew];
+
+                gva.GetVbo()->GetData(sizeOld, offset, dataNew);
+                memcpy(dataNew + sizeOld, dataNew, sizeOne);
+                vboLineLoopUpdated->Allocate(sizeNew, dataNew);
+
+                delete[] dataNew;
+                bo          = vboLineLoopUpdated->GetVkBuffer();
+                mCacheManager->CacheVBO(vboLineLoopUpdated);
+            } else {
+                bo          = gva.GetVbo()->GetVkBuffer();
+            }
+            // store each location
+
+            int32_t stride      = gva.GetStride();
+            BUFFER_STRIDE_PAIR p = {bo, stride};
+            unique_buffer_stride_map[p].push_back(location);
         }
     }
 
@@ -723,6 +745,7 @@ ShaderProgram::SetCacheManager(CacheManager *cacheManager)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    mCacheManager = cacheManager;
     mShaderResourceInterface.SetCacheManager(cacheManager);
 }
 
