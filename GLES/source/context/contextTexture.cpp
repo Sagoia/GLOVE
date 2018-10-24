@@ -96,6 +96,10 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(nullptr == textures) {
+        return;
+    }
+
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -176,6 +180,10 @@ void
 Context::GenTextures(GLsizei n, GLuint* textures)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(nullptr == textures) {
+        return;
+    }
 
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
@@ -324,7 +332,7 @@ Context::IsTexture(GLuint texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    return (texture && mResourceManager->TextureExists(texture) && mResourceManager->GetTexture(texture)->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
+    return (texture != 0 && mResourceManager->TextureExists(texture)) ? GL_TRUE : GL_FALSE;
 }
 
 void

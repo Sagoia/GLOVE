@@ -67,6 +67,10 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(nullptr == renderbuffers) {
+        return;
+    }
+
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -118,6 +122,10 @@ void
 Context::GenRenderbuffers(GLsizei n, GLuint *renderbuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(nullptr == renderbuffers) {
+        return;
+    }
 
     if(n < 0) {
         RecordError(GL_INVALID_VALUE);
@@ -173,12 +181,7 @@ Context::IsRenderbuffer(GLuint renderbuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(renderbuffer && mResourceManager->RenderbufferExists(renderbuffer)) {
-        Renderbuffer *pRenderBuffer = mResourceManager->GetRenderbuffer(renderbuffer);
-        return (pRenderBuffer && pRenderBuffer->GetTarget() != GL_INVALID_VALUE) ? GL_TRUE : GL_FALSE;
-    }
-
-    return GL_FALSE;
+    return (renderbuffer != 0 && mResourceManager->RenderbufferExists(renderbuffer)) ? GL_TRUE : GL_FALSE;
 }
 
 void
