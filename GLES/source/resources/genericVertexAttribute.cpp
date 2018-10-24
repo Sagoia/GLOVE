@@ -26,6 +26,7 @@
  */
 
 #include "genericVertexAttribute.h"
+#include "utils/glUtils.h"
 
 GenericVertexAttribute::GenericVertexAttribute()
 : mElements(4), mType(GL_FLOAT), mNormalized(false), mStride(0), mEnabled(false),
@@ -56,6 +57,39 @@ GenericVertexAttribute::MoveToCache(void)
         mVbo         = nullptr;
         mInternalVBO = false;
     }
+}
+
+void
+GenericVertexAttribute::ConvertFixedBufferToFloat(BufferObject* vbo, size_t byteSize,
+                                                  const void *srcData, size_t numVertices) {
+
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    const uint8_t* srcBuffer = static_cast<const uint8_t*>(srcData);
+    uint8_t* dstBuffer = new uint8_t[byteSize];
+
+    // this is needed to preserve data in case the buffer contains
+    // other data as well. For efficiency it can be commented out.
+    memcpy(dstBuffer, srcBuffer, byteSize);
+
+    size_t numElements = static_cast<size_t>(GetNumElements());
+    size_t stride = static_cast<size_t>(GetStride());
+    for(size_t ver = 0; ver < numVertices; ++ver) {
+        size_t vertexIndex = ver * stride;
+        for(size_t el = 0; el < numElements; ++el) {
+            size_t srcIndex = vertexIndex + el * sizeof(GLfixed);
+            size_t dstIndex = vertexIndex + el * sizeof(float);
+            const GLfixed* val = reinterpret_cast<const GLfixed*>(&srcBuffer[srcIndex]);
+            float fval = static_cast<float>(*val) / float(1<<16);
+            uint8_t* fvalp = reinterpret_cast<uint8_t*>(&fval);
+            for(size_t b = 0; b < sizeof(GLfloat); ++b) {
+                dstBuffer[dstIndex + b] = fvalp[b];
+            }
+        }
+    }
+
+    vbo->Allocate(byteSize, dstBuffer);
+    delete[] dstBuffer;
 }
 
 void

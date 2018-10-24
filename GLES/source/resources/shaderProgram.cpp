@@ -517,6 +517,9 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
             }
 
             GenericVertexAttribute& gva = genericVertAttribs[location];
+            VkBuffer bo       = VK_NULL_HANDLE;
+            BufferObject *vbo = nullptr;
+
             if(gva.GetEnabled()) {
                 // Calculate stride if not given from user based on the actual data type
                 if(gva.GetStride() == 0) {
@@ -526,19 +529,42 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
                 // Create new vbo if user passed pointer to data
                 // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
                 if(gva.GetVbo() == nullptr || gva.GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
+                    vbo = new VertexBufferObject(mVkContext);
+                    void *srcData = reinterpret_cast<void*>(gva.GetPointer());
+                    size_t byteSize = (firstVertex + vertCount) * gva.GetStride();
+                    size_t numVertices = firstVertex + vertCount;
 
-                    BufferObject *vbo = new VertexBufferObject(mVkContext);
-                    void * data = reinterpret_cast<void*>(gva.GetPointer());
-                    size_t size = (firstVertex + vertCount) * static_cast<uint32_t>(gva.GetStride());
+                    // explicitly convert GL_FIXED to GL_FLOAT
+                    if(gva.GetType() != GL_FIXED) {
+                        vbo->Allocate(byteSize, srcData);
+                    }
+                    else {
+                        gva.ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
+                    }
 
-                    vbo->Allocate(size, data);
                     gva.SetOffset(0);
                     gva.SetVbo(vbo);
                     gva.SetInternalVBOStatus(true);
+                    bo = vbo->GetVkBuffer();
+                } else {
+                    vbo = gva.GetVbo();
+                    // explicitly convert GL_FIXED to GL_FLOAT from a buffer object
+                    // NOTE: this is an inefficient operation and, thus, not a recommended good practice
+                    if(gva.GetType() == GL_FIXED) {
+                        size_t numVertices = firstVertex + vertCount;
+                        size_t byteSize = vbo->GetSize();
+                        uint8_t *srcData = new uint8_t[byteSize];
+                        vbo->GetData(vbo->GetSize(), 0, srcData);
+                        vbo = new VertexBufferObject(mVkContext);
+                        gva.ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
+                        delete[] srcData;
+                        mCacheManager->CacheVBO(vbo);
+                    }
+                    bo = vbo->GetVkBuffer();
                 }
             } else {
                 // Use the generic vertex attribute value registered to that location
-                BufferObject *vbo = new VertexBufferObject(mVkContext);
+                vbo = new VertexBufferObject(mVkContext);
                 GLfloat genericValue[4];
                 gva.GetGenericValue(genericValue);
                 vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
@@ -547,34 +573,30 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
                 gva.SetStride(0);
                 gva.SetVbo(vbo);
                 gva.SetInternalVBOStatus(true);
+                bo = vbo->GetVkBuffer();
             }
 
-            //If the primitives are rendered with GL_LINE_LOOP, which is not
-            //supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
-            VkBuffer bo = nullptr;
-
+            // If the primitives are rendered with GL_LINE_LOOP, which is not
+            // supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
             if(mGLContext->IsModeLineLoop()) {
                 BufferObject* vboLineLoopUpdated = new VertexBufferObject(mVkContext);
 
-                size_t sizeOld = gva.GetVbo()->GetSize();
-                size_t sizeOne = (gva.GetNumElements())* GlAttribTypeToElementSize(gva.GetType());
+                size_t sizeOld = vbo->GetSize();
+                size_t sizeOne = gva.GetStride();
                 size_t sizeNew = sizeOld + sizeOne;
 
-                size_t offset   = (firstVertex) * sizeOne;
-                uint8_t * dataNew = new uint8_t[sizeNew];
+                uint8_t *dataNew = new uint8_t[sizeNew];
 
-                gva.GetVbo()->GetData(sizeOld, offset, dataNew);
+                vbo->GetData(sizeOld, 0, dataNew);
                 memcpy(dataNew + sizeOld, dataNew, sizeOne);
                 vboLineLoopUpdated->Allocate(sizeNew, dataNew);
 
                 delete[] dataNew;
                 bo          = vboLineLoopUpdated->GetVkBuffer();
                 mCacheManager->CacheVBO(vboLineLoopUpdated);
-            } else {
-                bo          = gva.GetVbo()->GetVkBuffer();
             }
-            // store each location
 
+            // store each location
             int32_t stride      = gva.GetStride();
             BUFFER_STRIDE_PAIR p = {bo, stride};
             unique_buffer_stride_map[p].push_back(location);

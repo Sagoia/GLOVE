@@ -342,6 +342,7 @@ GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized)
 
     switch(type) {
     case GL_FLOAT:
+    case GL_FIXED:
         switch(nElements) {
         case 1:                             return VK_FORMAT_R32_SFLOAT;
         case 2:                             return VK_FORMAT_R32G32_SFLOAT;
@@ -403,15 +404,6 @@ GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized)
         case 4:                             return normalized ? VK_FORMAT_R16G16B16A16_UNORM : VK_FORMAT_R16G16B16A16_USCALED;
         default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
         }
-
-    case GL_FIXED:
-        switch(nElements) {
-        case 1:                             return VK_FORMAT_R32_SFLOAT;
-        case 2:                             return VK_FORMAT_R32G32_SFLOAT;
-        case 3:                             return VK_FORMAT_R32G32B32_SFLOAT;
-        case 4:                             return VK_FORMAT_R32G32B32A32_SFLOAT;
-    default: { NOT_REACHED();               return VK_FORMAT_UNDEFINED; }
-	}
 
     default: { NOT_REACHED();               return VK_FORMAT_UNDEFINED; }
     }

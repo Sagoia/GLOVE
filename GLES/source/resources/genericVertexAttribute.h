@@ -47,6 +47,7 @@ public:
     GenericVertexAttribute();
     ~GenericVertexAttribute();
 
+    void                                ConvertFixedBufferToFloat(BufferObject* vbo, size_t byteSize, const void *srcData, size_t numVertices);
     void                                MoveToCache(void);
 
     // Release Functions

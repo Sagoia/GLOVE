@@ -242,13 +242,13 @@ GlAttribTypeToElementSize(GLenum type)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(type) {
-    case GL_BYTE:                           return sizeof(GLbyte);
-    case GL_UNSIGNED_BYTE:                  return sizeof(GLubyte);
-    case GL_SHORT:                          return sizeof(GLshort);
-    case GL_UNSIGNED_SHORT:                 return sizeof(GLushort);
-    case GL_FIXED:                          return sizeof(GLfixed);
-    case GL_FLOAT:                          return sizeof(GLfloat);
-    default: { NOT_FOUND_ENUM(type);        return sizeof(GLubyte); }
+        case GL_BYTE:                           return sizeof(GLbyte);
+        case GL_UNSIGNED_BYTE:                  return sizeof(GLubyte);
+        case GL_SHORT:                          return sizeof(GLshort);
+        case GL_UNSIGNED_SHORT:                 return sizeof(GLushort);
+        case GL_FIXED:                          return sizeof(GLfixed);
+        case GL_FLOAT:                          return sizeof(GLfloat);
+        default: { NOT_FOUND_ENUM(type);        return sizeof(GLubyte); }
     }
 }
 
@@ -258,12 +258,12 @@ GlTypeToElementSize(GLenum type)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(type) {
-    case GL_UNSIGNED_BYTE:                  return sizeof(GLubyte);
-    case GL_UNSIGNED_SHORT_4_4_4_4:
-    case GL_UNSIGNED_SHORT_5_5_5_1:
-    case GL_UNSIGNED_SHORT_5_6_5:           return sizeof(GLushort);
-    case GL_UNSIGNED_INT_24_8_OES:          return sizeof(GLuint);
-    default: { NOT_FOUND_ENUM(type);        return sizeof(GLubyte); }
+        case GL_UNSIGNED_BYTE:                  return sizeof(GLubyte);
+        case GL_UNSIGNED_SHORT_4_4_4_4:
+        case GL_UNSIGNED_SHORT_5_5_5_1:
+        case GL_UNSIGNED_SHORT_5_6_5:           return sizeof(GLushort);
+        case GL_UNSIGNED_INT_24_8_OES:          return sizeof(GLuint);
+        default: { NOT_FOUND_ENUM(type);        return sizeof(GLubyte); }
     }
 }
 
