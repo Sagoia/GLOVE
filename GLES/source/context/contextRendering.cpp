@@ -132,13 +132,15 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     } else if(mWriteFBO->IsInClearDrawState()) {
         mWriteFBO->SetStateDraw();
     }
-    //If the primitives are rendered with GL_LINE_LOOP we have to increment the vertCount.
-    //TODO: In future this functionality may be better to stay hidden.
-    if(mStateManager.GetInputAssemblyState()->GetPrimitiveMode() == GL_LINE_LOOP ) {
-        vertCount = vertCount + 1;
-    }
+
 
     UpdateVertexAttributes(vertCount, firstVertex);
+
+    //If the primitives are rendered with GL_LINE_LOOP we have to increment the vertCount.
+    //TODO: In future this functionality may be better to stay hidden.
+    if(mStateManager.GetInputAssemblyState()->GetPrimitiveMode() == GL_LINE_LOOP) {
+        vertCount = vertCount + 1;
+    }
 
     if(SetPipelineProgramShaderStages(mStateManager.GetActiveShaderProgram())) {
         if(!mPipeline->Create(mWriteFBO->GetVkRenderPass())) {
