@@ -503,19 +503,20 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
     typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
     std::map<BUFFER_STRIDE_PAIR, std::vector<uint32_t>> unique_buffer_stride_map;
 
-    vector<uint32_t> locations_used;
+    std::vector<uint32_t> locationUsed;
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
-        const uint32_t location          = mShaderResourceInterface.GetAttributeLocation(i);
+        const uint32_t attributelocation  = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t occupiedLocations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
+
         for(uint32_t j = 0; j < occupiedLocations; ++j) {
-            const uint32_t loc = location + j;
+            const uint32_t location = attributelocation + j;
 
             // if location is currently used then ommit it
-            if (std::find (locations_used.begin(), locations_used.end(), loc) != locations_used.end()) {
+            if (std::find(locationUsed.begin(), locationUsed.end(), location) != locationUsed.end()) {
                 continue;
             }
 
-            GenericVertexAttribute& gva = genericVertAttribs[loc];
+            GenericVertexAttribute& gva = genericVertAttribs[location];
             if(gva.GetEnabled()) {
                 // Calculate stride if not given from user based on the actual data type
                 if(gva.GetStride() == 0) {
@@ -577,8 +578,7 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
             int32_t stride      = gva.GetStride();
             BUFFER_STRIDE_PAIR p = {bo, stride};
             unique_buffer_stride_map[p].push_back(location);
-
-            locations_used.push_back(loc);
+            locationUsed.push_back(location);
         }
     }
 
@@ -599,35 +599,35 @@ void
 ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings)
 {
     // create vertex input bindings and attributes
-    uint32_t count=0;
-    vector<uint32_t> locations_used;
+    uint32_t count = 0;
+    std::vector<uint32_t> locationUsed;
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
-        const uint32_t location          = mShaderResourceInterface.GetAttributeLocation(i);
+        const uint32_t attributelocation  = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t occupiedLocations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
 
         for(uint32_t j = 0; j < occupiedLocations; ++j) {
-            const uint32_t loc      = location + j;
-            const uint32_t binding  = vboLocationBindings.at(loc);
+            const uint32_t location = attributelocation + j;
+            const uint32_t binding  = vboLocationBindings.at(location);
 
             // if location is currently used then ommit it
-            if (std::find (locations_used.begin(), locations_used.end(), loc) != locations_used.end()) {
+            if (std::find(locationUsed.begin(), locationUsed.end(), location) != locationUsed.end()) {
                 continue;
             }
 
-            GenericVertexAttribute& gva = genericVertAttribs[loc];
+            GenericVertexAttribute& gva = genericVertAttribs[location];
             mVkVertexInputBinding[binding].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
             mVkVertexInputBinding[binding].binding   = binding;
             mVkVertexInputBinding[binding].stride    = static_cast<uint32_t>(gva.GetStride());
 
             mVkVertexInputAttribute[count].binding  = binding;
-            mVkVertexInputAttribute[count].location = loc;
+            mVkVertexInputAttribute[count].location = location;
             mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
             mVkVertexInputAttribute[count].offset   = gva.GetOffset();
 
             ++count;
 
-            locations_used.push_back(loc);
+            locationUsed.push_back(location);
         }
     }
 
