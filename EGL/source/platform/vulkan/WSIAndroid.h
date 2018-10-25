@@ -47,7 +47,7 @@ public:
     ~WSIAndroid() override {}
 
 	EGLBoolean         Initialize() override;
-    VkSurfaceKHR       CreateSurface(eglDisplay* dpy,
+    VkSurfaceKHR       CreateSurface(EGLDisplay_t* dpy,
                                      EGLNativeWindowType win,
                                      EGLSurface_t *surface) override;
 

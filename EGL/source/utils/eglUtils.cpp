@@ -44,7 +44,7 @@ const char*
 getEGLClientExtensions()
 {
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-    return "EGL_EXT_client_extensions EGL_KHR_image_base EGL_ANDROID_image_native_buffer\0"; break;
+    return "EGL_EXT_client_extensions EGL_KHR_image_base EGL_ANDROID_image_native_buffer\0";
 #else
     return "EGL_EXT_client_extensions\0";
 #endif

@@ -89,6 +89,7 @@ LOCAL_SRC_FILES :=  $(SRC_PATH)/GLES/source/api/gl.cpp \
                     $(SRC_PATH)/GLES/source/utils/cacheManager.cpp \
                     $(SRC_PATH)/GLES/source/vulkan/cbManager.cpp \
                     $(SRC_PATH)/GLES/source/vulkan/clearPass.cpp \
+                    $(SRC_PATH)/GLES/source/vulkan/commandBufferPool.cpp \
                     $(SRC_PATH)/GLES/source/vulkan/renderPass.cpp \
                     $(SRC_PATH)/GLES/source/vulkan/buffer.cpp \
                     $(SRC_PATH)/GLES/source/vulkan/memory.cpp \
@@ -143,6 +144,7 @@ LOCAL_SRC_FILES := $(SRC_PATH)/EGL/source/api/eglContext.cpp \
                    $(SRC_PATH)/EGL/source/api/eglConfig.cpp \
                    $(SRC_PATH)/EGL/source/api/egl.cpp \
                    $(SRC_PATH)/EGL/source/api/eglSurface.cpp \
+                   $(SRC_PATH)/EGL/source/api/eglDisplay.cpp \
                    $(SRC_PATH)/EGL/source/display/displayDriver.cpp \
                    $(SRC_PATH)/EGL/source/display/displayDriversContainer.cpp \
                    $(SRC_PATH)/EGL/source/thread/renderingThread.cpp \
@@ -154,7 +156,8 @@ LOCAL_SRC_FILES := $(SRC_PATH)/EGL/source/api/eglContext.cpp \
                    $(SRC_PATH)/EGL/source/platform/vulkan/vulkanAPI.cpp \
                    $(SRC_PATH)/EGL/source/platform/vulkan/vulkanResources.cpp \
                    $(SRC_PATH)/EGL/source/rendering_api/rendering_api.c \
-                   $(SRC_PATH)/EGL/source/utils/eglLogger.cpp
+                   $(SRC_PATH)/EGL/source/utils/eglLogger.cpp \
+                   $(SRC_PATH)/EGL/source/utils/eglUtils.cpp
 
 LOCAL_C_INCLUDES := $(SRC_PATH)/EGL/source \
                     $(SRC_PATH)/EGL/include \

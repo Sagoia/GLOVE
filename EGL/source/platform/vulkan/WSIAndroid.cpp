@@ -51,7 +51,7 @@ WSIAndroid::SetPlatformCallbacks(void)
 }
 
 VkSurfaceKHR
-WSIAndroid::CreateSurface(eglDisplay* dpy, EGLNativeWindowType win, EGLSurface_t *surface)
+WSIAndroid::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
