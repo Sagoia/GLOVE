@@ -96,12 +96,12 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(nullptr == textures) {
+    if(n < 0) {
+        RecordError(GL_INVALID_VALUE);
         return;
     }
 
-    if(n < 0) {
-        RecordError(GL_INVALID_VALUE);
+    if(textures == nullptr) {
         return;
     }
 
@@ -181,12 +181,12 @@ Context::GenTextures(GLsizei n, GLuint* textures)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(nullptr == textures) {
+    if(n < 0) {
+        RecordError(GL_INVALID_VALUE);
         return;
     }
 
-    if(n < 0) {
-        RecordError(GL_INVALID_VALUE);
+    if(textures == nullptr) {
         return;
     }
 
