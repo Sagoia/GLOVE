@@ -48,6 +48,7 @@ Context::Context()
     mCommandBufferManager = new vulkanAPI::CommandBufferManager(mVkContext);
 
     mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
+    mShaderCompiler  = new GlslangShaderCompiler();
     mPipeline        = new vulkanAPI::Pipeline(mVkContext);
     mCacheManager    = new CacheManager(mVkContext);
 
@@ -63,8 +64,6 @@ Context::Context()
     mWriteFBO     = nullptr;
     mSystemFBO    = nullptr;
     mExplicitIbo  = nullptr;
-
-    mShaderCompiler = nullptr;
 
     //If VK_KHR_maintenance1 is supported, then there is no need to invert the Y
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
