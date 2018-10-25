@@ -58,7 +58,6 @@ EGLDisplay_t::GetDisplayByID(EGLNativeDisplayType display_id)
    if (display_id == EGL_DEFAULT_DISPLAY) {
        dpy = (EGLDisplay)1;
    }
-   return nullptr;
 #endif
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
