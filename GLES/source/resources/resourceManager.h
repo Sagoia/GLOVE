@@ -54,19 +54,19 @@ private:
     typedef ObjectArray<Framebuffer>           FramebufferArray;
     typedef map<uint32_t, ShadingNamespace_t>  shadingPoolIDs_t;
 
-    BufferArray                mBuffers;
-    RenderbufferArray          mRenderbuffers;
-    FramebufferArray           mFramebuffers;
-    TextureArray               mTextures;
+    BufferArray                                mBuffers;
+    RenderbufferArray                          mRenderbuffers;
+    FramebufferArray                           mFramebuffers;
+    TextureArray                               mTextures;
 
-    static uint32_t            mShadingObjectCount;
-    shadingPoolIDs_t           mShadingObjectPool;
-    ShaderArray                mShaders;
-    ShaderProgramArray         mShaderPrograms;
+    static uint32_t                            mShadingObjectCount;
+    shadingPoolIDs_t                           mShadingObjectPool;
+    ShaderArray                                mShaders;
+    ShaderProgramArray                         mShaderPrograms;
 
-    Texture                   *mDefaultTexture2D;
-    Texture                   *mDefaultTextureCubeMap;
-    std::vector<GenericVertexAttribute> mGenericVertexAttributes;
+    Texture                                   *mDefaultTexture2D;
+    Texture                                   *mDefaultTextureCubeMap;
+    std::vector<GenericVertexAttribute>        mGenericVertexAttributes;
 
 public:
     ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
@@ -91,8 +91,10 @@ public:
     inline GenericVertexAttribute* GetGenericVertexAttribute(size_t index)      { FUN_ENTRY(GL_LOG_TRACE); return &mGenericVertexAttributes[index];}
 
     inline TextureArray       *GetTextureArray(void)                            { FUN_ENTRY(GL_LOG_TRACE); return &mTextures; }
+    inline ShaderArray        *GetShaderArray(void)                             { FUN_ENTRY(GL_LOG_TRACE); return &mShaders;  }
+    inline ShaderProgramArray *GetShaderProgramArray(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mShaderPrograms;}
     inline RenderbufferArray  *GetRenderbufferArray(void)                       { FUN_ENTRY(GL_LOG_TRACE); return &mRenderbuffers; }
-    inline FramebufferArray   *GetFramebufferArray(void)                        { FUN_ENTRY(GL_LOG_TRACE); return &mFramebuffers; }
+    inline FramebufferArray   *GetFramebufferArray(void)                        { FUN_ENTRY(GL_LOG_TRACE); return &mFramebuffers;  }
 
     inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
     inline Texture *           GetDefaultTexture(GLenum target)                 { FUN_ENTRY(GL_LOG_TRACE); return target == GL_TEXTURE_2D ? mDefaultTexture2D : mDefaultTextureCubeMap; }

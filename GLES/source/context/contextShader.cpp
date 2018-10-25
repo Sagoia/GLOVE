@@ -37,6 +37,8 @@ Context::CompileShader(GLuint shader)
         return;
     }
 
+    CreateShaderCompiler();
+
     shaderPtr->CompileShader();
 }
 
@@ -301,15 +303,54 @@ Context::ShaderSource(GLuint shader, GLsizei count, const GLchar* const* string,
     shaderPtr->SetShaderSource(count, string, length);
 }
 
+bool
+Context::HasShaderCompiler(void)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    GLboolean compilerSupport;
+    GetBooleanv(GL_SHADER_COMPILER, &compilerSupport);
+    if(!compilerSupport) {
+        RecordError(GL_INVALID_OPERATION);
+        return false;
+    }
+
+    return true;
+}
+
 void
 Context::ReleaseShaderCompiler(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    HasShaderCompiler();
+    if(!HasShaderCompiler()) {
+        return;
+    }
 
     if(mShaderCompiler != nullptr) {
         delete mShaderCompiler;
         mShaderCompiler = nullptr;
+    }
+}
+
+void
+Context::CreateShaderCompiler(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mShaderCompiler == nullptr) {
+        mShaderCompiler = new GlslangShaderCompiler();
+
+        ObjectArray<Shader> *shaderArray = mResourceManager->GetShaderArray();
+        for(typename map<uint32_t, Shader *>::const_iterator it =
+        shaderArray->GetObjects()->begin(); it != shaderArray->GetObjects()->end(); it++) {
+            it->second->SetShaderCompiler(mShaderCompiler);
+        }
+
+        ObjectArray<ShaderProgram> *shaderProgramArray = mResourceManager->GetShaderProgramArray();
+        for(typename map<uint32_t, ShaderProgram *>::const_iterator it =
+        shaderProgramArray->GetObjects()->begin(); it != shaderProgramArray->GetObjects()->end(); it++) {
+            it->second->SetShaderCompiler(mShaderCompiler);
+        }
     }
 }

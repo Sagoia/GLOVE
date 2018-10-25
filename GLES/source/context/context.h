@@ -84,6 +84,8 @@ private:
     Framebuffer   *InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface);
     Texture       *CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface);
 
+    void CreateShaderCompiler(void);
+
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
     void PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices);
     void UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex);
@@ -106,10 +108,6 @@ private:
            uint32_t         GetShaderId(const Shader *shaderPtr)                 { FUN_ENTRY(GL_LOG_TRACE); return (shaderPtr) ? mResourceManager->FindShaderID(shaderPtr)      : 0; }
 
 // Is/Has Functions
-    inline bool             HasShaderCompiler(void)                              { FUN_ENTRY(GL_LOG_TRACE); GLboolean compilerSupport;
-                                                                                                            GetBooleanv(GL_SHADER_COMPILER, &compilerSupport);
-                                                                                                            if(!compilerSupport) { RecordError(GL_INVALID_OPERATION); return false; }
-                                                                                                            return true; }
     inline bool             IsDrawModeTriangle(GLenum mode)                const { FUN_ENTRY(GL_LOG_TRACE); return (mode == GL_TRIANGLE_STRIP || mode  == GL_TRIANGLE_FAN || mode == GL_TRIANGLES); }
 // Other Functions
     inline void             RecordError(GLenum error)                            { FUN_ENTRY(GL_LOG_TRACE); if (mStateManager.GetError() == GL_NO_ERROR) { mStateManager.SetError(error); } }
@@ -133,6 +131,8 @@ public:
     inline  void            SetNextImageIndex(uint32_t imageIndex)                { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
     inline  void            SetFullScreenRender(bool value)                       { FUN_ENTRY(GL_LOG_TRACE); mIsFullScreenRender = value; }
     inline  void            BindToTexture(GLuint bind)                            { FUN_ENTRY(GL_LOG_DEBUG); mSystemFBO->SetBindToTexture(bind); }
+
+    inline  bool            HasShaderCompiler(void);
 
 // GL API core functions
     void            ActiveTexture(GLenum texture);
