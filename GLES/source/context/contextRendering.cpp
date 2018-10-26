@@ -204,6 +204,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         mWriteFBO->SetStateDraw();
     }
 
+
     UpdateVertexAttributes(vertCount, firstVertex);
 
     //If the primitives are rendered with GL_LINE_LOOP we have to increment the vertCount.
@@ -294,8 +295,7 @@ bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCoun
     return validatedBuffer;
 }
 
-void Context::LineLoopConvertion(void * data, uint32_t vertCount, size_t elementByteSize)
-{
+void Context::LineLoopConversion(void * data, uint32_t vertCount, size_t elementByteSize){
     FUN_ENTRY(GL_LOG_TRACE);
 
     memcpy((uint8_t*)data + (vertCount-1)*elementByteSize, data, elementByteSize);
@@ -351,7 +351,7 @@ void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices,
             void *srcData     = new uint8_t[vertCount*sizeOne];
 
             ibo->GetData(actual_size - sizeOne, offset, srcData);
-            LineLoopConvertion(srcData, vertCount, sizeOne);
+            LineLoopConversion(srcData, vertCount, sizeOne);
 
             validatedBuffer = AllocateExplicitIndexBuffer(srcData, actual_size, &ibo);
             delete[] (uint8_t*)srcData;

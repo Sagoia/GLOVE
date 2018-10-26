@@ -23,7 +23,7 @@ CLAMP(const T x, const T minVal, const T maxVal) {
 
 #define CLAMPF_01(x)                                    CLAMP(x, 0.0f, 1.0f)
 
-// TODO:: check and reimplement/optimize convertions for packed image formats if needed
+// TODO:: check and reimplement/optimize conversions for packed image formats if needed
 struct Color {
     unsigned char r, g, b, a;
 

@@ -17,7 +17,7 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      (Image) Rectangle and Pixel Convertions in GLOVE
+ *  @brief      (Image) Rectangle and Pixel Conversions in GLOVE
  *
  */
 
@@ -73,7 +73,7 @@ public:
 template<typename SourceType, typename DestType>
 bool                    ConvertBuffer(const void *srcData, void *dstData, size_t elemCount);
 void                    InvertImageYAxis(uint8_t *image, const ImageRect* rect);
-void                    CopyPixelsNoConvertion(
+void                    CopyPixelsNoConversion(
                         const ImageRect* srcRect,
                         const void* srcData,
                         const ImageRect* dstRect,

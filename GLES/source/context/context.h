@@ -230,7 +230,7 @@ public:
     GLboolean       IsTexture(GLuint texture);
     void            LineWidth(GLfloat width);
     void            LinkProgram(GLuint program);
-    void            LineLoopConvertion(void* data, uint32_t vertCount, size_t elementByteSize);
+    void            LineLoopConversion(void* data, uint32_t vertCount, size_t elementByteSize);
     void            PixelStorei(GLenum pname, GLint param);
     void            PolygonOffset(GLfloat factor, GLfloat units);
     void            ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void* pixels);
