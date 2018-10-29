@@ -286,9 +286,13 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
 
         /// Either type or precision qualifier
         token = GetNextToken(source, found);
+        string tokenTypeStr = token;
+        string tokenPrecisionStr = "";
+
         if(IsPrecisionQualifier(token)) {
             found = SkipWhiteSpaces(source, found + token.length());
             token = GetNextToken(source, found);
+            tokenPrecisionStr = token;
         }
 
         /// Definitely type now
@@ -308,6 +312,7 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
             source.insert(f1, layoutSyntax);
 
             found = FindToken(uniformLiteralStr, source, found + token.length() + layoutSyntax.length());
+
             continue;
         }
 
@@ -315,6 +320,27 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
 
         /// Variable name
         token = GetNextToken(source, found);
+
+        /// Check for multiple inline variable declaration
+        bool   multiple_declaration = false;
+        size_t f2  = source.find (",", found + token.length());
+        size_t fNL = source.find (';', found + token.length());
+        blockSyntax = string(";\n") + uniformLiteralStr + " " + tokenTypeStr + " " + tokenPrecisionStr;
+        while(f2 <= fNL) {
+            /// Move every variable on a new line
+            source.replace(found + token.length(), 1, blockSyntax);
+            found = SkipWhiteSpaces(source, found + token.length() + blockSyntax.length() + 1);
+            token = GetNextToken(source, found);
+            f2    = source.find (",", found + token.length());
+
+            multiple_declaration = true;
+        }
+
+        /// if yes, then goto back to the beginning
+        if(multiple_declaration) {
+            found = f1;
+            continue;
+        }
 
         // Rename uni* variable cases
         const string uniStr("uni");
