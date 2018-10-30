@@ -216,7 +216,7 @@ StateFramebufferOperations::UpdateColorMask(GLboolean red, GLboolean green, GLbo
 }
 
 bool
-StateFramebufferOperations::UpdateDepthMask(GLenum enable)
+StateFramebufferOperations::UpdateDepthMask(GLboolean enable)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

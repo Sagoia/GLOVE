@@ -79,7 +79,7 @@ public:
       bool                    UpdateClearDepth(GLfloat depth);
       bool                    UpdateClearStencil(GLint stencil);
       bool                    UpdateColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-      bool                    UpdateDepthMask(GLenum enable);
+      bool                    UpdateDepthMask(GLboolean enable);
       bool                    UpdateStencilMask(GLuint mask);
       bool                    UpdateStencilMaskFront(GLuint mask);
       bool                    UpdateStencilMaskBack(GLuint mask);
