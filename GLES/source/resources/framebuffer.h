@@ -157,7 +157,7 @@ public:
     inline void             SetWidth(int32_t width)                             { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int32_t height)                           { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }
 
-           void             SetColorAttachmentTexture(Texture *texture);
+           void             SetColorAttachment(int width, int height);
     inline void             SetColorAttachmentType(GLenum type)                 { FUN_ENTRY(GL_LOG_TRACE); mAttachmentColors[0]->SetType(type);   }
     inline void             SetColorAttachmentName(uint32_t name)               { FUN_ENTRY(GL_LOG_TRACE); mAttachmentColors[0]->SetName(name);   }
     inline void             SetColorAttachmentLevel(GLint level)                { FUN_ENTRY(GL_LOG_TRACE); mAttachmentColors[0]->SetLevel(level); }

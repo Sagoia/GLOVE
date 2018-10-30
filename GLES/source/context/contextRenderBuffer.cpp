@@ -95,7 +95,7 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
             }
 
             if(index == mWriteFBO->GetColorAttachmentName()) {
-                mWriteFBO->SetColorAttachmentTexture(nullptr);
+                mWriteFBO->SetColorAttachment(-1,-1);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
             }

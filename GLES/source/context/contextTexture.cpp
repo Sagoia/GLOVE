@@ -118,7 +118,7 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
             }
 
             if(texture == mWriteFBO->GetColorAttachmentName()) {
-                mWriteFBO->SetColorAttachmentTexture(nullptr);
+                mWriteFBO->SetColorAttachment(-1,-1);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
             }

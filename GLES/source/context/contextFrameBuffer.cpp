@@ -145,12 +145,14 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
     }
 
     switch(attachment) {
-    case GL_COLOR_ATTACHMENT0:
-        mWriteFBO->SetColorAttachmentTexture(renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
+    case GL_COLOR_ATTACHMENT0: {
+        int width  = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetWidth()  : -1;
+        int height = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetHeight() : -1;
+        mWriteFBO->SetColorAttachment(width, height);
         mWriteFBO->SetColorAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetColorAttachmentName(renderbuffer);
         mPipeline->SetUpdateViewportState(true);
-        break;
+        break; }
     case GL_DEPTH_ATTACHMENT:
         mWriteFBO->SetDepthAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetDepthAttachmentName(renderbuffer);
@@ -209,14 +211,16 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
     }
 
     switch(attachment) {
-    case GL_COLOR_ATTACHMENT0:
-        mWriteFBO->SetColorAttachmentTexture(texture ? mResourceManager->GetTexture(texture) : nullptr);
+    case GL_COLOR_ATTACHMENT0: {
+        int width  = texture ? mResourceManager->GetTexture(texture)->GetWidth()  : -1;
+        int height = texture ? mResourceManager->GetTexture(texture)->GetHeight() : -1;
+        mWriteFBO->SetColorAttachment(width, height);
         mWriteFBO->SetColorAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetColorAttachmentName(texture);
         mWriteFBO->SetColorAttachmentLayer(texture && mResourceManager->GetTexture(texture)->IsCubeMap() ? textarget : 0);
         mWriteFBO->SetColorAttachmentLevel(0);
         mPipeline->SetUpdateViewportState(true);
-        break;
+        break; }
     case GL_DEPTH_ATTACHMENT:
         mWriteFBO->SetDepthAttachmentType(texture ? GL_TEXTURE : GL_NONE);
         mWriteFBO->SetDepthAttachmentName(texture);

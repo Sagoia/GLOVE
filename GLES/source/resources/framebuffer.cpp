@@ -166,7 +166,7 @@ Framebuffer::AddColorAttachment(Texture *texture)
 }
 
 void
-Framebuffer::SetColorAttachmentTexture(Texture *texture)
+Framebuffer::SetColorAttachment(int width, int height)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -175,14 +175,9 @@ Framebuffer::SetColorAttachmentTexture(Texture *texture)
         mAttachmentColors.push_back(att);
     }
 
-    if(texture) {
-        SetWidth(texture->GetWidth());
-        SetHeight(texture->GetHeight());
-    }
-    else {
-        SetWidth(-1);
-        SetHeight(-1);
-    }
+    SetWidth(width);
+    SetHeight(height);
+
     mUpdated     = true;
     mSizeUpdated = true;
 }
