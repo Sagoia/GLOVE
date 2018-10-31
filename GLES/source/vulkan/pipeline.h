@@ -69,10 +69,10 @@ private:
 
     CacheManager                               *mCacheManager;
 
-    bool CreateGraphicsPipeline(void);
-    void MoveToCache(void);
-    void Release(void);
-    void SetInfo(VkRenderPass *renderpass);
+    bool                                        CreateGraphicsPipeline(void);
+    void                                        MoveToCache(void);
+    void                                        Release(void);
+    void                                        SetInfo(const VkRenderPass *renderpass);
 
 public:
 // Constructor
@@ -82,9 +82,10 @@ public:
     ~Pipeline();
 
 // Get Functions
-    inline int      * GetShaderStageIDs(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineShaderStageIDs; }
-    inline uint32_t & GetShaderStageCount(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineShaderStageCount; }
+    inline int      * GetShaderStageIDsRef(void)                                { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineShaderStageIDs; }
+    inline uint32_t & GetShaderStageCountRef(void)                              { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineShaderStageCount; }
     inline VkPipelineShaderStageCreateInfo * GetShaderStages(void)              { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineShaderStages; }
+
     inline bool GetUpdatePipelineState(void)                              const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Pipeline; }
     inline bool GetUpdateViewportState(void)                              const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Viewport; }
     inline bool GetUpdateVertexAttribVBOs(void)                           const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.VertexAttribVBOs; }
@@ -178,7 +179,7 @@ public:
           void Bind(VkCommandBuffer *CmdBuffer)                                 { FUN_ENTRY(GL_LOG_TRACE); vkCmdBindPipeline(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mVkPipeline); }
 
 // Create Functions
-          bool Create(VkRenderPass *renderpass);
+          bool Create(const VkRenderPass *renderpass);
 // Update Functions
           void UpdateDynamicState(VkCommandBuffer *CmdBuffer, float lineWidth);
 };

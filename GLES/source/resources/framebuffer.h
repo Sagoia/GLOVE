@@ -83,9 +83,10 @@ public:
 // RenderPass Functions
     bool                    CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
                                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled);
-    void                    BeginVkRenderPass (bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
+    void                    CreateRenderPass (bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
                                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
                                                const float *colorValue, float depthValue, uint32_t stencilValue, const Rect *clearRect);
+    void                    BeginVkRenderPass(void);
     bool                    EndVkRenderPass(void);
     void                    PrepareVkImage(VkImageLayout newImageLayout);
 
@@ -107,6 +108,7 @@ public:
     inline int              GetWidth(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.width; }
     inline int              GetHeight(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.height; }
     inline GLenum           GetTarget(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget; }
+    inline vulkanAPI::RenderPass *     GetRenderPass(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderPass; }
     inline VkRenderPass *   GetVkRenderPass(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderPass->GetRenderPass(); }
 
     inline uint32_t         GetAttachmentName(GLenum type)              const   { FUN_ENTRY(GL_LOG_TRACE); switch(type) {

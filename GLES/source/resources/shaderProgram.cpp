@@ -56,7 +56,7 @@ ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI:
     mVkDescSet = VK_NULL_HANDLE;
     mVkPipelineLayout = VK_NULL_HANDLE;
 
-    mVkPipelineCache = new vulkanAPI::PipelineCache(mVkContext);
+    mPipelineCache = new vulkanAPI::PipelineCache(mVkContext);
 
     mStageCount = 0;
 
@@ -77,9 +77,9 @@ ShaderProgram::~ShaderProgram()
 
     ReleaseVkObjects();
 
-    if(mVkPipelineCache) {
-        delete mVkPipelineCache;
-        mVkPipelineCache = nullptr;
+    if(mPipelineCache) {
+        delete mPipelineCache;
+        mPipelineCache = nullptr;
     }
 }
 
@@ -363,11 +363,11 @@ ShaderProgram::GetVkPipelineCache(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(mVkPipelineCache->GetPipelineCache() == VK_NULL_HANDLE) {
-        mVkPipelineCache->Create(nullptr, 0);
+    if(mPipelineCache->GetPipelineCache() == VK_NULL_HANDLE) {
+        mPipelineCache->Create(nullptr, 0);
     }
 
-    return mVkPipelineCache->GetPipelineCache();
+    return mPipelineCache->GetPipelineCache();
 }
 
 const string &
@@ -554,7 +554,7 @@ void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t fi
                         size_t numVertices = firstVertex + vertCount;
                         size_t byteSize = vbo->GetSize();
                         uint8_t *srcData = new uint8_t[byteSize];
-                        vbo->GetData(vbo->GetSize(), 0, srcData);
+                        vbo->GetData(byteSize, 0, srcData);
                         vbo = new VertexBufferObject(mVkContext);
                         gva.ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
                         delete[] srcData;
@@ -672,7 +672,7 @@ ShaderProgram::UsePrecompiledBinary(const void *binary, size_t binarySize)
 
     BuildShaderResourceInterface();
 
-    mVkPipelineCache->Create(vulkanDataPtr, binarySize - reflectionOffset);
+    mPipelineCache->Create(vulkanDataPtr, binarySize - reflectionOffset);
 
     mIsPrecompiled = true;
 }
@@ -690,8 +690,8 @@ ShaderProgram::GetBinaryData(void *binary, GLsizei *binarySize)
     uint8_t *vulkanDataPtr = reinterpret_cast<uint8_t *>(binary) + reflectionOffset + spirvOffset;
     size_t vulkanDataSize = *binarySize;
 
-    if(mVkPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
-        mVkPipelineCache->GetData(reinterpret_cast<void *>(vulkanDataPtr), &vulkanDataSize);
+    if(mPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
+        mPipelineCache->GetData(reinterpret_cast<void *>(vulkanDataPtr), &vulkanDataSize);
         *binarySize = vulkanDataSize + reflectionOffset + spirvOffset;
     } else {
         *binarySize = 0;
@@ -706,8 +706,8 @@ ShaderProgram::GetBinaryLength(void)
     size_t vkPipelineCacheDataLength = 0;
     uint32_t spirvSize = 2 * sizeof(uint32_t) + 4 * (mShaderSPVsize[0] + mShaderSPVsize[1]);
 
-    if(mVkPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
-        mVkPipelineCache->GetData(nullptr, &vkPipelineCacheDataLength);
+    if(mPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
+        mPipelineCache->GetData(nullptr, &vkPipelineCacheDataLength);
     }
 
     return vkPipelineCacheDataLength + mShaderResourceInterface.GetReflectionSize() + spirvSize;
@@ -1099,7 +1099,7 @@ void ShaderProgram::UpdateSamplerDescriptors()
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
 
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[i].pNext      = NULL;
+        writes[i].pNext      = nullptr;
         writes[i].dstSet     = mVkDescSet;
         writes[i].dstBinding = mShaderResourceInterface.GetUniformBlockBinding(i);
 

@@ -294,7 +294,7 @@ CommandBufferManager::BeginVkDrawCommandBuffer(void)
 }
 
 bool
-CommandBufferManager::BeginVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer)
+CommandBufferManager::BeginVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -340,7 +340,7 @@ CommandBufferManager::EndVkDrawCommandBuffer(void)
 }
 
 void
-CommandBufferManager::EndVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer)
+CommandBufferManager::EndVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

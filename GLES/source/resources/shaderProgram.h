@@ -45,7 +45,7 @@ private:
     VkDescriptorSet                                     mVkDescSet;
     VkPipelineLayout                                    mVkPipelineLayout;
 
-    vulkanAPI::PipelineCache                           *mVkPipelineCache;
+    vulkanAPI::PipelineCache                           *mPipelineCache;
     CacheManager                                       *mCacheManager;
 
     VkPipelineVertexInputStateCreateInfo                mVkPipelineVertexInput;
@@ -141,7 +141,7 @@ public:
 
     void                                                SetCommandBufferManager(
                                                         vulkanAPI::CommandBufferManager *cbManager)         { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
-    void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mVkPipelineCache->SetContext(mVkContext);}
+    void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext);}
     void                                                SetGlContext(Context *context)                      { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGLContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != NULL); mShaderCompiler = shaderCompiler; }
     void                                                SetStagesIDs(uint32_t index, uint32_t id)           { FUN_ENTRY(GL_LOG_TRACE); mStagesIDs[index] = id; }

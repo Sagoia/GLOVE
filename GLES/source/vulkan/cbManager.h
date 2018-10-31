@@ -71,9 +71,9 @@ class CommandBufferManager {
 private:
 
     typedef struct State {
-        vector<VkCommandBuffer>         commandBuffer;
-        vector<cmdBufferState_t>        commandBufferState;
-        vector<Fence>                   fence;
+        std::vector<VkCommandBuffer>         commandBuffer;
+        std::vector<cmdBufferState_t>        commandBufferState;
+        std::vector<Fence>                   fence;
 
         State()  { FUN_ENTRY(GL_LOG_TRACE); }
         ~State() { FUN_ENTRY(GL_LOG_TRACE); }
@@ -117,12 +117,12 @@ public:
 // Begin Functions
     bool BeginVkAuxCommandBuffer(void);
     bool BeginVkDrawCommandBuffer(void);
-    bool BeginVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer);
+    bool BeginVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer);
 
 // End Functions
     bool EndVkAuxCommandBuffer(void);
     void EndVkDrawCommandBuffer(void);
-    void EndVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer);
+    void EndVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer);
 
 // Submit Functions
     bool SubmitVkDrawCommandBuffer(void);

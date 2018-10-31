@@ -184,4 +184,30 @@ RenderPass::End(VkCommandBuffer *activeCmdBuffer)
     }
 }
 
+void
+RenderPass::SetClearArea(const VkRect2D *rect)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mVkRenderArea = *rect;
+}
+
+void
+RenderPass::SetClearColorValue(const float *value)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    mVkClearValues[0].color.float32[0] = value[0];
+    mVkClearValues[0].color.float32[1] = value[1];
+    mVkClearValues[0].color.float32[2] = value[2];
+    mVkClearValues[0].color.float32[3] = value[3];
+}
+void
+RenderPass::SetClearDepthStencilValue(float depth, uint32_t stencil)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    mVkClearValues[1].depthStencil.depth   = depth;
+    // 8-bit stencil
+    mVkClearValues[1].depthStencil.stencil = stencil ;
+}
+
 }

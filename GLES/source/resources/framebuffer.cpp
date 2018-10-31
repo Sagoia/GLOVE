@@ -308,7 +308,7 @@ Framebuffer::IsUpdated()
 }
 
 void
-Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
+Framebuffer::CreateRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,
                                bool writeColorEnabled, bool writeDepthEnabled, bool writeStencilEnabled,
                                const float *colorValue, float depthValue, uint32_t stencilValue,
                                const Rect  *clearRect)
@@ -334,7 +334,6 @@ Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, b
         mUpdated = false;
     }
 
-    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
 
     const VkRect2D clearRect2D = { {clearRect->x, clearRect->y},
                                    {(uint32_t)clearRect->width, (uint32_t)clearRect->height}};
@@ -342,6 +341,12 @@ Framebuffer::BeginVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, b
     mRenderPass->SetClearArea(&clearRect2D);
     mRenderPass->SetClearColorValue(colorValue);
     mRenderPass->SetClearDepthStencilValue(depthValue, stencilValue);
+}
+
+void
+Framebuffer::BeginVkRenderPass()
+{
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), true);
 }
 

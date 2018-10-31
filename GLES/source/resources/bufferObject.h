@@ -81,7 +81,7 @@ class IndexBufferObject : public BufferObject
 {
 
 public:
-    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr)        : BufferObject(vkContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -89,7 +89,7 @@ class TransferSrcBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferSrcBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_SRC_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferSrcBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_SRC_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -97,7 +97,7 @@ class TransferDstBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_DST_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_DST_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -106,7 +106,7 @@ class UniformBufferObject : public BufferObject
     void                    AllocateVkDescriptorBufferInfo(void);
 
 public:
-    explicit                UniformBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr)      : BufferObject(vkContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                UniformBufferObject(const vulkanAPI::vkContext_t *vkContext)      : BufferObject(vkContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
     bool                    Allocate(size_t size, const void *data) override;
     VkDescriptorBufferInfo* GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }
@@ -116,7 +116,7 @@ class VertexBufferObject : public BufferObject
 {
 
 public:
-    explicit                VertexBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr)       : BufferObject(vkContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                VertexBufferObject(const vulkanAPI::vkContext_t *vkContext)       : BufferObject(vkContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 

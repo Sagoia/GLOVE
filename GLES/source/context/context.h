@@ -86,6 +86,7 @@ private:
 
     void CreateShaderCompiler(void);
 
+    void UpdateViewportState(vulkanAPI::Pipeline* pipeline);
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
     void PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices);
     void UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex);

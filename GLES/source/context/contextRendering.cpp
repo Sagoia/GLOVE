@@ -38,13 +38,14 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    mWriteFBO->BeginVkRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
+    mWriteFBO->CreateRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
                static_cast<bool>(mStateManager.GetFramebufferOperationsState()->GetColorMask()),
                                  mStateManager.GetFramebufferOperationsState()->GetDepthMask(),
                                  mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
                                  mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack(),
                                  clearColorValue, clearDepthValue, clearStencilValue,
                                  &mClearRect);
+    mWriteFBO->BeginVkRenderPass();
 }
 
 void
@@ -117,6 +118,38 @@ Context::Clear(GLbitfield mask)
 }
 
 void
+
+void
+Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
+{
+    if(pipeline->GetUpdateViewportState()) {
+        pipeline->ComputeViewport(mWriteFBO->GetWidth(),
+                                   mWriteFBO->GetHeight(),
+                                   mStateManager.GetViewportTransformationState()->GetViewportRectX(),
+                                   mStateManager.GetViewportTransformationState()->GetViewportRectY(),
+                                   mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
+                                   mStateManager.GetViewportTransformationState()->GetViewportRectHeight(),
+                                   mStateManager.GetViewportTransformationState()->GetMinDepthRange(),
+                                   mStateManager.GetViewportTransformationState()->GetMaxDepthRange());
+
+        if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
+            pipeline->ComputeScissor(mWriteFBO->GetWidth(),
+                                      mWriteFBO->GetHeight(),
+                                      mStateManager.GetFragmentOperationsState()->GetScissorRectX(),
+                                      mStateManager.GetFragmentOperationsState()->GetScissorRectY(),
+                                      mStateManager.GetFragmentOperationsState()->GetScissorRectWidth(),
+                                      mStateManager.GetFragmentOperationsState()->GetScissorRectHeight());
+        } else {
+            pipeline->ComputeScissor(mWriteFBO->GetWidth(),
+                                      mWriteFBO->GetHeight(),
+                                      mStateManager.GetViewportTransformationState()->GetViewportRectX(),
+                                      mStateManager.GetViewportTransformationState()->GetViewportRectY(),
+                                      mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
+                                      mStateManager.GetViewportTransformationState()->GetViewportRectHeight());
+        }
+        pipeline->SetUpdateViewportState(false);
+    }
+}
 Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -155,33 +188,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     mPipeline->Bind(secondaryCmdBuffer);
     BindUniformDescriptors(secondaryCmdBuffer);
     BindVertexBuffers(secondaryCmdBuffer, indices, type, indexed, vertCount);
-    if(mPipeline->GetUpdateViewportState()) {
-        mPipeline->ComputeViewport(mWriteFBO->GetWidth(),
-                                   mWriteFBO->GetHeight(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectX(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectY(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectHeight(),
-                                   mStateManager.GetViewportTransformationState()->GetMinDepthRange(),
-                                   mStateManager.GetViewportTransformationState()->GetMaxDepthRange());
-
-        if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
-            mPipeline->ComputeScissor(mWriteFBO->GetWidth(),
-                                      mWriteFBO->GetHeight(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectX(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectY(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectWidth(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectHeight());
-        } else {
-            mPipeline->ComputeScissor(mWriteFBO->GetWidth(),
-                                      mWriteFBO->GetHeight(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectX(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectY(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectHeight());
-        }
-        mPipeline->SetUpdateViewportState(false);
-    }
+    UpdateViewportState(mPipeline);
 
     mPipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
 

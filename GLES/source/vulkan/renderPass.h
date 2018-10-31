@@ -88,14 +88,9 @@ public:
     inline void             SetDepthWriteEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mDepthWriteEnabled   = enable;    }
     inline void             SetStencilWriteEnabled(VkBool32 enable)             { FUN_ENTRY(GL_LOG_TRACE); mStencilWriteEnabled = enable;    }
 
-    inline void             SetClearArea(const VkRect2D *rect)                  { FUN_ENTRY(GL_LOG_TRACE); memcpy (static_cast<void*>(&mVkRenderArea), static_cast<const void*>(rect), sizeof (VkRect2D)); }
-    inline void             SetClearColorValue(const float *value)              { FUN_ENTRY(GL_LOG_TRACE); mVkClearValues[0].color.float32[0]     = value[0];
-                                                                                                           mVkClearValues[0].color.float32[1]     = value[1];
-                                                                                                           mVkClearValues[0].color.float32[2]     = value[2];
-                                                                                                           mVkClearValues[0].color.float32[3]     = value[3];}
-    inline void             SetClearDepthStencilValue(float    depth,
-                                                      uint32_t stencil)         { FUN_ENTRY(GL_LOG_TRACE); mVkClearValues[1].depthStencil.depth   = depth;
-                                                                                                           mVkClearValues[1].depthStencil.stencil = stencil;}
+           void             SetClearArea(const VkRect2D *rect);
+           void             SetClearColorValue(const float *value);
+           void             SetClearDepthStencilValue(float depth, uint32_t stencil);
 };
 
 }

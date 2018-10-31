@@ -562,10 +562,10 @@ Context::SetPipelineProgramShaderStages(ShaderProgram *progPtr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!progPtr->HasStages() || progPtr->HasStagesUpdated(mPipeline->GetShaderStageIDs())) {
+    if(!progPtr->HasStages() || progPtr->HasStagesUpdated(mPipeline->GetShaderStageIDsRef())) {
 
-        if(!progPtr->SetPipelineShaderStage(mPipeline->GetShaderStageCount(),
-                                            mPipeline->GetShaderStageIDs(),
+        if(!progPtr->SetPipelineShaderStage(mPipeline->GetShaderStageCountRef(),
+                                            mPipeline->GetShaderStageIDsRef(),
                                             mPipeline->GetShaderStages())) {
             return false;
         }
