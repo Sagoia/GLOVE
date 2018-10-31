@@ -135,7 +135,7 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     info.sType            = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     info.pNext            = nullptr;
     info.flags            = 0;
-    info.attachmentCount  = attachments.size();
+    info.attachmentCount  = static_cast<uint32_t>(attachments.size());
     info.pAttachments     = attachments.data();
     info.subpassCount     = 1;
     info.pSubpasses       = &subpass;

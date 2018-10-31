@@ -50,26 +50,26 @@ class Context {
 private:
 // ------------
     const
-    vulkanAPI::vkContext_t *                    mVkContext;
+    vulkanAPI::vkContext_t                     *mVkContext;
 // ------------
     Rect                                        mClearRect;
     StateManager                                mStateManager;
-    ResourceManager *                           mResourceManager;
-    CacheManager *                              mCacheManager;
-    ShaderCompiler *                            mShaderCompiler;
-    vulkanAPI::Pipeline *                       mPipeline;
+    ResourceManager                            *mResourceManager;
+    CacheManager                               *mCacheManager;
+    ShaderCompiler                             *mShaderCompiler;
+    vulkanAPI::Pipeline                        *mPipeline;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
 // ------------
     bool                                        mIsYInverted;
     bool                                        mIsModeLineLoop;
     bool                                        mIsFullScreenRender;
 // ------------
-    void        *                               mWriteSurface;
-    void        *                               mReadSurface;
-    BufferObject*                               mExplicitIbo;
-    Framebuffer *                               mWriteFBO;
+    void                                       *mWriteSurface;
+    void                                       *mReadSurface;
+    BufferObject                               *mExplicitIbo;
+    Framebuffer                                *mWriteFBO;
 
-    Framebuffer *                               mSystemFBO;
+    Framebuffer                                *mSystemFBO;
     vector<Texture *>                           mSystemTextures;
 
     typedef std::pair<EGLSurfaceInterface*, EGLSurfaceInterface*> FRAMEBUFFER_SURFACES_PAIR;

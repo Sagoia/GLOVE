@@ -372,7 +372,7 @@ Framebuffer::Create(void)
     Release();
 
     for(uint32_t i = 0; i < mAttachmentColors.size(); ++i) {
-        vulkanAPI::Framebuffer *fb = new vulkanAPI::Framebuffer(mVkContext);
+        vulkanAPI::Framebuffer *frameBuffer = new vulkanAPI::Framebuffer(mVkContext);
 
         vector<VkImageView> imageViews;
         if(GetColorAttachmentTexture(i)) {
@@ -382,12 +382,12 @@ Framebuffer::Create(void)
             imageViews.push_back(mDepthStencilTexture->GetVkImageView());
         }
 
-        if(!fb->Create(&imageViews, GetVkRenderPass(), GetWidth(), GetHeight())) {
-            delete fb;
+        if(!frameBuffer->Create(&imageViews, GetVkRenderPass(), GetWidth(), GetHeight())) {
+            delete frameBuffer;
             return false;
         }
 
-        mFramebuffers.push_back(fb);
+        mFramebuffers.push_back(frameBuffer);
     }
 
     return true;

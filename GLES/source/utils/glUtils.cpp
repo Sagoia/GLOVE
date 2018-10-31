@@ -75,7 +75,6 @@ GlFormatToGlInternalFormat(GLenum format, GLenum type)
         case GL_UNSIGNED_BYTE:              return GL_BGRA8_EXT;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
     case GL_RGBA:
         switch(type) {
         case GL_UNSIGNED_SHORT_4_4_4_4:     return GL_RGBA4;
@@ -83,7 +82,6 @@ GlFormatToGlInternalFormat(GLenum format, GLenum type)
         case GL_UNSIGNED_BYTE:              return GL_RGBA8_OES;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
 
     case GL_RGB:
         switch(type) {
@@ -91,35 +89,30 @@ GlFormatToGlInternalFormat(GLenum format, GLenum type)
         case GL_UNSIGNED_BYTE:              return GL_RGB8_OES;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
 
     case GL_LUMINANCE_ALPHA:
         switch(type) {
         case GL_UNSIGNED_BYTE:              return GL_LUMINANCE_ALPHA;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
 
     case GL_LUMINANCE:
         switch(type) {
         case GL_UNSIGNED_BYTE:              return GL_LUMINANCE;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
 
     case GL_ALPHA:
         switch(type) {
         case GL_UNSIGNED_BYTE:              return GL_ALPHA;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
 
     case GL_DEPTH24_STENCIL8_OES:
         switch(type) {
         case GL_UNSIGNED_INT_24_8_OES:      return GL_DEPTH24_STENCIL8_OES;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
-        break;
 
     default: NOT_FOUND_ENUM(format);        return GL_INVALID_VALUE;
     }
@@ -197,7 +190,6 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGBA:                               return 4;
         default: { NOT_FOUND_ENUM(internalFormat);  return 1; }
         }
-        break;
     case GL_UNSIGNED_SHORT_4_4_4_4:
         switch(internalFormat) {
         case GL_RGBA4:
@@ -207,7 +199,6 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGBA:                              return 1;
         default: { NOT_FOUND_ENUM(internalFormat); return 1; }
         }
-        break;
     case GL_UNSIGNED_SHORT_5_5_5_1:
         switch(internalFormat) {
         case GL_RGB5_A1:
@@ -217,7 +208,6 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGBA:                              return 1;
         default: { NOT_FOUND_ENUM(internalFormat); return 1; }
         }
-        break;
     case GL_UNSIGNED_SHORT_5_6_5:
         switch(internalFormat) {
         case GL_RGB565:
@@ -225,13 +215,11 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGB:                               return 1;
         default: { NOT_FOUND_ENUM(internalFormat); return 1; }
         }
-        break;
     case GL_UNSIGNED_INT_24_8_OES:
         switch(internalFormat) {
         case GL_DEPTH24_STENCIL8_OES:              return 1;
         default: { NOT_FOUND_ENUM(internalFormat); return 1; }
         }
-        break;
     default: { NOT_FOUND_ENUM(type);               return 1; }
     }
 }

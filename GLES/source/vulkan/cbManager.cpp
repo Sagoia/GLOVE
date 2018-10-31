@@ -300,7 +300,7 @@ CommandBufferManager::BeginVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer, 
 
     VkCommandBufferInheritanceInfo inheritanceInfo;
     inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfo.pNext = NULL;
+    inheritanceInfo.pNext = nullptr;
     inheritanceInfo.renderPass = renderPass;
     inheritanceInfo.subpass = 0;
     inheritanceInfo.framebuffer = framebuffer;
@@ -310,7 +310,7 @@ CommandBufferManager::BeginVkSecondaryCommandBuffer(VkCommandBuffer *cmdBuffer, 
 
     VkCommandBufferBeginInfo cmdBeginInfo;
     cmdBeginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    cmdBeginInfo.pNext            = NULL;
+    cmdBeginInfo.pNext            = nullptr;
     cmdBeginInfo.flags            = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
     cmdBeginInfo.pInheritanceInfo = &inheritanceInfo;
 

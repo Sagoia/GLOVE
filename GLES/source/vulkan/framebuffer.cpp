@@ -50,7 +50,7 @@ Framebuffer::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkFramebuffer != VK_NULL_HANDLE) {
-        vkDestroyFramebuffer(mVkContext->vkDevice, mVkFramebuffer, NULL);
+        vkDestroyFramebuffer(mVkContext->vkDevice, mVkFramebuffer, nullptr);
         mVkFramebuffer = VK_NULL_HANDLE;
     }
 }
@@ -64,16 +64,16 @@ Framebuffer::Create(vector<VkImageView> *imageViews, VkRenderPass *renderpass, u
 
     VkFramebufferCreateInfo info;
     info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    info.pNext           = NULL;
+    info.pNext           = nullptr;
     info.flags           = 0;
     info.renderPass      = *renderpass;
     info.width           = width;
     info.height          = height;
     info.layers          = 1;
-    info.attachmentCount = imageViews->size();
+    info.attachmentCount = static_cast<uint32_t>(imageViews->size());
     info.pAttachments    = imageViews->data();
 
-    VkResult err = vkCreateFramebuffer(mVkContext->vkDevice, &info, NULL, &mVkFramebuffer);
+    VkResult err = vkCreateFramebuffer(mVkContext->vkDevice, &info, nullptr, &mVkFramebuffer);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

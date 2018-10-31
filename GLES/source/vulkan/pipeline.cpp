@@ -69,7 +69,7 @@ Pipeline::Release()
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkPipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(mVkContext->vkDevice, mVkPipeline, NULL);
+        vkDestroyPipeline(mVkContext->vkDevice, mVkPipeline, nullptr);
         mVkPipeline = VK_NULL_HANDLE;
     }
 }
@@ -117,9 +117,9 @@ Pipeline::CreateInfo()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineInfo, 0, sizeof(mVkPipelineInfo));
+    memset(static_cast<void *>(&mVkPipelineInfo), 0, sizeof(mVkPipelineInfo));
     mVkPipelineInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    mVkPipelineInfo.pNext               = NULL;
+    mVkPipelineInfo.pNext               = nullptr;
     mVkPipelineInfo.flags               = 0;
     mVkPipelineInfo.pInputAssemblyState = &mVkPipelineInputAssemblyState;
     mVkPipelineInfo.pRasterizationState = &mVkPipelineRasterizationState;
@@ -135,9 +135,9 @@ Pipeline::CreateInputAssemblyState(VkBool32 primitiveRestartEnable, VkPrimitiveT
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineInputAssemblyState, 0, sizeof(mVkPipelineInputAssemblyState));
+    memset(static_cast<void *>(&mVkPipelineInputAssemblyState), 0, sizeof(mVkPipelineInputAssemblyState));
     mVkPipelineInputAssemblyState.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    mVkPipelineInputAssemblyState.pNext                  = NULL;
+    mVkPipelineInputAssemblyState.pNext                  = nullptr;
     mVkPipelineInputAssemblyState.flags                  = 0;
     mVkPipelineInputAssemblyState.primitiveRestartEnable = primitiveRestartEnable;
 
@@ -151,9 +151,9 @@ Pipeline::CreateRasterizationState(VkPolygonMode polygonMode, VkCullModeFlagBits
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineRasterizationState, 0, sizeof(mVkPipelineRasterizationState));
+    memset(static_cast<void *>(&mVkPipelineRasterizationState), 0, sizeof(mVkPipelineRasterizationState));
     mVkPipelineRasterizationState.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    mVkPipelineRasterizationState.pNext                   = NULL;
+    mVkPipelineRasterizationState.pNext                   = nullptr;
     mVkPipelineRasterizationState.flags                   = 0;
     mVkPipelineRasterizationState.depthClampEnable        = depthClampEnable;
     mVkPipelineRasterizationState.depthBiasClamp          = depthBiasClamp;
@@ -176,7 +176,7 @@ Pipeline::CreateColorBlendState(VkBool32 blendEnable, VkColorComponentFlagBits c
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineColorBlendAttachmentState, 0, sizeof(mVkPipelineColorBlendAttachmentState));
+    memset(static_cast<void *>(&mVkPipelineColorBlendAttachmentState), 0, sizeof(mVkPipelineColorBlendAttachmentState));
 
     SetColorBlendAttachmentEnable(blendEnable);
     SetColorBlendAttachmentWriteMask(colorWriteMask);
@@ -189,9 +189,9 @@ Pipeline::CreateColorBlendState(VkBool32 blendEnable, VkColorComponentFlagBits c
     SetColorBlendAttachmentColorOp(colorBlendOp);
     SetColorBlendAttachmentAlphaOp(alphaBlendOp);
 
-    memset((void *)&mVkPipelineColorBlendState, 0, sizeof(mVkPipelineColorBlendState));
+    memset(static_cast<void *>(&mVkPipelineColorBlendState), 0, sizeof(mVkPipelineColorBlendState));
     mVkPipelineColorBlendState.sType            = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    mVkPipelineColorBlendState.pNext            = NULL;
+    mVkPipelineColorBlendState.pNext            = nullptr;
     mVkPipelineColorBlendState.flags            = 0;
     mVkPipelineColorBlendState.logicOp          = logicOp;
     mVkPipelineColorBlendState.logicOpEnable    = logicOpEnable;
@@ -210,9 +210,9 @@ Pipeline::CreateDepthStencilState(VkBool32 depthTestEnable, VkBool32 depthWriteE
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineDepthStencilState, 0, sizeof(mVkPipelineDepthStencilState));
+    memset(static_cast<void *>(&mVkPipelineDepthStencilState), 0, sizeof(mVkPipelineDepthStencilState));
     mVkPipelineDepthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    mVkPipelineDepthStencilState.pNext = NULL;
+    mVkPipelineDepthStencilState.pNext = nullptr;
     mVkPipelineDepthStencilState.flags = 0;
 
     SetDepthTestEnable        (depthTestEnable);
@@ -245,9 +245,9 @@ Pipeline::CreateViewportState(uint32_t viewportCount, uint32_t scissorCount)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineViewportState, 0, sizeof(mVkPipelineViewportState));
+    memset(static_cast<void *>(&mVkPipelineViewportState), 0, sizeof(mVkPipelineViewportState));
     mVkPipelineViewportState.sType          = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    mVkPipelineViewportState.pNext          = NULL;
+    mVkPipelineViewportState.pNext          = nullptr;
     mVkPipelineViewportState.flags          = 0;
     mVkPipelineViewportState.viewportCount  = viewportCount;
     mVkPipelineViewportState.scissorCount   = scissorCount;
@@ -258,15 +258,15 @@ Pipeline::CreateMultisampleState(VkBool32 alphaToOneEnable, VkBool32 alphaToCove
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset((void *)&mVkPipelineMultisampleState, 0, sizeof(mVkPipelineMultisampleState));
+    memset(static_cast<void *>(&mVkPipelineMultisampleState), 0, sizeof(mVkPipelineMultisampleState));
     mVkPipelineMultisampleState.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    mVkPipelineMultisampleState.pNext                 = NULL;
+    mVkPipelineMultisampleState.pNext                 = nullptr;
     mVkPipelineMultisampleState.flags                 = 0;
     mVkPipelineMultisampleState.alphaToOneEnable      = alphaToOneEnable;
     mVkPipelineMultisampleState.rasterizationSamples  = rasterizationSamples;
     mVkPipelineMultisampleState.sampleShadingEnable   = sampleShadingEnable;
     mVkPipelineMultisampleState.minSampleShading      = minSampleShading;
-    mVkPipelineMultisampleState.pSampleMask           = NULL; // TODO: GetSampleCoverageValue()
+    mVkPipelineMultisampleState.pSampleMask           = nullptr; // TODO: GetSampleCoverageValue()
 
     SetMultisampleAlphaToCoverage(alphaToCoverageEnable);
 }
@@ -283,8 +283,8 @@ Pipeline::CreateDynamicState()
 
     memset((void *)&mVkPipelineDynamicState, 0, sizeof(mVkPipelineDynamicState));
     mVkPipelineDynamicState.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    mVkPipelineDynamicState.pNext             = NULL;
     mVkPipelineDynamicState.dynamicStateCount = 3;
+    mVkPipelineDynamicState.pNext             = nullptr;
     mVkPipelineDynamicState.pDynamicStates    = mVkPipelineDynamicStateEnables;
 }
 
@@ -330,7 +330,7 @@ Pipeline::CreateGraphicsPipeline(void)
 
     MoveToCache();
 
-    VkResult err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, NULL, &mVkPipeline);
+    VkResult err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, nullptr, &mVkPipeline);
     assert(!err);
     
     mUpdateState.Pipeline = false;

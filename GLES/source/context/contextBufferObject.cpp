@@ -69,7 +69,7 @@ Context::BufferData(GLenum target, GLsizeiptr size, const void *data, GLenum usa
     }
 
     bo->SetUsage(usage);
-    if((data && bo->HasData()) || (data == NULL && bo->GetSize() && (size_t)size != bo->GetSize())) {
+    if((data && bo->HasData()) || (data == nullptr && bo->GetSize() && (size_t)size != bo->GetSize())) {
         bo->Release();
     }
 
