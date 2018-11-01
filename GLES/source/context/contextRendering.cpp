@@ -118,8 +118,6 @@ Context::Clear(GLbitfield mask)
 }
 
 void
-
-void
 Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
 {
     if(pipeline->GetUpdateViewportState()) {
@@ -150,6 +148,8 @@ Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
         pipeline->SetUpdateViewportState(false);
     }
 }
+
+void
 Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices)
 {
     FUN_ENTRY(GL_LOG_TRACE);

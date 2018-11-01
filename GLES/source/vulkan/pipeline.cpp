@@ -289,8 +289,6 @@ Pipeline::CreateDynamicState()
 }
 
 void
-Pipeline::SetInfo(VkRenderPass *renderpass)
-void
 Pipeline::SetInfo(const VkRenderPass *renderpass)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
