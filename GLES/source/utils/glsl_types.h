@@ -44,8 +44,8 @@ typedef struct { glsl_int_t   i[4]; }       glsl_ivec4_t;
 typedef struct { glsl_uint_t  u[4]; }       glsl_uvec4_t;
 typedef struct { glsl_float_t f[4]; }       glsl_vec4_t;
 
-typedef struct { glsl_vec2_t fm[2]; }       glsl_mat2_t;
-typedef struct { glsl_vec3_t fm[3]; }       glsl_mat3_t;
+typedef struct { glsl_vec4_t fm[2]; }       glsl_mat2_t;
+typedef struct { glsl_vec4_t fm[3]; }       glsl_mat3_t;
 typedef struct { glsl_vec4_t fm[4]; }       glsl_mat4_t;
 
 typedef uint32_t                            glsl_sampler_t;
@@ -75,7 +75,7 @@ inline size_t GlslTypeToAllignment(GLenum type)
     case GL_INT_VEC4:
     case GL_FLOAT_VEC4:                     return 16;
 
-    case GL_FLOAT_MAT2:                     return 16;
+    case GL_FLOAT_MAT2:                     return 32;
     case GL_FLOAT_MAT3:                     return 48;
     case GL_FLOAT_MAT4:                     return 64;
 

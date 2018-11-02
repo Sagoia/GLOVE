@@ -451,19 +451,38 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     case GL_FLOAT_VEC2:
     case GL_FLOAT_VEC3:
     case GL_FLOAT_VEC4:
-    case GL_FLOAT_MAT2:
-    case GL_FLOAT_MAT3:
     case GL_FLOAT_MAT4:
         progPtr->GetUniformData(location, size, (void *)params);
         break;
-
+    case GL_FLOAT_MAT2: {
+        glsl_float_t fData[2][4];
+        progPtr->GetUniformData(location, size, (void *)&fData);
+        params[0] = (float)fData[0][0];
+        params[1] = (float)fData[0][1];
+        params[2] = (float)fData[1][0];
+        params[3] = (float)fData[1][1];
+        break;
+    }
+    case GL_FLOAT_MAT3: {
+        glsl_float_t fData[3][4];
+        progPtr->GetUniformData(location, size, (void *)&fData);
+        params[0] = (float)fData[0][0];
+        params[1] = (float)fData[0][1];
+        params[2] = (float)fData[0][2];
+        params[3] = (float)fData[1][0];
+        params[4] = (float)fData[1][1];
+        params[5] = (float)fData[1][2];
+        params[6] = (float)fData[2][0];
+        params[7] = (float)fData[2][1];
+        params[8] = (float)fData[2][2];
+        break;
+    }
     case GL_BOOL: {
         glsl_bool_t bData;
         progPtr->GetUniformData(location, size, (void *)&bData);
         params[0] = (float)bData;
         break;
     }
-
     case GL_BOOL_VEC2: {
         glsl_bool_t bData[2];
         progPtr->GetUniformData(location, size, (void *)bData);
@@ -1257,7 +1276,18 @@ Context::UniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, co
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * 2 * count * sizeof(float), (void *)value);
+    glsl_mat2_t *v = new glsl_mat2_t[count];
+    for (int k = 0; k < count; k++) {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                v[k].fm[i].f[j] = (*value++);
+            }
+            v[k].fm[i].f[2] = 0.0f;
+            v[k].fm[i].f[3] = 0.0f;
+        }
+    }
+    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * 4 * count * sizeof(float), (void *)v);
+    delete[] v;
 }
 
 void
@@ -1297,8 +1327,17 @@ Context::UniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, co
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * 3 * count * sizeof(float), (void *)value);
-
+    glsl_mat3_t *v = new glsl_mat3_t[count];
+    for (int k = 0; k < count; k++) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                v[k].fm[i].f[j] = (*value++);
+            }
+            v[k].fm[i].f[3] = 0.0f;
+        }
+    }
+    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * 4 * count * sizeof(float), (void *)v);
+    delete[] v;
 }
 
 void
