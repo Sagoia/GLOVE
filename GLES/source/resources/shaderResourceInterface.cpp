@@ -316,7 +316,7 @@ ShaderResourceInterface::SetSampler(uint32_t location, int count, const int *tex
         assert((*textureUnit >= GL_TEXTURE0 && *textureUnit < GL_TEXTURE0 + GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS) ||
                (*textureUnit >= 0 && *textureUnit < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 
-        const ShaderResourceInterface::uniform *uniformSampler = GetUniformAtLocation(location + count);
+        const ShaderResourceInterface::uniform *uniformSampler = GetUniformAtLocation(location);
         map<std::string, uniformData>::iterator it = mUniformDataInterface.find(uniformSampler->reflectionName);
 
         assert(uniformSampler->location <= location);
@@ -330,6 +330,7 @@ ShaderResourceInterface::SetSampler(uint32_t location, int count, const int *tex
         }
 
         ++textureUnit;
+        ++location;
     }
 }
 
