@@ -278,8 +278,8 @@ bool Context::AllocateExplicitIndexBuffer(const void *data, size_t size, BufferO
     return mExplicitIbo->Allocate(size, data);
 }
 
-bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo) {
-
+bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo)
+{
     FUN_ENTRY(GL_LOG_TRACE);
 
     uint16_t *converted_indices_u16 = new uint16_t[elementCount];
@@ -294,7 +294,8 @@ bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCoun
     return validatedBuffer;
 }
 
-void Context::LineLoopConvertion(void * data, uint32_t vertCount, size_t elementByteSize){
+void Context::LineLoopConvertion(void * data, uint32_t vertCount, size_t elementByteSize)
+{
     FUN_ENTRY(GL_LOG_TRACE);
 
     memcpy((uint8_t*)data + (vertCount-1)*elementByteSize, data, elementByteSize);
