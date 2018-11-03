@@ -23,7 +23,7 @@
  *
  *  A Texture contains one or more images that all have the same image format.
  *  A texture can be used in two ways: (a) it can be the source of a texture
- *  access from a Shader or (b) it can be used as an attachmet.
+ *  access from a Shader or (b) it can be used as an attachment.
  *
  */
 
