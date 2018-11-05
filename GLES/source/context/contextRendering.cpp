@@ -28,70 +28,24 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
+    const StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+
     GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
     if(clearColorEnabled) {
-        mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
+        stateFramebufferOperations->GetClearColor(clearColorValue);
     }
-
-    GLfloat clearDepthValue    = clearDepthEnabled   ? mStateManager.GetFramebufferOperationsState()->GetClearDepth()   : 0.0f;
-    uint32_t clearStencilValue = clearStencilEnabled ? mStateManager.GetFramebufferOperationsState()->GetClearStencil() : 0;
+    GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth()   : 0.0f;
+    uint32_t clearStencilValue = clearStencilEnabled ? stateFramebufferOperations->GetClearStencilMasked() : 0u;
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     mWriteFBO->CreateRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
-               static_cast<bool>(mStateManager.GetFramebufferOperationsState()->GetColorMask()),
-                                 mStateManager.GetFramebufferOperationsState()->GetDepthMask(),
-                                 mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront() |
-                                 mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack(),
-                                 clearColorValue, clearDepthValue, clearStencilValue,
+                                stateFramebufferOperations->IsColorWriteEnabled(),
+                                stateFramebufferOperations->IsDepthWriteEnabled(),
+                                stateFramebufferOperations->IsStencilWriteEnabled(),
+                                clearColorValue, clearDepthValue, clearStencilValue,
                                  &mClearRect);
     mWriteFBO->BeginVkRenderPass();
-}
-
-void
-Context::SetClearRect(void)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    mWriteFBO->IsUpdated();
-
-    int x = 0;
-    int y = 0;
-    int w = mWriteFBO->GetWidth();
-    int h = mWriteFBO->GetHeight();
-
-    if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
-        x = mStateManager.GetFragmentOperationsState()->GetScissorRectX();
-        y = mWriteFBO->GetHeight() - mStateManager.GetFragmentOperationsState()->GetScissorRectY() - mStateManager.GetFragmentOperationsState()->GetScissorRectHeight();
-
-        if(x < mWriteFBO->GetX()) {
-            w = mStateManager.GetFragmentOperationsState()->GetScissorRectWidth() + x;
-        } else {
-            w = mStateManager.GetFragmentOperationsState()->GetScissorRectWidth();
-            if(w > mWriteFBO->GetWidth() - x) {
-                w = mWriteFBO->GetWidth() - x;
-            }
-        }
-
-        if(y < mWriteFBO->GetY()) {
-            h = mStateManager.GetFragmentOperationsState()->GetScissorRectHeight() + y;
-        } else {
-            h = mStateManager.GetFragmentOperationsState()->GetScissorRectHeight();
-            if(h > mWriteFBO->GetHeight() - y) {
-                h = mWriteFBO->GetHeight() - y;
-            }
-        }
-    }
-
-    x = x > mWriteFBO->GetWidth()  ? mWriteFBO->GetX() : x;
-    y = y > mWriteFBO->GetHeight() ? mWriteFBO->GetY() : y;
-    w = w < mWriteFBO->GetX()      ? mWriteFBO->GetX() : w;
-    h = h < mWriteFBO->GetY()      ? mWriteFBO->GetY() : h;
-
-    mClearRect.x      = std::max(mWriteFBO->GetX()     , x);
-    mClearRect.y      = std::max(mWriteFBO->GetY()     , y);
-    mClearRect.width  = std::min(mWriteFBO->GetWidth() , w);
-    mClearRect.height = std::min(mWriteFBO->GetHeight(), h);
 }
 
 void
@@ -108,13 +62,96 @@ Context::Clear(GLbitfield mask)
         return;
     }
 
+    const StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+
+    // color masks are executed implicitly through a screen-space pass (i.e., need a VkPipeline object)
+    bool performCustomClear =
+            (stateFramebufferOperations->ColorMaskActive() && clearColorEnabled);
+
+    if(!performCustomClear) {
+        ClearSimple(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
+    } else {
+        ClearMask(clearDepthEnabled, clearStencilEnabled);
+    }
+}
+
+void
+Context::ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
+{
     if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
     mWriteFBO->SetStateClear();
 
     SetClearRect();
+
     BeginRendering(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
+}
+
+void
+Context::ClearMask(bool clearDepthEnabled, bool clearStencilEnabled)
+{
+    if(mWriteFBO->IsInClearState()) {
+        Finish();
+    }
+
+    const StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+    const StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+
+    SetClearRect();
+
+    GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
+    GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth()   : 0.0f;
+    uint32_t clearStencilValue = clearStencilEnabled ? stateFramebufferOperations->GetClearStencilMasked() : 0u;
+
+    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    // perform a screen-space pass
+    mWriteFBO->CreateRenderPass(false, clearDepthEnabled, clearStencilEnabled,
+                                stateFramebufferOperations->IsColorWriteEnabled(),
+                                stateFramebufferOperations->IsDepthWriteEnabled(),
+                                stateFramebufferOperations->IsStencilWriteEnabled(),
+                                 clearColorValue, clearDepthValue, clearStencilValue,
+                                 &mClearRect);
+
+    // clearColor is passed as a uniform and masked through VkPipelineColorBlendAttachmentState
+    mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
+    mScreenSpacePass->UpdateUniformBufferColor(clearColorValue[0], clearColorValue[1], clearColorValue[2], clearColorValue[3]);
+
+    vulkanAPI::Pipeline* pipeline = mScreenSpacePass->GetPipeline();
+
+    pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
+    pipeline->SetDepthWriteEnable(stateFramebufferOperations->IsDepthWriteEnabled());
+    pipeline->SetStencilBackCompareMask(stateFragmentOperations->GetStencilTestFuncMaskBack());
+    pipeline->SetStencilBackReference(stateFragmentOperations->GetStencilTestFuncRefBack());
+    pipeline->SetStencilFrontCompareMask(stateFragmentOperations->GetStencilTestFuncMaskFront());
+    pipeline->SetStencilFrontReference(stateFragmentOperations->GetStencilTestFuncRefFront());
+    pipeline->SetUpdatePipeline(true);
+    pipeline->SetViewport(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
+    pipeline->SetScissor(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
+
+    if(!pipeline->Create(mWriteFBO->GetVkRenderPass())) {
+        Finish();
+        return;
+    }
+
+    mCommandBufferManager->BeginVkDrawCommandBuffer();
+    mWriteFBO->BeginVkRenderPass();
+
+    const VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
+    mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
+
+    mScreenSpacePass->BindPipeline(secondaryCmdBuffer);
+    mScreenSpacePass->BindUniformDescriptors(secondaryCmdBuffer);
+    mScreenSpacePass->BindVertexBuffers(secondaryCmdBuffer);
+
+    pipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
+
+    mScreenSpacePass->Draw(secondaryCmdBuffer);
+    mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
+
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
+    vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
+    Finish();
 }
 
 void
@@ -155,6 +192,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     FUN_ENTRY(GL_LOG_TRACE);
 
     SetClearRect();
+
     if(mWriteFBO->IsInClearState()) {
         mWriteFBO->SetStateClearDraw();
 
@@ -165,7 +203,6 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     } else if(mWriteFBO->IsInClearDrawState()) {
         mWriteFBO->SetStateDraw();
     }
-
 
     UpdateVertexAttributes(vertCount, firstVertex);
 
@@ -453,4 +490,50 @@ Context::Flush(void)
         return true;
     }
     return false;
+}
+
+void
+Context::SetClearRect(void)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mWriteFBO->IsUpdated();
+
+    int x = 0;
+    int y = 0;
+    int w = mWriteFBO->GetWidth();
+    int h = mWriteFBO->GetHeight();
+
+    if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
+        x = mStateManager.GetFragmentOperationsState()->GetScissorRectX();
+        y = mWriteFBO->GetHeight() - mStateManager.GetFragmentOperationsState()->GetScissorRectY() - mStateManager.GetFragmentOperationsState()->GetScissorRectHeight();
+
+        if(x < mWriteFBO->GetX()) {
+            w = mStateManager.GetFragmentOperationsState()->GetScissorRectWidth() + x;
+        } else {
+            w = mStateManager.GetFragmentOperationsState()->GetScissorRectWidth();
+            if(w > mWriteFBO->GetWidth() - x) {
+                w = mWriteFBO->GetWidth() - x;
+            }
+        }
+
+        if(y < mWriteFBO->GetY()) {
+            h = mStateManager.GetFragmentOperationsState()->GetScissorRectHeight() + y;
+        } else {
+            h = mStateManager.GetFragmentOperationsState()->GetScissorRectHeight();
+            if(h > mWriteFBO->GetHeight() - y) {
+                h = mWriteFBO->GetHeight() - y;
+            }
+        }
+    }
+
+    x = x > mWriteFBO->GetWidth()  ? mWriteFBO->GetX() : x;
+    y = y > mWriteFBO->GetHeight() ? mWriteFBO->GetY() : y;
+    w = w < mWriteFBO->GetX()      ? mWriteFBO->GetX() : w;
+    h = h < mWriteFBO->GetY()      ? mWriteFBO->GetY() : h;
+
+    mClearRect.x      = std::max(mWriteFBO->GetX()     , x);
+    mClearRect.y      = std::max(mWriteFBO->GetY()     , y);
+    mClearRect.width  = std::min(mWriteFBO->GetWidth() , w);
+    mClearRect.height = std::min(mWriteFBO->GetHeight(), h);
 }

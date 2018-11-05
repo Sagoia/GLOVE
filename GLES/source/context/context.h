@@ -32,6 +32,7 @@
 #include "resources/resourceManager.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/clearPass.h"
+#include "resources/screenSpacePass.h"
 #include "vulkan/cbManager.h"
 #include "rendering_api_interface.h"
 #include <utility>
@@ -58,6 +59,7 @@ private:
     CacheManager                               *mCacheManager;
     ShaderCompiler                             *mShaderCompiler;
     vulkanAPI::Pipeline                        *mPipeline;
+    ScreenSpacePass                            *mScreenSpacePass;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
 // ------------
     bool                                        mIsYInverted;
@@ -85,6 +87,8 @@ private:
     Texture       *CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface);
 
     void CreateShaderCompiler(void);
+    void           ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
+    void           ClearMask(bool clearDepthEnabled, bool clearStencilEnabled);
 
     void UpdateViewportState(vulkanAPI::Pipeline* pipeline);
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);

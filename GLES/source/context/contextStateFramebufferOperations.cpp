@@ -54,7 +54,7 @@ Context::ColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alp
 
     if(mStateManager.GetFramebufferOperationsState()->UpdateColorMask(red, green, blue, alpha)) {
         mPipeline->SetColorBlendAttachmentWriteMask(
-                    GLColorMaskToVkColorComponentFlagBits(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
+                    GLColorMaskToVkColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
     }
 }
 

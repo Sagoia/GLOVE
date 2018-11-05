@@ -30,9 +30,9 @@
 #include "vulkan/vulkan.h"
 
 VkBool32                GlBooleanToVkBool(GLboolean value);
-VkColorComponentFlagBits GLColorMaskToVkColorComponentFlagBits(GLchar colorMask);
+VkColorComponentFlags   GLColorMaskToVkColorComponentFlags(GLubyte colorMask);
 VkBlendFactor           GlBlendFactorToVkBlendFactor(GLenum mode);
-VkLogicOp           	  GlLogicOpToVkLogicOp(GLenum mode);
+VkLogicOp           	GlLogicOpToVkLogicOp(GLenum mode);
 VkBlendOp               GlBlendEquationToVkBlendOp(GLenum mode);
 VkCompareOp             GlCompareFuncToVkCompareOp(GLenum mode);
 VkCullModeFlagBits      GlCullModeToVkCullMode(GLenum mode);

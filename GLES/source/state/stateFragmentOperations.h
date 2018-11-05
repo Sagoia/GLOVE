@@ -30,6 +30,38 @@
 #include "utils/glLogger.h"
 #include "utils/color.hpp"
 
+enum StencilFace : int {
+    SF_FRONT = 0,
+    SF_BACK,
+    SF_NUM_FACES
+};
+
+class StencilOperations {
+    private:
+    GLenum                  mFuncCompare;
+    GLint                   mFuncRef;
+    GLuint                  mFuncMask;
+    GLenum                  mOpFail;
+    GLenum                  mOpZfail;
+    GLenum                  mOpZpass;
+public:
+    StencilOperations();
+
+    inline GLenum           GetFuncCompare(void)      const   { FUN_ENTRY(GL_LOG_TRACE); return mFuncCompare; }
+    inline GLint            GetFuncRef (void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mFuncRef ; }
+    inline GLuint           GetFuncMask(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mFuncMask; }
+    inline GLenum           GetOpFail(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mOpFail; }
+    inline GLenum           GetOpZfail(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mOpZfail; }
+    inline GLenum           GetOpZpass(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mOpZpass; }
+
+    inline void             SetFuncCompare(GLenum compare)    { FUN_ENTRY(GL_LOG_TRACE); mFuncCompare = compare; }
+    inline void             SetFuncRef (GLint ref)            { FUN_ENTRY(GL_LOG_TRACE); mFuncRef = ref; }
+    inline void             SetFuncMask(GLuint mask)          { FUN_ENTRY(GL_LOG_TRACE); mFuncMask = mask; }
+    inline void             SetOpFail(GLenum op)              { FUN_ENTRY(GL_LOG_TRACE); mOpFail = op; }
+    inline void             SetOpZfail(GLenum op)             { FUN_ENTRY(GL_LOG_TRACE); mOpZfail = op; }
+    inline void             SetOpZpass(GLenum op)             { FUN_ENTRY(GL_LOG_TRACE); mOpZpass = op; }
+};
+
 class StateFragmentOperations {
 
 private:
@@ -60,19 +92,7 @@ private:
 
       // 4. Stencil Test
       GLboolean               mStencilTestEnabled;
-      GLenum                  mStencilTestFuncCompareFront;
-      GLenum                  mStencilTestFuncCompareBack;
-      GLint                   mStencilTestFuncRefFront;
-      GLint                   mStencilTestFuncRefBack;
-      GLuint                  mStencilTestFuncMaskFront;
-      GLuint                  mStencilTestFuncMaskBack;
-
-      GLenum                  mStencilTestOpFailFront;
-      GLenum                  mStencilTestOpZfailFront;
-      GLenum                  mStencilTestOpZpassFront;
-      GLenum                  mStencilTestOpFailBack;
-      GLenum                  mStencilTestOpZfailBack;
-      GLenum                  mStencilTestOpZpassBack;
+      StencilOperations       mStencilOperations[SF_NUM_FACES];
 
       // 5. Depth Buffer Test
       GLenum                  mDepthTestFunc;
@@ -135,19 +155,18 @@ public:
       inline GLboolean        GetMultiSamplingEnabled(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mMultiSamplingEnabled; }
       inline GLboolean        GetStencilTestEnabled(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestEnabled; }
 
-      inline GLenum           GetStencilTestFuncCompareFront(void)      const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestFuncCompareFront; }
-      inline GLint            GetStencilTestFuncRefFront (void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestFuncRefFront ; }
-      inline GLuint           GetStencilTestFuncMaskFront(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestFuncMaskFront; }
-      inline GLenum           GetStencilTestFuncCompareBack(void)       const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestFuncCompareBack; }
-      inline GLint            GetStencilTestFuncRefBack (void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestFuncRefBack ; }
-      inline GLuint           GetStencilTestFuncMaskBack(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestFuncMaskBack; }
-
-      inline GLenum           GetStencilTestOpFailFront(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestOpFailFront; }
-      inline GLenum           GetStencilTestOpZfailFront(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestOpZfailFront; }
-      inline GLenum           GetStencilTestOpZpassFront(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestOpZpassFront; }
-      inline GLenum           GetStencilTestOpFailBack(void)            const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestOpFailBack; }
-      inline GLenum           GetStencilTestOpZfailBack(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestOpZfailBack; }
-      inline GLenum           GetStencilTestOpZpassBack(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilTestOpZpassBack; }
+      inline GLenum           GetStencilTestFuncCompareBack(void)       const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_BACK].GetFuncCompare(); }
+      inline GLint            GetStencilTestFuncRefBack(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_BACK].GetFuncRef() ; }
+      inline GLuint           GetStencilTestFuncMaskBack(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_BACK].GetFuncMask(); }
+      inline GLenum           GetStencilTestOpFailBack(void)            const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_BACK].GetOpFail(); }
+      inline GLenum           GetStencilTestOpZfailBack(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_BACK].GetOpZfail(); }
+      inline GLenum           GetStencilTestOpZpassBack(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_BACK].GetOpZpass(); }
+      inline GLenum           GetStencilTestFuncCompareFront(void)      const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_FRONT].GetFuncCompare(); }
+      inline GLint            GetStencilTestFuncRefFront(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_FRONT].GetFuncRef() ; }
+      inline GLuint           GetStencilTestFuncMaskFront(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_FRONT].GetFuncMask(); }
+      inline GLenum           GetStencilTestOpFailFront(void)           const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_FRONT].GetOpFail(); }
+      inline GLenum           GetStencilTestOpZfailFront(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_FRONT].GetOpZfail(); }
+      inline GLenum           GetStencilTestOpZpassFront(void)          const   { FUN_ENTRY(GL_LOG_TRACE); return mStencilOperations[SF_FRONT].GetOpZpass(); }
 
       inline GLenum           GetDepthTestFunc(void)                    const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthTestFunc; }
       inline GLboolean        GetDepthTestEnabled(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthTestEnabled; }

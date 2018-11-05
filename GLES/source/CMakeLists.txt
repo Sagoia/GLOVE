@@ -41,6 +41,7 @@ set(SOURCES
     resources/texture.cpp
     resources/rect.cpp
     resources/sampler.cpp
+    resources/screenSpacePass.cpp
     state/stateManager.cpp
     state/stateActiveObjects.cpp
     state/stateInputAssembly.cpp

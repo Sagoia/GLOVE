@@ -29,16 +29,21 @@
 
 #include "stateFragmentOperations.h"
 
+StencilOperations::StencilOperations():
+        mFuncCompare(GL_ALWAYS),
+        mFuncRef(0),
+        mFuncMask(0xFFFFFFFFu),
+        mOpFail(GL_KEEP),
+        mOpZfail(GL_KEEP),
+        mOpZpass(GL_KEEP) {
+    }
+
 StateFragmentOperations::StateFragmentOperations()
 : mScissorTestEnabled(GL_FALSE),
 mDepthBoundsTestEnabled(GL_FALSE), mMinDepthBounds(0.0f), mMaxDepthBounds(1.0f),
 mMultiSamplingEnabled(GL_FALSE), mSampleCoverageBits(1), mSampleCoverageValue(1.0f), mSampleCoverageInvert(GL_FALSE), mSampleCoverageEnabled(GL_FALSE), mSampleAlphaToCoverageEnabled(GL_FALSE),
 mSampleAlphaToOneEnabled(GL_FALSE), mSampleShadingEnabled(GL_FALSE), mMinSampleShading(1.0f),
-mStencilTestEnabled(GL_FALSE), mStencilTestFuncCompareFront(GL_ALWAYS), mStencilTestFuncCompareBack(GL_ALWAYS),
-mStencilTestFuncRefFront(0), mStencilTestFuncRefBack(0), mStencilTestFuncMaskFront(0xFF), mStencilTestFuncMaskBack(0xFF),
-mStencilTestOpFailFront(GL_KEEP), mStencilTestOpZfailFront(GL_KEEP), mStencilTestOpZpassFront(GL_KEEP),
-mStencilTestOpFailBack(GL_KEEP), mStencilTestOpZfailBack(GL_KEEP), mStencilTestOpZpassBack(GL_KEEP),
-mDepthTestFunc(GL_LESS), mDepthTestEnabled(GL_FALSE),
+mStencilTestEnabled(GL_FALSE), mDepthTestFunc(GL_LESS), mDepthTestEnabled(GL_FALSE),
 mBlendingEnabled(GL_FALSE), mBlendingEquationRGB(GL_FUNC_ADD), mBlendingEquationAlpha(GL_FUNC_ADD),
 mBlendingFactorSourceRGB(GL_ONE), mBlendingFactorSourceAlpha(GL_ONE), mBlendingFactorDestinationRGB(GL_ZERO), mBlendingFactorDestinationAlpha(GL_ZERO), mBlendingColorAttachmentCount(1),
 mBlendingLogicOp(GL_CLEAR), mBlendingLogicOpEnabled(GL_FALSE),
@@ -304,19 +309,13 @@ bool StateFragmentOperations::UpdateStencilTestFunc(GLenum face, GLenum func, GL
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    bool res = false;
-
-    if(face == GL_FRONT) {
-        res = (mStencilTestFuncCompareFront != func) || (mStencilTestFuncRefFront != ref) || (mStencilTestFuncMaskFront != mask);
-        mStencilTestFuncCompareFront = func;
-        mStencilTestFuncRefFront  = ref;
-        mStencilTestFuncMaskFront = mask;
-    } else {
-        res = (mStencilTestFuncCompareBack != func) || (mStencilTestFuncRefBack != ref) || (mStencilTestFuncMaskBack != mask);
-        mStencilTestFuncCompareBack = func;
-        mStencilTestFuncRefBack  = ref;
-        mStencilTestFuncMaskBack = mask;
-    }
+    bool res = true;
+    StencilOperations& stencilOperations = (face == GL_FRONT) ? mStencilOperations[SF_FRONT] : mStencilOperations[SF_BACK];
+    res = (stencilOperations.GetFuncCompare() != func) || (stencilOperations.GetFuncRef() != ref) || (stencilOperations.GetFuncMask() != mask);
+    stencilOperations.SetFuncCompare(func);
+    GLint clampedRef = std::min(std::max(ref, 0), 0xFF);
+    stencilOperations.SetFuncRef(clampedRef);
+    stencilOperations.SetFuncMask(mask);
 
     return res;
 }
@@ -325,18 +324,12 @@ bool StateFragmentOperations::UpdateStencilTestOp(GLenum face, GLenum fail, GLen
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    bool res = false;
-    if(face == GL_FRONT) {
-       res = (mStencilTestOpFailFront != fail) || (mStencilTestOpZfailFront != zfail) || (mStencilTestOpZpassFront != zpass);
-        mStencilTestOpFailFront  = fail;
-        mStencilTestOpZfailFront = zfail;
-        mStencilTestOpZpassFront = zpass;
-    } else {
-        res = (mStencilTestOpFailBack != fail) || (mStencilTestOpZfailBack != zfail) || (mStencilTestOpZpassBack != zpass);
-        mStencilTestOpFailBack  = fail;
-        mStencilTestOpZfailBack = zfail;
-        mStencilTestOpZpassBack = zpass;
-    }
+    bool res = true;
+    StencilOperations& stencilOperations = (face == GL_FRONT) ? mStencilOperations[SF_FRONT] : mStencilOperations[SF_BACK];
+    res = (stencilOperations.GetOpFail() != fail) || (stencilOperations.GetOpZfail() != zfail) || (stencilOperations.GetOpZpass() != zpass);
+    stencilOperations.SetOpFail(fail);
+    stencilOperations.SetOpZfail(zfail);
+    stencilOperations.SetOpZpass(zpass);
 
     return res;
 }

@@ -85,6 +85,9 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_USE_PLATFORM_ANDROID_KHR")
 endif()
 
+add_definitions(-DASSET_PATH="${CMAKE_INSTALL_PREFIX}/")
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_INSTALL_PREFIX})
+
 # Recurse into the the following subdirectories. This does not actually cause
 # another cmake executable to run. The same process will walk through the
 # project's entire directory structure.

@@ -28,6 +28,15 @@
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
 
+enum GLColorMaskBit {
+    GLC_RED     = 0,
+    GLC_GREEN   = 1,
+    GLC_BLUE    = 2,
+    GLC_ALPHA   = 3
+};
+
+GLboolean               GlColorMaskHasBit(GLubyte colorMask, GLColorMaskBit bit);
+GLubyte                 GlColorMaskPack(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 const char *            GlAttribTypeToString(GLenum type);
 GLenum                  GlFormatToGlInternalFormat(GLenum format, GLenum type);
 GLenum                  GlInternalFormatToGlType(GLenum internalFormat);

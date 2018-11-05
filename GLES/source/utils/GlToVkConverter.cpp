@@ -23,6 +23,7 @@
 
 #include "GlToVkConverter.h"
 #include "glLogger.h"
+#include "glUtils.h"
 
 VkBool32
 GlBooleanToVkBool(GLboolean value)
@@ -32,26 +33,26 @@ GlBooleanToVkBool(GLboolean value)
     return value ? VK_TRUE : VK_FALSE;
 }
 
-VkColorComponentFlagBits
-GLColorMaskToVkColorComponentFlagBits(GLchar colorMask)
+VkColorComponentFlags
+GLColorMaskToVkColorComponentFlags(GLubyte colorMask)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    assert(colorMask > 0);
-    uint8_t bits = 0;
-    if(colorMask & 0x8) {
+    //assert(colorMask > 0);
+    VkColorComponentFlags bits = 0;
+    if(GlColorMaskHasBit(colorMask, GLColorMaskBit::GLC_RED)) {
         bits |= VK_COLOR_COMPONENT_R_BIT;
     }
-    if(colorMask & 0x4) {
+    if(GlColorMaskHasBit(colorMask, GLColorMaskBit::GLC_GREEN)) {
         bits |= VK_COLOR_COMPONENT_G_BIT;
     }
-    if(colorMask & 0x2) {
+    if(GlColorMaskHasBit(colorMask, GLColorMaskBit::GLC_BLUE)) {
         bits |= VK_COLOR_COMPONENT_B_BIT;
     }
-    if(colorMask & 0x1) {
+    if(GlColorMaskHasBit(colorMask, GLColorMaskBit::GLC_ALPHA)) {
         bits |= VK_COLOR_COMPONENT_A_BIT;
     }
-    return static_cast<VkColorComponentFlagBits>(bits);
+    return static_cast<VkColorComponentFlags>(bits);
 }
 
 VkPolygonMode

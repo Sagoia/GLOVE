@@ -31,6 +31,21 @@
 
 #define CASE_STR(c)                                     case GL_ ##c: return "GL_" STRINGIFY(c);
 
+GLboolean
+GlColorMaskHasBit(GLubyte colorMask, GLColorMaskBit bit)
+{
+    return ((colorMask >> bit) & 0x1) == 1 ? GL_TRUE : GL_FALSE;
+}
+
+GLubyte
+GlColorMaskPack(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
+{
+    return static_cast<GLubyte>((red << GLColorMaskBit::GLC_RED)     |
+                                (green << GLColorMaskBit::GLC_GREEN) |
+                                (blue << GLColorMaskBit::GLC_BLUE)   |
+                                (alpha << GLColorMaskBit::GLC_ALPHA));
+}
+
 const char *
 GlAttribTypeToString(GLenum type)
 {

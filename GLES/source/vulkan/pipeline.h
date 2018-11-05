@@ -30,7 +30,6 @@
 namespace vulkanAPI {
 
 class Pipeline {
-
 private:
 
     const
@@ -38,7 +37,6 @@ private:
 
     VkViewport                                  mVkViewport;
     VkRect2D                                    mVkScissorRect;
-
     VkPipeline                                  mVkPipeline;
     VkPipelineLayout                            mVkPipelineLayout;
     VkPipelineCache                             mVkPipelineCache;
@@ -54,6 +52,7 @@ private:
     VkPipelineVertexInputStateCreateInfo       *mVkPipelineVertexInputState;
     VkPipelineMultisampleStateCreateInfo        mVkPipelineMultisampleState;
 
+    std::vector<bool>                           mEnabledDynamicStatesList;
     VkDynamicState                              mVkPipelineDynamicStateEnables[VK_DYNAMIC_STATE_RANGE_SIZE];
     VkPipelineDynamicStateCreateInfo            mVkPipelineDynamicState;
 
@@ -112,7 +111,7 @@ public:
                                                                                                            mVkPipelineColorBlendState.blendConstants[1] = color[1];
                                                                                                            mVkPipelineColorBlendState.blendConstants[2] = color[2];
                                                                                                            mVkPipelineColorBlendState.blendConstants[3] = color[3];    mUpdateState.Pipeline = true;}
-    inline void SetColorBlendAttachmentWriteMask(VkColorComponentFlagBits mask) { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.colorWriteMask = mask; mUpdateState.Pipeline = true;}
+    inline void SetColorBlendAttachmentWriteMask(VkColorComponentFlags mask)    { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.colorWriteMask = mask; mUpdateState.Pipeline = true;}
 
     inline void SetColorBlendAttachmentSrcColorFactor(VkBlendFactor factor)     { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.srcColorBlendFactor = factor; mUpdateState.Pipeline = true;}
     inline void SetColorBlendAttachmentDstColorFactor(VkBlendFactor factor)     { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.dstColorBlendFactor = factor; mUpdateState.Pipeline = true;}
@@ -152,6 +151,8 @@ public:
     inline void SetVertexInputState(
                             VkPipelineVertexInputStateCreateInfo *vertexInput)  { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineVertexInputState = vertexInput; }
     inline void SetCacheManager(CacheManager *cacheManager)                     { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
+           void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
+           void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height);
 
 // Create Functions
           void CreateInfo(void);
@@ -159,11 +160,11 @@ public:
           void CreateRasterizationState(VkPolygonMode polygonMode, VkCullModeFlagBits cullMode, VkFrontFace frontFace,
                                         VkBool32 depthBiasEnable, float depthBiasConstantFactor, float depthBiasSlopeFactor, float depthBiasClamp,
                                         VkBool32 depthClampEnable, VkBool32 rasterizerDiscardEnable);
-          void CreateColorBlendState(VkBool32 blendEnable, VkColorComponentFlagBits colorWriteMask,
+          void CreateColorBlendState(VkBool32 blendEnable, VkColorComponentFlags colorWriteMask,
                                      VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor,
                                      VkBlendOp colorBlendOp, VkBlendOp alphaBlendOp, VkLogicOp logicOp, VkBool32 logicOpEnable, uint32_t attachmentCount, float *blendConstants);
           void CreateViewportState(uint32_t viewportCount, uint32_t scissorCount);
-          void CreateDynamicState(void);
+          void CreateDynamicState(const std::vector<VkDynamicState>& states);
           void CreateDepthStencilState(VkBool32 depthTestEnable, VkBool32 depthWriteEnable, VkCompareOp depthCompareOp, VkBool32 depthBoundsTestEnable,
                                        float minDepthBounds, float maxDepthBounds, VkBool32  stencilTestEnable, VkStencilOp backfailOp, VkStencilOp backpassOp,
                                        VkStencilOp backdepthFailOp, uint32_t backwriteMask, VkCompareOp backcompareOp, uint32_t backcompareMask, uint32_t backreference,
@@ -176,12 +177,12 @@ public:
           void ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH);
 
 // Bind Functions
-          void Bind(VkCommandBuffer *CmdBuffer)                                 { FUN_ENTRY(GL_LOG_TRACE); vkCmdBindPipeline(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mVkPipeline); }
+          void Bind(const VkCommandBuffer *CmdBuffer) const;
 
 // Create Functions
           bool Create(const VkRenderPass *renderpass);
 // Update Functions
-          void UpdateDynamicState(VkCommandBuffer *CmdBuffer, float lineWidth);
+          void UpdateDynamicState(const VkCommandBuffer *CmdBuffer, float lineWidth) const;
 };
 
 }

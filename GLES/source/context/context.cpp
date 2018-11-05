@@ -69,6 +69,12 @@ Context::Context()
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsModeLineLoop     = false;
     mIsFullScreenRender = false;
+
+    mScreenSpacePass = new ScreenSpacePass(mVkContext, mCommandBufferManager);
+    mScreenSpacePass->Initialize();
+    mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
+    mScreenSpacePass->CreateDefaultPipelineStates();
+    mScreenSpacePass->GetPipeline()->SetCacheManager(mCacheManager);
 }
 
 Context::~Context()
@@ -88,6 +94,11 @@ Context::~Context()
     if(mPipeline != nullptr) {
         delete mPipeline;
         mPipeline = nullptr;
+    }
+
+    if(mScreenSpacePass != nullptr) {
+        delete mScreenSpacePass;
+        mScreenSpacePass = nullptr;
     }
 
     if(mExplicitIbo != nullptr) {

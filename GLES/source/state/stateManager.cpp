@@ -82,7 +82,7 @@ StateManager::InitVkPipelineStates(vulkanAPI::Pipeline *pipeline)
     float              depthBiasSlopeFactor    = GetRasterizationState()->GetPolygonOffsetUnits();
     float              depthBiasClamp          = GetRasterizationState()->GetPolygonOffsetClamp();
     VkBool32           blendEnable             = GlBooleanToVkBool(GetFragmentOperationsState()->GetBlendingEnabled());
-    VkColorComponentFlagBits colorWriteMask    = GLColorMaskToVkColorComponentFlagBits(GetFramebufferOperationsState()->GetColorMask());
+    VkColorComponentFlags colorWriteMask       = GLColorMaskToVkColorComponentFlags(GetFramebufferOperationsState()->GetColorMask());
 
     VkBlendFactor srcColorBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorSourceRGB());
     VkBlendFactor dstColorBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorDestinationRGB());
@@ -137,6 +137,9 @@ StateManager::InitVkPipelineStates(vulkanAPI::Pipeline *pipeline)
                             backdepthFailOp, backwriteMask, backcompareOp, backcompareMask, backreference, frontfailOp, frontpassOp, frontdepthFailOp, frontwriteMask, frontcompareOp, frontcompareMask, frontreference );
     pipeline->CreateViewportState(viewportCount, scissorCount);
     pipeline->CreateMultisampleState(alphaToOneEnable, alphaToCoverageEnable, rasterizationSamples, sampleShadingEnable, minSampleShading);
-    pipeline->CreateDynamicState();
+    std::vector<VkDynamicState> states = {VK_DYNAMIC_STATE_VIEWPORT,
+                                          VK_DYNAMIC_STATE_SCISSOR,
+                                          VK_DYNAMIC_STATE_LINE_WIDTH};
+    pipeline->CreateDynamicState(states);
     pipeline->CreateInfo();
 }

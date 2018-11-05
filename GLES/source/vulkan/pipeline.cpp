@@ -43,6 +43,8 @@ Pipeline::Pipeline(const vkContext_t *vkContext)
     mUpdateState.VertexAttribVBOs = true;
     mUpdateState.Viewport         = true;
     mUpdateState.Pipeline         = true;
+
+    mEnabledDynamicStatesList.resize(VK_DYNAMIC_STATE_RANGE_SIZE);
 }
 
 Pipeline::~Pipeline()
@@ -50,6 +52,24 @@ Pipeline::~Pipeline()
     FUN_ENTRY(GL_LOG_TRACE);
 
     Release();
+}
+
+void
+Pipeline::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    mVkViewport.x = x;
+    mVkViewport.y = y;
+    mVkViewport.width = width;
+    mVkViewport.height = height;
+}
+
+void
+Pipeline::SetScissor(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    mVkScissorRect.offset.x = x;
+    mVkScissorRect.offset.y = y;
+    mVkScissorRect.extent.width = width;
+    mVkScissorRect.extent.height = height;
 }
 
 void
@@ -169,7 +189,7 @@ Pipeline::CreateRasterizationState(VkPolygonMode polygonMode, VkCullModeFlagBits
 }
 
 void
-Pipeline::CreateColorBlendState(VkBool32 blendEnable, VkColorComponentFlagBits colorWriteMask,
+Pipeline::CreateColorBlendState(VkBool32 blendEnable, VkColorComponentFlags colorWriteMask,
     VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor,
     VkBlendOp colorBlendOp, VkBlendOp alphaBlendOp,
     VkLogicOp logicOp, VkBool32 logicOpEnable, uint32_t attachmentCount, float *blendConstants)
@@ -272,20 +292,50 @@ Pipeline::CreateMultisampleState(VkBool32 alphaToOneEnable, VkBool32 alphaToCove
 }
 
 void
-Pipeline::CreateDynamicState()
+Pipeline::CreateDynamicState(const std::vector<VkDynamicState>& states)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+    assert(states.size() <= VK_DYNAMIC_STATE_RANGE_SIZE);
+    for(size_t index = 0; index < mEnabledDynamicStatesList.size(); ++index) {
+        mEnabledDynamicStatesList[index] = false;
+    }
+    memset(mVkPipelineDynamicStateEnables, 0, sizeof(mVkPipelineDynamicStateEnables));
+
+    for(size_t stateIndex = 0; stateIndex < states.size(); ++stateIndex) {
+        VkDynamicState state = states[stateIndex];
+        mVkPipelineDynamicStateEnables[stateIndex] = state;
+        mEnabledDynamicStatesList[state] = true;
+    }
+
+    memset(static_cast<void *>(&mVkPipelineDynamicState), 0, sizeof(mVkPipelineDynamicState));
+    mVkPipelineDynamicState.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    mVkPipelineDynamicState.pNext             = nullptr;
+    mVkPipelineDynamicState.dynamicStateCount = static_cast<uint32_t>(states.size());
+    mVkPipelineDynamicState.pDynamicStates    = mVkPipelineDynamicStateEnables;
+}
+
+void
+Pipeline::UpdateDynamicState(const VkCommandBuffer *CmdBuffer, float lineWidth) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    memset(mVkPipelineDynamicStateEnables, 0, sizeof(mVkPipelineDynamicStateEnables));
-    mVkPipelineDynamicStateEnables[0] = VK_DYNAMIC_STATE_VIEWPORT;
-    mVkPipelineDynamicStateEnables[1] = VK_DYNAMIC_STATE_SCISSOR;
-    mVkPipelineDynamicStateEnables[2] = VK_DYNAMIC_STATE_LINE_WIDTH;
-
-    memset((void *)&mVkPipelineDynamicState, 0, sizeof(mVkPipelineDynamicState));
-    mVkPipelineDynamicState.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    mVkPipelineDynamicState.dynamicStateCount = 3;
-    mVkPipelineDynamicState.pNext             = nullptr;
-    mVkPipelineDynamicState.pDynamicStates    = mVkPipelineDynamicStateEnables;
+    if(mEnabledDynamicStatesList[VK_DYNAMIC_STATE_VIEWPORT]) {
+        vkCmdSetViewport  (*CmdBuffer, 0, mVkPipelineViewportState.viewportCount, &mVkViewport);
+    }
+    if(mEnabledDynamicStatesList[VK_DYNAMIC_STATE_SCISSOR]) {
+        vkCmdSetScissor   (*CmdBuffer, 0, mVkPipelineViewportState.scissorCount , &mVkScissorRect);
+    }
+    if(mEnabledDynamicStatesList[VK_DYNAMIC_STATE_LINE_WIDTH]) {
+        vkCmdSetLineWidth (*CmdBuffer, lineWidth);
+    }
+    /*
+    TODO:: fill the remaining dynamic states
+    VK_DYNAMIC_STATE_BLEND_CONSTANTS
+    VK_DYNAMIC_STATE_DEPTH_BOUNDS
+    VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK
+    VK_DYNAMIC_STATE_STENCIL_WRITE_MASK
+    VK_DYNAMIC_STATE_STENCIL_REFERENCE
+    */
 }
 
 void
@@ -301,13 +351,11 @@ Pipeline::SetInfo(const VkRenderPass *renderpass)
 }
 
 void
-Pipeline::UpdateDynamicState(VkCommandBuffer *CmdBuffer, float lineWidth)
+Pipeline::Bind(const VkCommandBuffer *CmdBuffer) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    vkCmdSetViewport  (*CmdBuffer, 0, mVkPipelineViewportState.viewportCount, &mVkViewport);
-    vkCmdSetScissor   (*CmdBuffer, 0, mVkPipelineViewportState.scissorCount , &mVkScissorRect);
-    vkCmdSetLineWidth (*CmdBuffer, lineWidth);
+    vkCmdBindPipeline(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mVkPipeline);
 }
 
 bool
