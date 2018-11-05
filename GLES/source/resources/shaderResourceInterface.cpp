@@ -187,19 +187,13 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
             }
 
             // compute uniform size
-            struct uniformDirty newUniformDirty;
-            newUniformDirty.size   = uniform.arraySize * GlslTypeToSize(uniform.glType);
-            newUniformDirty.offset = uniform.offset;
-            newUniformDirty.data   = (void *)itUniform->second.pClientData;
-            uniformInterfaceDirty.push_back(newUniformDirty);
-            // for (size_t i = 0; i < (size_t)uniform.arraySize; i++) {
-            //      struct uniformDirty newUniformDirty;
-            //      newUniformDirty.size   = GlslTypeToSize(uniform.glType);
-            //      newUniformDirty.offset = uniform.offset + i*GlslTypeToAllignment(uniform.glType);
-            //      newUniformDirty.data   = (void *)(itUniform->second.pClientData + i*newUniformDirty.size);
-            //
-            //      uniformInterfaceDirty.push_back(newUniformDirty);
-            //  }
+            for (size_t i = 0; i < (size_t)uniform.arraySize; i++) {
+                struct uniformDirty newUniformDirty;
+                newUniformDirty.size   = GlslTypeToSize(uniform.glType);
+                newUniformDirty.offset = uniform.offset + i*GlslTypeToAllignment(uniform.glType);
+                newUniformDirty.data   = (void *)(itUniform->second.pClientData + i*newUniformDirty.size);
+                uniformInterfaceDirty.push_back(newUniformDirty);
+            }
         }
 
         if(blockDataDirty) {
