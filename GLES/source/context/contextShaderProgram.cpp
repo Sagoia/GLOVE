@@ -261,13 +261,20 @@ Context::GetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei
     const ShaderResourceInterface::uniform *uniform = progPtr->GetUniform((uint32_t)index);
     assert(uniform);
     GLint len = static_cast<GLint>(std::max(std::min((int)uniform->reflectionName.length(), bufsize-1), 0));
-    if(length) {
-        *length = len;
+
+    string index0Str = "";
+    if(uniform->arraySize > 1) {
+        len += 3;
+        index0Str = "[0]";
     }
 
     if(len) {
-        memcpy((void *)name, (void *)uniform->reflectionName.c_str(), len);
+        memcpy((void *)name, (void *) (uniform->reflectionName + index0Str).c_str(), len);
         name[len] = '\0';
+    }
+
+    if(length) {
+        *length = len;
     }
 
     if(type) {
