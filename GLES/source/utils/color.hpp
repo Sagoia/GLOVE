@@ -13,9 +13,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 
-#define CLAMP(x)                                        ((x) > 0xff ? 0xff : ( (x) < 0 ? 0 : (x) ))
-#define CLAMP_F(x)                                      ((x) > 1.0f ? 1.0f : ( (x) < 0.0f ? 0.0f : (x) ))
+template<typename T>
+inline const T
+CLAMP(const T x, const T minVal, const T maxVal) {
+    return std::min(std::max(x, minVal), maxVal);
+};
+
+#define CLAMPF_01(x)                                    CLAMP(x, 0.0f, 1.0f)
 
 // TODO:: check and reimplement/optimize convertions for packed image formats if needed
 struct Color {
@@ -308,9 +314,9 @@ struct Color {
         temp_R = (int16_t)((18 * (int16_t)y                   +   24 * (int16_t)v - 3368) >> 4);
         temp_G = (int16_t)((18 * (int16_t)y -  6 * (int16_t)u -   16 * (int16_t)v + 2536) >> 4);
         temp_B = (int16_t)((18 * (int16_t)y + 32 * (int16_t)u - 4392) >> 4);
-        color.r = CLAMP(temp_R);
-        color.g = CLAMP(temp_G);
-        color.b = CLAMP(temp_B);
+        color.r = CLAMP(temp_R, int16_t(0), int16_t(0xff));
+        color.g = CLAMP(temp_G, int16_t(0), int16_t(0xff));
+        color.b = CLAMP(temp_B, int16_t(0), int16_t(0xff));
         color.a = 0xff;
 
         return color;

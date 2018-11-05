@@ -134,10 +134,10 @@ StateFragmentOperations::SetBlendingColor(GLclampf red, GLclampf green, GLclampf
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mBlendingColor[0] = CLAMP_F(red);
-    mBlendingColor[1] = CLAMP_F(green);
-    mBlendingColor[2] = CLAMP_F(blue);
-    mBlendingColor[3] = CLAMP_F(alpha);
+    mBlendingColor[0] = CLAMPF_01(red);
+    mBlendingColor[1] = CLAMPF_01(green);
+    mBlendingColor[2] = CLAMPF_01(blue);
+    mBlendingColor[3] = CLAMPF_01(alpha);
 }
 
 void
@@ -176,7 +176,7 @@ StateFragmentOperations::UpdateSampleCoverageValue(GLfloat value)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    GLfloat v = CLAMP_F(value);
+    GLfloat v = CLAMPF_01(value);
     bool res = mSampleCoverageValue != v;
     mSampleCoverageValue = v;
     return res;
@@ -275,10 +275,10 @@ StateFragmentOperations::UpdateBlendingColor(GLclampf red, GLclampf green, GLcla
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    GLfloat r = CLAMP_F(red);
-    GLfloat g = CLAMP_F(green);
-    GLfloat b = CLAMP_F(blue);
-    GLfloat a = CLAMP_F(alpha);
+    GLfloat r = CLAMPF_01(red);
+    GLfloat g = CLAMPF_01(green);
+    GLfloat b = CLAMPF_01(blue);
+    GLfloat a = CLAMPF_01(alpha);
 
     bool res = (mBlendingColor[0] != r) || (mBlendingColor[1] != g) || (mBlendingColor[2] != b) || (mBlendingColor[3] != a);
 
@@ -313,8 +313,7 @@ bool StateFragmentOperations::UpdateStencilTestFunc(GLenum face, GLenum func, GL
     StencilOperations& stencilOperations = (face == GL_FRONT) ? mStencilOperations[SF_FRONT] : mStencilOperations[SF_BACK];
     res = (stencilOperations.GetFuncCompare() != func) || (stencilOperations.GetFuncRef() != ref) || (stencilOperations.GetFuncMask() != mask);
     stencilOperations.SetFuncCompare(func);
-    GLint clampedRef = std::min(std::max(ref, 0), 0xFF);
-    stencilOperations.SetFuncRef(clampedRef);
+    stencilOperations.SetFuncRef(CLAMP(ref, 0, 0xFF));
     stencilOperations.SetFuncMask(mask);
 
     return res;

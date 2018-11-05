@@ -77,13 +77,13 @@ public:
       inline void             SetViewportRectY(GLint y)                          { FUN_ENTRY(GL_LOG_TRACE); mViewportRectangle.y = y; }
       inline void             SetViewportRectWidth(GLint width)                  { FUN_ENTRY(GL_LOG_TRACE); mViewportRectangle.width = width; }
       inline void             SetViewportRectHeight(GLint height)                { FUN_ENTRY(GL_LOG_TRACE); mViewportRectangle.height = height; }
-      inline void             SetMinDepthRange(GLfloat min_depth)                { FUN_ENTRY(GL_LOG_TRACE); mMinDepthRange = CLAMP_F(min_depth); }
-      inline void             SetMaxDepthRange(GLfloat max_depth)                { FUN_ENTRY(GL_LOG_TRACE); mMaxDepthRange = CLAMP_F(max_depth); }
+      inline void             SetMinDepthRange(GLfloat min_depth)                { FUN_ENTRY(GL_LOG_TRACE); mMinDepthRange = CLAMPF_01(min_depth); }
+      inline void             SetMaxDepthRange(GLfloat max_depth)                { FUN_ENTRY(GL_LOG_TRACE); mMaxDepthRange = CLAMPF_01(max_depth); }
 
 // Update Functions
       inline bool             UpdateDepthRange(GLfloat min_depth,
-                                               GLfloat max_depth)                { FUN_ENTRY(GL_LOG_TRACE); GLfloat min_depth_f = CLAMP_F(min_depth);
-                                                                                                        GLfloat max_depth_f = CLAMP_F(max_depth);
+                                               GLfloat max_depth)                { FUN_ENTRY(GL_LOG_TRACE); GLfloat min_depth_f = CLAMPF_01(min_depth);
+                                                                                                        GLfloat max_depth_f = CLAMPF_01(max_depth);
                                                                                                         bool res = (mMinDepthRange != min_depth_f) || (mMaxDepthRange != max_depth_f);
                                                                                                         mMinDepthRange = min_depth_f;
                                                                                                         mMaxDepthRange = max_depth_f;

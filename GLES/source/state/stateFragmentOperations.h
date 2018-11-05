@@ -184,7 +184,7 @@ public:
       inline void             SetScissorRectY(GLint y)                          { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.y = y; }
       inline void             SetScissorRectWidth(GLint width)                  { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.width = width; }
       inline void             SetScissorRectHeight(GLint height)                { FUN_ENTRY(GL_LOG_TRACE); mScissorTestRectangle.height = height; }
-      inline void             SetSampleCoverageValue(GLfloat value)             { FUN_ENTRY(GL_LOG_TRACE); mSampleCoverageValue = CLAMP_F(value); }
+      inline void             SetSampleCoverageValue(GLfloat value)             { FUN_ENTRY(GL_LOG_TRACE); mSampleCoverageValue = CLAMPF_01(value); }
       inline void             SetSampleCoverageInvert(GLboolean invert)         { FUN_ENTRY(GL_LOG_TRACE); mSampleCoverageInvert = invert; }
       inline void             SetSampleCoverageEnabled(GLboolean enable)        { FUN_ENTRY(GL_LOG_TRACE); mSampleCoverageEnabled = enable; }
       inline void             SetSampleAlphaToCoverageEnabled(GLboolean enable) { FUN_ENTRY(GL_LOG_TRACE); mSampleAlphaToCoverageEnabled = enable; }

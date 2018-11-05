@@ -156,10 +156,10 @@ StateFramebufferOperations::SetClearColor(GLclampf red, GLclampf green, GLclampf
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mClearColor[0] = CLAMP_F(red);
-    mClearColor[1] = CLAMP_F(green);
-    mClearColor[2] = CLAMP_F(blue);
-    mClearColor[3] = CLAMP_F(alpha);
+    mClearColor[0] = CLAMPF_01(red);
+    mClearColor[1] = CLAMPF_01(green);
+    mClearColor[2] = CLAMPF_01(blue);
+    mClearColor[3] = CLAMPF_01(alpha);
 }
 
 void
@@ -167,7 +167,7 @@ StateFramebufferOperations::SetClearDepth(GLfloat depth)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mClearDepth   = CLAMP_F(depth);
+    mClearDepth   = CLAMPF_01(depth);
 }
 
 // Update Functions
@@ -176,10 +176,10 @@ StateFramebufferOperations::UpdateClearColor(GLclampf red, GLclampf green, GLcla
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    GLfloat r = CLAMP_F(red);
-    GLfloat g = CLAMP_F(green);
-    GLfloat b = CLAMP_F(blue);
-    GLfloat a = CLAMP_F(alpha);
+    GLfloat r = CLAMPF_01(red);
+    GLfloat g = CLAMPF_01(green);
+    GLfloat b = CLAMPF_01(blue);
+    GLfloat a = CLAMPF_01(alpha);
 
     bool res = (mClearColor[0] != r) || (mClearColor[1] != g) || (mClearColor[2] != b) || (mClearColor[3] != a);
 
@@ -196,7 +196,7 @@ StateFramebufferOperations::UpdateClearDepth(GLfloat depth)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    GLfloat d = CLAMP_F(depth);
+    GLfloat d = CLAMPF_01(depth);
 
     bool res = (mClearDepth != d);
     mClearDepth = d;

@@ -206,8 +206,7 @@ RenderPass::SetClearDepthStencilValue(float depth, uint32_t stencil)
 {
     FUN_ENTRY(GL_LOG_TRACE);
     mVkClearValues[1].depthStencil.depth   = depth;
-    // 8-bit stencil
-    mVkClearValues[1].depthStencil.stencil = stencil ;
+    mVkClearValues[1].depthStencil.stencil = stencil;
 }
 
 }
