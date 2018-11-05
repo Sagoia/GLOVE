@@ -28,6 +28,7 @@
 
 #include "renderbuffer.h"
 #include "utils/glUtils.h"
+#include "vulkan/utils.h"
 
 Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
@@ -64,12 +65,17 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
     mInternalFormat = internalformat;
 
     mTexture->SetTarget(GL_TEXTURE_2D);
-    mTexture->SetVkFormat(GlInternalFormatToVkFormat(mInternalFormat));
+
+    VkFormat vkformat = GlInternalFormatToVkFormat(mInternalFormat);
 
     if(GlFormatIsColorRenderable(mInternalFormat)) {
+        mTexture->SetVkFormat(vkformat);
         mTexture->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
         mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     } else {
+        // convert to supported format
+        vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
+        mTexture->SetVkFormat(vkformat);
         mTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }

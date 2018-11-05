@@ -29,6 +29,95 @@
 #include "utils/glLogger.h"
 #include "utils/parser_helpers.h"
 
+uint32_t
+GetVkFormatDepthBits(VkFormat format)
+{
+    switch (format) {
+        case VK_FORMAT_S8_UINT:                 return 0;
+        case VK_FORMAT_D16_UNORM:
+        case VK_FORMAT_D16_UNORM_S8_UINT:       return 16;
+        case VK_FORMAT_X8_D24_UNORM_PACK32:
+        case VK_FORMAT_D24_UNORM_S8_UINT:       return 24;
+        case VK_FORMAT_D32_SFLOAT:
+        case VK_FORMAT_D32_SFLOAT_S8_UINT:      return 32;
+        default: { NOT_REACHED(); return 24; }
+    }
+}
+
+uint32_t
+GetVkFormatStencilBits(VkFormat format)
+{
+    switch (format) {
+        case VK_FORMAT_S8_UINT:
+        case VK_FORMAT_D16_UNORM_S8_UINT:
+        case VK_FORMAT_D24_UNORM_S8_UINT:
+        case VK_FORMAT_D32_SFLOAT_S8_UINT:      return 8;
+        case VK_FORMAT_D16_UNORM:
+        case VK_FORMAT_X8_D24_UNORM_PACK32:
+        case VK_FORMAT_D32_SFLOAT:              return 0;
+        default: { NOT_REACHED(); return 24; }
+    }
+}
+
+VkFormat
+FindSupportedFormat(VkPhysicalDevice vkPhysicalDevice, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+{
+    for (VkFormat format : candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(vkPhysicalDevice, format, &props);
+
+        if(tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            return format;
+        }
+        else if(tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+
+    return VK_FORMAT_UNDEFINED;
+}
+
+VkFormat
+FindSupportedDepthStencilFormat(VkPhysicalDevice dev, uint32_t depthSize, uint32_t stencilSize)
+{
+    std::vector<VkFormat> acceptableFormats;
+    switch(depthSize) {
+    case 0:
+    {
+        stencilSize ?
+                    acceptableFormats = {VK_FORMAT_S8_UINT,
+                     VK_FORMAT_D16_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT} :
+                    acceptableFormats = { }; break;
+    }
+    case 16:
+    {
+        stencilSize ?
+                    acceptableFormats = {VK_FORMAT_D16_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT} :
+                    acceptableFormats = {VK_FORMAT_D16_UNORM, VK_FORMAT_X8_D24_UNORM_PACK32, VK_FORMAT_D32_SFLOAT}; break;
+    }
+    case 24:
+    {
+        stencilSize ?
+                    acceptableFormats = {VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT} :
+                    acceptableFormats = {VK_FORMAT_X8_D24_UNORM_PACK32, VK_FORMAT_D32_SFLOAT}; break;
+    }
+    case 32:
+    {
+        stencilSize ?
+                    acceptableFormats = {VK_FORMAT_D32_SFLOAT_S8_UINT} :
+                    acceptableFormats = {VK_FORMAT_D32_SFLOAT}; break;
+    }
+    default: NOT_REACHED(); break;
+    }
+
+    return FindSupportedFormat(
+        dev,
+        acceptableFormats,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
+}
+
 bool
 VkFormatIsDepthStencil(VkFormat format)
 {

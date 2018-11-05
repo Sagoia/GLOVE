@@ -25,7 +25,13 @@
 #define __VKUTILS_H__
 
 #include "vulkan/vulkan.h"
+#include <vector>
 
+
+uint32_t                GetVkFormatStencilBits(VkFormat format);
+uint32_t                GetVkFormatDepthBits(VkFormat format);
+VkFormat                FindSupportedDepthStencilFormat(VkPhysicalDevice dev, uint32_t depthSize, uint32_t stencilSize);
+VkFormat                FindSupportedFormat(VkPhysicalDevice vkPhysicalDevice, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 bool                    VkFormatIsDepthStencil(VkFormat format);
 bool                    VkFormatIsDepth(VkFormat format);
 bool                    VkFormatIsStencil(VkFormat format);

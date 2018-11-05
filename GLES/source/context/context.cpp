@@ -209,41 +209,34 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     return fbo;
 }
 
+
 Texture *
 Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkFormat depthFormat = VK_FORMAT_UNDEFINED;
+    VkFormat depthStencilFormat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], eglSurfaceInterface->depthSize, eglSurfaceInterface->stencilSize);
 
-    switch(eglSurfaceInterface->depthSize) {
-    case 0:  depthFormat = eglSurfaceInterface->stencilSize ? VK_FORMAT_S8_UINT            : VK_FORMAT_UNDEFINED;           break;
-    case 16: depthFormat = eglSurfaceInterface->stencilSize ? VK_FORMAT_D16_UNORM_S8_UINT  : VK_FORMAT_D16_UNORM;           break;
-    case 24: depthFormat = eglSurfaceInterface->stencilSize ? VK_FORMAT_D24_UNORM_S8_UINT  : VK_FORMAT_X8_D24_UNORM_PACK32; break;
-    case 32: depthFormat = eglSurfaceInterface->stencilSize ? VK_FORMAT_D32_SFLOAT_S8_UINT : VK_FORMAT_D32_SFLOAT;          break;
-    default: NOT_REACHED(); break;
-    }
-
-    if(depthFormat == VK_FORMAT_UNDEFINED) {
+    if(depthStencilFormat == VK_FORMAT_UNDEFINED) {
         return nullptr;
     }
 
     Texture *tex = new Texture(mVkContext, mCommandBufferManager);
     tex->SetTarget(GL_TEXTURE_2D);
-    tex->SetVkFormat(depthFormat);
+    tex->SetVkFormat(depthStencilFormat);
     tex->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     tex->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
 
-    GLenum glformat = VkFormatToGlInternalformat(depthFormat);
+    GLenum glformat = VkFormatToGlInternalformat(depthStencilFormat);
     tex->InitState();
     tex->SetState(eglSurfaceInterface->width, eglSurfaceInterface->height,
                   0, 0,
                   GlInternalFormatToGlFormat(glformat),
                   GlInternalFormatToGlType(glformat),
                   Texture::GetDefaultInternalAlignment(),
-                  NULL);
+                  nullptr);
     return tex->Allocate() ? tex : nullptr;
 }
 
