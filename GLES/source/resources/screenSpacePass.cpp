@@ -234,7 +234,7 @@ bool ScreenSpacePass::CreateDescriptorPool(std::vector<VkDescriptorPoolSize>& po
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = 1;
-    poolInfo.flags = 0;
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
     VkResult res = vkCreateDescriptorPool(mVkContext->vkDevice, &poolInfo, nullptr, &mVkDescriptorPool);
     return res == VK_SUCCESS;
