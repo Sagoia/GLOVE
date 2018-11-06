@@ -36,6 +36,7 @@ private:
       GLfloat             mClearColor[4];
       GLfloat             mClearDepth;
       GLint               mClearStencil;
+      uint32_t            mClearStencilOld;
 
       GLubyte             mColorMask;
       GLboolean           mDepthMask;
@@ -52,6 +53,7 @@ public:
              void             GetClearColor(GLfloat *params)            const;
       inline GLfloat          GetClearDepth(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mClearDepth; }
       inline GLint            GetClearStencil(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mClearStencil; }
+      inline uint32_t         GetClearStencilOld(void)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mClearStencilOld; }
       inline GLboolean        GetDepthMask(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthMask; }
       inline GLubyte          GetColorMask(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mColorMask; }
       inline GLboolean        IsColorWriteEnabled(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mColorMask > 0; }
@@ -69,7 +71,8 @@ public:
 // Set Functions
              void             SetClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
              void             SetClearDepth(GLfloat depth);
-      inline void             SetClearStencil(GLint stencil)                    { FUN_ENTRY(GL_LOG_TRACE); mClearStencil = stencil; }
+      inline void             SetClearStencil(GLint stencil)                    { FUN_ENTRY(GL_LOG_TRACE); mClearStencil    = stencil; }
+      inline void             SetClearStencilOld(uint32_t stencil)              { FUN_ENTRY(GL_LOG_TRACE); mClearStencilOld = stencil; }
 
 // Update Functions
       bool                    UpdateClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);

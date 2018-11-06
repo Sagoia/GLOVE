@@ -30,7 +30,7 @@
 #include "utils/glUtils.h"
 
 StateFramebufferOperations::StateFramebufferOperations()
-: mClearDepth(1.0f), mClearStencil(0),
+: mClearDepth(1.0f), mClearStencil(0), mClearStencilOld(0u),
 mDepthMask(GL_TRUE), mStencilMaskFront(0xFFFFFFFFu), mStencilMaskBack(0xFFFFFFFFu)
 {
     FUN_ENTRY(GL_LOG_TRACE);

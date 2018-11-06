@@ -28,23 +28,27 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    const StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+    StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
 
     GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
     if(clearColorEnabled) {
         stateFramebufferOperations->GetClearColor(clearColorValue);
     }
-    GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth()   : 0.0f;
+    GLfloat  clearDepthValue   = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth() : 0.0f;
     uint32_t clearStencilValue = clearStencilEnabled ? stateFramebufferOperations->GetClearStencilMasked() : 0u;
+
+    if(stateFramebufferOperations->StencilMaskActive())
+        clearStencilValue |= stateFramebufferOperations->GetClearStencilOld() & (~(stateFramebufferOperations->GetStencilMaskFront() & 0xFF));
+    stateFramebufferOperations->SetClearStencilOld(clearStencilValue);
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     mWriteFBO->CreateRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
-                                stateFramebufferOperations->IsColorWriteEnabled(),
-                                stateFramebufferOperations->IsDepthWriteEnabled(),
-                                stateFramebufferOperations->IsStencilWriteEnabled(),
-                                clearColorValue, clearDepthValue, clearStencilValue,
-                                 &mClearRect);
+                               stateFramebufferOperations->IsColorWriteEnabled(),
+                               stateFramebufferOperations->IsDepthWriteEnabled(),
+                               stateFramebufferOperations->IsStencilWriteEnabled(),
+                               clearColorValue, clearDepthValue, clearStencilValue,
+                               &mClearRect);
     mWriteFBO->BeginVkRenderPass();
 }
 
@@ -62,12 +66,8 @@ Context::Clear(GLbitfield mask)
         return;
     }
 
-    const StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
-
     // color masks are executed implicitly through a screen-space pass (i.e., need a VkPipeline object)
-    bool performCustomClear =
-            (stateFramebufferOperations->ColorMaskActive() && clearColorEnabled);
-
+    bool performCustomClear = (mStateManager.GetFramebufferOperationsState()->ColorMaskActive() && clearColorEnabled);
     if(!performCustomClear) {
         ClearSimple(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
     } else {
@@ -94,15 +94,17 @@ Context::ClearMask(bool clearDepthEnabled, bool clearStencilEnabled)
     if(mWriteFBO->IsInClearState()) {
         Finish();
     }
-
-    const StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
-    const StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
-
     SetClearRect();
 
+    StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+
     GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
-    GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth()   : 0.0f;
+    GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth() : 0.0f;
     uint32_t clearStencilValue = clearStencilEnabled ? stateFramebufferOperations->GetClearStencilMasked() : 0u;
+
+    if(stateFramebufferOperations->StencilMaskActive())
+        clearStencilValue |= stateFramebufferOperations->GetClearStencilOld() & (~(stateFramebufferOperations->GetStencilMaskFront() & 0xFF));
+    stateFramebufferOperations->SetClearStencilOld(clearStencilValue);
 
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     // perform a screen-space pass
@@ -121,10 +123,6 @@ Context::ClearMask(bool clearDepthEnabled, bool clearStencilEnabled)
 
     pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
     pipeline->SetDepthWriteEnable(stateFramebufferOperations->IsDepthWriteEnabled());
-    pipeline->SetStencilBackCompareMask(stateFragmentOperations->GetStencilTestFuncMaskBack());
-    pipeline->SetStencilBackReference(stateFragmentOperations->GetStencilTestFuncRefBack());
-    pipeline->SetStencilFrontCompareMask(stateFragmentOperations->GetStencilTestFuncMaskFront());
-    pipeline->SetStencilFrontReference(stateFragmentOperations->GetStencilTestFuncRefFront());
     pipeline->SetUpdatePipeline(true);
     pipeline->SetViewport(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
     pipeline->SetScissor(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
