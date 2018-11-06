@@ -430,14 +430,6 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
                 aggregateName = string(aggregateName, 0, firstOpenBracket);
             }
 
-            /// Remove any other "[*]" from uniformName too
-            size_t lastOpenBracket = uniformName.find_last_of("[");
-            while(lastOpenBracket > dotPosition && lastOpenBracket != string::npos){
-                const size_t lastCloseBracket = uniformName.find_last_of("]");
-                uniformName.erase(lastOpenBracket, lastCloseBracket - lastOpenBracket + 1);
-                lastOpenBracket = uniformName.find_last_of("[");
-            }
-
             /// Register aggregate and keep track of highest array index (if any)
             aggregateMap_t::iterator aggrIt = mAggregates.find(aggregateName);
             if(aggrIt != mAggregates.end()) {
@@ -571,14 +563,23 @@ GlslangShaderCompiler::SetUniformBlocksOffset(const glslang::TProgram* prog)
 
             assert(uni.pBlock);
             assert((uni.pBlock == pBlock && uni.pAggregate == pBlock->pAggregate) || (uni.pBlock != pBlock && uni.pAggregate != pBlock->pAggregate));
+            string variableName = uni.variableName;
+
+            /// Remove any other "[*]" from uniformName too
+            size_t lastOpenBracket = variableName.find_last_of("[");
+            while(lastOpenBracket > 0 && lastOpenBracket != string::npos){
+                const size_t lastCloseBracket = variableName.find_last_of("]");
+                variableName.erase(lastOpenBracket, lastCloseBracket - lastOpenBracket + 1);
+                lastOpenBracket = variableName.find_last_of("[");
+            }
 
             /// Query uniform's offset in block from glslang
             size_t offset = GLOVE_INVALID_OFFSET;
             string uniName;
             if(uni.pAggregate->name.compare("gl_DepthRange")) {
-                uniName = uni.pAggregate->name + string(".") + uni.variableName;
+                uniName = uni.pAggregate->name + string(".") + variableName;
             } else {
-                uniName = string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + string(".") + uni.variableName;
+                uniName = string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + string(".") + variableName;
             }
 
             for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformVariables(); ++index) {
