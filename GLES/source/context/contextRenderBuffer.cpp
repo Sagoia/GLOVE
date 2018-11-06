@@ -211,6 +211,10 @@ Context::RenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width
         return;
     }
 
+    if(!width || !height) {
+        return;
+    }
+
     if((activeRenderbufferId == mWriteFBO->GetColorAttachmentName()    ||
         activeRenderbufferId == mWriteFBO->GetDepthAttachmentName()    ||
         activeRenderbufferId == mWriteFBO->GetStencilAttachmentName()) &&
