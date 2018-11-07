@@ -458,7 +458,9 @@ Context::Finish(void)
         return;
     }
 
-    mCommandBufferManager->WaitLastSubmition();
+    if(!mCommandBufferManager->WaitLastSubmition()) {
+        return;
+    }
 
     if(!mWriteFBO->IsInDeleteState()) {
         if(mWriteFBO == mSystemFBO) {
@@ -483,12 +485,16 @@ Context::Flush(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mWriteFBO && mWriteFBO->EndVkRenderPass()) {
+    if(mWriteFBO == nullptr) {
+        return false;
+    }
+
+    if(mWriteFBO->EndVkRenderPass()) {
         mCommandBufferManager->EndVkDrawCommandBuffer();
         mCommandBufferManager->SubmitVkDrawCommandBuffer();
-        return true;
     }
-    return false;
+
+    return true;
 }
 
 void

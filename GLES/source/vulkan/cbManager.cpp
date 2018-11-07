@@ -415,9 +415,10 @@ CommandBufferManager::WaitLastSubmition(void)
         }
 
         mLastSubmittedBuffer = GLOVE_NO_BUFFER_TO_WAIT;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 bool

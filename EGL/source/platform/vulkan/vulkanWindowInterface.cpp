@@ -358,6 +358,8 @@ VulkanWindowInterface::PresentImage(EGLSurface_t *surface)
     std::vector<VkSemaphore> pSems;
     if(mVkInterface->vkSyncItems->drawSemaphoreFlag) {
         pSems.push_back(mVkInterface->vkSyncItems->vkDrawSemaphore);
+    } else {
+        pSems.push_back(mVkInterface->vkSyncItems->vkAcquireSemaphore);
     }
 
     mVkInterface->vkSyncItems->acquireSemaphoreFlag = true;
