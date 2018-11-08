@@ -364,7 +364,8 @@ ScreenSpacePass::CreateDefaultPipelineStates()
                                          0.0f, VK_FALSE, VK_FALSE);
 
     std::vector<VkDynamicState> states = {VK_DYNAMIC_STATE_VIEWPORT,
-                                          VK_DYNAMIC_STATE_SCISSOR};
+                                          VK_DYNAMIC_STATE_SCISSOR,
+                                          VK_DYNAMIC_STATE_LINE_WIDTH};
     mPipeline->CreateDynamicState(states);
     GLfloat     blendcolor[4] = { 0.0f, 0.0f, 0.0f, 0.0f};
 
