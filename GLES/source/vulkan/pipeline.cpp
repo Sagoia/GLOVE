@@ -178,6 +178,7 @@ Pipeline::CreateRasterizationState(VkPolygonMode polygonMode, VkCullModeFlagBits
     mVkPipelineRasterizationState.depthClampEnable        = depthClampEnable;
     mVkPipelineRasterizationState.depthBiasClamp          = depthBiasClamp;
     mVkPipelineRasterizationState.rasterizerDiscardEnable = rasterizerDiscardEnable;
+    mVkPipelineRasterizationState.lineWidth               = 1.0f;
 
     SetRasterizationPolygonMode(polygonMode);
     SetRasterizationCullMode(VK_FALSE, cullMode);

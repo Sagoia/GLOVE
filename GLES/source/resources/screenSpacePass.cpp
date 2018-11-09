@@ -24,7 +24,8 @@
 #include "screenSpacePass.h"
 #include "utils/VkToGlConverter.h"
 #include "shaderProgram.h"
-#include <fstream>
+#include "glslang/glslangShaderCompiler.h"
+#include "context/context.h"
 
 struct ScreenSpaceVertex {
     float pos[2];
@@ -34,26 +35,29 @@ struct UniformBufferObject_ScreenSpace {
     float color[4];
 };
 
-ScreenSpacePass::ScreenSpacePass(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
-    mVkContext(vkContext), mCommandBufferManager(cbManager),
-    mVkVertShaderModule(VK_NULL_HANDLE), mVkFragShaderModule(VK_NULL_HANDLE),
-    mVkDescriptorSetLayout(VK_NULL_HANDLE), mVkDescriptorPool(VK_NULL_HANDLE),
-    mVKDescriptorSet(VK_NULL_HANDLE),
+ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
+    mGLContext(GLContext), mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
     mNumElements(0), mVertexBuffer(nullptr),
-    mVertexInputInfo(), mPipelineLayoutInfo(),
-    mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)), mPipeline(new vulkanAPI::Pipeline(vkContext)),
-    mVkPipelineLayout(VK_NULL_HANDLE), mClearColorUBO(nullptr)
+    mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)),
+    mPipeline(new vulkanAPI::Pipeline(vkContext)),
+    mInitializedData(false), mInitializedPipeline(false)
 {
+    FUN_ENTRY(GL_LOG_TRACE);
 
 }
 
 ScreenSpacePass::~ScreenSpacePass()
 {
+    FUN_ENTRY(GL_LOG_TRACE);
+
     Destroy();
 }
 
-bool ScreenSpacePass::CreateMeshData()
+bool
+ScreenSpacePass::CreateMeshData()
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     // the rate to load data from memory throughout the vertices
     VkVertexInputBindingDescription bindingDescription = {};
     bindingDescription.binding = 0;
@@ -72,10 +76,6 @@ bool ScreenSpacePass::CreateMeshData()
 
     float pos = 1.0f;
     std::vector<ScreenSpaceVertex> vertices =  {
-     // bottom left
-     //   {{0.0, -0.5}},
-     //   {{0.5, 0.5}},
-     //   {{-0.5, 0.5}}
      // bottom left
      {{-pos, -pos}},
      // bottom right
@@ -98,8 +98,11 @@ bool ScreenSpacePass::CreateMeshData()
     return true;
 }
 
-bool ScreenSpacePass::DestroyMeshData()
+bool
+ScreenSpacePass::DestroyMeshData()
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     if(mVertexBuffer) {
         mVertexBuffer->Release();
     }
@@ -108,225 +111,138 @@ bool ScreenSpacePass::DestroyMeshData()
     return true;
 }
 
+void
+ScreenSpacePass::ShaderData::Destroy()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(shaderCompiler) {
+        delete shaderCompiler;
+        shaderCompiler = nullptr;
+    }
+    if(vertShader) {
+        delete vertShader;
+        vertShader = nullptr;
+    }
+    if(fragShader) {
+        delete fragShader;
+        fragShader = nullptr;
+    }
+    if(shaderProgram) {
+        delete shaderProgram;
+        shaderProgram = nullptr;
+    }
+}
+
+void
+ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cacheManager,
+                                           const vulkanAPI::vkContext_t* mVkContext,
+                                           vulkanAPI::CommandBufferManager* commandBufferManager)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    Destroy();
+    shaderCompiler = new GlslangShaderCompiler();
+    vertShader = new Shader();
+    vertShader->SetShaderCompiler(shaderCompiler);
+    vertShader->SetVkContext(mVkContext);
+    fragShader = new Shader();
+    fragShader->SetShaderCompiler(shaderCompiler);
+    fragShader->SetVkContext(mVkContext);
+    shaderProgram = new ShaderProgram(mVkContext, nullptr);
+    shaderProgram->SetShaderCompiler(shaderCompiler);
+    shaderProgram->SetCacheManager(cacheManager);
+    shaderProgram->SetGlContext(GLContext);
+    shaderProgram->SetCommandBufferManager(commandBufferManager);
+}
+
 bool
-loadProgramBinary(const char* myBinaryFileName, VkDevice device, VkShaderModule& module)
+ScreenSpacePass::ShaderData::Generate(const std::string& vertexSource, const std::string& fragmentSource)
 {
-    std::string filenameWithPath = std::string(ASSET_PATH).append(myBinaryFileName);
-    std::ifstream input(filenameWithPath.c_str(), std::ios::in|std::ios::binary);
-    if(!input.is_open()) {
-        GLOVE_PRINT_ERR("Could not load spv file: %s\n", filenameWithPath.c_str());
-        return false;
-    }
-    std::string bin = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkShaderModuleCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = bin.length();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(bin.c_str());
+    const char *vertexSourcec100Str = vertexSource.c_str();
+    const char *fragmentSourcec100Str = fragmentSource.c_str();
 
-    VkResult res = vkCreateShaderModule(device, &createInfo, nullptr, &module);
-    if(res != VK_SUCCESS) {
-        return false;
-    }
-    return true;
-}
-
-bool ScreenSpacePass::CreateShaderData()
-{
-    if(!loadProgramBinary("assets/screenspace.vert.spv", mVkContext->vkDevice, mVkVertShaderModule)) {
-        return false;
-    }
-    if(!loadProgramBinary("assets/screenspace.frag.spv", mVkContext->vkDevice, mVkFragShaderModule)) {
+    vertShader->SetShaderType(SHADER_TYPE_VERTEX);
+    GLint vertexLength = static_cast<GLint>(vertexSource.length());
+    vertShader->SetShaderSource(1, &vertexSourcec100Str, &vertexLength);
+    if(!vertShader->CompileShader()) {
+        GLOVE_PRINT_ERR("Could not compile vertex shader for screen-space pass\n");
         return false;
     }
 
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = mVkVertShaderModule;
-    vertShaderStageInfo.pName = "main";
-    vertShaderStageInfo.pSpecializationInfo = nullptr;
-    mVkshaderStagesList.push_back(vertShaderStageInfo);
-
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
-    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = mVkFragShaderModule;
-    fragShaderStageInfo.pName = "main";
-    fragShaderStageInfo.pSpecializationInfo = nullptr;
-    mVkshaderStagesList.push_back(fragShaderStageInfo);
-
-    if(mPipelineCache->GetPipelineCache() == VK_NULL_HANDLE) {
-        mPipelineCache->Create(nullptr, 0);
-        mPipeline->SetCache(mPipelineCache->GetPipelineCache());
-    }
-
-    return true;
-}
-
-bool ScreenSpacePass::DestroyShaderData()
-{
-    vkDestroyShaderModule(mVkContext->vkDevice, mVkVertShaderModule, nullptr);
-    mVkVertShaderModule = VK_NULL_HANDLE;
-    vkDestroyShaderModule(mVkContext->vkDevice, mVkFragShaderModule, nullptr);
-    mVkFragShaderModule = VK_NULL_HANDLE;
-    return true;
-}
-
-bool ScreenSpacePass::CreateUniformData()
-{
-    mClearColorUBO = new UniformBufferObject(mVkContext);
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject_ScreenSpace);
-    mClearColorUBO->Allocate(bufferSize, nullptr);
-
-    // VkDescriptorSetLayoutBinding
-    CreateDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 0, 1);
-    // m_vkdescriptorSetLayout
-    CreateLayoutInfo();
-    mUniformVkDescriptorSetLayoutList = { mVkDescriptorSetLayout };
-
-    std::vector<VkDescriptorPoolSize> poolSizes {
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
-    };
-
-    if (!CreateDescriptorPool(poolSizes)) {
+    fragShader->SetShaderType(SHADER_TYPE_FRAGMENT);
+    GLint fragmentLength = static_cast<GLint>(fragmentSource.length());
+    fragShader->SetShaderSource(1, &fragmentSourcec100Str, &fragmentLength);
+    if(!fragShader->CompileShader()) {
+        GLOVE_PRINT_ERR("Could not compile fragment shader for screen-space pass\n");
         return false;
     }
-    AllocateDescriptorSets(mVKDescriptorSet, mUniformVkDescriptorSetLayoutList);
-    mUniformVkDescriptorBufferInfoList = { *mClearColorUBO->GetBufferDescInfo() };
-    VkWriteDescriptorSet uboSet;
-    CreateWriteDescriptorSet(uboSet, mVKDescriptorSet, 0, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr,
-                             &mUniformVkDescriptorBufferInfoList, nullptr);
-    std::vector<VkWriteDescriptorSet> writeSets = { uboSet };
-    UpdateDescriptorSets(writeSets);
 
-    return true;
-}
-
-bool ScreenSpacePass::CreateDescriptorSetLayoutBinding(VkDescriptorType type, VkShaderStageFlagBits flags, uint32_t binding, uint32_t count)
-{
-    VkDescriptorSetLayoutBinding setLayoutBinding = {};
-    setLayoutBinding.binding = binding;
-    setLayoutBinding.descriptorType = type;
-    setLayoutBinding.descriptorCount = count;
-    setLayoutBinding.stageFlags = flags;
-    setLayoutBinding.pImmutableSamplers = nullptr; // Optional
-
-    mVkLayoutBindings.push_back(setLayoutBinding);
-    return true;
-}
-
-bool ScreenSpacePass::CreateLayoutInfo()
-{
-    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = static_cast<uint32_t>(mVkLayoutBindings.size());
-    layoutInfo.pBindings = mVkLayoutBindings.data();
-
-    VkResult res = vkCreateDescriptorSetLayout(mVkContext->vkDevice, &layoutInfo, nullptr, &mVkDescriptorSetLayout);
-    return res == VK_SUCCESS;
-}
-
-bool ScreenSpacePass::CreateDescriptorPool(std::vector<VkDescriptorPoolSize>& poolSizes)
-{
-    VkDescriptorPoolCreateInfo poolInfo = {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-    poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = 1;
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-    VkResult res = vkCreateDescriptorPool(mVkContext->vkDevice, &poolInfo, nullptr, &mVkDescriptorPool);
-    return res == VK_SUCCESS;
-}
-
-bool ScreenSpacePass::AllocateDescriptorSets(VkDescriptorSet& set, std::vector<VkDescriptorSetLayout>& layouts)
-{
-    VkDescriptorSetAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = mVkDescriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.size());
-    allocInfo.pSetLayouts = layouts.data();
-
-    VkResult res = vkAllocateDescriptorSets(mVkContext->vkDevice, &allocInfo, &set);
-    mVkDescriptorSetsList.push_back(set);
-    return res == VK_SUCCESS;
-}
-
-bool ScreenSpacePass::CreateWriteDescriptorSet(VkWriteDescriptorSet& writeSet, VkDescriptorSet& set,
-                                           uint32_t dstBinding, uint32_t dstArrayElement,
-                                           VkDescriptorType descriptorType, std::vector<VkDescriptorImageInfo>* pImageInfos,
-                                           std::vector<VkDescriptorBufferInfo>* pBufferInfos, std::vector<VkBufferView>* pTexelBufferView)
-{
-    writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writeSet.pNext = nullptr;
-    writeSet.dstSet = set;
-    writeSet.dstBinding = dstBinding;
-    writeSet.dstArrayElement = dstArrayElement;
-    writeSet.descriptorType = descriptorType;
-    writeSet.descriptorCount = 0;
-    writeSet.pImageInfo = nullptr;
-    writeSet.pBufferInfo = nullptr;
-    writeSet.pTexelBufferView = nullptr;
-    if(pImageInfos != nullptr) {
-        writeSet.descriptorCount = static_cast<uint32_t>(pImageInfos->size());
-        writeSet.pImageInfo = pImageInfos->data();
-    } else if(pBufferInfos != nullptr) {
-        writeSet.descriptorCount = static_cast<uint32_t>(pBufferInfos->size());
-        writeSet.pBufferInfo = pBufferInfos->data();
-    } else if(pTexelBufferView != nullptr) {
-        writeSet.descriptorCount = static_cast<uint32_t>(pTexelBufferView->size());
-        writeSet.pTexelBufferView = pTexelBufferView->data();
+    shaderProgram->AttachShader(vertShader);
+    shaderProgram->AttachShader(fragShader);
+    if(!shaderProgram->LinkProgram()) {
+        GLOVE_PRINT_ERR("Could not link shader program for screen-space pass\n");
+        return false;
     }
+    shaderProgram->SetShaderModules();
     return true;
 }
 
-bool ScreenSpacePass::UpdateDescriptorSets(std::vector<VkWriteDescriptorSet>& descriptorWrites)
+bool
+ScreenSpacePass::CreateShaderData()
 {
-    vkUpdateDescriptorSets(mVkContext->vkDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
-    return true;
-}
+std::string vertexSource100 = "#version 100\n\
+#ifdef GL_ES\n\
+    precision mediump float;\n\
+#endif\n\
+attribute vec2 v_position;\n\
+void main() {\n\
+    gl_Position = vec4(v_position, 1.0, 1.0);\n\
+    gl_Position.y = -gl_Position.y;\n\
+}\n\
+";
 
-bool ScreenSpacePass::DestroyUniformBufferData()
-{
-    delete mClearColorUBO;
-    mClearColorUBO = nullptr;
+std::string fragmentSource100 = "#version 100\n\
+#ifdef GL_ES\n\
+    precision mediump float;\n\
+#endif\n\
+uniform  vec4    clearColor;\n\
+void main() {\n\
+    gl_FragColor = clearColor;\n\
+}\n\
+";
 
-    DestroyDescriptorSets();
-    DestroyDescriptorPool();
+    mShaderData.InitResources(mGLContext, mCacheManager, mVkContext, mCommandBufferManager);
+    mShaderData.Generate(vertexSource100, fragmentSource100);
 
-    mUniformVkDescriptorBufferInfoList.clear();
-    mUniformVkDescriptorImageInfoList.clear();
-    mUniformVkDescriptorSetLayoutList.clear();
-    return true;
-}
-
-bool ScreenSpacePass::DestroyDescriptorPool()
-{
-    if(mVkDescriptorPool != VK_NULL_HANDLE) {
-        vkDestroyDescriptorPool(mVkContext->vkDevice, mVkDescriptorPool, nullptr);
-        mVkDescriptorPool = VK_NULL_HANDLE;
+    if(!mShaderData.shaderProgram->SetPipelineShaderStage(mPipeline->GetShaderStageCountRef(), mPipeline->GetShaderStageIDsRef(), mPipeline->GetShaderStages())) {
+        return false;
     }
+    mPipeline->SetCache(mShaderData.shaderProgram->GetVkPipelineCache());
+    mPipeline->SetLayout(mShaderData.shaderProgram->GetVkPipelineLayout());
+
     return true;
 }
 
-bool ScreenSpacePass::DestroyDescriptorSets()
+bool
+ScreenSpacePass::DestroyShaderData()
 {
-    if(mVkDescriptorSetLayout != VK_NULL_HANDLE) {
-        vkDestroyDescriptorSetLayout(mVkContext->vkDevice, mVkDescriptorSetLayout, nullptr);
-        mVkDescriptorSetLayout = VK_NULL_HANDLE;
-    }
-    if(mVKDescriptorSet != VK_NULL_HANDLE) {
-        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescriptorPool, 1, &mVKDescriptorSet);
-        mVKDescriptorSet = VK_NULL_HANDLE;
-    }
-    mVkDescriptorSetsList.clear();
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mShaderData.Destroy();
+
     return true;
 }
 
-bool ScreenSpacePass::Initialize()
+bool
+ScreenSpacePass::Initialize()
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     if(!CreateShaderData()) {
         return false;
     }
@@ -335,16 +251,19 @@ bool ScreenSpacePass::Initialize()
         return false;
     }
 
-    if(!CreateUniformData()) {
-        return false;
-    }
-
-    return true;
+    mInitializedData = true;
+    return mInitializedData;
 }
 
 bool
 ScreenSpacePass::CreateDefaultPipelineStates()
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(!mInitializedData) {
+        return false;
+    }
+
     // the format of the vertex data that will be passed to the vertex shader
     mVertexInputInfo = {};
     mVertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -352,54 +271,58 @@ ScreenSpacePass::CreateDefaultPipelineStates()
     mVertexInputInfo.pVertexBindingDescriptions = mVkBindingDescriptions.data();
     mVertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(mVkAttributeDescriptions.size());
     mVertexInputInfo.pVertexAttributeDescriptions = mVkAttributeDescriptions.data();
+
     mPipeline->SetVertexInputState(&mVertexInputInfo);
 
-    // to set shader uniforms (an empty one is needed if no uniforms are used)
-    mPipelineLayoutInfo = {};
-    mPipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    mPipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(mUniformVkDescriptorSetLayoutList.size());
-    mPipelineLayoutInfo.pSetLayouts = mUniformVkDescriptorSetLayoutList.data();
-    mPipelineLayoutInfo.pushConstantRangeCount = 0;
-    mPipelineLayoutInfo.pPushConstantRanges = nullptr;
+    std::vector<VkDynamicState> states = {VK_DYNAMIC_STATE_VIEWPORT,
+                                          VK_DYNAMIC_STATE_SCISSOR};
+    mPipeline->CreateDynamicState(states);
 
-    VkResult res = vkCreatePipelineLayout(mVkContext->vkDevice, &mPipelineLayoutInfo, nullptr, &mVkPipelineLayout);
-    if (res != VK_SUCCESS)
-    {
-        return false;
-    }
+    mPipeline->SetDepthTestEnable(false);
+    mPipeline->SetDepthCompareOp(VK_COMPARE_OP_ALWAYS);
+    mPipeline->SetStencilBackCompareOp(VK_COMPARE_OP_ALWAYS);
+    mPipeline->SetStencilBackFailOp(VK_STENCIL_OP_KEEP);
+    mPipeline->SetStencilBackZFailOp(VK_STENCIL_OP_KEEP);
+    mPipeline->SetStencilBackPassOp(VK_STENCIL_OP_REPLACE);
+    mPipeline->SetStencilFrontCompareOp(VK_COMPARE_OP_ALWAYS);
+    mPipeline->SetStencilFrontFailOp(VK_STENCIL_OP_KEEP);
+    mPipeline->SetStencilFrontZFailOp(VK_STENCIL_OP_KEEP);
+    mPipeline->SetStencilFrontPassOp(VK_STENCIL_OP_REPLACE);
 
-    mPipeline->SetLayout(mVkPipelineLayout);
-    mPipeline->GetShaderStageCountRef() = 2;
-    mPipeline->GetShaderStages()[0] = mVkshaderStagesList[0];
-    mPipeline->GetShaderStages()[1] = mVkshaderStagesList[1];
-
-    return res == VK_SUCCESS;
+    mInitializedPipeline = true;
+    return mInitializedPipeline;
 }
 
 bool
 ScreenSpacePass::Destroy()
 {
-   DestroyShaderData();
-   DestroyMeshData();
-   DestroyUniformBufferData();
-   vkDestroyPipelineLayout(mVkContext->vkDevice, mVkPipelineLayout, nullptr);
-   mVkPipelineLayout = VK_NULL_HANDLE;
-   if(mPipeline != nullptr) {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    DestroyShaderData();
+    DestroyMeshData();
+    if(mPipeline != nullptr) {
        delete mPipeline;
        mPipeline = nullptr;
-   }
-   if(mPipelineCache) {
+    }
+    if(mPipelineCache) {
        delete mPipelineCache;
        mPipelineCache = nullptr;
-   }
-   return true;
+    }
+    return true;
 }
 
 bool
 ScreenSpacePass::UpdateUniformBufferColor(float r, float g, float b, float a)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+
     UniformBufferObject_ScreenSpace ubo = { r,g,b,a };
-    mClearColorUBO->UpdateData(sizeof(ubo), 0, static_cast<void*>(&ubo));
+    GLint loc = mShaderData.shaderProgram->GetUniformLocation("clearColor");
+    if(loc >= 0) {
+        mShaderData.shaderProgram->SetUniformData(static_cast<uint32_t>(loc), sizeof(UniformBufferObject_ScreenSpace), static_cast<void *>(&ubo.color));
+
+    }
 
     return true;
 }
@@ -407,12 +330,18 @@ ScreenSpacePass::UpdateUniformBufferColor(float r, float g, float b, float a)
 void
 ScreenSpacePass::BindPipeline(const VkCommandBuffer *cmdBuffer) const
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+
     mPipeline->Bind(cmdBuffer);
 }
 
 void
 ScreenSpacePass::BindVertexBuffers(const VkCommandBuffer *cmdBuffer) const
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+
     // bind vertex buffers
     VkBuffer vertexBuffers[] = { mVertexBuffer->GetVkBuffer() };
     VkDeviceSize offsets[] = { 0 };
@@ -422,13 +351,28 @@ ScreenSpacePass::BindVertexBuffers(const VkCommandBuffer *cmdBuffer) const
 void
 ScreenSpacePass::BindUniformDescriptors(const VkCommandBuffer *cmdBuffer) const
 {
-    vkCmdBindDescriptorSets(*cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            mVkPipelineLayout, 0,
-                            static_cast<uint32_t>(mVkDescriptorSetsList.size()), mVkDescriptorSetsList.data(), 0, nullptr);
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mShaderData.shaderProgram->UpdateDescriptorSet();
+    mShaderData.shaderProgram->UpdateBuiltInUniformData(0.0f, 1.0f);
+    vkCmdBindDescriptorSets(*cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mShaderData.shaderProgram->GetVkPipelineLayout(), 0, 1,
+                            mShaderData.shaderProgram->GetVkDescSet(), 0, nullptr);
 }
 
 void
 ScreenSpacePass::Draw(const VkCommandBuffer *cmdBuffer) const
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+
     vkCmdDraw(*cmdBuffer, mNumElements, 1, 0, 0);
+}
+
+void
+ScreenSpacePass::SetCacheManager(CacheManager* cacheManager)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mCacheManager = cacheManager;
+    mPipeline->SetCacheManager(cacheManager);
 }

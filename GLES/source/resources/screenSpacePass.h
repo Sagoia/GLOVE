@@ -36,23 +36,33 @@
 #include <map>
 
 class ScreenSpacePass {
+struct ShaderData {
+    class ShaderCompiler                       *shaderCompiler;
+    class ShaderProgram                        *shaderProgram;
+    class Shader                               *vertShader;
+    class Shader                               *fragShader;
+    ShaderData():
+    shaderCompiler(nullptr), shaderProgram(nullptr),
+    vertShader(nullptr), fragShader(nullptr){
+
+    }
+    void InitResources(class Context *GLContext, CacheManager* cacheManager,
+                       const vulkanAPI::vkContext_t *mVkContext,
+                       vulkanAPI::CommandBufferManager* commandBufferManager);
+    bool Generate(const std::string& vertexSource, const std::string& fragmentSource);
+    void Destroy(void);
+};
 
 private:
 // ------------
 
-    VkRenderPass m_vkrenderPass;
+    class Context                              *mGLContext;
     const vulkanAPI::vkContext_t               *mVkContext;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
+    CacheManager*                               mCacheManager;
 
     // shader
-    VkShaderModule                              mVkVertShaderModule;
-    VkShaderModule                              mVkFragShaderModule;
-    std::vector<VkPipelineShaderStageCreateInfo> mVkshaderStagesList;
-    VkDescriptorSetLayout                       mVkDescriptorSetLayout;
-    std::vector<VkDescriptorSetLayoutBinding>   mVkLayoutBindings;
-    VkDescriptorPool                            mVkDescriptorPool;
-    std::vector<VkDescriptorSet>                mVkDescriptorSetsList;
-    VkDescriptorSet                             mVKDescriptorSet;
+    ShaderData                                  mShaderData;
 
     // mesh
     uint32_t                                    mNumElements;
@@ -62,25 +72,20 @@ private:
 
     // pipeline/renderpass
     VkPipelineVertexInputStateCreateInfo        mVertexInputInfo;
-    VkPipelineLayoutCreateInfo                  mPipelineLayoutInfo;
     vulkanAPI::PipelineCache                   *mPipelineCache;
     vulkanAPI::Pipeline*                        mPipeline;
-    VkPipelineLayout                            mVkPipelineLayout;
 
     // buffers
-    UniformBufferObject*                        mClearColorUBO;
-    std::vector<VkDescriptorSetLayout>          mUniformVkDescriptorSetLayoutList;
-    std::vector<VkDescriptorBufferInfo>         mUniformVkDescriptorBufferInfoList;
-    std::vector<VkDescriptorImageInfo>          mUniformVkDescriptorImageInfoList;
+
+    bool                                        mInitializedData;
+    bool                                        mInitializedPipeline;
 
     bool                                        CreateShaderData();
     bool                                        CreateMeshData();
-    bool                                        CreateUniformData();
 
     bool                                        Destroy();
     bool                                        DestroyMeshData();
     bool                                        DestroyShaderData();
-    bool                                        DestroyUniformBufferData();
 
     bool                                        CreateDescriptorSetLayoutBinding(VkDescriptorType type, VkShaderStageFlagBits flags, uint32_t binding, uint32_t count);
     bool                                        CreateLayoutInfo();
@@ -98,7 +103,7 @@ private:
     bool                                        DestroyDescriptorSets();
 
 public:
-    ScreenSpacePass(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
+    ScreenSpacePass(class Context *GLContext, const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
     ~ScreenSpacePass();
 
     bool                                        Initialize();
@@ -110,9 +115,10 @@ public:
     bool                                        UpdateUniformBufferColor(float r, float g, float b, float a);
 
 // Get Functions
-    vulkanAPI::Pipeline*                        GetPipeline()                     { return mPipeline; }
+    inline vulkanAPI::Pipeline*                 GetPipeline()                     { return mPipeline; }
 
 // Set Functions
+    void                                        SetCacheManager(CacheManager* cacheManager);
 
 };
 

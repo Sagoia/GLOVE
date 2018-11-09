@@ -70,11 +70,13 @@ Context::Context()
     mIsModeLineLoop     = false;
     mIsFullScreenRender = false;
 
-    mScreenSpacePass = new ScreenSpacePass(mVkContext, mCommandBufferManager);
-    mScreenSpacePass->Initialize();
-    mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
-    mScreenSpacePass->CreateDefaultPipelineStates();
-    mScreenSpacePass->GetPipeline()->SetCacheManager(mCacheManager);
+    mScreenSpacePass = new ScreenSpacePass(this, mVkContext, mCommandBufferManager);
+    mScreenSpacePass->SetCacheManager(mCacheManager);
+    if(mScreenSpacePass->Initialize()) {
+        mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
+        mScreenSpacePass->CreateDefaultPipelineStates();
+    }
+
 }
 
 Context::~Context()

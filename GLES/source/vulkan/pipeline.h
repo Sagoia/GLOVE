@@ -105,6 +105,7 @@ public:
     inline void SetRasterizationDepthBiasEnable(VkBool32 enable)                { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.depthBiasEnable         = enable; mUpdateState.Pipeline = true;}
     inline void SetRasterizationDepthBiasConstantFactor(float factor)           { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.depthBiasConstantFactor = factor; mUpdateState.Pipeline = true;}
     inline void SetRasterizationDepthBiasSlopeFactor(float factor)              { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.depthBiasSlopeFactor    = factor; mUpdateState.Pipeline = true;}
+    inline void SetRasterizationLineWidth(float lineWidth)                      { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.lineWidth = lineWidth; mUpdateState.Pipeline = true;}
 
     inline void SetColorBlendAttachmentEnable(VkBool32 enable)                  { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendAttachmentState.blendEnable = enable; mUpdateState.Pipeline = true; }
     inline void SetColorBlendConstants(float *color)                            { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineColorBlendState.blendConstants[0] = color[0];
