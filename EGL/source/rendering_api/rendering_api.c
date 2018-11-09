@@ -140,7 +140,9 @@ rendering_api_interface_t *RENDERING_API_get_interface(EGLenum api, uint32_t cli
                 }
                 break;
             }
-        case EGL_OPENVG_API:  api_interface = vg_interface;
+        case EGL_OPENVG_API:
+			api_interface = vg_interface;
+			break;
         default:              { NOT_REACHED(); break; }
     }
 
