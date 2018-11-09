@@ -367,8 +367,10 @@ Framebuffer::PrepareVkImage(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(GetColorAttachmentTexture()) {
+    if(GetColorAttachmentTexture() && newImageLayout != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
         GetColorAttachmentTexture()->PrepareVkImageLayout(newImageLayout);
+    } else if(GetDepthStencilAttachmentTexture() && newImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        GetDepthStencilAttachmentTexture()->PrepareVkImageLayout(newImageLayout);
     }
 }
 

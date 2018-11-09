@@ -43,6 +43,7 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     mWriteFBO->CreateRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
                                stateFramebufferOperations->IsColorWriteEnabled(),
                                stateFramebufferOperations->IsDepthWriteEnabled(),
@@ -102,11 +103,13 @@ Context::ClearMask(bool clearDepthEnabled, bool clearStencilEnabled)
     GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth() : 0.0f;
     uint32_t clearStencilValue = clearStencilEnabled ? stateFramebufferOperations->GetClearStencilMasked() : 0u;
 
-    if(stateFramebufferOperations->StencilMaskActive())
+    if(stateFramebufferOperations->StencilMaskActive()) {
         clearStencilValue |= stateFramebufferOperations->GetClearStencilOld() & (~(stateFramebufferOperations->GetStencilMaskFront() & 0xFF));
+    }
     stateFramebufferOperations->SetClearStencilOld(clearStencilValue);
 
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     // perform a screen-space pass
     mWriteFBO->CreateRenderPass(false, clearDepthEnabled, clearStencilEnabled,
                                 stateFramebufferOperations->IsColorWriteEnabled(),

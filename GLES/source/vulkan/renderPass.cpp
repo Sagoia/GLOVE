@@ -86,7 +86,7 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
         attachmentColor.storeOp         = mColorWriteEnabled ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachmentColor.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachmentColor.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentColor.initialLayout   = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachmentColor.initialLayout   = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         attachmentColor.finalLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         attachments.push_back(attachmentColor);
@@ -102,15 +102,14 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
         bool isStencil = VkFormatIsStencil(depthstencilFormat);
 
         VkAttachmentDescription attachmentDepthStencil;
-
         attachmentDepthStencil.flags          = 0;
         attachmentDepthStencil.format         = depthstencilFormat;
         attachmentDepthStencil.samples        = VK_SAMPLE_COUNT_1_BIT;
-        attachmentDepthStencil.loadOp         = (isDepth   && mDepthClearEnabled) ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentDepthStencil.storeOp        = (isDepth   && mDepthWriteEnabled) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentDepthStencil.stencilLoadOp  = (isStencil && mStencilClearEnabled) ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentDepthStencil.stencilStoreOp = (isStencil && mStencilWriteEnabled) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentDepthStencil.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachmentDepthStencil.loadOp         = (isDepth   && mDepthClearEnabled && mDepthWriteEnabled)     ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.storeOp        = (isDepth   && mDepthWriteEnabled)                           ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentDepthStencil.stencilLoadOp  = (isStencil && mStencilClearEnabled && mStencilWriteEnabled) ? VK_ATTACHMENT_LOAD_OP_CLEAR  : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDepthStencil.stencilStoreOp = (isStencil && mStencilWriteEnabled)                         ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentDepthStencil.initialLayout  = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         attachmentDepthStencil.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         attachments.push_back(attachmentDepthStencil);

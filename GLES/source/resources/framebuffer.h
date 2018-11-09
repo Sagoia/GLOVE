@@ -124,7 +124,7 @@ public:
     inline Texture *        GetColorAttachmentTexture(uint32_t i)       const   { FUN_ENTRY(GL_LOG_TRACE); return mIsSystem ? mAttachmentColors[i]->GetTexture() :
                                                                                                                               GetColorAttachmentTexture(); }
            Texture *        GetColorAttachmentTexture(void)             const;
-
+           Texture *        GetDepthStencilAttachmentTexture(void)      const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthStencilTexture;            }
     inline GLenum           GetDepthAttachmentType(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentDepth->GetType();     }
     inline uint32_t         GetDepthAttachmentName(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentDepth->GetName();     }
     inline GLint            GetDepthAttachmentLevel(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mAttachmentDepth->GetLevel();    }
