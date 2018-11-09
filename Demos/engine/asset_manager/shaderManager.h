@@ -18,6 +18,7 @@
 
 bool  LoadSource        (const char *filename  , char   **shaderSource, int    *length);
 bool  LoadShader        (const char *filename  , GLuint *shader       , GLenum  shaderType);
+void  DetachShader      (const GLuint prog, const GLuint sh);
 void  DeleteShader      (const GLuint sh);
 bool  LoadProgram       (const GLuint vs       , const  GLuint fs     , GLuint *prog);
 bool  LoadProgramBinary (const char* myBinaryFileName, GLenum binaryFormat, GLuint *prog);

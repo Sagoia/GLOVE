@@ -13,7 +13,8 @@
 
 #include "shaderManager.h"
 
-bool  LoadSource(const char *filename, char **shaderSource, int *length)
+bool
+LoadSource(const char *filename, char **shaderSource, int *length)
 {
     FILE *file;
     file = fopen(filename, "r");
@@ -46,7 +47,8 @@ bool  LoadSource(const char *filename, char **shaderSource, int *length)
     return true;
 }
 
-bool  LoadShader(const char *filename, GLuint *shader, GLenum shaderType)
+bool
+LoadShader(const char *filename, GLuint *shader, GLenum shaderType)
 {
   int   length = 0, type = 0, status = 0;
   char *source = NULL;
@@ -98,7 +100,8 @@ bool  LoadShader(const char *filename, GLuint *shader, GLenum shaderType)
   return status!=0;
 }
 
-bool  LoadProgram(const GLuint vs, const GLuint fs, GLuint *prog)
+bool
+LoadProgram(const GLuint vs, const GLuint fs, GLuint *prog)
 {
     int   length = 0, status = 0;
 
@@ -127,17 +130,11 @@ bool  LoadProgram(const GLuint vs, const GLuint fs, GLuint *prog)
         DeleteProgram(*prog);
     }
 
-    glDetachShader(*prog, vs);
-    ASSERT_NO_GL_ERROR();
-    glDetachShader(*prog, fs);
-    ASSERT_NO_GL_ERROR();
-    DeleteShader(vs);
-    DeleteShader(fs);
-
     return status!=0;
 }
 
-bool LoadProgramBinary(const char* myBinaryFileName, GLenum binaryFormat, GLuint *prog)
+bool
+LoadProgramBinary(const char* myBinaryFileName, GLenum binaryFormat, GLuint *prog)
 {
     GLint   length = 0, status = 0;
 
@@ -191,7 +188,8 @@ bool LoadProgramBinary(const char* myBinaryFileName, GLenum binaryFormat, GLuint
     return status!=0;
 }
 
-bool SaveProgramBinary(GLuint *prog, char *fileName)
+bool
+SaveProgramBinary(GLuint *prog, char *fileName)
 {
     GLint    binaryLength;
     void*    binary;
@@ -215,14 +213,27 @@ bool SaveProgramBinary(GLuint *prog, char *fileName)
 
     return true;
 }
-void  DeleteShader   (const GLuint sh)
+
+void
+DetachShader(const GLuint prog, const GLuint sh)
 {
-    glDeleteShader(sh);
+    glDetachShader(prog, sh);
+}
+
+void
+DeleteShader(const GLuint sh)
+{
+    if(glIsShader(sh)) {
+        glDeleteShader(sh);
+    }
     ASSERT_NO_GL_ERROR();
 }
 
-void  DeleteProgram   (const GLuint prog)
+void
+DeleteProgram(const GLuint prog)
 {
-    glDeleteProgram(prog);
+    if(glIsProgram(prog)) {
+        glDeleteProgram(prog);
+    }
     ASSERT_NO_GL_ERROR();
 }

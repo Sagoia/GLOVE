@@ -29,12 +29,14 @@ static void PrintUsage    ();
 static void CompileShaders();
 static bool ReadArguments (int argc, char *argv[]);
 
-static void PrintUsage()
+static void
+PrintUsage()
 {
     printf("Correct Usage: ./offline_shader_compiler -v <vertex_shader_source> -f <fragment_shader_source> -o <output_file>\n");
 }
 
-static bool ReadArguments(int argc, char *argv[])
+static bool
+ReadArguments(int argc, char *argv[])
 {
     signed char c;
 
@@ -76,7 +78,8 @@ static bool ReadArguments(int argc, char *argv[])
     return true;
 }
 
-static void CompileShaders(void)
+static void
+CompileShaders(void)
 {
 // Load Vertex Shader
     if(!LoadShader(vs_source, &program.mVertexShader  , GL_VERTEX_SHADER))
@@ -93,11 +96,12 @@ static void CompileShaders(void)
     printf ("Generation of Binary Shader Program '%s' Completed Successfully\n", out_file);
 }
 
-void DestroyGL(void)
+void
+DestroyGL(void)
 {
 // Detach Shaders
-    glDetachShader(program.mID, program.mVertexShader);
-    glDetachShader(program.mID, program.mFragmentShader);
+    DetachShader(program.mID, program.mVertexShader);
+    DetachShader(program.mID, program.mFragmentShader);
 
 // Delete Shaders
     DeleteShader  (program.mVertexShader);
@@ -107,7 +111,8 @@ void DestroyGL(void)
     DeleteProgram (program.mID);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     if(!ReadArguments(argc, argv))
       return 0;
