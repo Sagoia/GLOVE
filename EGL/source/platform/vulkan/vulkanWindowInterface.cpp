@@ -250,19 +250,16 @@ VulkanWindowInterface::CreateSwapchain(EGLSurface_t *surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VkSurfaceCapabilitiesKHR surfCapabilities;
-    VkExtent2D swapChainExtent;
-    VkPresentModeKHR swapchainPresentMode;
-
-    /// Is present supported?
+    // Is present supported?
     if(InitSwapchainExtension(surface) == EGL_FALSE) {
         assert(0);
         return;
     }
 
+    VkSurfaceCapabilitiesKHR surfCapabilities = {};
+    VkExtent2D swapChainExtent = SetSwapchainExtent(surface, &surfCapabilities);
+    VkPresentModeKHR swapchainPresentMode = SetSwapchainPresentMode(surface);
     SetSurfaceColorFormat(surface);
-    swapChainExtent = SetSwapchainExtent(surface, &surfCapabilities);
-    swapchainPresentMode = SetSwapchainPresentMode(surface);
     CreateVkSwapchain(surface, swapchainPresentMode, swapChainExtent, surfCapabilities);
 }
 
