@@ -352,41 +352,7 @@ ScreenSpacePass::CreateDefaultPipelineStates()
     mVertexInputInfo.pVertexBindingDescriptions = mVkBindingDescriptions.data();
     mVertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(mVkAttributeDescriptions.size());
     mVertexInputInfo.pVertexAttributeDescriptions = mVkAttributeDescriptions.data();
-
-
     mPipeline->SetVertexInputState(&mVertexInputInfo);
-    mPipeline->CreateInputAssemblyState(VK_FALSE, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-
-    mPipeline->CreateRasterizationState(VK_POLYGON_MODE_FILL,
-                                         VK_CULL_MODE_FRONT_AND_BACK,
-                                         VK_FRONT_FACE_COUNTER_CLOCKWISE,
-                                         VK_FALSE, 0.0f, 0.0f,
-                                         0.0f, VK_FALSE, VK_FALSE);
-
-    std::vector<VkDynamicState> states = {VK_DYNAMIC_STATE_VIEWPORT,
-                                          VK_DYNAMIC_STATE_SCISSOR,
-                                          VK_DYNAMIC_STATE_LINE_WIDTH};
-    mPipeline->CreateDynamicState(states);
-    GLfloat     blendcolor[4] = { 0.0f, 0.0f, 0.0f, 0.0f};
-
-    mPipeline->CreateColorBlendState(VK_FALSE,
-                                     VK_COLOR_COMPONENT_R_BIT |
-                                     VK_COLOR_COMPONENT_G_BIT |
-                                     VK_COLOR_COMPONENT_B_BIT |
-                                     VK_COLOR_COMPONENT_A_BIT,
-                                     VK_BLEND_FACTOR_ONE,
-                                     VK_BLEND_FACTOR_ZERO,
-                                     VK_BLEND_FACTOR_ONE,
-                                     VK_BLEND_FACTOR_ZERO,
-                                    VK_BLEND_OP_ADD,
-                                    VK_BLEND_OP_ADD,
-                                    VK_LOGIC_OP_COPY,
-                                    VK_FALSE,
-                                    1,
-                                    &blendcolor[0]);
-
-    // multisampling
-    mPipeline->CreateMultisampleState(VK_FALSE, VK_FALSE, VK_SAMPLE_COUNT_1_BIT, VK_FALSE, 1.0f);
 
     // to set shader uniforms (an empty one is needed if no uniforms are used)
     mPipelineLayoutInfo = {};
@@ -406,16 +372,6 @@ ScreenSpacePass::CreateDefaultPipelineStates()
     mPipeline->GetShaderStageCountRef() = 2;
     mPipeline->GetShaderStages()[0] = mVkshaderStagesList[0];
     mPipeline->GetShaderStages()[1] = mVkshaderStagesList[1];
-    mPipeline->SetDepthTestEnable(false);
-    mPipeline->SetDepthCompareOp(VK_COMPARE_OP_ALWAYS);
-    mPipeline->SetStencilBackCompareOp(VK_COMPARE_OP_ALWAYS);
-    mPipeline->SetStencilBackFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilBackZFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilBackPassOp(VK_STENCIL_OP_REPLACE);
-    mPipeline->SetStencilFrontCompareOp(VK_COMPARE_OP_ALWAYS);
-    mPipeline->SetStencilFrontFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilFrontZFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilFrontPassOp(VK_STENCIL_OP_REPLACE);
 
     return res == VK_SUCCESS;
 }

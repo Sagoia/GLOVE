@@ -125,7 +125,6 @@ Context::ClearMask(bool clearDepthEnabled, bool clearStencilEnabled)
     vulkanAPI::Pipeline* pipeline = mScreenSpacePass->GetPipeline();
 
     pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
-    pipeline->SetDepthWriteEnable(stateFramebufferOperations->IsDepthWriteEnabled());
     pipeline->SetUpdatePipeline(true);
     pipeline->SetViewport(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
     pipeline->SetScissor(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
