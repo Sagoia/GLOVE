@@ -127,14 +127,16 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
     assert(res == EGL_TRUE);
 
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-    for(size_t i = 0; i < presentModeCount; i++) {
-        if(presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
-            swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-            break;
-        }
-        if((swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) &&
-           (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)) {
-            swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    if(surface->GetSwapInterval() == 0) {
+        for(size_t i = 0; i < presentModeCount; i++) {
+            if(presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
+                swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+                break;
+            }
+            if((swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) &&
+            (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)) {
+                swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            }
         }
     }
 

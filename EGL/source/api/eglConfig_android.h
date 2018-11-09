@@ -34,7 +34,7 @@ const EGLConfig_t EglConfigs[4] = {
                              EGL_FALSE,   // BindToTextureRGB
                               EGL_TRUE,   // BindToTextureRGBA
                                      0,   // MinSwapInterval
-                                     0,   // MaxSwapInterval
+                                     1,   // MaxSwapInterval
                                      0,   // LuminanceSize
                                      0,   // AlphaMaskSize
                         EGL_RGB_BUFFER,   // ColorBufferType
@@ -71,7 +71,7 @@ const EGLConfig_t EglConfigs[4] = {
                              EGL_FALSE,   // BindToTextureRGB
                               EGL_TRUE,   // BindToTextureRGBA
                                      0,   // MinSwapInterval
-                                     0,   // MaxSwapInterval
+                                     1,   // MaxSwapInterval
                                      0,   // LuminanceSize
                                      0,   // AlphaMaskSize
                         EGL_RGB_BUFFER,   // ColorBufferType
@@ -108,7 +108,7 @@ const EGLConfig_t EglConfigs[4] = {
                              EGL_FALSE,   // BindToTextureRGB
                               EGL_TRUE,   // BindToTextureRGBA
                                      0,   // MinSwapInterval
-                                     0,   // MaxSwapInterval
+                                     1,   // MaxSwapInterval
                                      0,   // LuminanceSize
                                      0,   // AlphaMaskSize
                         EGL_RGB_BUFFER,   // ColorBufferType
@@ -145,7 +145,7 @@ const EGLConfig_t EglConfigs[4] = {
                              EGL_FALSE,   // BindToTextureRGB
                               EGL_TRUE,   // BindToTextureRGBA
                                      0,   // MinSwapInterval
-                                     0,   // MaxSwapInterval
+                                     1,   // MaxSwapInterval
                                      0,   // LuminanceSize
                                      0,   // AlphaMaskSize
                         EGL_RGB_BUFFER,   // ColorBufferType

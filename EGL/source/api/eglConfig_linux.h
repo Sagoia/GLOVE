@@ -54,8 +54,13 @@ const EGLConfig_t EglConfigs[1] = {
                                      0,   // TransparentRedValue
                              EGL_FALSE,   // BindToTextureRGB
                               EGL_TRUE,   // BindToTextureRGBA
+#ifdef VK_USE_PLATFORM_XCB_KHR
                                      0,   // MinSwapInterval
                                      0,   // MaxSwapInterval
+#else
+                                     0,   // MinSwapInterval
+                                     1,   // MaxSwapInterval
+#endif
                                      0,   // LuminanceSize
                                      0,   // AlphaMaskSize
                         EGL_RGB_BUFFER,   // ColorBufferType

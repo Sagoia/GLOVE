@@ -446,15 +446,21 @@ DisplayDriver::SwapInterval(EGLDisplay_t* dpy, EGLint interval)
         return EGL_FALSE;
     }
 
-    // 0 interval can be considered as supported with the current implementation
-    if(!interval) {
-        return EGL_TRUE;
+    EGLSurface_t* surface = static_cast<EGLSurface_t*>(mActiveContext->GetDrawSurface());
+    if(surface == nullptr) {
+        currentThread.RecordError(EGL_BAD_SURFACE);
+        return EGL_FALSE;
     }
 
-    NOT_IMPLEMENTED();
-
-    return EGL_FALSE;
+    //If the interval remains the same, there is no need to update the surface
+    if(interval != surface->GetSwapInterval()) {
+        surface->ClampSwapInterval(interval);
+        mActiveContext->Finish();
+        UpdateSurface(dpy, surface);
+    }
+    return EGL_TRUE;
 }
+
 
 EGLBoolean
 DisplayDriver::SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)

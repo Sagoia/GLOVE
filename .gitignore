@@ -28,3 +28,11 @@ External/glslang
 External/googletest
 CMake/FindXCB.cmake
 CMake/ECMFindModuleHelpersStub.cmake
+android/local.properties
+android/bin/AndroidManifest.xml
+android/bin/NativeActivity.ap_
+android/bin/NativeActivity-debug.apk
+android/bin/project.properties
+android/bin/proguard-project.txt
+android/bin/local.properties
+android/bin/NativeActivity-debug-unaligned.apk

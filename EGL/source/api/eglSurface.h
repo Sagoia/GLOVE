@@ -106,6 +106,7 @@ public:
     inline void                      SetMultisampleResolve(EGLint multisampleResolve)           { FUN_ENTRY(EGL_LOG_TRACE); MultisampleResolve = multisampleResolve; }
     inline void                      SetSwapBehavior(EGLint swapBehavior)                       { FUN_ENTRY(EGL_LOG_TRACE); SwapBehavior = swapBehavior; }
     inline void                      SetBindToTexture(EGLint bindToTexture)                     { FUN_ENTRY(EGL_LOG_TRACE); BindToTexture = bindToTexture; }
+           void                      ClampSwapInterval(EGLint swapInterval);
 
     inline EGLint                    GetType()                                            const { FUN_ENTRY(EGL_LOG_TRACE); return Type; }
     inline EGLint                    GetWidth()                                           const { FUN_ENTRY(EGL_LOG_TRACE); return Width; }
@@ -122,6 +123,7 @@ public:
 
     inline EGLint                    GetBindToTextureRGB()                                const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGB; }
     inline EGLint                    GetBindToTextureRGBA()                               const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTextureRGBA; }
+    inline EGLint                    GetSwapInterval()                                    const { FUN_ENTRY(EGL_LOG_TRACE); return SwapInterval; }
     inline EGLBoolean                GetBindToTexture()                                   const { FUN_ENTRY(EGL_LOG_TRACE); return BindToTexture; }
     inline EGLenum                   GetRenderBuffer()                                    const { FUN_ENTRY(EGL_LOG_TRACE); return RenderBuffer; }
 };

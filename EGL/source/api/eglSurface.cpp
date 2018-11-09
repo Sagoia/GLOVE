@@ -31,7 +31,7 @@ DepthSize(0), StencilSize(0), RedSize(0), GreenSize(0), BlueSize(0), AlphaSize(0
 TextureFormat(0), TextureTarget(0), MipmapTexture(EGL_FALSE),
 LargestPbuffer(EGL_FALSE), RenderBuffer(0), VGAlphaFormat(0), VGColorspace(0),
 MipmapLevel(0), MultisampleResolve(0), SwapBehavior(0), HorizontalResolution(0),
-VerticalResolution(0), AspectRatio(0), SwapInterval(0), BindToTexture(EGL_FALSE), PostSubBufferSupportedNV(0),
+VerticalResolution(0), AspectRatio(0), SwapInterval(1), BindToTexture(EGL_FALSE), PostSubBufferSupportedNV(0),
 CurrentImageIndex(0), mPlatformResources(nullptr)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
@@ -238,6 +238,9 @@ EGLSurface_t::InitSurface(EGLint type, EGLConfig_t *conf, const EGLint *attrib_l
     BindToTextureRGB  = GetConfigKey(conf, EGL_BIND_TO_TEXTURE_RGB);
     BindToTextureRGBA = GetConfigKey(conf, EGL_BIND_TO_TEXTURE_RGBA);
 
+    //The default value for SwapInterval is 1, but it has to keep up with the Config parameters
+    ClampSwapInterval(1);
+
     TextureFormat = EGL_NO_TEXTURE;
     TextureTarget = EGL_NO_TEXTURE;
     MipmapTexture = EGL_FALSE;
@@ -351,4 +354,13 @@ EGLSurface_t::SetMipmapLevel(EGLint mipmapLevel)
 
     EGLint maxMipmapLevel = NUMBER_OF_MIP_LEVELS(Width, Height);
     MipmapLevel = std::max(0, std::min(mipmapLevel, maxMipmapLevel));
+}
+
+void
+EGLSurface_t::ClampSwapInterval(EGLint interval)
+{
+    EGLint minInterval     = GetConfigKey(Config, EGL_MIN_SWAP_INTERVAL);
+    EGLint maxInterval     = GetConfigKey(Config, EGL_MAX_SWAP_INTERVAL);
+    EGLint clampedInterval = std::max(minInterval, std::min(interval, maxInterval));
+    SwapInterval           = clampedInterval;
 }
