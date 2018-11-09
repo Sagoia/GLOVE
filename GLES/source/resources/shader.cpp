@@ -76,7 +76,7 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
         return;
     }
 
-    uint32_t *sourceLenghts = new uint32_t[count];
+    uint32_t *sourceLengths = new uint32_t[count];
     mSourceLength = 0;
 
     /// Count total source length
@@ -84,22 +84,22 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
         /// All strings in source are considered to be null terminated
         if(length == NULL) {
             /// strlen does not include null termination character
-            sourceLenghts[i] = strlen(source[i]);
+            sourceLengths[i] = strlen(source[i]);
         } else {
             if(length[i] < 0) {
                 /// NULL terminated again
-                sourceLenghts[i] = strlen(source[i]);
+                sourceLengths[i] = strlen(source[i]);
             } else {
-                sourceLenghts[i] = length[i];
+                sourceLengths[i] = length[i];
             }
         }
 
-        mSourceLength += sourceLenghts[i];
+        mSourceLength += sourceLengths[i];
     }
 
     if(!mSourceLength) {
-        if(sourceLenghts) {
-            delete[] sourceLenghts;
+        if(sourceLengths) {
+            delete[] sourceLengths;
         }
         return;
     }
@@ -109,14 +109,14 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     /// Concatenate sources into 1 string and null terminate it
     uint32_t currentLength = 0;
     for(GLsizei i = 0; i < count; ++i) {
-        if(sourceLenghts[i]) {
-            memcpy((void *)&mSource[currentLength], source[i], sourceLenghts[i]);
-            currentLength += sourceLenghts[i];
+        if(sourceLengths[i]) {
+            memcpy((void *)&mSource[currentLength], source[i], sourceLengths[i]);
+            currentLength += sourceLengths[i];
         }
     }
     assert(currentLength == mSourceLength);
     mSource[currentLength] = '\0';
-    delete[] sourceLenghts;
+    delete[] sourceLengths;
 
     if(GLOVE_SAVE_SHADER_SOURCES_TO_FILES) {
         mShaderCompiler->EnableSaveSourceToFiles();

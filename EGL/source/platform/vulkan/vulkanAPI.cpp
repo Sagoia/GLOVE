@@ -82,9 +82,9 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
     }
 
     VkSwapchainCreateInfoKHR swapChainCreateInfo;
-    memset((void *)&swapChainCreateInfo, 0 ,sizeof(swapChainCreateInfo));
+    memset(static_cast<void *>(&swapChainCreateInfo), 0 ,sizeof(swapChainCreateInfo));
     swapChainCreateInfo.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    swapChainCreateInfo.pNext                 = NULL;
+    swapChainCreateInfo.pNext                 = nullptr;
     swapChainCreateInfo.surface               = vkResources->GetSurface();
     swapChainCreateInfo.minImageCount         = desiredNumberOfSwapChainImages;
     swapChainCreateInfo.imageFormat           = surfaceColorFormat;
@@ -100,10 +100,10 @@ VulkanAPI::CreateSwapchain(const VulkanResources *vkResources,
     swapChainCreateInfo.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     swapChainCreateInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
     swapChainCreateInfo.queueFamilyIndexCount = 0;
-    swapChainCreateInfo.pQueueFamilyIndices   = NULL;
+    swapChainCreateInfo.pQueueFamilyIndices   = nullptr;
 
     VkSwapchainKHR vkSwapchain;
-    VkResult res = mWsiCallbacks->fpCreateSwapchainKHR(mVkInterface->vkDevice, &swapChainCreateInfo, NULL, &vkSwapchain);
+    VkResult res = mWsiCallbacks->fpCreateSwapchainKHR(mVkInterface->vkDevice, &swapChainCreateInfo, nullptr, &vkSwapchain);
 
     return (VK_SUCCESS == res) ? vkSwapchain : VK_NULL_HANDLE;
 }

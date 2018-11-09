@@ -63,7 +63,7 @@ GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* reso
 
     bool result = mSlangShader->parse(resources, 100, ENoProfile, false, false, EShMsgDefault);
     if(!result) {
-        printf("%s\n", mSlangShader->getInfoLog());
+        GLOVE_PRINT_ERR("%s\n", mSlangShader->getInfoLog());
     }
 
     return result;
@@ -82,7 +82,7 @@ GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* r
     mSlangShader400->setStrings(source, 1);
     bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, (EShMessages)(EShMsgVulkanRules | EShMsgSpvRules));
     if(!result) {
-        printf("%s\n", mSlangShader400->getInfoLog());
+        GLOVE_PRINT_ERR("%s\n", mSlangShader400->getInfoLog());
     }
 
     return result;

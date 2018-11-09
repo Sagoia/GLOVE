@@ -45,7 +45,7 @@ PipelineCache::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkPipelineCache != VK_NULL_HANDLE) {
-        vkDestroyPipelineCache(mVkContext->vkDevice, mVkPipelineCache, NULL);
+        vkDestroyPipelineCache(mVkContext->vkDevice, mVkPipelineCache, nullptr);
         mVkPipelineCache = VK_NULL_HANDLE;
     }
 }
@@ -68,12 +68,12 @@ PipelineCache::Create(const void *data, size_t size)
 
     VkPipelineCacheCreateInfo info;
     info.sType           = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-    info.pNext           = NULL;
+    info.pNext           = nullptr;
     info.flags           = 0;
     info.pInitialData    = data;
     info.initialDataSize = size;
 
-    VkResult err = vkCreatePipelineCache(mVkContext->vkDevice, &info, NULL, &mVkPipelineCache);
+    VkResult err = vkCreatePipelineCache(mVkContext->vkDevice, &info, nullptr, &mVkPipelineCache);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

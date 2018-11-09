@@ -85,7 +85,7 @@ GlslangLinker::LinkProgram(glslang::TShader* slangVertShader, glslang::TShader* 
 
     result = mSlangProgram400->link(EShMsgDefault);
     if(!result) {
-        printf("%s\n", mSlangProgram400->getInfoLog());
+        GLOVE_PRINT_ERR("%s\n", mSlangProgram400->getInfoLog());
         return result;
     }
 
