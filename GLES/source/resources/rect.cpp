@@ -17,12 +17,12 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      (Image) Rectangle and Pixel Convertions in GLOVE
+ *  @brief      (Image) Rectangle and Pixel Conversions in GLOVE
  *
  *  @scope
  *
  *  Defines a rectangle object for image transfer operations
- *  and pixel convertion functions for converting buffers
+ *  and pixel conversion functions for converting buffers
  *  between different formats
  *
  */
@@ -141,7 +141,7 @@ CopyPixelsConvert(
     const uint8_t* srcPtr = static_cast<const uint8_t*>(srcData) + srcCurrentRowIndex;
     uint8_t* dstPtr = static_cast<uint8_t*>(dstData) + dstCurrentRowIndex;
 
-    // perform the convertion
+    // perform the conversion
     for(int row = 0; row < srcRect->height; ++row) {
         for(int col = 0; col < srcRect->width; ++col) {
             const uint32_t srcIndex = col * srcRect->GetPixelByteOffset();
@@ -158,7 +158,7 @@ CopyPixelsConvert(
 // copies pixels between two buffers
 // buffers must have the same format but may have different alignment
 void
-CopyPixelsNoConvertion(
+CopyPixelsNoConversion(
             const ImageRect* srcRect,
             const void* srcData,
             const ImageRect* dstRect,
@@ -207,7 +207,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
         switch(dstFormat) {
         case GL_BGRA8_EXT:
         case GL_BGRA_EXT:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGBA:
         case GL_RGBA8_OES:
@@ -235,7 +235,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
         switch(dstFormat) {
         case GL_RGBA:
         case GL_RGBA8_OES:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGB:
         case GL_RGB8_OES:
@@ -254,7 +254,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
         switch(dstFormat) {
         case GL_RGB:
         case GL_RGB8_OES:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGBA8_OES:
             CopyPixelsConvert(srcRect, srcData, dstRect, dstData, &Color::FromRGB, &Color::ConvertToRGBA);
@@ -266,7 +266,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
     case GL_LUMINANCE_ALPHA: {
         switch(dstFormat) {
         case GL_LUMINANCE_ALPHA:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_LUMINANCE:
             CopyPixelsConvert(srcRect, srcData, dstRect, dstData, &Color::FromLuminanceAlpha, &Color::ConvertToLuminance);
@@ -282,7 +282,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
     case GL_LUMINANCE: {
         switch(dstFormat) {
         case GL_LUMINANCE:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_LUMINANCE_ALPHA:
             CopyPixelsConvert(srcRect, srcData, dstRect, dstData, &Color::FromLuminance, &Color::ConvertToLuminanceAlpha);
@@ -298,7 +298,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
     case GL_ALPHA: {
         switch(dstFormat) {
         case GL_ALPHA:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGBA:
         case GL_RGBA8_OES:
@@ -311,7 +311,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
     case GL_RGBA4:
         switch(dstFormat) {
         case GL_RGBA4:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGBA:
         case GL_RGBA8_OES:
@@ -324,7 +324,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
     case GL_RGB5_A1:
         switch(dstFormat) {
         case GL_RGB5_A1:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGBA:
         case GL_RGBA8_OES:
@@ -337,7 +337,7 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
     case GL_RGB565:
         switch(dstFormat) {
         case GL_RGB565:
-            CopyPixelsNoConvertion(srcRect, srcData, dstRect, dstData);
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
             break;
         case GL_RGBA:
         case GL_RGB8_OES:

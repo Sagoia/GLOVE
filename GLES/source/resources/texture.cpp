@@ -227,7 +227,7 @@ Texture::Allocate(void)
         return false;
     }
 
-    // NOTE:: there is an implicit convertion of all textures to GL_RGBA
+    // NOTE:: there is an implicit conversion of all textures to GL_RGBA
     // TODO:: this should definitely NOT be the case
     GLenum srcInternalFormat = mInternalFormat;
     GLenum dstInternalFormat = mExplicitInternalFormat;
@@ -329,7 +329,7 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
         tmp_dstRect.width = mState[layer][level].width;
         tmp_dstRect.height = mState[layer][level].height;
 
-        CopyPixelsNoConvertion(&tmp_srcRect, dstData,
+        CopyPixelsNoConversion(&tmp_srcRect, dstData,
                               &tmp_dstRect, mState[layer][level].data);
         delete[] dstData;
     }
