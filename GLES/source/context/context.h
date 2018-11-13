@@ -94,13 +94,12 @@ private:
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
     void PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices);
     void UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex);
+    void UpdateIndices(uint32_t* offset, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
     void BindUniformDescriptors(VkCommandBuffer *CmdBuffer);
-    void BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices, GLenum type, bool indexed, uint32_t vertCount);
+    void BindVertexBuffers(VkCommandBuffer *CmdBuffer);
+    void BindIndexBuffer(VkCommandBuffer *CmdBuffer, uint32_t offset, VkIndexType type);
     void DrawGeometry(VkCommandBuffer *CmdBuffer, bool indexed, uint32_t firstVertex, uint32_t vertCount);
     void SetCapability(GLenum cap, GLboolean enable);
-
-    bool AllocateExplicitIndexBuffer(const void *srcData, size_t size, BufferObject** ibo);
-    bool ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo);
 
     void InitializeDefaultTextures(void);
 
@@ -230,7 +229,6 @@ public:
     GLboolean       IsTexture(GLuint texture);
     void            LineWidth(GLfloat width);
     void            LinkProgram(GLuint program);
-    void            LineLoopConversion(void* data, uint32_t vertCount, size_t elementByteSize);
     void            PixelStorei(GLenum pname, GLint param);
     void            PolygonOffset(GLfloat factor, GLfloat units);
     void            ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void* pixels);

@@ -204,8 +204,13 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         mWriteFBO->SetStateDraw();
     }
 
+    uint32_t indexOffset = 0;
+    uint32_t maxIndex = 0;
+    if(indexed) {
+        UpdateIndices(&indexOffset, &maxIndex, vertCount, type, indices, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER));
+    }
 
-    UpdateVertexAttributes(vertCount, firstVertex);
+    UpdateVertexAttributes(indexed ? maxIndex + 1 : vertCount, firstVertex);
 
     //If the primitives are rendered with GL_LINE_LOOP we have to increment the vertCount.
     //TODO: In future this functionality may be better to stay hidden.
@@ -225,7 +230,8 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 
     mPipeline->Bind(secondaryCmdBuffer);
     BindUniformDescriptors(secondaryCmdBuffer);
-    BindVertexBuffers(secondaryCmdBuffer, indices, type, indexed, vertCount);
+    BindIndexBuffer(secondaryCmdBuffer, indexOffset, GlToVkIndexType(type));
+    BindVertexBuffers(secondaryCmdBuffer);
     UpdateViewportState(mPipeline);
 
     mPipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
@@ -237,7 +243,19 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
 }
 
-void Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
+void
+Context::UpdateIndices(uint32_t* offset, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if(mPipeline->GetUpdateIndexBuffer() || indices) {
+        mStateManager.GetActiveShaderProgram()->PrepareIndexBufferObject(offset, maxIndex, indexCount, type, indices, ibo);
+        mPipeline->SetUpdateIndexBuffer(false);
+    }
+}
+
+void
+Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -251,7 +269,8 @@ void Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
     }
 }
 
-void Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
+void
+Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -263,45 +282,8 @@ void Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
     }
 }
 
-bool Context::AllocateExplicitIndexBuffer(const void *data, size_t size, BufferObject** ibo) {
-
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    if(mExplicitIbo != nullptr) {
-        mCacheManager->CacheVBO(mExplicitIbo);
-        mExplicitIbo = nullptr;
-    }
-
-    mExplicitIbo = new IndexBufferObject(mVkContext);
-    mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
-    *ibo = mExplicitIbo;
-
-    return mExplicitIbo->Allocate(size, data);
-}
-
-bool Context::ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    uint16_t *converted_indices_u16 = new uint16_t[elementCount];
-    size_t actual_size = elementCount * sizeof(uint16_t);
-
-    bool validatedBuffer = ConvertBuffer<uint8_t, uint16_t>(srcData, converted_indices_u16, elementCount);
-    if(validatedBuffer) {
-        validatedBuffer = AllocateExplicitIndexBuffer(converted_indices_u16, actual_size, ibo);
-    }
-    delete[] converted_indices_u16;
-
-    return validatedBuffer;
-}
-
-void Context::LineLoopConversion(void * data, uint32_t vertCount, size_t elementByteSize){
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    memcpy((uint8_t*)data + (vertCount-1)*elementByteSize, data, elementByteSize);
-}
-
-void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices, GLenum type, bool indexed, uint32_t vertCount)
+void
+Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -310,59 +292,20 @@ void Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer, const void *indices,
         memset(offsets, 0, sizeof(VkDeviceSize) * mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount());
         vkCmdBindVertexBuffers(*CmdBuffer, 0, mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount(), mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffers(), offsets);
     }
+}
 
-    if(!indexed) {
-        return;
-    }
+void
+Context::BindIndexBuffer(VkCommandBuffer *CmdBuffer, uint32_t offset, VkIndexType type)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
 
-    VkDeviceSize offset = 0;
-    BufferObject *ibo = nullptr;
-    bool validatedBuffer = true;
-    size_t actual_size = vertCount * (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
-
-    // Index buffer requires special handling for passing data and handling unsigned bytes:
-    // - If there is a index buffer bound, use the indices parameter as offset.
-    // - Otherwise, indices contains the index buffer data. Therefore create a temporary object and store the data there.
-    // If the data format is GL_UNSIGNED_BYTE (not supported by Vulkan), convert the data to uint16 and pass this instead.
-    if(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) != nullptr) {
-        ibo = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER);
-        offset = reinterpret_cast<VkDeviceSize>(indices);
-
-        if(type == GL_UNSIGNED_BYTE) {
-            actual_size = ibo->GetSize();
-            assert(actual_size > 0);
-            uint8_t *srcData     = new uint8_t[actual_size];
-            ibo->GetData(actual_size, offset, srcData);
-            offset = 0;
-            validatedBuffer = ConvertIndexBufferToUint16(srcData, vertCount, &ibo);
-            delete[] srcData;
-        }
-
-    } else {
-        if(type == GL_UNSIGNED_BYTE) {
-            validatedBuffer = ConvertIndexBufferToUint16(indices, vertCount, &ibo);
-        } else {
-            validatedBuffer = AllocateExplicitIndexBuffer(indices, actual_size, &ibo);
-        }
-    }
-
-    if(mStateManager.GetInputAssemblyState()->GetPrimitiveMode() == GL_LINE_LOOP && ibo->GetTarget() == GL_ELEMENT_ARRAY_BUFFER) {
-            size_t sizeOne = (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
-            void *srcData     = new uint8_t[vertCount*sizeOne];
-
-            ibo->GetData(actual_size - sizeOne, offset, srcData);
-            LineLoopConversion(srcData, vertCount, sizeOne);
-
-            validatedBuffer = AllocateExplicitIndexBuffer(srcData, actual_size, &ibo);
-            delete[] (uint8_t*)srcData;
-        }
-
-    if(validatedBuffer) {
-        vkCmdBindIndexBuffer(*CmdBuffer, ibo->GetVkBuffer(), offset, type == GL_UNSIGNED_INT ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
+    if(mStateManager.GetActiveShaderProgram()->GetActiveIndexVkBuffer()) {
+        vkCmdBindIndexBuffer(*CmdBuffer, mStateManager.GetActiveShaderProgram()->GetActiveIndexVkBuffer(), offset, type);
     }
 }
 
-void Context::DrawGeometry(VkCommandBuffer *CmdBuffer, bool indexed, uint32_t firstVertex, uint32_t vertCount)
+void
+Context::DrawGeometry(VkCommandBuffer *CmdBuffer, bool indexed, uint32_t firstVertex, uint32_t vertCount)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

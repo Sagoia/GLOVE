@@ -63,6 +63,7 @@ private:
     struct {
     VkBool32                                    Pipeline;
     VkBool32                                    VertexAttribVBOs;
+    VkBool32                                    IndexBuffer;
     VkBool32                                    Viewport;
     }                                           mUpdateState;
 
@@ -88,8 +89,10 @@ public:
     inline bool GetUpdatePipelineState(void)                              const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Pipeline; }
     inline bool GetUpdateViewportState(void)                              const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.Viewport; }
     inline bool GetUpdateVertexAttribVBOs(void)                           const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.VertexAttribVBOs; }
+    inline bool GetUpdateIndexBuffer(void)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.IndexBuffer; }
 
 // Set Functions
+    inline void SetUpdateIndexBuffer(VkBool32 enable)                           { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.IndexBuffer      = enable; }
     inline void SetUpdateVertexAttribVBOs(VkBool32 enable)                      { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.VertexAttribVBOs = enable; }
     inline void SetUpdateViewportState(VkBool32 enable)                         { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Viewport         = enable; }
     inline void SetUpdatePipeline(VkBool32 enable)                              { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Pipeline         = enable; }

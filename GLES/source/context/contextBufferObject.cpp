@@ -77,6 +77,10 @@ Context::BufferData(GLenum target, GLsizeiptr size, const void *data, GLenum usa
         RecordError(GL_OUT_OF_MEMORY);
         return;
     }
+
+    if(target == GL_ELEMENT_ARRAY_BUFFER || bo->IsIndexBuffer()) {
+        mPipeline->SetUpdateIndexBuffer(true);
+    }
 }
 
 void
@@ -101,6 +105,10 @@ Context::BufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const vo
     }
 
     bo->UpdateData(size, offset, data);
+
+    if(target == GL_ELEMENT_ARRAY_BUFFER || bo->IsIndexBuffer()) {
+        mPipeline->SetUpdateIndexBuffer(true);
+    }
 }
 
 void

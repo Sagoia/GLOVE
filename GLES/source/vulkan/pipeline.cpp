@@ -41,6 +41,7 @@ Pipeline::Pipeline(const vkContext_t *vkContext)
     mVkPipelineShaderStageIDs[1]  = -1;
 
     mUpdateState.VertexAttribVBOs = true;
+    mUpdateState.IndexBuffer      = false;
     mUpdateState.Viewport         = true;
     mUpdateState.Pipeline         = true;
 

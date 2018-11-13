@@ -67,6 +67,8 @@ ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI:
     mIsPrecompiled = false;
     mValidated = false;
     mActiveVertexVkBuffersCount = 0;
+    mActiveIndexVkBuffer = VK_NULL_HANDLE;
+    mExplicitIbo = nullptr;
 
     SetPipelineVertexInputStateInfo();
 }
@@ -80,6 +82,11 @@ ShaderProgram::~ShaderProgram()
     if(mPipelineCache) {
         delete mPipelineCache;
         mPipelineCache = nullptr;
+    }
+
+    if(mExplicitIbo != nullptr) {
+        delete mExplicitIbo;
+        mExplicitIbo = nullptr;
     }
 }
 
@@ -474,6 +481,120 @@ ShaderProgram::LinkProgram()
     return mLinked;
 }
 
+bool
+ShaderProgram::AllocateExplicitIndexBuffer(const void* data, size_t size, BufferObject** ibo)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if(mExplicitIbo != nullptr) {
+        mCacheManager->CacheVBO(mExplicitIbo);
+        mExplicitIbo = nullptr;
+    }
+
+    mExplicitIbo = new IndexBufferObject(mVkContext);
+    mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
+    *ibo = mExplicitIbo;
+
+    return mExplicitIbo->Allocate(size, data);
+}
+
+bool
+ShaderProgram::ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    uint16_t* convertedIndicesU16 = new uint16_t[elementCount];
+    size_t actualSize = elementCount * sizeof(uint16_t);
+
+    bool validatedBuffer = ConvertBuffer<uint8_t, uint16_t>(srcData, convertedIndicesU16, elementCount);
+    if(validatedBuffer) {
+        validatedBuffer = AllocateExplicitIndexBuffer(convertedIndicesU16, actualSize, ibo);
+    }
+    delete[] convertedIndicesU16;
+
+    return validatedBuffer;
+}
+
+void
+ShaderProgram::LineLoopConversion(void* data, uint32_t indexCount, size_t elementByteSize)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    memcpy(static_cast<uint8_t*>(data) + (indexCount - 1) * elementByteSize, data, elementByteSize);
+}
+
+uint32_t
+ShaderProgram::GetMaxIndex(BufferObject* ibo, uint32_t indexCount, size_t actualSize, VkDeviceSize offset)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    uint16_t* srcData = new uint16_t[actualSize];
+    ibo->GetData(actualSize, offset, srcData);
+
+    uint16_t maxIndex = srcData[0];
+    for(uint32_t i = indexCount - 1; i > 0; --i) {
+        uint16_t index = srcData[i];
+        if(maxIndex < index) {
+            maxIndex = index;
+        }
+    }
+    delete[] srcData;
+
+    return maxIndex;
+}
+
+void
+ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mActiveIndexVkBuffer = VK_NULL_HANDLE;
+    size_t actualSize = indexCount * (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
+    VkDeviceSize offset = 0;
+    bool validatedBuffer = true;
+
+    // Index buffer requires special handling for passing data and handling unsigned bytes:
+    // - If there is a index buffer bound, use the indices parameter as offset.
+    // - Otherwise, indices contains the index buffer data. Therefore create a temporary object and store the data there.
+    // If the data format is GL_UNSIGNED_BYTE (not supported by Vulkan), convert the data to uint16 and pass this instead.
+    if(ibo) {
+        offset = reinterpret_cast<VkDeviceSize>(indices);
+
+        if(type == GL_UNSIGNED_BYTE) {
+            actualSize = ibo->GetSize();
+            assert(actualSize > 0);
+            uint8_t* srcData = new uint8_t[actualSize];
+            ibo->GetData(actualSize, offset, srcData);
+            offset = 0;
+            validatedBuffer = ConvertIndexBufferToUint16(srcData, actualSize, &ibo);
+            delete[] srcData;
+        }
+    } else {
+        if(type == GL_UNSIGNED_BYTE) {
+            validatedBuffer = ConvertIndexBufferToUint16(indices, indexCount, &ibo);
+        } else {
+            validatedBuffer = AllocateExplicitIndexBuffer(indices, actualSize, &ibo);
+        }
+    }
+
+    if(mGLContext->IsModeLineLoop()) {
+        size_t sizeOne = (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
+        uint8_t* srcData = new uint8_t[indexCount * sizeOne];
+
+        ibo->GetData(actualSize - sizeOne, offset, srcData);
+        LineLoopConversion(srcData, indexCount, sizeOne);
+
+        validatedBuffer = AllocateExplicitIndexBuffer(srcData, actualSize, &ibo);
+        delete[] srcData;
+    }
+
+    if(validatedBuffer) {
+        *firstIndex = offset;
+        *maxIndex = GetMaxIndex(ibo, indexCount, actualSize, offset);
+        mActiveIndexVkBuffer = ibo->GetVkBuffer();
+    }
+}
+
 void
 ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs)
 {
@@ -496,7 +617,8 @@ ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t first
     GenerateVertexInputProperties(genericVertAttribs, vboLocationBindings);
 }
 
-void ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings)
+void
+ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings)
 {
     // store attribute locations containing the same VkBuffer and stride
     // as they are directly associated with vertex input bindings
@@ -1026,7 +1148,8 @@ ShaderProgram::UpdateDescriptorSet(void)
     mUpdateDescriptorSets = false;
 }
 
-void ShaderProgram::UpdateSamplerDescriptors()
+void
+ShaderProgram::UpdateSamplerDescriptors(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

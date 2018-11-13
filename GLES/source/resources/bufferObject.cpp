@@ -71,12 +71,12 @@ BufferObject::Allocate(size_t size, const void *data)
     return mAllocated;
 }
 
-void
+bool
 BufferObject::GetData(size_t size, size_t offset, void *data) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mMemory->GetData(size, offset, data);
+    return mMemory->GetData(size, offset, data);
 }
 
 void

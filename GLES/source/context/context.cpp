@@ -63,7 +63,6 @@ Context::Context()
     mReadSurface  = nullptr;
     mWriteFBO     = nullptr;
     mSystemFBO    = nullptr;
-    mExplicitIbo  = nullptr;
 
     //If VK_KHR_maintenance1 is supported, then there is no need to invert the Y
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
@@ -101,11 +100,6 @@ Context::~Context()
     if(mScreenSpacePass != nullptr) {
         delete mScreenSpacePass;
         mScreenSpacePass = nullptr;
-    }
-
-    if(mExplicitIbo != nullptr) {
-        delete mExplicitIbo;
-        mExplicitIbo = nullptr;
     }
 
     delete mCommandBufferManager;

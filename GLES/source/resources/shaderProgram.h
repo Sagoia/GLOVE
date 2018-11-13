@@ -55,6 +55,9 @@ private:
     uint32_t                                            mActiveVertexVkBuffersCount;
     VkBuffer                                            mActiveVertexVkBuffers[GLOVE_MAX_VERTEX_ATTRIBS];
 
+    BufferObject                                       *mExplicitIbo;
+    VkBuffer                                            mActiveIndexVkBuffer;
+
     bool                                                mUpdateDescriptorSets;
     bool                                                mUpdateDescriptorData;
     bool                                                mMarkForDeletion;
@@ -94,12 +97,18 @@ private:
     void                                                GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings);
     void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
 
+    void                                                LineLoopConversion(void* data, uint32_t indexCount, size_t elementByteSize);
+    bool                                                ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo);
+    bool                                                AllocateExplicitIndexBuffer(const void* data, size_t size, BufferObject** ibo);
+    uint32_t                                            GetMaxIndex(BufferObject* ibo, uint32_t indexCount, size_t actualSize, VkDeviceSize offset);
+
 public:
     ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~ShaderProgram();
 
     void                                                SetPipelineVertexInputStateInfo(void);
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
+    void                                                PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
     void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs);
     Shader                                             *IsShaderAttached(Shader *shader);
     void                                                AttachShader(Shader *shader);
@@ -138,6 +147,7 @@ public:
     const VkDescriptorSet                              *GetVkDescSet(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return &mVkDescSet; }
     uint32_t                                            GetActiveVertexVkBuffersCount(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffersCount; }
     const VkBuffer                                     *GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
+    VkBuffer                                            GetActiveIndexVkBuffer(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveIndexVkBuffer; }
 
     void                                                SetCommandBufferManager(
                                                         vulkanAPI::CommandBufferManager *cbManager)         { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
