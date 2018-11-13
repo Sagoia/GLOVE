@@ -419,6 +419,7 @@ GlToVkIndexType(GLenum type)
     case GL_UNSIGNED_BYTE:
     case GL_UNSIGNED_SHORT:                 return VK_INDEX_TYPE_UINT16;
     case GL_UNSIGNED_INT:                   return VK_INDEX_TYPE_UINT32;
-    default: NOT_FOUND_ENUM(type);          return VK_INDEX_TYPE_UINT16;
+    case GL_INVALID_ENUM:                   return VK_INDEX_TYPE_MAX_ENUM;
+    default: NOT_FOUND_ENUM(type);          return VK_INDEX_TYPE_MAX_ENUM;
     }
 }

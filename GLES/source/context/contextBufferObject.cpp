@@ -40,6 +40,10 @@ Context::BindBuffer(GLenum target, GLuint buffer)
         bo->SetContext(mVkContext);
     }
     mStateManager.GetActiveObjectsState()->SetActiveBufferObject(target, bo);
+
+    if(target == GL_ELEMENT_ARRAY_BUFFER || bo->IsIndexBuffer()) {
+        mPipeline->SetUpdateIndexBuffer(true);
+    }
 }
 
 void
