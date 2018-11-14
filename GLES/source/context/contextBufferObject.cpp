@@ -41,7 +41,7 @@ Context::BindBuffer(GLenum target, GLuint buffer)
     }
     mStateManager.GetActiveObjectsState()->SetActiveBufferObject(target, bo);
 
-    if(target == GL_ELEMENT_ARRAY_BUFFER || bo->IsIndexBuffer()) {
+    if(target == GL_ELEMENT_ARRAY_BUFFER || (bo && bo->IsIndexBuffer())) {
         mPipeline->SetUpdateIndexBuffer(true);
     }
 }
