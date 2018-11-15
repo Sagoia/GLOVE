@@ -142,7 +142,6 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
         }
     }
 
-    assert(surface->GetSwapInterval () == 0 && swapchainPresentMode!=VK_PRESENT_MODE_FIFO_KHR);
     assert(surface->GetSwapInterval () > 0 && swapchainPresentMode!=VK_PRESENT_MODE_IMMEDIATE_KHR);
     delete[] presentModes;
 
