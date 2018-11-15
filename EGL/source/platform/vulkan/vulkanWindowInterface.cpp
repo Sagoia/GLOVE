@@ -141,7 +141,8 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
             }
         }
     }
-
+    //If the swapInterval is not 0, then the swapchainPresentMode should not be VK_PRESENT_MODE_IMMEDIATE_KHR,
+    //which corresponds to swapInterval equals 0
     assert(surface->GetSwapInterval () > 0 && swapchainPresentMode!=VK_PRESENT_MODE_IMMEDIATE_KHR);
     delete[] presentModes;
 
