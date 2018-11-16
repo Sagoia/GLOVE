@@ -562,11 +562,10 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
 
         if(type == GL_UNSIGNED_BYTE) {
             actualSize = ibo->GetSize();
-            assert(actualSize > 0);
             uint8_t* srcData = new uint8_t[actualSize];
             ibo->GetData(actualSize, offset, srcData);
             offset = 0;
-            validatedBuffer = ConvertIndexBufferToUint16(srcData, actualSize, &ibo);
+            validatedBuffer = ConvertIndexBufferToUint16(srcData, indexCount, &ibo);
             delete[] srcData;
         }
     } else {
@@ -578,10 +577,10 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
     }
 
     if(mGLContext->IsModeLineLoop()) {
-        size_t sizeOne = (type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort));
+        size_t sizeOne = type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort);
         uint8_t* srcData = new uint8_t[indexCount * sizeOne];
 
-        ibo->GetData(actualSize - sizeOne, offset, srcData);
+        ibo->GetData(actualSize, offset, srcData);
         LineLoopConversion(srcData, indexCount, sizeOne);
 
         validatedBuffer = AllocateExplicitIndexBuffer(srcData, actualSize, &ibo);
@@ -620,6 +619,12 @@ ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t first
 void
 ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mGLContext->IsModeLineLoop()) {
+        --vertCount;
+    }
+
     // store attribute locations containing the same VkBuffer and stride
     // as they are directly associated with vertex input bindings
     typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
@@ -700,7 +705,7 @@ ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVe
 
             // If the primitives are rendered with GL_LINE_LOOP, which is not
             // supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
-            if(mGLContext->IsModeLineLoop()) {
+            if(mGLContext->IsModeLineLoop() && !mActiveIndexVkBuffer) {
                 BufferObject* vboLineLoopUpdated = new VertexBufferObject(mVkContext);
 
                 size_t sizeOld = vbo->GetSize();
