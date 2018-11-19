@@ -1429,8 +1429,10 @@ Context::UseProgram(GLuint program)
     }
 
     mStateManager.GetActiveObjectsState()->SetActiveShaderProgram(progPtr);
-
     mPipeline->SetUpdatePipeline(true);
+    if(progPtr) {
+        progPtr->EnableUpdateOfDescriptorSets();
+    }
 }
 
 void
