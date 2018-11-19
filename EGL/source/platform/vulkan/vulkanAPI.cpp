@@ -125,7 +125,7 @@ VulkanAPI::GetSwapChainImagesCount(const VulkanResources *vkResources)
 
     VkResult res;
     uint32_t imageCount = 0;
-    res = mWsiCallbacks->fpGetSwapchainImagesKHR(mVkInterface->vkDevice, vkResources->GetSwapchain(), &imageCount, NULL);
+    res = mWsiCallbacks->fpGetSwapchainImagesKHR(mVkInterface->vkDevice, vkResources->GetSwapchain(), &imageCount, nullptr);
 
     return (VK_SUCCESS == res) ? imageCount : 0;
 }
@@ -147,7 +147,7 @@ VulkanAPI::GetPhysicalDevFormatsCount(const VulkanResources *vkResources)
 
     VkResult res;
     uint32_t formatCount = 0;
-    res = vkGetPhysicalDeviceSurfaceFormatsKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &formatCount, NULL);
+    res = vkGetPhysicalDeviceSurfaceFormatsKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &formatCount, nullptr);
 
     return (VK_SUCCESS == res) ? formatCount : 0;
 }
@@ -177,7 +177,7 @@ VulkanAPI::GetPhysicalDevPresentModesCount(const VulkanResources *vkResources)
 
     VkResult res;
     uint32_t presentModeCount = 0;
-    res = vkGetPhysicalDeviceSurfacePresentModesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &presentModeCount, NULL);
+    res = vkGetPhysicalDeviceSurfacePresentModesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &presentModeCount, nullptr);
 
     return (VK_SUCCESS == res) ? presentModeCount : 0;
 }
@@ -217,13 +217,13 @@ VulkanAPI::PresentImage(const VulkanResources *vkResources, uint32_t imageIndex,
     VkPresentInfoKHR presentInfo;
     VkSwapchainKHR swapchain        = vkResources->GetSwapchain();
     presentInfo.sType               = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.pNext               = NULL;
-    presentInfo.waitSemaphoreCount  = vkSemaphores.size();
+    presentInfo.pNext               = nullptr;
+    presentInfo.waitSemaphoreCount  = static_cast<uint32_t>(vkSemaphores.size());
     presentInfo.pWaitSemaphores     = vkSemaphores.data();
     presentInfo.swapchainCount      = 1;
     presentInfo.pSwapchains         = &swapchain;
     presentInfo.pImageIndices       = &imageIndex;
-    presentInfo.pResults            = NULL;
+    presentInfo.pResults            = nullptr;
 
     VkResult res = mWsiCallbacks->fpQueuePresentKHR(mVkInterface->vkQueue, &presentInfo);
 
@@ -235,7 +235,7 @@ VulkanAPI::DestroySwapchain(const VulkanResources *vkResources)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    vkDestroySwapchainKHR(mVkInterface->vkDevice, vkResources->GetSwapchain(), NULL);
+    vkDestroySwapchainKHR(mVkInterface->vkDevice, vkResources->GetSwapchain(), nullptr);
 }
 
 void
@@ -243,5 +243,5 @@ VulkanAPI::DestroyPlatformSurface(const VulkanResources *vkResources)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    vkDestroySurfaceKHR(mVkInterface->vkInstance, vkResources->GetSurface(), NULL);
+    vkDestroySurfaceKHR(mVkInterface->vkInstance, vkResources->GetSurface(), nullptr);
 }

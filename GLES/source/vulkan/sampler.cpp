@@ -62,7 +62,7 @@ Sampler::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkSampler != VK_NULL_HANDLE) {
-        vkDestroySampler(mVkContext->vkDevice, mVkSampler, NULL);
+        vkDestroySampler(mVkContext->vkDevice, mVkSampler, nullptr);
         mVkSampler = VK_NULL_HANDLE;
     }
 
@@ -82,7 +82,7 @@ Sampler::Create()
 
     VkSamplerCreateInfo samplerInfo;
     samplerInfo.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerInfo.pNext                   = NULL;
+    samplerInfo.pNext                   = nullptr;
     samplerInfo.flags                   = 0;
 
     samplerInfo.mipmapMode              = mVkMipmapMode;
@@ -102,7 +102,7 @@ Sampler::Create()
     samplerInfo.borderColor             = mVkBorderColor;
     samplerInfo.unnormalizedCoordinates = mUnnormalizedCoordinates;
 
-    VkResult err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, NULL, &mVkSampler);
+    VkResult err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
     assert(!err);
 
     mUpdated = false;

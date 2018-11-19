@@ -81,7 +81,8 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
     }
     mTexture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
     mTexture->SetVkImageTiling();
-    mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat), GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), NULL);
+    mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat),
+                       GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), nullptr);
 
     return mTexture->Allocate();
 }

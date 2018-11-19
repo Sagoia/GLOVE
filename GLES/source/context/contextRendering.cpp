@@ -283,7 +283,7 @@ Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
         mStateManager.GetActiveShaderProgram()->UpdateBuiltInUniformData(mStateManager.GetViewportTransformationState()->GetMinDepthRange(),
                                                                          mStateManager.GetViewportTransformationState()->GetMaxDepthRange());
         mStateManager.GetActiveShaderProgram()->UpdateDescriptorSet();
-        vkCmdBindDescriptorSets(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mStateManager.GetActiveShaderProgram()->GetVkPipelineLayout(), 0, 1, mStateManager.GetActiveShaderProgram()->GetVkDescSet(), 0, NULL);
+        vkCmdBindDescriptorSets(*CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mStateManager.GetActiveShaderProgram()->GetVkPipelineLayout(), 0, 1, mStateManager.GetActiveShaderProgram()->GetVkDescSet(), 0, nullptr);
     }
 }
 
@@ -353,7 +353,7 @@ Context::DrawArrays(GLenum mode, GLint first, GLsizei count)
         mPipeline->SetInputAssemblyTopology(GlPrimitiveTopologyToVkPrimitiveTopology(mStateManager.GetInputAssemblyState()->GetPrimitiveMode()));
     }
 
-    PushGeometry(count, first, false, GL_INVALID_ENUM, NULL);
+    PushGeometry(count, first, false, GL_INVALID_ENUM, nullptr);
 }
 
 void
@@ -388,7 +388,7 @@ Context::DrawElements(GLenum mode, GLsizei count, GLenum type, const void* indic
         mPipeline->SetInputAssemblyTopology(GlPrimitiveTopologyToVkPrimitiveTopology(mStateManager.GetInputAssemblyState()->GetPrimitiveMode()));
     }
 
-    PushGeometry(count, 0, (bool)count, type, indices);
+    PushGeometry(count, 0, true, type, indices);
 }
 
 void

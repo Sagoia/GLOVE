@@ -44,8 +44,8 @@ class Texture {
         void                       *data;
 
         State() : width(-1), height(-1), format(GL_INVALID_VALUE), type(GL_INVALID_VALUE),
-            data(NULL) { FUN_ENTRY(GL_LOG_TRACE); }
-        ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = NULL;}}
+            data(nullptr) { FUN_ENTRY(GL_LOG_TRACE); }
+        ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
     typedef State                  State_t;
     typedef map<uint32_t, State_t> StateMap_t;

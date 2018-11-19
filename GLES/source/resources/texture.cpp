@@ -244,7 +244,7 @@ Texture::Allocate(void)
                                   GlInternalFormatTypeToNumElements(dstInternalFormat, dstType),
                                   GlTypeToElementSize(dstType),
                                   Texture::GetDefaultInternalAlignment());
-                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, (void *)state->data);
+                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, static_cast<void *>(state->data));
             }
         }
     }
@@ -520,7 +520,7 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     // Blit LoD Level '0' to rest layers
     VkImageBlit imageBlit;
-    memset((void *)&imageBlit, 0, sizeof(imageBlit));
+    memset(static_cast<void *>(&imageBlit), 0, sizeof(imageBlit));
     imageBlit.srcSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
     imageBlit.srcSubresource.mipLevel       = 0;
     imageBlit.srcSubresource.baseArrayLayer = 0;

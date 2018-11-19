@@ -107,12 +107,12 @@ Context::GetBooleanv(GLenum pname, GLboolean* params)
                                                 params[1] = GL_TRUE; break;
     case GL_ALIASED_POINT_SIZE_RANGE:           params[0] = GL_TRUE;
                                                 params[1] = GL_TRUE; break;
-    case GL_RED_BITS:                           GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), params, NULL, NULL, NULL, NULL, NULL); break;
-    case GL_BLUE_BITS:                          GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), NULL, params, NULL, NULL, NULL, NULL); break;
-    case GL_GREEN_BITS:                         GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), NULL, NULL, params, NULL, NULL, NULL); break;
-    case GL_ALPHA_BITS:                         GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), NULL, NULL, NULL, params, NULL, NULL); break;
-    case GL_DEPTH_BITS:                         GlFormatToStorageBits(mWriteFBO->GetDepthAttachmentTexture()   ? mWriteFBO->GetDepthAttachmentTexture()->GetInternalFormat()   : GL_INVALID_VALUE, NULL, NULL, NULL, NULL, params, NULL); break;
-    case GL_STENCIL_BITS:                       GlFormatToStorageBits(mWriteFBO->GetStencilAttachmentTexture() ? mWriteFBO->GetStencilAttachmentTexture()->GetInternalFormat() : GL_INVALID_VALUE, NULL, NULL, NULL, NULL, NULL, params); break;
+    case GL_RED_BITS:                           GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), params, nullptr, nullptr, nullptr, nullptr, nullptr); break;
+    case GL_BLUE_BITS:                          GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), nullptr, params, nullptr, nullptr, nullptr, nullptr); break;
+    case GL_GREEN_BITS:                         GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), nullptr, nullptr, params, nullptr, nullptr, nullptr); break;
+    case GL_ALPHA_BITS:                         GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), nullptr, nullptr, nullptr, params, nullptr, nullptr); break;
+    case GL_DEPTH_BITS:                         GlFormatToStorageBits(mWriteFBO->GetDepthAttachmentTexture()   ? mWriteFBO->GetDepthAttachmentTexture()->GetInternalFormat()   : GL_INVALID_VALUE, nullptr, nullptr, nullptr, nullptr, params, nullptr); break;
+    case GL_STENCIL_BITS:                       GlFormatToStorageBits(mWriteFBO->GetStencilAttachmentTexture() ? mWriteFBO->GetStencilAttachmentTexture()->GetInternalFormat() : GL_INVALID_VALUE, nullptr, nullptr, nullptr, nullptr, nullptr, params); break;
     case GL_SUBPIXEL_BITS:
     case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
     case GL_MAX_VERTEX_UNIFORM_VECTORS:

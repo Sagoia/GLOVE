@@ -135,15 +135,12 @@ VulkanWindowInterface::SetSwapchainPresentMode(EGLSurface_t* surface)
                 swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
                 break;
             }
-            if((swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) &&
-            (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)) {
+            if(presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR &&
+               swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) {
                 swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
             }
         }
     }
-    //If the swapInterval is not 0, then the swapchainPresentMode should not be VK_PRESENT_MODE_IMMEDIATE_KHR,
-    //which corresponds to swapInterval equals 0
-    assert(surface->GetSwapInterval () > 0 && swapchainPresentMode!=VK_PRESENT_MODE_IMMEDIATE_KHR);
     delete[] presentModes;
 
     return swapchainPresentMode;

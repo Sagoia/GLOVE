@@ -43,7 +43,7 @@ RenderPass::RenderPass(const vkContext_t *vkContext)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    memset((void *)mVkClearValues, 0, sizeof(mVkClearValues));
+    memset(static_cast<void *>(mVkClearValues), 0, sizeof(mVkClearValues));
 }
 
 RenderPass::~RenderPass()

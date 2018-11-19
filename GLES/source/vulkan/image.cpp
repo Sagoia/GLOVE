@@ -58,7 +58,7 @@ Image::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkImage != VK_NULL_HANDLE) {
-        vkDestroyImage(mVkContext->vkDevice, mVkImage, NULL);
+        vkDestroyImage(mVkContext->vkDevice, mVkImage, nullptr);
         mVkImage = VK_NULL_HANDLE;
     }
 
@@ -103,7 +103,7 @@ Image::Create(void)
 
     VkImageCreateInfo info;
     info.sType          = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    info.pNext          = NULL;
+    info.pNext          = nullptr;
     info.flags          = mVkImageTarget == VK_IMAGE_TARGET_2D ? 0 : VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     info.imageType      = mVkImageType;
     info.format         = mVkFormat;
@@ -119,9 +119,9 @@ Image::Create(void)
     info.initialLayout  = mVkImageLayout;
 
     info.queueFamilyIndexCount = 0;
-    info.pQueueFamilyIndices   = NULL;
+    info.pQueueFamilyIndices   = nullptr;
 
-    VkResult err = vkCreateImage(mVkContext->vkDevice, &info, NULL, &mVkImage);
+    VkResult err = vkCreateImage(mVkContext->vkDevice, &info, nullptr, &mVkImage);
     assert(!err);
 
     mDelete = VK_TRUE;
@@ -220,7 +220,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
 
     VkImageMemoryBarrier imageMemoryBarrier;
     imageMemoryBarrier.sType                = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    imageMemoryBarrier.pNext                = NULL;
+    imageMemoryBarrier.pNext                = nullptr;
     imageMemoryBarrier.srcAccessMask        = 0;
     imageMemoryBarrier.dstAccessMask        = 0;
     imageMemoryBarrier.oldLayout            = oldImageLayout;
@@ -334,7 +334,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     VkPipelineStageFlags srcStages  = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     VkPipelineStageFlags destStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 
-    vkCmdPipelineBarrier(*activeCmdBuffer, srcStages, destStages, 0, 0, NULL, 0, NULL, 1, &imageMemoryBarrier);
+    vkCmdPipelineBarrier(*activeCmdBuffer, srcStages, destStages, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
     mVkImageLayout = newImageLayout;
 }
