@@ -294,6 +294,58 @@ Framebuffer::CreateDepthStencilTexture(void)
 }
 
 void
+Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t stencilMaskFront, const Rect& clearRect)
+{
+    GLenum glFormat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
+    size_t numElements = GlInternalFormatTypeToNumElements(glFormat, mDepthStencilTexture->GetExplicitType());
+    ImageRect srcRect(clearRect, numElements, 1, Texture::GetDefaultInternalAlignment());
+
+    ImageRect dstRect = srcRect;
+    dstRect.x = 0;
+    dstRect.y = 0;
+    size_t dstByteSize = dstRect.GetRectBufferSize();
+    uint8_t* dstData = new uint8_t[dstByteSize];
+
+    //retrieve the stored stencil data
+    mDepthStencilTexture->SetDataNoInvertion(true);
+    mDepthStencilTexture->SetImageBufferCopyStencil(true);
+    mDepthStencilTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, glFormat, dstData);
+
+    // size of an entire row in bytes
+    uint32_t dataRowStride = dstRect.GetRectAlignedRowInBytes();
+
+    // rectangle offset in the memory block
+    uint32_t dataCurrentRowIndex = dstRect.GetStartRowIndex(dataRowStride);
+
+    // obtain ptr locations with the byte offset
+    uint8_t* dataPtr = static_cast<uint8_t*>(dstData) + dataCurrentRowIndex;
+
+    GLint depthBits = 0;
+    GLint stencilBits = 0;
+    GlFormatToStorageBits(glFormat, nullptr, nullptr, nullptr, nullptr, &depthBits, &stencilBits);
+    assert(stencilBits > 0);
+
+    // perform the conversion
+    for(int row = 0; row < srcRect.height; ++row) {
+        for(int col = 0; col < srcRect.width; ++col) {
+            uint32_t dataIndex = col * srcRect.GetPixelByteOffset();
+            uint8_t oldStencilValue = dataPtr[dataIndex];
+            uint8_t newStencilValue = (clearStencil & 0xFF) | ((oldStencilValue & 0xFF) & (~(stencilMaskFront & 0xFF)));
+
+            dataPtr[dataIndex] = newStencilValue;
+        }
+        // offset by the number of bytes per row
+        dataPtr = dataPtr + dataRowStride;
+    }
+
+    //update the stencil data
+    mDepthStencilTexture->CopyPixelsFromHost(&dstRect, &srcRect, 0, 0, glFormat, dstData);
+    mDepthStencilTexture->SetImageBufferCopyStencil(false);
+
+    delete[] dstData;
+}
+
+void
 Framebuffer::IsUpdated()
 {
     if(GetColorAttachmentTexture()) {

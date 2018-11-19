@@ -38,7 +38,8 @@ Image::Image(const vkContext_t *vkContext)
 mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED),
 mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),
 mVkSampleCount(VK_SAMPLE_COUNT_1_BIT), mVkSharingMode(VK_SHARING_MODE_EXCLUSIVE),
-mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true)
+mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true),
+mCopyStencil(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -137,7 +138,19 @@ Image::CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWi
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mVkBufferImageCopy.imageSubresource.aspectMask     = mVkImageSubresourceRange.aspectMask;
+    VkImageAspectFlagBits aspectMask = static_cast<VkImageAspectFlagBits>(0);
+    if(VkFormatIsColor(mVkFormat)) {
+        aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    } else {
+        if(VkFormatIsDepth(mVkFormat)) {
+            aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        }
+        if(VkFormatIsStencil(mVkFormat) && mCopyStencil) {
+            aspectMask = VK_IMAGE_ASPECT_STENCIL_BIT;
+        }
+    }
+
+    mVkBufferImageCopy.imageSubresource.aspectMask     = aspectMask;
     mVkBufferImageCopy.imageSubresource.mipLevel       = miplevel;
     mVkBufferImageCopy.imageSubresource.baseArrayLayer = layer;
     mVkBufferImageCopy.imageSubresource.layerCount     = layerCount;

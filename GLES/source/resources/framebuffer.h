@@ -79,6 +79,7 @@ public:
 // Create Functions
     bool                    Create(void);
     void                    CreateDepthStencilTexture(void);
+    void                    UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t stencilMaskFront, const Rect& clearRect);
 
 // RenderPass Functions
     bool                    CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled,

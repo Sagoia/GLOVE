@@ -70,14 +70,12 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
 
     if(GlFormatIsColorRenderable(mInternalFormat)) {
         mTexture->SetVkFormat(vkformat);
-        mTexture->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT));
     } else {
         // convert to supported format
         vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
         mTexture->SetVkFormat(vkformat);
-        mTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-        mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT));
     }
     mTexture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
     mTexture->SetVkImageTiling();

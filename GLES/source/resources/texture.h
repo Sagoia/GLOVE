@@ -172,6 +172,7 @@ public:
     inline void             SetDataUpdated(bool updated)                        { FUN_ENTRY(GL_LOG_TRACE); mDataUpdated = updated; }
     inline void             SetDataNoInvertion(bool updated)                    { FUN_ENTRY(GL_LOG_TRACE); mDataNoInvertion = updated; }
 
+    inline void             SetImageBufferCopyStencil(bool copy)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetCopyStencil(copy);   }
     inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
     inline void             SetVkImage(VkImage image)                           { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImage(image);        }
     inline void             SetVkImageUsage(VkImageUsageFlagBits usage)         { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }

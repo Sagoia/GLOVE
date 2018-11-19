@@ -351,6 +351,26 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
         }
         break;
 
+    case GL_UNSIGNED_INT_24_8_OES:
+    case GL_DEPTH24_STENCIL8_OES:
+        switch(dstFormat) {
+        case GL_UNSIGNED_INT_24_8_OES:
+        case GL_DEPTH24_STENCIL8_OES:
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
+            break;
+        default: NOT_FOUND_ENUM(dstFormat); break;
+        }
+        break;
+
+    case GL_STENCIL_INDEX8_OES:
+       switch(dstFormat) {
+       case GL_STENCIL_INDEX8_OES:
+           CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
+           break;
+       default: NOT_FOUND_ENUM(dstFormat); break;
+       }
+       break;
+
     default: NOT_FOUND_ENUM(srcFormat); break;
     }
 }
