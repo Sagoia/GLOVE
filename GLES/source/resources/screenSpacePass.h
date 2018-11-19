@@ -36,6 +36,15 @@
 #include <map>
 
 class ScreenSpacePass {
+private:
+
+struct ScreenSpaceVertex {
+    float pos[2];
+};
+
+struct UniformBufferObject_ScreenSpace {
+    float color[4];
+};
 struct ShaderData {
     class ShaderCompiler                       *shaderCompiler;
     class ShaderProgram                        *shaderProgram;
@@ -53,7 +62,6 @@ struct ShaderData {
     void Destroy(void);
 };
 
-private:
 // ------------
 
     class Context                              *mGLContext;
@@ -69,6 +77,8 @@ private:
     VertexBufferObject                         *mVertexBuffer;
     std::vector<VkVertexInputBindingDescription> mVkBindingDescriptions;
     std::vector<VkVertexInputAttributeDescription> mVkAttributeDescriptions;
+    VkBuffer                                    mVertexVkBuffer;
+    VkDeviceSize                                mVertexVkBufferOffset;
 
     // pipeline/renderpass
     VkPipelineVertexInputStateCreateInfo        mVertexInputInfo;
