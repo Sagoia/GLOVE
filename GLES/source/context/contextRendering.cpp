@@ -32,6 +32,11 @@ Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool 
     if(clearColorEnabled) {
         stateFramebufferOperations->GetClearColor(clearColorValue);
     }
+
+    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+        clearColorValue[3] = 1.0f;
+    }
+
     GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth() : 0.0f;
     uint32_t clearStencilValue = clearStencilEnabled ? stateFramebufferOperations->GetClearStencilMasked() : 0u;
 
@@ -114,12 +119,22 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
     stateFramebufferOperations->GetClearColor(clearColorValue);
 
+    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+        clearColorValue[3] = 1.0f;
+    }
+
     mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
     mScreenSpacePass->UpdateUniformBufferColor(clearColorValue[0], clearColorValue[1], clearColorValue[2], clearColorValue[3]);
 
     vulkanAPI::Pipeline* pipeline = mScreenSpacePass->GetPipeline();
 
-    pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
+    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+        GLboolean colormask[4];
+        mStateManager.GetFramebufferOperationsState()->GetColorMask(colormask);
+        GLubyte colorMaskPackRGB = GlColorMaskPack(colormask[0], colormask[1], colormask[2], GL_FALSE);
+        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(colorMaskPackRGB));
+    }
+
     pipeline->SetUpdatePipeline(true);
     pipeline->SetViewport(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
     pipeline->SetScissor(mClearRect.x, mClearRect.y, mClearRect.width, mClearRect.height);
@@ -127,6 +142,10 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     if(!pipeline->Create(mWriteFBO->GetVkRenderPass())) {
         Finish();
         return;
+    }
+
+    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
     }
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
@@ -216,11 +235,22 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 
     UpdateVertexAttributes(indexed ? maxIndex + 1 : vertCount, firstVertex);
 
+    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+        GLboolean colormask[4];
+        mStateManager.GetFramebufferOperationsState()->GetColorMask(colormask);
+        GLubyte colorMaskPackRGB = GlColorMaskPack(colormask[0], colormask[1], colormask[2], GL_FALSE);
+        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(colorMaskPackRGB));
+    }
+
     if(SetPipelineProgramShaderStages(mStateManager.GetActiveShaderProgram())) {
         if(!mPipeline->Create(mWriteFBO->GetVkRenderPass())) {
             Finish();
             return;
         }
+    }
+
+    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
     }
 
     VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
