@@ -51,7 +51,11 @@ Framebuffer::~Framebuffer()
     delete mAttachmentStencil;
 
     if(!mIsSystem && mDepthStencilTexture != nullptr) {
-        delete mDepthStencilTexture;
+        if(mDepthStencilTexture->GetDepthStencilTextureRefCount() == 1) {
+            delete mDepthStencilTexture;
+        } else {
+            mDepthStencilTexture->DecreaseDepthStencilTextureRefCount();
+        }
         mDepthStencilTexture = nullptr;
     }
 
@@ -267,12 +271,18 @@ Framebuffer::CreateDepthStencilTexture(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(GetDepthAttachmentTexture() || GetStencilAttachmentTexture()) {
+       
+        if(!mIsSystem && GetDepthAttachmentTexture() && GetDepthAttachmentTexture()->GetDepthStencilTexture()) {
+           mDepthStencilTexture = GetDepthAttachmentTexture()->GetDepthStencilTexture();
+           mDepthStencilTexture->IncreaseDepthStencilTextureRefCount();
+           return;
+        }
 
         if(mDepthStencilTexture != nullptr) {
             delete mDepthStencilTexture;
             mDepthStencilTexture = nullptr;
         }
-
+        
         mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
@@ -283,7 +293,7 @@ Framebuffer::CreateDepthStencilTexture(void)
         // convert to supported format
         vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
         mDepthStencilTexture->SetVkFormat(vkformat);
-        mDepthStencilTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         mDepthStencilTexture->SetVkImageTiling();
         GLenum glformat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
@@ -291,6 +301,11 @@ Framebuffer::CreateDepthStencilTexture(void)
         mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat),
                                        GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), nullptr);
         mDepthStencilTexture->Allocate();
+
+        if(!mIsSystem && GetDepthAttachmentTexture()) {
+            GetDepthAttachmentTexture()->SetDepthStencilTexture(mDepthStencilTexture);
+            mDepthStencilTexture->IncreaseDepthStencilTextureRefCount();
+        }
     }
 }
 

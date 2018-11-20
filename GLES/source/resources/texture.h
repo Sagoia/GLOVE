@@ -73,6 +73,9 @@ private:
     StateMap_t*                 mState;
     bool                        mDataUpdated;
     bool                        mDataNoInvertion;
+    
+    Texture                    *mDepthStencilTexture;
+    uint32_t                    mDepthStencilTextureRefCount;
 
     vulkanAPI::Image*           mImage;
     vulkanAPI::Memory*          mMemory;
@@ -132,7 +135,10 @@ public:
     inline GLenum           GetExplicitInternalFormat(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mExplicitInternalFormat; }
     inline GLint            GetLayersCount(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mLayersCount; }
     inline GLint            GetMipLevelsCount(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mMipLevelsCount; }
-    inline bool             GetDataUpdated(void)                         const  { FUN_ENTRY(GL_LOG_TRACE); return mDataUpdated; }
+    inline bool             GetDataUpdated(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mDataUpdated; }
+    
+    inline Texture         *GetDepthStencilTexture(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthStencilTexture;}
+    inline uint32_t         GetDepthStencilTextureRefCount(void)        const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthStencilTextureRefCount; }
 
     inline vulkanAPI::Image* GetImage(void)                                     { FUN_ENTRY(GL_LOG_TRACE); return mImage; }
 
@@ -171,6 +177,7 @@ public:
     inline void             SetExplicitInternalFormat(GLenum format)            { FUN_ENTRY(GL_LOG_TRACE); mExplicitInternalFormat = format;  }
     inline void             SetDataUpdated(bool updated)                        { FUN_ENTRY(GL_LOG_TRACE); mDataUpdated = updated; }
     inline void             SetDataNoInvertion(bool updated)                    { FUN_ENTRY(GL_LOG_TRACE); mDataNoInvertion = updated; }
+    inline void             SetDepthStencilTexture(Texture *tex)                { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = tex;}
 
     inline void             SetImageBufferCopyStencil(bool copy)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetCopyStencil(copy);   }
     inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
@@ -179,9 +186,12 @@ public:
     inline void             SetVkImageLayout(VkImageLayout layout)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageLayout(layout); }
     inline void             SetVkImageTiling(VkImageTiling tiling)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling(tiling); }
     inline void             SetVkImageTiling(void)                              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
-
     inline void             SetVkImageTarget(vulkanAPI::Image::VkImageTarget
                                                                      target)    { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTarget(target); }
+
+// Increase/Decrease Functions
+    inline void             IncreaseDepthStencilTextureRefCount(void)                              { FUN_ENTRY(GL_LOG_TRACE); ++mDepthStencilTextureRefCount; }
+    inline void             DecreaseDepthStencilTextureRefCount(void)                              { FUN_ENTRY(GL_LOG_TRACE); --mDepthStencilTextureRefCount; }
 
 // Is Functions
     inline bool             IsCubeMap(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget  == GL_TEXTURE_CUBE_MAP; }
