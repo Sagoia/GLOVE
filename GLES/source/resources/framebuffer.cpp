@@ -178,8 +178,9 @@ Framebuffer::SetColorAttachment(int width, int height)
     SetWidth(width);
     SetHeight(height);
 
+
     mUpdated     = true;
-    mSizeUpdated = true;
+    mSizeUpdated = (mDepthStencilTexture == nullptr) || (mDepthStencilTexture->GetWidth() != GetWidth() || mDepthStencilTexture->GetHeight() != GetHeight());
 }
 
 GLenum
