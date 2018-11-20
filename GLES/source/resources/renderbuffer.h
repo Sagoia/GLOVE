@@ -63,8 +63,7 @@ public:
     inline void        SetTarget(GLenum target)                                 { FUN_ENTRY(GL_LOG_TRACE); mTarget               = target;    }
 
 // Init Functions
-           void        InitTexture(void)                                        { FUN_ENTRY(GL_LOG_TRACE); mTexture              = new Texture(mVkContext, mCommandBufferManager);
-                                                                                                           mTexture->InitState();}
+           void        InitTexture(void);
 };
 
 #endif // __RENDERBUFFER_H__

@@ -45,7 +45,7 @@ Renderbuffer::~Renderbuffer()
 }
 
 void
-Renderbuffer::Release()
+Renderbuffer::Release(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -53,6 +53,16 @@ Renderbuffer::Release()
         delete mTexture;
         mTexture = nullptr;
     }
+}
+
+void
+Renderbuffer::InitTexture(void)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    
+    mTexture = new Texture(mVkContext, mCommandBufferManager);
+    mTexture->SetTarget(GL_TEXTURE_2D);
+    mTexture->InitState();
 }
 
 bool
