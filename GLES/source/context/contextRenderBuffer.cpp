@@ -45,19 +45,7 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
         rendbuff->SetTarget(target);
         rendbuff->InitTexture();
 
-        ObjectArray<Framebuffer> *fbs = mResourceManager->GetFramebufferArray();
-        for(typename map<uint32_t, Framebuffer *>::const_iterator it =
-        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
-
-            Framebuffer *fb = it->second;
-            if(fb->GetColorAttachmentType() == GL_RENDERBUFFER && renderbuffer == fb->GetColorAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetDepthAttachmentType()   == GL_RENDERBUFFER && renderbuffer == fb->GetDepthAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetStencilAttachmentType() == GL_RENDERBUFFER && renderbuffer == fb->GetStencilAttachmentName()) {
-                fb->SetUpdated();
-            }
-        }
+        mResourceManager->UpdateFramebufferObjects(renderbuffer, GL_RENDERBUFFER);
     }
     mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(renderbuffer);
 }

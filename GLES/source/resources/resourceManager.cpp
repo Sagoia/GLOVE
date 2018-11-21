@@ -106,3 +106,21 @@ ResourceManager::FindShaderProgramID(const ShaderProgram *program)
     }
     return 0;
 }
+
+
+void
+ResourceManager::UpdateFramebufferObjects(GLuint index, GLenum target)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+        mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
+
+        Framebuffer *fb = it->second;
+        if((fb->GetColorAttachmentType()   == target && index == fb->GetColorAttachmentName()) ||
+           (fb->GetDepthAttachmentType()   == target && index == fb->GetDepthAttachmentName()) ||
+           (fb->GetStencilAttachmentType() == target && index == fb->GetStencilAttachmentName())) {
+            fb->SetUpdated();
+        }
+    }
+}

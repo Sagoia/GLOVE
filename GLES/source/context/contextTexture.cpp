@@ -66,20 +66,7 @@ Context::BindTexture(GLenum target, GLuint texture)
             return;
         }
 
-        ObjectArray<Framebuffer> *fbs = mResourceManager->GetFramebufferArray();
-        for(typename map<uint32_t, Framebuffer *>::const_iterator it =
-        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
-
-            Framebuffer *fb = it->second;
-
-            if(fb->GetColorAttachmentType() == GL_TEXTURE && texture == fb->GetColorAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetDepthAttachmentType()   == GL_TEXTURE && texture == fb->GetDepthAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetStencilAttachmentType() == GL_TEXTURE && texture == fb->GetStencilAttachmentName()) {
-                fb->SetUpdated();
-            }
-        }
+        mResourceManager->UpdateFramebufferObjects(texture, GL_TEXTURE);
 
     } else {
         tex = mResourceManager->GetDefaultTexture(target);
