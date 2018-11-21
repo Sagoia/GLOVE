@@ -73,6 +73,7 @@ private:
     StateMap_t*                 mState;
     bool                        mDataUpdated;
     bool                        mDataNoInvertion;
+    bool                        mFboColorAttached;
     
     Texture                    *mDepthStencilTexture;
     uint32_t                    mDepthStencilTextureRefCount;
@@ -177,6 +178,7 @@ public:
     inline void             SetExplicitInternalFormat(GLenum format)            { FUN_ENTRY(GL_LOG_TRACE); mExplicitInternalFormat = format;  }
     inline void             SetDataUpdated(bool updated)                        { FUN_ENTRY(GL_LOG_TRACE); mDataUpdated = updated; }
     inline void             SetDataNoInvertion(bool updated)                    { FUN_ENTRY(GL_LOG_TRACE); mDataNoInvertion = updated; }
+    inline void             SetFboColorAttached(bool updated)                   { FUN_ENTRY(GL_LOG_TRACE); mFboColorAttached = updated; }
     inline void             SetDepthStencilTexture(Texture *tex)                { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = tex;}
 
     inline void             SetImageBufferCopyStencil(bool copy)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetCopyStencil(copy);   }

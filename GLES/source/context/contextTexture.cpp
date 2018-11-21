@@ -67,7 +67,7 @@ Context::BindTexture(GLenum target, GLuint texture)
         }
 
         mResourceManager->UpdateFramebufferObjects(texture, GL_TEXTURE);
-
+        
     } else {
         tex = mResourceManager->GetDefaultTexture(target);
     }
@@ -454,6 +454,12 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
 
     if(mWriteFBO->IsInDrawState()) {
         Finish();
+    }
+
+    if(mWriteFBO != mSystemFBO && GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
+        activeTexture->SetFboColorAttached(true);
+        activeTexture->SetDataNoInvertion(true);
+        CopyTexImage2D(target, level, format, 0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(), 0);
     }
 
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;

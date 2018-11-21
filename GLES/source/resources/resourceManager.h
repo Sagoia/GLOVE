@@ -94,7 +94,6 @@ public:
     inline ShaderArray        *GetShaderArray(void)                             { FUN_ENTRY(GL_LOG_TRACE); return &mShaders;  }
     inline ShaderProgramArray *GetShaderProgramArray(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mShaderPrograms;}
     inline RenderbufferArray  *GetRenderbufferArray(void)                       { FUN_ENTRY(GL_LOG_TRACE); return &mRenderbuffers; }
-    inline FramebufferArray   *GetFramebufferArray(void)                        { FUN_ENTRY(GL_LOG_TRACE); return &mFramebuffers;  }
 
     inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
     inline Texture *           GetDefaultTexture(GLenum target)                 { FUN_ENTRY(GL_LOG_TRACE); return target == GL_TEXTURE_2D ? mDefaultTexture2D : mDefaultTextureCubeMap; }
@@ -127,6 +126,7 @@ public:
                                              shadingNamespaceType_t type) const { FUN_ENTRY(GL_LOG_TRACE); if(!index || index >= mShadingObjectCount || !ShadingObjectExists(index)) { return GL_FALSE; }
                                                                                                            ShadingNamespace_t shadId = mShadingObjectPool.find(index)->second;
                                                                                                            return (shadId.arrayIndex && shadId.type == type) ? GL_TRUE : GL_FALSE;}
+    bool                       IsTextureAttachedToFBO(const Texture *texture);
     uint32_t                   FindShaderID(const Shader *shader);
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
 

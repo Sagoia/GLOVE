@@ -124,3 +124,19 @@ ResourceManager::UpdateFramebufferObjects(GLuint index, GLenum target)
         }
     }
 }
+
+bool
+ResourceManager::IsTextureAttachedToFBO(const Texture *texture)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+        mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
+
+        if(it->second->GetColorAttachmentType() == GL_TEXTURE && texture == it->second->GetColorAttachmentTexture()) {
+            return true;
+        }
+    }
+
+    return false;
+}

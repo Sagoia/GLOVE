@@ -40,7 +40,7 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false),
+mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
 mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -321,6 +321,11 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
         ConvertPixels(srcFormat, dstFormat,
                       &tmp_srcRect, srcData,
                       &tmp_dstRect, dstData);
+
+        if(mFboColorAttached) {
+            InvertImageYAxis(static_cast<uint8_t *>(dstData), &tmp_dstRect);
+        }
+        mFboColorAttached = false;
 
         // copy the converted buffer (containing the subtexture) to the target texture
         // both buffers are now in the same format and alignment

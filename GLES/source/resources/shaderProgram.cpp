@@ -1200,14 +1200,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         activeTexture->Allocate();
                     }
 
-                    ObjectArray<Framebuffer> *fbs = mGLContext->GetResourceManager()->GetFramebufferArray();
-                    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
-                        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
-
-                        Framebuffer *fb = it->second;
-                        if(fb->GetColorAttachmentType() == GL_TEXTURE && activeTexture == fb->GetColorAttachmentTexture())
-                            mGLContext->SetFullScreenRender(true);
-                    }
+                    mGLContext->SetFullScreenRender(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture));
 
                     activeTexture->CreateVkSampler();
 
