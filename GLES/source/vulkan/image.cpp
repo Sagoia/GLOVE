@@ -355,6 +355,8 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
 VkFormat
 Image::FindSupportedColorFormat(VkFormat format)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     //Check if the selected vkformat supports VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
     VkFormatProperties formatDeviceProps;
     vkGetPhysicalDeviceFormatProperties(mVkContext->vkGpus[0], format, &formatDeviceProps);
