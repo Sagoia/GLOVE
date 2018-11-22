@@ -69,10 +69,10 @@ public:
 
 // Set Functions
     void                    SetTarget(GLenum target);
-    inline void             SetUsage(GLenum usage)                              { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
-    inline void             SetContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
-                                                                                                           mBuffer->SetContext(vkContext);
-                                                                                                           mMemory->SetContext(vkContext); }
+    inline void             SetUsage(GLenum usage)                                { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
+    inline void             SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
+                                                                                                             mBuffer->SetContext(vkContext);
+                                                                                                             mMemory->SetContext(vkContext); }
 // Has/Is Functions
     inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != VK_NULL_HANDLE; }
     inline bool             IsIndexBuffer(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetFlags() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT; }

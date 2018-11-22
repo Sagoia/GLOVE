@@ -115,7 +115,7 @@ WSIXcb::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *
     surfaceCreateInfo.connection = xcb.connection;
     surfaceCreateInfo.window     = (xcb_window_t)win;
 
-    if(VK_SUCCESS != mWsiXCBCallbacks.fpCreateXcbSurfaceKHR(mVkInterface->vkInstance, &surfaceCreateInfo, NULL, &vkSurface)) {
+    if(VK_SUCCESS != mWsiXCBCallbacks.fpCreateXcbSurfaceKHR(mVkInterface->vkInstance, &surfaceCreateInfo, nullptr, &vkSurface)) {
         return VK_NULL_HANDLE;
     }
 

@@ -220,7 +220,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
     Texture *tex = new Texture(mVkContext, mCommandBufferManager);
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(depthStencilFormat);
-    tex->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     tex->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);

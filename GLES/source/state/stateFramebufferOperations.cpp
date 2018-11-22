@@ -163,7 +163,7 @@ StateFramebufferOperations::SetClearColor(GLclampf red, GLclampf green, GLclampf
 }
 
 void
-StateFramebufferOperations::SetClearDepth(GLfloat depth)
+StateFramebufferOperations::SetClearDepth(GLclampf depth)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -192,7 +192,7 @@ StateFramebufferOperations::UpdateClearColor(GLclampf red, GLclampf green, GLcla
 }
 
 bool
-StateFramebufferOperations::UpdateClearDepth(GLfloat depth)
+StateFramebufferOperations::UpdateClearDepth(GLclampf depth)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -216,7 +216,7 @@ StateFramebufferOperations::UpdateColorMask(GLboolean red, GLboolean green, GLbo
 }
 
 bool
-StateFramebufferOperations::UpdateDepthMask(GLenum enable)
+StateFramebufferOperations::UpdateDepthMask(GLboolean enable)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

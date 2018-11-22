@@ -79,7 +79,7 @@ WSIPlaneDisplay::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSu
     surfaceCreateInfo.imageExtent.width = static_cast<uint32_t>(surface->GetWidth());
     surfaceCreateInfo.imageExtent.height = static_cast<uint32_t>(surface->GetHeight());
 
-    if(VK_SUCCESS != mWsiPlaneDisplayCallbacks.fpCreateDisplayPlaneSurfaceKHR(mVkInterface->vkInstance, &surfaceCreateInfo, NULL, &vkSurface)) {
+    if(VK_SUCCESS != mWsiPlaneDisplayCallbacks.fpCreateDisplayPlaneSurfaceKHR(mVkInterface->vkInstance, &surfaceCreateInfo, nullptr, &vkSurface)) {
         return VK_NULL_HANDLE;
     }
 

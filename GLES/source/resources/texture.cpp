@@ -23,7 +23,7 @@
  *
  *  A Texture contains one or more images that all have the same image format.
  *  A texture can be used in two ways: (a) it can be the source of a texture
- *  access from a Shader or (b) it can be used as an attachmet.
+ *  access from a Shader or (b) it can be used as an attachment.
  *
  */
 
@@ -40,7 +40,8 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false)
+mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
+mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -244,7 +245,7 @@ Texture::Allocate(void)
                                   GlInternalFormatTypeToNumElements(dstInternalFormat, dstType),
                                   GlTypeToElementSize(dstType),
                                   Texture::GetDefaultInternalAlignment());
-                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, (void *)state->data);
+                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, static_cast<void *>(state->data));
             }
         }
     }
@@ -320,6 +321,11 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
         ConvertPixels(srcFormat, dstFormat,
                       &tmp_srcRect, srcData,
                       &tmp_dstRect, dstData);
+
+        if(mFboColorAttached) {
+            InvertImageYAxis(static_cast<uint8_t *>(dstData), &tmp_dstRect);
+        }
+        mFboColorAttached = false;
 
         // copy the converted buffer (containing the subtexture) to the target texture
         // both buffers are now in the same format and alignment
@@ -522,7 +528,7 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     // Blit LoD Level '0' to rest layers
     VkImageBlit imageBlit;
-    memset((void *)&imageBlit, 0, sizeof(imageBlit));
+    memset(static_cast<void *>(&imageBlit), 0, sizeof(imageBlit));
     imageBlit.srcSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
     imageBlit.srcSubresource.mipLevel       = 0;
     imageBlit.srcSubresource.baseArrayLayer = 0;

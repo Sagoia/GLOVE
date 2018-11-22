@@ -70,7 +70,7 @@ public:
     typedef vector<uniform>         uniformInterface;
 
     struct uniformData {
-        const uint8_t *             pClientData;
+        uint8_t                    *pClientData;
         bool                        clientDataDirty;
 
         uniformData()

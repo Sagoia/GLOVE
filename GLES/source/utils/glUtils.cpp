@@ -193,6 +193,7 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
     switch(type) {
     case GL_UNSIGNED_BYTE:
         switch(internalFormat) {
+        case GL_STENCIL_INDEX8:
         case GL_ALPHA8_OES:
         case GL_ALPHA:
         case GL_LUMINANCE:                          return 1;

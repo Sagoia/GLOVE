@@ -66,21 +66,8 @@ Context::BindTexture(GLenum target, GLuint texture)
             return;
         }
 
-        ObjectArray<Framebuffer> *fbs = mResourceManager->GetFramebufferArray();
-        for(typename map<uint32_t, Framebuffer *>::const_iterator it =
-        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
-
-            Framebuffer *fb = it->second;
-
-            if(fb->GetColorAttachmentType() == GL_TEXTURE && texture == fb->GetColorAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetDepthAttachmentType()   == GL_TEXTURE && texture == fb->GetDepthAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetStencilAttachmentType() == GL_TEXTURE && texture == fb->GetStencilAttachmentName()) {
-                fb->SetUpdated();
-            }
-        }
-
+        mResourceManager->UpdateFramebufferObjects(texture, GL_TEXTURE);
+        
     } else {
         tex = mResourceManager->GetDefaultTexture(target);
     }
@@ -469,6 +456,12 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
         Finish();
     }
 
+    if(mWriteFBO != mSystemFBO && GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
+        activeTexture->SetFboColorAttached(true);
+        activeTexture->SetDataNoInvertion(true);
+        CopyTexImage2D(target, level, format, 0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(), 0);
+    }
+
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
     GLenum srcInternalFormat = GlFormatToGlInternalFormat(format, type);
@@ -569,7 +562,7 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 
     // copy the framebuffer contents to the temp buffer
     // and convert them to the texture's internal format
-    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, internalformat, (void *)stagePixels);
+    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, internalformat, static_cast<void *>(stagePixels));
 
     // now copy the temp buffer contents to the texture
     activeTexture->SetState(width, height, level, layer, dstInternalFormat, dstType, Texture::GetDefaultInternalAlignment(), stagePixels);
@@ -647,7 +640,7 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
 
     // copy the framebuffer subcontents to the temp buffer
     // and convert them to the texture's internal format
-    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, dstInternalFormat, (void *)stagePixels);
+    fbTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, dstInternalFormat, static_cast<void *>(stagePixels));
 
     srcRect = dstRect;
     srcRect.x = 0; srcRect.y = 0;

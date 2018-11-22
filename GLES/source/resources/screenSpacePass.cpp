@@ -39,6 +39,7 @@ struct UniformBufferObject_ScreenSpace {
 ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
     mGLContext(GLContext), mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
     mNumElements(0), mVertexBuffer(nullptr),
+    mVertexVkBuffer(VK_NULL_HANDLE), mVertexVkBufferOffset(0),
     mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)),
     mPipeline(new vulkanAPI::Pipeline(vkContext)),
     mInitializedData(false), mInitializedPipeline(false)
@@ -94,7 +95,12 @@ ScreenSpacePass::CreateMeshData()
     mNumElements = static_cast<uint32_t>(vertices.size());
 
     mVertexBuffer = new VertexBufferObject(mVkContext);
-    mVertexBuffer->Allocate(mNumElements * sizeof(ScreenSpaceVertex), vertices.data());
+    if(!mVertexBuffer->Allocate(mNumElements * sizeof(ScreenSpaceVertex), vertices.data())) {
+        return false;
+    }
+
+    mVertexVkBuffer = mVertexBuffer->GetVkBuffer();
+    mVertexVkBufferOffset = 0;
 
     return true;
 }
@@ -109,6 +115,8 @@ ScreenSpacePass::DestroyMeshData()
     }
     delete mVertexBuffer;
     mVertexBuffer = nullptr;
+    mVertexVkBuffer = VK_NULL_HANDLE;
+    mVertexVkBufferOffset = 0;
     return true;
 }
 
@@ -196,18 +204,17 @@ ScreenSpacePass::CreateShaderData()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-std::string vertexSource100 = "#version 100\n\
+const std::string vertexSource100 = "#version 100\n\
 #ifdef GL_ES\n\
     precision mediump float;\n\
 #endif\n\
 attribute vec2 v_position;\n\
 void main() {\n\
     gl_Position = vec4(v_position, 1.0, 1.0);\n\
-    gl_Position.y = -gl_Position.y;\n\
 }\n\
 ";
 
-std::string fragmentSource100 = "#version 100\n\
+const std::string fragmentSource100 = "#version 100\n\
 #ifdef GL_ES\n\
     precision mediump float;\n\
 #endif\n\
@@ -280,15 +287,6 @@ ScreenSpacePass::CreateDefaultPipelineStates()
     mPipeline->CreateDynamicState(states);
 
     mPipeline->SetDepthTestEnable(false);
-    mPipeline->SetDepthCompareOp(VK_COMPARE_OP_ALWAYS);
-    mPipeline->SetStencilBackCompareOp(VK_COMPARE_OP_ALWAYS);
-    mPipeline->SetStencilBackFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilBackZFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilBackPassOp(VK_STENCIL_OP_REPLACE);
-    mPipeline->SetStencilFrontCompareOp(VK_COMPARE_OP_ALWAYS);
-    mPipeline->SetStencilFrontFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilFrontZFailOp(VK_STENCIL_OP_KEEP);
-    mPipeline->SetStencilFrontPassOp(VK_STENCIL_OP_REPLACE);
 
     mInitializedPipeline = true;
     return mInitializedPipeline;
@@ -317,7 +315,6 @@ ScreenSpacePass::UpdateUniformBufferColor(float r, float g, float b, float a)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-
     UniformBufferObject_ScreenSpace ubo = { r,g,b,a };
     GLint loc = mShaderData.shaderProgram->GetUniformLocation("clearColor");
     if(loc >= 0) {
@@ -342,11 +339,8 @@ ScreenSpacePass::BindVertexBuffers(const VkCommandBuffer *cmdBuffer) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-
     // bind vertex buffers
-    VkBuffer vertexBuffers[] = { mVertexBuffer->GetVkBuffer() };
-    VkDeviceSize offsets[] = { 0 };
-    vkCmdBindVertexBuffers(*cmdBuffer, 0, 1, vertexBuffers, offsets);
+    vkCmdBindVertexBuffers(*cmdBuffer, 0, 1, &mVertexVkBuffer, &mVertexVkBufferOffset);
 }
 
 void

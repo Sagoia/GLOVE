@@ -84,7 +84,7 @@ CommandBufferManager::~CommandBufferManager()
         DestroyVkCmdBuffers();
 
         if(mVkCmdPool != VK_NULL_HANDLE) {
-            vkDestroyCommandPool(mVkContext->vkDevice, mVkCmdPool, NULL);
+            vkDestroyCommandPool(mVkContext->vkDevice, mVkCmdPool, nullptr);
             mVkCmdPool = VK_NULL_HANDLE;
         }
     }
@@ -103,7 +103,7 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
     mVkCommandBuffers.commandBuffer.clear();
     mVkCommandBuffers.commandBufferState.clear();
     mVkCommandBuffers.fence.clear();
-    memset((void *)&mVkCommandBuffers, 0, mVkCommandBuffers.commandBuffer.size()*sizeof(State));
+    memset(static_cast<void *>(&mVkCommandBuffers), 0, mVkCommandBuffers.commandBuffer.size()*sizeof(State));
 
     if(mVkAuxCommandBuffer != VK_NULL_HANDLE) {
         vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
@@ -146,7 +146,7 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
 
     VkCommandBufferAllocateInfo cmdAllocInfo;
     cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cmdAllocInfo.pNext              = NULL;
+    cmdAllocInfo.pNext              = nullptr;
     cmdAllocInfo.commandPool        = mVkCmdPool;
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
     cmdAllocInfo.commandBufferCount = numOfBuffers;
@@ -174,19 +174,19 @@ CommandBufferManager::FreeResources(void)
             switch(resourceBase->mType) {
             case RESOURCE_TYPE_SHADER: {
                 referencedResource_t<VkShaderModule> *resource = (referencedResource_t<VkShaderModule> *)resourceBase;
-                vkDestroyShaderModule(mVkContext->vkDevice, resource->mResourcePtr, NULL);
+                vkDestroyShaderModule(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             case RESOURCE_TYPE_PIPELINE_LAYOUT: {
                 referencedResource_t<VkPipelineLayout> *resource = (referencedResource_t<VkPipelineLayout> *)resourceBase;
-                vkDestroyPipelineLayout(mVkContext->vkDevice, resource->mResourcePtr, NULL);
+                vkDestroyPipelineLayout(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             case RESOURCE_TYPE_DESC_POOL: {
                 referencedResource_t<VkDescriptorPool> *resource = (referencedResource_t<VkDescriptorPool> *)resourceBase;
-                vkDestroyDescriptorPool(mVkContext->vkDevice, resource->mResourcePtr, NULL);
+                vkDestroyDescriptorPool(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             case RESOURCE_TYPE_DESC_SET_LAYOUT: {
                 referencedResource_t<VkDescriptorSetLayout> *resource = (referencedResource_t<VkDescriptorSetLayout> *)resourceBase;
-                vkDestroyDescriptorSetLayout(mVkContext->vkDevice, resource->mResourcePtr, NULL);
+                vkDestroyDescriptorSetLayout(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             default: NOT_REACHED(); break;
             }
@@ -207,13 +207,13 @@ CommandBufferManager::AllocateVkCmdPool(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     VkCommandPoolCreateInfo cmdPoolInfo;
-    memset((void *)&cmdPoolInfo, 0 ,sizeof(cmdPoolInfo));
+    memset(static_cast<void *>(&cmdPoolInfo), 0 ,sizeof(cmdPoolInfo));
     cmdPoolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    cmdPoolInfo.pNext            = NULL;
+    cmdPoolInfo.pNext            = nullptr;
     cmdPoolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     cmdPoolInfo.queueFamilyIndex = mVkContext->vkGraphicsQueueNodeIndex;
 
-    VkResult err = vkCreateCommandPool(mVkContext->vkDevice, &cmdPoolInfo, NULL, &mVkCmdPool);
+    VkResult err = vkCreateCommandPool(mVkContext->vkDevice, &cmdPoolInfo, nullptr, &mVkCmdPool);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -234,7 +234,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
 
     VkCommandBufferAllocateInfo cmdAllocInfo;
     cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cmdAllocInfo.pNext              = NULL;
+    cmdAllocInfo.pNext              = nullptr;
     cmdAllocInfo.commandPool        = mVkCmdPool;
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     cmdAllocInfo.commandBufferCount = GLOVE_NUM_COMMAND_BUFFERS;
@@ -277,9 +277,9 @@ CommandBufferManager::BeginVkDrawCommandBuffer(void)
 
     VkCommandBufferBeginInfo info;
     info.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    info.pNext            = NULL;
+    info.pNext            = nullptr;
     info.flags            = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    info.pInheritanceInfo = NULL;
+    info.pInheritanceInfo = nullptr;
 
     VkResult err = vkBeginCommandBuffer(mVkCommandBuffers.commandBuffer[mActiveCmdBuffer], &info);
     assert(!err);
@@ -369,10 +369,10 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
 
     VkSubmitInfo submitInfo;
     submitInfo.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.pNext                = NULL;
+    submitInfo.pNext                = nullptr;
     submitInfo.commandBufferCount   = 1;
     submitInfo.pCommandBuffers      = &mVkCommandBuffers.commandBuffer[mActiveCmdBuffer];
-    submitInfo.waitSemaphoreCount   = pSems.size();
+    submitInfo.waitSemaphoreCount   = static_cast<uint32_t>(pSems.size());
     submitInfo.pWaitSemaphores      = pSems.data();
     submitInfo.pWaitDstStageMask    = pFlags.data();
     submitInfo.signalSemaphoreCount = 1;
@@ -428,9 +428,9 @@ CommandBufferManager::BeginVkAuxCommandBuffer(void)
 
     VkCommandBufferBeginInfo info;
     info.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    info.pNext            = NULL;
+    info.pNext            = nullptr;
     info.flags            = 0;
-    info.pInheritanceInfo = NULL;
+    info.pInheritanceInfo = nullptr;
 
     VkResult err = vkBeginCommandBuffer(mVkAuxCommandBuffer, &info);
     assert(!err);
@@ -456,7 +456,7 @@ CommandBufferManager::SubmitVkAuxCommandBuffer(void)
 
     VkSubmitInfo info = {};
     info.sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    info.pNext                  = NULL;
+    info.pNext                  = nullptr;
     info.commandBufferCount     = 1;
     info.pCommandBuffers        = &mVkAuxCommandBuffer;
 

@@ -53,7 +53,7 @@ ImageView::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkImageView != VK_NULL_HANDLE) {
-        vkDestroyImageView(mVkContext->vkDevice, mVkImageView, NULL);
+        vkDestroyImageView(mVkContext->vkDevice, mVkImageView, nullptr);
         mVkImageView = VK_NULL_HANDLE;
     }
 }
@@ -65,7 +65,7 @@ ImageView::Create(vulkanAPI::Image *image)
 
     VkImageViewCreateInfo info;
     info.sType            = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    info.pNext            = NULL;
+    info.pNext            = nullptr;
     info.flags            = 0;
     info.viewType         = (image->GetImageTarget() == Image::VK_IMAGE_TARGET_2D) ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_CUBE;
     info.image            = image->GetImage();

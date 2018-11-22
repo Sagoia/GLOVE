@@ -95,8 +95,8 @@ BufferObject::SetTarget(GLenum target)
     // realloc with combined flags in case GL specifies at a later state that an
     // already allocated, e.g., vertex buffer is also an index buffer and vice-versa
     if(mTarget != target && mTarget != GL_INVALID_VALUE) {
-        VkBufferUsageFlagBits combinedBuffers =
-                static_cast<VkBufferUsageFlagBits>(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        VkBufferUsageFlags combinedBuffers =
+                static_cast<VkBufferUsageFlags>(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
         if(mBuffer->GetFlags() != combinedBuffers && mAllocated == true) {
             size_t size = mBuffer->GetSize();
             uint8_t *srcData = new uint8_t[size];

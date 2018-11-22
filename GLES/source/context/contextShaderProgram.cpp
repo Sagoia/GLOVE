@@ -229,7 +229,7 @@ Context::GetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei*
     }
 
     if(len) {
-        memcpy((void *)name, (void *)attribute->name.c_str(), len);
+        memcpy(static_cast<void *>(name), static_cast<const void *>(attribute->name.c_str()), len);
         name[len] = '\0';
     }
 
@@ -269,7 +269,7 @@ Context::GetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei
     }
 
     if(len) {
-        memcpy((void *)name, (void *) (uniform->reflectionName + index0Str).c_str(), len);
+        memcpy(static_cast<void *>(name), static_cast<const void *>((uniform->reflectionName + index0Str).c_str()), len);
         name[len] = '\0';
     }
 
@@ -334,7 +334,7 @@ Context::GetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* length, cha
         }
 
         if(returnedLen) {
-            memcpy((void *)infolog, (void *)log, returnedLen);
+            memcpy(static_cast<void *>(infolog), static_cast<const void *>(log), returnedLen);
             infolog[returnedLen - 1] = '\0';
         }
 
@@ -427,7 +427,7 @@ Context::GetUniformiv(GLuint program, GLint location, GLint *params)
     }
 
     size_t size = GlslTypeToSize(uniform->glType);
-    progPtr->GetUniformData(location, size, (void *)params);
+    progPtr->GetUniformData(location, size, static_cast<void *>(params));
 }
 
 void
@@ -459,11 +459,11 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     case GL_FLOAT_VEC3:
     case GL_FLOAT_VEC4:
     case GL_FLOAT_MAT4:
-        progPtr->GetUniformData(location, size, (void *)params);
+        progPtr->GetUniformData(location, size, static_cast<void *>(params));
         break;
     case GL_FLOAT_MAT2: {
         glsl_float_t fData[2][4];
-        progPtr->GetUniformData(location, size, (void *)&fData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(&fData));
         params[0] = (float)fData[0][0];
         params[1] = (float)fData[0][1];
         params[2] = (float)fData[1][0];
@@ -472,7 +472,7 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     }
     case GL_FLOAT_MAT3: {
         glsl_float_t fData[3][4];
-        progPtr->GetUniformData(location, size, (void *)&fData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(&fData));
         params[0] = (float)fData[0][0];
         params[1] = (float)fData[0][1];
         params[2] = (float)fData[0][2];
@@ -486,20 +486,20 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     }
     case GL_BOOL: {
         glsl_bool_t bData;
-        progPtr->GetUniformData(location, size, (void *)&bData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(&bData));
         params[0] = (float)bData;
         break;
     }
     case GL_BOOL_VEC2: {
         glsl_bool_t bData[2];
-        progPtr->GetUniformData(location, size, (void *)bData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(bData));
         params[0] = bData[0];
         params[1] = bData[1];
         break;
     }
     case GL_BOOL_VEC3: {
         glsl_bool_t bData[3];
-        progPtr->GetUniformData(location, size, (void *)bData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(bData));
         params[0] = bData[0];
         params[1] = bData[1];
         params[2] = bData[2];
@@ -507,7 +507,7 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     }
     case GL_BOOL_VEC4: {
         glsl_bool_t bData[4];
-        progPtr->GetUniformData(location, size, (void *)bData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(bData));
         params[0] = bData[0];
         params[1] = bData[1];
         params[2] = bData[2];
@@ -517,7 +517,7 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
 
     case GL_INT: {
         glsl_int_t iData;
-        progPtr->GetUniformData(location, size, (void *)&iData);
+        progPtr->GetUniformData(location, size, static_cast<void *>(&iData));
         params[0] = (float)iData;
         break;
     }
@@ -558,7 +558,7 @@ Context::GetUniformLocation(GLuint program, const char *name)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(!memcmp((void *)name, (void *)"gl_", 3)) {
+    if(!memcmp(static_cast<const void *>(name), static_cast<const void *>("gl_"), 3)) {
         return -1;
     }
 
@@ -613,6 +613,11 @@ Context::LinkProgram(GLuint program)
     if(!progPtr) {
         return;
     }
+
+    if(mWriteFBO->IsInDrawState()) {
+        Finish();
+    }
+
     progPtr->LinkProgram();
     progPtr->SetShaderModules();
 
@@ -673,10 +678,10 @@ Context::Uniform1f(GLint location, GLfloat x)
     }
 
     if(uniform->glType == GL_FLOAT) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(float), (void *)&x);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(float), static_cast<void *>(&x));
     } else {
         glsl_bool_t bf = (bool)x;
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(glsl_bool_t), (void *)&bf);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(glsl_bool_t), static_cast<void *>(&bf));
     }
 }
 
@@ -713,13 +718,13 @@ Context::Uniform1fv(GLint location, GLsizei count, const GLfloat *v)
     }
 
     if(uniform->glType == GL_FLOAT) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[count];
         for(int i = 0; i < count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -753,7 +758,7 @@ Context::Uniform1i(GLint location, GLint x)
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(int), &x);
     } else {
         glsl_bool_t bx = (bool)x;
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(glsl_bool_t), (void *)&bx);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(glsl_bool_t), static_cast<void *>(&bx));
     }
 }
 
@@ -793,13 +798,13 @@ Context::Uniform1iv(GLint location, GLsizei count, const GLint *v)
     if(uniform->glType == GL_SAMPLER_2D || uniform->glType == GL_SAMPLER_CUBE) {
         mStateManager.GetActiveShaderProgram()->SetSampler(location, count, v);
     } else if(uniform->glType == GL_INT) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(int), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[count];
         for(int i = 0; i < count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -827,10 +832,10 @@ Context::Uniform2f(GLint location, GLfloat x, GLfloat y)
 
     if(uniform->glType == GL_FLOAT_VEC2) {
         float v[2] = {x, y};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(float), static_cast<void *>(v));
     } else {
         glsl_bool_t bv[2] = {(bool)x, (bool)y};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(glsl_bool_t), static_cast<void *>(bv));
     }
 }
 
@@ -867,13 +872,13 @@ Context::Uniform2fv(GLint location, GLsizei count, const GLfloat *v)
     }
 
     if(uniform->glType == GL_FLOAT_VEC2) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[2 * count];
         for(int i = 0; i < 2 * count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -901,10 +906,10 @@ Context::Uniform2i(GLint location, GLint x, GLint y)
 
     if(uniform->glType == GL_INT_VEC2) {
         int v[2] = {x, y};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(int), static_cast<void *>(v));
     } else {
         glsl_bool_t bv[2] = {(bool)x, (bool)y};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(glsl_bool_t), static_cast<void *>(bv));
     }
 }
 
@@ -941,13 +946,13 @@ Context::Uniform2iv(GLint location, GLsizei count, const GLint *v)
     }
 
     if(uniform->glType == GL_INT_VEC2) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(int), static_cast<const void *>(v));
     } else if(uniform->glType == GL_BOOL_VEC2) {
         glsl_bool_t *bv = new glsl_bool_t[2 * count];
         for(int i = 0; i < 2 * count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -975,10 +980,10 @@ Context::Uniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z)
 
     if(uniform->glType == GL_FLOAT_VEC3) {
         float v[3] = {x, y, z};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(float), static_cast<void *>(v));
     } else {
         glsl_bool_t bv[3] = {(bool)x, (bool)y, (bool)z};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(glsl_bool_t), static_cast<void *>(bv));
     }
 }
 
@@ -1015,13 +1020,13 @@ Context::Uniform3fv(GLint location, GLsizei count, const GLfloat *v)
     }
 
     if(uniform->glType == GL_FLOAT_VEC3) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[3 * count];
         for(int i = 0; i < 3 * count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -1049,10 +1054,10 @@ Context::Uniform3i(GLint location, GLint x, GLint y, GLint z)
 
     if(uniform->glType == GL_INT_VEC3) {
         int v[3] = {x, y, z};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(int), static_cast<void *>(v));
     } else {
         glsl_bool_t bv[3] = {(bool)x, (bool)y, (bool)z};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(glsl_bool_t), static_cast<void *>(bv));
     }
 }
 
@@ -1089,13 +1094,13 @@ Context::Uniform3iv(GLint location, GLsizei count, const GLint *v)
     }
 
     if(uniform->glType == GL_INT_VEC3) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(int), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[3 * count];
         for(int i = 0; i < 3 * count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -1123,10 +1128,10 @@ Context::Uniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 
     if(uniform->glType == GL_FLOAT_VEC4) {
         float v[4] = {x, y, z, w};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(float), static_cast<void *>(v));
     } else {
         glsl_bool_t bv[4] = {(bool)x, (bool)y, (bool)z, (bool)w};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(glsl_bool_t), static_cast<void *>(bv));
     }
 }
 
@@ -1163,13 +1168,13 @@ Context::Uniform4fv(GLint location, GLsizei count, const GLfloat *v)
     }
 
     if(uniform->glType == GL_FLOAT_VEC4) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(float), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[4 * count];
         for(int i = 0; i < 4 * count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -1197,10 +1202,10 @@ Context::Uniform4i(GLint location, GLint x, GLint y, GLint z, GLint w)
 
     if(uniform->glType == GL_INT_VEC4) {
         int v[4] = {x, y, z, w};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(int), static_cast<void *>(v));
     } else {
         glsl_bool_t bv[4] = {(bool)x, (bool)y, (bool)z, (bool)w};
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(glsl_bool_t), static_cast<void *>(bv));
     }
 }
 
@@ -1237,13 +1242,13 @@ Context::Uniform4iv(GLint location, GLsizei count, const GLint *v)
     }
 
     if(uniform->glType == GL_INT_VEC4) {
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(int), (void *)v);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(int), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[4 * count];
         for(int i = 0; i < 4 * count; ++i) {
             bv[i] = (bool)v[i];
         }
-        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(glsl_bool_t), (void *)bv);
+        mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(glsl_bool_t), static_cast<void *>(bv));
         delete[] bv;
     }
 }
@@ -1295,7 +1300,7 @@ Context::UniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, co
             v[k].fm[i].f[3] = 0.0f;
         }
     }
-    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * 4 * count * sizeof(float), (void *)v);
+    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * 4 * count * sizeof(float), static_cast<void *>(v));
     delete[] v;
 }
 
@@ -1345,7 +1350,7 @@ Context::UniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, co
             v[k].fm[i].f[3] = 0.0f;
         }
     }
-    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * 4 * count * sizeof(float), (void *)v);
+    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * 4 * count * sizeof(float), static_cast<void *>(v));
     delete[] v;
 }
 
@@ -1386,7 +1391,7 @@ Context::UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, co
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * 4 * count * sizeof(float), (void *)value);
+    mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * 4 * count * sizeof(float), static_cast<const void *>(value));
 }
 
 void
@@ -1424,8 +1429,10 @@ Context::UseProgram(GLuint program)
     }
 
     mStateManager.GetActiveObjectsState()->SetActiveShaderProgram(progPtr);
-
     mPipeline->SetUpdatePipeline(true);
+    if(progPtr) {
+        progPtr->EnableUpdateOfDescriptorSets();
+    }
 }
 
 void

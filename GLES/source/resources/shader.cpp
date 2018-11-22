@@ -82,7 +82,7 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     /// Count total source length
     for(GLsizei i = 0; i < count; ++i) {
         /// All strings in source are considered to be null terminated
-        if(length == NULL) {
+        if(length == nullptr) {
             /// strlen does not include null termination character
             sourceLengths[i] = strlen(source[i]);
         } else {
@@ -110,7 +110,7 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     uint32_t currentLength = 0;
     for(GLsizei i = 0; i < count; ++i) {
         if(sourceLengths[i]) {
-            memcpy((void *)&mSource[currentLength], source[i], sourceLengths[i]);
+            memcpy(static_cast<void *>(&mSource[currentLength]), source[i], sourceLengths[i]);
             currentLength += sourceLengths[i];
         }
     }
@@ -237,7 +237,7 @@ Shader::CreateVkShaderModule(void)
 
     VkShaderModuleCreateInfo moduleCreateInfo;
     moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    moduleCreateInfo.pNext = NULL;
+    moduleCreateInfo.pNext = nullptr;
     moduleCreateInfo.flags = 0;
     moduleCreateInfo.codeSize = mSpv.size() * sizeof(uint32_t);
     moduleCreateInfo.pCode = mSpv.data();

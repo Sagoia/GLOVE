@@ -163,11 +163,11 @@ Context::GetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length, char*
         }
 
         if(returnedLen) {
-            memcpy((void *)infolog, (void *)log, returnedLen);
+            memcpy(static_cast<void*>(infolog), static_cast<void *>(log), returnedLen);
             infolog[returnedLen] = '\0';
         }
         else {
-            memcpy((void *)infolog, (void *)log, 1);
+            memcpy(static_cast<void*>(infolog), static_cast<void *>(log), 1);
             infolog[0] = '\0';
         }
 
@@ -259,11 +259,11 @@ Context::GetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, char* 
     }
 
     if(returnedLen) {
-        memcpy((void *)source, (void *)src, returnedLen);
+        memcpy(static_cast<void *>(source), static_cast<void *>(src), returnedLen);
         source[returnedLen] = '\0';
     }
     else {
-        memcpy((void *)source, (void *)src, 1);
+        memcpy(static_cast<void *>(source), static_cast<void *>(src), 1);
         source[0] = '\0';
     }
 

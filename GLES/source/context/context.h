@@ -86,9 +86,10 @@ private:
     Framebuffer   *InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface);
     Texture       *CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface);
 
-    void CreateShaderCompiler(void);
+    void           PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
+    void           CreateShaderCompiler(void);
     void           ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
-    void           ClearMask(bool clearDepthEnabled, bool clearStencilEnabled);
+    void           ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
 
     void UpdateViewportState(vulkanAPI::Pipeline* pipeline);
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);

@@ -41,7 +41,7 @@ mActiveTextureUnit(GL_TEXTURE0)
         mActiveBufferObjects[i] = nullptr;
     }
 
-    memset((void *)mActiveTextures, 0, sizeof(mActiveTextures));
+    memset(static_cast<void *>(mActiveTextures), 0, sizeof(mActiveTextures));
 }
 
 StateActiveObjects::~StateActiveObjects()

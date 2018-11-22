@@ -72,7 +72,7 @@ public:
                                                       BufferObject *bo)                    { FUN_ENTRY(GL_LOG_TRACE); mActiveBufferObjects[target] = bo; }
       inline void               SetActiveBufferObject(GLenum target,
                                                       BufferObject *bo)                    { FUN_ENTRY(GL_LOG_TRACE); SetActiveBufferObject(GL_BUFFER_TARGET_TO_TYPE(target), bo); }
-      inline void               ResetActiveBufferObject(GLenum target)                     { FUN_ENTRY(GL_LOG_TRACE); SetActiveBufferObject(target, NULL); }
+      inline void               ResetActiveBufferObject(GLenum target)                     { FUN_ENTRY(GL_LOG_TRACE); SetActiveBufferObject(target, nullptr); }
 
 // Equals/Is Functions
       inline bool               EqualsActiveBufferObject(BufferObject *bo)                 { FUN_ENTRY(GL_LOG_TRACE); return GetActiveBufferObject(bo->GetTarget()) == bo; }

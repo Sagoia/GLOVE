@@ -100,6 +100,8 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
 
     pipelineShaderStageCount = GetStageCount();
     if(pipelineShaderStageCount == 1) {
+        pipelineShaderStages[0].flags  = 0;
+        pipelineShaderStages[0].pNext  = nullptr;
         pipelineShaderStages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pipelineShaderStages[0].stage  = GetShaderStage();
         pipelineShaderStages[0].module = GetShaderModule();
@@ -110,6 +112,8 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
             linked = false;
         }
     } else if (pipelineShaderStageCount == 2) {
+        pipelineShaderStages[0].flags  = 0;
+        pipelineShaderStages[0].pNext  = nullptr;
         pipelineShaderStages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pipelineShaderStages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
         pipelineShaderStages[0].module = GetVertexShaderModule();
@@ -120,6 +124,8 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
             linked = false;
         }
 
+        pipelineShaderStages[1].flags  = 0;
+        pipelineShaderStages[1].pNext  = nullptr;
         pipelineShaderStages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pipelineShaderStages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
         pipelineShaderStages[1].module = GetFragmentShaderModule();
@@ -846,7 +852,7 @@ ShaderProgram::GetInfoLog(void) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    char *log = NULL;
+    char *log = nullptr;
 
     if(mShaderCompiler) {
         uint32_t len = strlen(mShaderCompiler->GetProgramInfoLog()) + 1;
@@ -941,7 +947,7 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(!mVkDescSetLayoutBind) {
+    if(mVkDescSetLayoutBind != nullptr) {
         delete mVkDescSetLayoutBind;
         mVkDescSetLayoutBind = nullptr;
     }
@@ -956,14 +962,14 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
             mVkDescSetLayoutBind[i].descriptorCount = 1;
             mVkDescSetLayoutBind[i].stageFlags = mShaderResourceInterface.GetUniformBlockBlockStage(i) == (SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT) ? VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT :
                                                  mShaderResourceInterface.GetUniformBlockBlockStage(i) == SHADER_TYPE_VERTEX ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
-            mVkDescSetLayoutBind[i].pImmutableSamplers = NULL;
+            mVkDescSetLayoutBind[i].pImmutableSamplers = nullptr;
         }
     }
 
     VkDescriptorSetLayoutCreateInfo descLayoutInfo;
-    memset((void *)&descLayoutInfo, 0, sizeof(descLayoutInfo));
+    memset(static_cast<void *>(&descLayoutInfo), 0, sizeof(descLayoutInfo));
     descLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descLayoutInfo.pNext = NULL;
+    descLayoutInfo.pNext = nullptr;
     descLayoutInfo.flags = 0;
     descLayoutInfo.bindingCount = nLiveUniformBlocks;
     descLayoutInfo.pBindings = mVkDescSetLayoutBind;
@@ -977,14 +983,14 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
     mCommandBufferManager->RefResource(mVkDescSetLayout, vulkanAPI::RESOURCE_TYPE_DESC_SET_LAYOUT);
 
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
-    memset((void *) &pipelineLayoutCreateInfo, 0, sizeof(pipelineLayoutCreateInfo));
+    memset(static_cast<void *>(&pipelineLayoutCreateInfo), 0, sizeof(pipelineLayoutCreateInfo));
     pipelineLayoutCreateInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutCreateInfo.pNext                  = NULL;
+    pipelineLayoutCreateInfo.pNext                  = nullptr;
     pipelineLayoutCreateInfo.flags                  = 0;
     pipelineLayoutCreateInfo.setLayoutCount         = 1;
     pipelineLayoutCreateInfo.pSetLayouts            = &mVkDescSetLayout;
     pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-    pipelineLayoutCreateInfo.pPushConstantRanges    = NULL;
+    pipelineLayoutCreateInfo.pPushConstantRanges    = nullptr;
 
     if(vkCreatePipelineLayout(mVkContext->vkDevice, &pipelineLayoutCreateInfo, 0, &mVkPipelineLayout) != VK_SUCCESS) {
         assert(0);
@@ -1004,7 +1010,7 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
 
     VkDescriptorPoolSize *descTypeCounts = new VkDescriptorPoolSize[nLiveUniformBlocks];
     assert(descTypeCounts);
-    memset((void *)descTypeCounts, 0, nLiveUniformBlocks * sizeof(*descTypeCounts));
+    memset(static_cast<void *>(descTypeCounts), 0, nLiveUniformBlocks * sizeof(*descTypeCounts));
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveUniformBlocks(); ++i) {
         descTypeCounts[i].descriptorCount = 1;
@@ -1013,9 +1019,9 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
     }
 
     VkDescriptorPoolCreateInfo descriptorPoolInfo;
-    memset((void *)&descriptorPoolInfo, 0, sizeof(descriptorPoolInfo));
+    memset(static_cast<void *>(&descriptorPoolInfo), 0, sizeof(descriptorPoolInfo));
     descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descriptorPoolInfo.pNext = NULL;
+    descriptorPoolInfo.pNext = nullptr;
     descriptorPoolInfo.poolSizeCount = nLiveUniformBlocks;
     descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     descriptorPoolInfo.maxSets = 1;
@@ -1040,9 +1046,9 @@ ShaderProgram::CreateDescriptorSet(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     VkDescriptorSetAllocateInfo descAllocInfo;
-    memset((void *)&descAllocInfo, 0, sizeof(descAllocInfo));
+    memset(static_cast<void *>(&descAllocInfo), 0, sizeof(descAllocInfo));
     descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    descAllocInfo.pNext = NULL;
+    descAllocInfo.pNext = nullptr;
     descAllocInfo.descriptorPool = mVkDescPool;
     descAllocInfo.descriptorSetCount = 1;
     descAllocInfo.pSetLayouts = &mVkDescSetLayout;
@@ -1170,10 +1176,10 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     /// Get texture units from samplers
     uint32_t samp = 0;
     std::map<uint32_t, uint32_t> map_block_texDescriptor;
-    VkDescriptorImageInfo *textureDescriptors = NULL;
+    VkDescriptorImageInfo *textureDescriptors = nullptr;
     if(nSamplers) {
         textureDescriptors = new VkDescriptorImageInfo[nSamplers];
-        memset((void *)textureDescriptors, 0, nSamplers * sizeof(*textureDescriptors));
+        memset(static_cast<void *>(textureDescriptors), 0, nSamplers * sizeof(*textureDescriptors));
 
         for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveUniforms(); ++i) {
             if(mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D || mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_CUBE) {
@@ -1186,8 +1192,6 @@ ShaderProgram::UpdateSamplerDescriptors(void)
 
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
                         uint8_t pixels[4] = {0,0,0,255};
-                        //activeTexture->SetVkImageUsage(VK_IMAGE_USAGE_SAMPLED_BIT);
-                        //activeTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                         for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
                             for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
                                 /// TODO:: how we handle this case should be investigated further
@@ -1197,14 +1201,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         activeTexture->Allocate();
                     }
 
-                    ObjectArray<Framebuffer> *fbs = mGLContext->GetResourceManager()->GetFramebufferArray();
-                    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
-                        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
-
-                        Framebuffer *fb = it->second;
-                        if(fb->GetColorAttachmentType() == GL_TEXTURE && activeTexture == fb->GetColorAttachmentTexture())
-                            mGLContext->SetFullScreenRender(true);
-                    }
+                    mGLContext->SetFullScreenRender(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture));
 
                     activeTexture->CreateVkSampler();
 
@@ -1224,7 +1221,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
 
     samp = 0;
     VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
-    memset((void*)writes, 0, nLiveUniformBlocks * sizeof(*writes));
+    memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
 
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1245,7 +1242,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     }
     assert(samp == nSamplers);
 
-    vkUpdateDescriptorSets(mVkContext->vkDevice, nLiveUniformBlocks, writes, 0, NULL);
+    vkUpdateDescriptorSets(mVkContext->vkDevice, nLiveUniformBlocks, writes, 0, nullptr);
 
     delete[] writes;
     delete[] textureDescriptors;
@@ -1261,7 +1258,7 @@ ShaderProgram::ResetVulkanVertexInput(void)
     mVkPipelineVertexInput.vertexAttributeDescriptionCount = 0;
     mVkPipelineVertexInput.vertexBindingDescriptionCount = 0;
     mActiveVertexVkBuffersCount = 0;
-    memset((void *)mActiveVertexVkBuffers, 0, sizeof(mActiveVertexVkBuffers));
+    memset(static_cast<void *>(mActiveVertexVkBuffers), 0, sizeof(mActiveVertexVkBuffers));
 }
 
 void
