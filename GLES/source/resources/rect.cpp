@@ -102,7 +102,7 @@ InvertImageYAxis(uint8_t *image, const ImageRect* rect)
 
     uint8_t *tmpRow = new uint8_t[rowStride];
     uint8_t *srcRow = static_cast<uint8_t *>(image);
-    uint8_t *dstRow = static_cast<uint8_t *>(image) + (rect->height - 1) * rowStride;
+    uint8_t *dstRow = static_cast<uint8_t *>(image) + ((rect->height - 1) * rowStride);
 
     // switch rows
     for(uint32_t i = 0; i < (uint32_t)(rect->height >> 1); ++i) {
@@ -350,6 +350,26 @@ ConvertPixels(GLenum srcFormat, GLenum dstFormat,
         default: NOT_FOUND_ENUM(dstFormat); break;
         }
         break;
+
+    case GL_UNSIGNED_INT_24_8_OES:
+    case GL_DEPTH24_STENCIL8_OES:
+        switch(dstFormat) {
+        case GL_UNSIGNED_INT_24_8_OES:
+        case GL_DEPTH24_STENCIL8_OES:
+            CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
+            break;
+        default: NOT_FOUND_ENUM(dstFormat); break;
+        }
+        break;
+
+    case GL_STENCIL_INDEX8_OES:
+       switch(dstFormat) {
+       case GL_STENCIL_INDEX8_OES:
+           CopyPixelsNoConversion(srcRect, srcData, dstRect, dstData);
+           break;
+       default: NOT_FOUND_ENUM(dstFormat); break;
+       }
+       break;
 
     default: NOT_FOUND_ENUM(srcFormat); break;
     }

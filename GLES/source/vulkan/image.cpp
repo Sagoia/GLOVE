@@ -38,7 +38,8 @@ Image::Image(const vkContext_t *vkContext)
 mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED),
 mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),
 mVkSampleCount(VK_SAMPLE_COUNT_1_BIT), mVkSharingMode(VK_SHARING_MODE_EXCLUSIVE),
-mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true)
+mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true),
+mCopyStencil(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -58,7 +59,7 @@ Image::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkImage != VK_NULL_HANDLE) {
-        vkDestroyImage(mVkContext->vkDevice, mVkImage, NULL);
+        vkDestroyImage(mVkContext->vkDevice, mVkImage, nullptr);
         mVkImage = VK_NULL_HANDLE;
     }
 
@@ -103,7 +104,7 @@ Image::Create(void)
 
     VkImageCreateInfo info;
     info.sType          = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    info.pNext          = NULL;
+    info.pNext          = nullptr;
     info.flags          = mVkImageTarget == VK_IMAGE_TARGET_2D ? 0 : VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     info.imageType      = mVkImageType;
     info.format         = mVkFormat;
@@ -119,9 +120,9 @@ Image::Create(void)
     info.initialLayout  = mVkImageLayout;
 
     info.queueFamilyIndexCount = 0;
-    info.pQueueFamilyIndices   = NULL;
+    info.pQueueFamilyIndices   = nullptr;
 
-    VkResult err = vkCreateImage(mVkContext->vkDevice, &info, NULL, &mVkImage);
+    VkResult err = vkCreateImage(mVkContext->vkDevice, &info, nullptr, &mVkImage);
     assert(!err);
 
     mDelete = VK_TRUE;
@@ -137,7 +138,19 @@ Image::CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWi
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mVkBufferImageCopy.imageSubresource.aspectMask     = mVkImageSubresourceRange.aspectMask;
+    VkImageAspectFlagBits aspectMask = static_cast<VkImageAspectFlagBits>(0);
+    if(VkFormatIsColor(mVkFormat)) {
+        aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    } else {
+        if(VkFormatIsDepth(mVkFormat)) {
+            aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        }
+        if(VkFormatIsStencil(mVkFormat) && mCopyStencil) {
+            aspectMask = VK_IMAGE_ASPECT_STENCIL_BIT;
+        }
+    }
+
+    mVkBufferImageCopy.imageSubresource.aspectMask     = aspectMask;
     mVkBufferImageCopy.imageSubresource.mipLevel       = miplevel;
     mVkBufferImageCopy.imageSubresource.baseArrayLayer = layer;
     mVkBufferImageCopy.imageSubresource.layerCount     = layerCount;
@@ -220,7 +233,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
 
     VkImageMemoryBarrier imageMemoryBarrier;
     imageMemoryBarrier.sType                = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    imageMemoryBarrier.pNext                = NULL;
+    imageMemoryBarrier.pNext                = nullptr;
     imageMemoryBarrier.srcAccessMask        = 0;
     imageMemoryBarrier.dstAccessMask        = 0;
     imageMemoryBarrier.oldLayout            = oldImageLayout;
@@ -334,7 +347,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     VkPipelineStageFlags srcStages  = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     VkPipelineStageFlags destStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 
-    vkCmdPipelineBarrier(*activeCmdBuffer, srcStages, destStages, 0, 0, NULL, 0, NULL, 1, &imageMemoryBarrier);
+    vkCmdPipelineBarrier(*activeCmdBuffer, srcStages, destStages, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
     mVkImageLayout = newImageLayout;
 }

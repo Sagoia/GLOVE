@@ -107,7 +107,7 @@ ShaderResourceInterface::AllocateUniformClientData(void)
     for(auto& uni : mUniformInterface) {
         size_t clientDataSize = uni.arraySize * GlslTypeToSize(uni.glType);
         uint8_t* clientData = new uint8_t[clientDataSize];
-        memset((void *)clientData, 0, clientDataSize);
+        memset(static_cast<void *>(clientData), 0, clientDataSize);
 
         mUniformDataInterface.insert(make_pair(uni.reflectionName, uniformData()));
         map<std::string, uniformData>::iterator it = mUniformDataInterface.find(uni.reflectionName);
@@ -191,7 +191,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 struct uniformDirty newUniformDirty;
                 newUniformDirty.size   = GlslTypeToSize(uniform.glType);
                 newUniformDirty.offset = uniform.offset + i*GlslTypeToAllignment(uniform.glType);
-                newUniformDirty.data   = (void *)(itUniform->second.pClientData + i*newUniformDirty.size);
+                newUniformDirty.data   = static_cast<const void *>(itUniform->second.pClientData + i*newUniformDirty.size);
                 uniformInterfaceDirty.push_back(newUniformDirty);
             }
         }
@@ -297,7 +297,7 @@ ShaderResourceInterface::SetUniformClientData(uint32_t location, size_t size, co
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
     map<std::string, uniformData>::iterator it = mUniformDataInterface.find(uniform->reflectionName);
-    memcpy((void *)(it->second.pClientData + arrayOffset), ptr, size);
+    memcpy(static_cast<void *>(it->second.pClientData + arrayOffset), ptr, size);
     it->second.clientDataDirty = true;
 }
 
@@ -350,7 +350,7 @@ ShaderResourceInterface::GetUniformClientData(uint32_t location, size_t size, vo
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
     map<std::string, uniformData>::const_iterator it = mUniformDataInterface.find(uniform->reflectionName);
-    memcpy(ptr, (void *)(it->second.pClientData + arrayOffset), size);
+    memcpy(ptr, static_cast<const void *>(it->second.pClientData + arrayOffset), size);
 }
 
 void

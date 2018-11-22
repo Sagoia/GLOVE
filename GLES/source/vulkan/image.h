@@ -64,6 +64,8 @@ private:
     uint32_t                          mLayers;
     VkBool32                          mDelete;
 
+    bool                              mCopyStencil;
+
 public:
 // Constructor
     Image(const vkContext_t *vkContext = nullptr);
@@ -105,6 +107,7 @@ public:
 // Set Functions
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext     = vkContext; }
     inline void                       SetFormat(VkFormat format)                { FUN_ENTRY(GL_LOG_TRACE); mVkFormat      = format;    }
+    inline void                       SetCopyStencil(bool copy)                 { FUN_ENTRY(GL_LOG_TRACE); mCopyStencil   = copy;      }
     inline void                       SetImage(VkImage image)                   { FUN_ENTRY(GL_LOG_TRACE); mVkImage       = image;
                                                                                                            mDelete        = false;     }
     inline void                       SetImageUsage(VkImageUsageFlagBits usage) { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }

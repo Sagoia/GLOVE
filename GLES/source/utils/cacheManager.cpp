@@ -52,7 +52,7 @@ CacheManager::CleanUpVkPipelineObjectCache()
     if(!mVkPipelineObjectCache.empty()) {
         for(uint32_t i = 0; i < mVkPipelineObjectCache.size(); ++i) {
             if(mVkPipelineObjectCache[i] != VK_NULL_HANDLE){
-                vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineObjectCache[i], NULL);
+                vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineObjectCache[i], nullptr);
                 mVkPipelineObjectCache[i] = VK_NULL_HANDLE;
             }
         }

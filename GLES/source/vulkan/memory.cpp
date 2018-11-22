@@ -51,7 +51,7 @@ Memory::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkMemory != VK_NULL_HANDLE) {
-        vkFreeMemory(mVkContext->vkDevice, mVkMemory, NULL);
+        vkFreeMemory(mVkContext->vkDevice, mVkMemory, nullptr);
         mVkMemory = VK_NULL_HANDLE;
     }
 }

@@ -47,7 +47,7 @@ ShaderReflection::SerializeReflection(void *binary) const
     FUN_ENTRY(GL_LOG_DEBUG);
 
     uint8_t *rawDataPtr = reinterpret_cast<uint8_t *>(binary);
-    uint32_t *u32DataPtr = NULL;
+    uint32_t *u32DataPtr = nullptr;
 
     u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
     *u32DataPtr = mReflectionData.mLiveAttributes;
@@ -121,7 +121,7 @@ ShaderReflection::DeserializeReflection(const void *binary)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     const uint8_t *rawDataPtr = reinterpret_cast<const uint8_t *>(binary);
-    const uint32_t *u32DataPtr = NULL;
+    const uint32_t *u32DataPtr = nullptr;
 
     u32DataPtr = reinterpret_cast<const uint32_t *>(rawDataPtr);
     mReflectionData.mLiveAttributes = *u32DataPtr;

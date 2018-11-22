@@ -45,19 +45,7 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
         rendbuff->SetTarget(target);
         rendbuff->InitTexture();
 
-        ObjectArray<Framebuffer> *fbs = mResourceManager->GetFramebufferArray();
-        for(typename map<uint32_t, Framebuffer *>::const_iterator it =
-        fbs->GetObjects()->begin(); it != fbs->GetObjects()->end(); it++) {
-
-            Framebuffer *fb = it->second;
-            if(fb->GetColorAttachmentType() == GL_RENDERBUFFER && renderbuffer == fb->GetColorAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetDepthAttachmentType()   == GL_RENDERBUFFER && renderbuffer == fb->GetDepthAttachmentName()) {
-                fb->SetUpdated();
-            } else if(fb->GetStencilAttachmentType() == GL_RENDERBUFFER && renderbuffer == fb->GetStencilAttachmentName()) {
-                fb->SetUpdated();
-            }
-        }
+        mResourceManager->UpdateFramebufferObjects(renderbuffer, GL_RENDERBUFFER);
     }
     mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(renderbuffer);
 }
@@ -166,12 +154,12 @@ Context::GetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params)
     case GL_RENDERBUFFER_WIDTH:             *params = activeRenderbuffer->GetWidth(); break;
     case GL_RENDERBUFFER_HEIGHT:            *params = activeRenderbuffer->GetHeight(); break;
     case GL_RENDERBUFFER_INTERNAL_FORMAT:   *params = activeRenderbuffer->GetInternalFormat(); break;
-    case GL_RENDERBUFFER_RED_SIZE:          GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), params, NULL, NULL, NULL, NULL, NULL); break;
-    case GL_RENDERBUFFER_GREEN_SIZE:        GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), NULL, params, NULL, NULL, NULL, NULL); break;
-    case GL_RENDERBUFFER_BLUE_SIZE:         GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), NULL, NULL, params, NULL, NULL, NULL); break;
-    case GL_RENDERBUFFER_ALPHA_SIZE:        GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), NULL, NULL, NULL, params, NULL, NULL); break;
-    case GL_RENDERBUFFER_DEPTH_SIZE:        GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), NULL, NULL, NULL, NULL, params, NULL); break;
-    case GL_RENDERBUFFER_STENCIL_SIZE:      GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), NULL, NULL, NULL, NULL, NULL, params); break;
+    case GL_RENDERBUFFER_RED_SIZE:          GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), params, nullptr, nullptr, nullptr, nullptr, nullptr); break;
+    case GL_RENDERBUFFER_GREEN_SIZE:        GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), nullptr, params, nullptr, nullptr, nullptr, nullptr); break;
+    case GL_RENDERBUFFER_BLUE_SIZE:         GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), nullptr, nullptr, params, nullptr, nullptr, nullptr); break;
+    case GL_RENDERBUFFER_ALPHA_SIZE:        GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), nullptr, nullptr, nullptr, params, nullptr, nullptr); break;
+    case GL_RENDERBUFFER_DEPTH_SIZE:        GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), nullptr, nullptr, nullptr, nullptr, params, nullptr); break;
+    case GL_RENDERBUFFER_STENCIL_SIZE:      GlFormatToStorageBits(activeRenderbuffer->GetInternalFormat(), nullptr, nullptr, nullptr, nullptr, nullptr, params); break;
     default:                                RecordError(GL_INVALID_ENUM); break;
     }
 }

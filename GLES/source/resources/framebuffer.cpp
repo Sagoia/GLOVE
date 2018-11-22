@@ -51,7 +51,11 @@ Framebuffer::~Framebuffer()
     delete mAttachmentStencil;
 
     if(!mIsSystem && mDepthStencilTexture != nullptr) {
-        delete mDepthStencilTexture;
+        if(mDepthStencilTexture->GetDepthStencilTextureRefCount() == 1) {
+            delete mDepthStencilTexture;
+        } else {
+            mDepthStencilTexture->DecreaseDepthStencilTextureRefCount();
+        }
         mDepthStencilTexture = nullptr;
     }
 
@@ -178,8 +182,9 @@ Framebuffer::SetColorAttachment(int width, int height)
     SetWidth(width);
     SetHeight(height);
 
+
     mUpdated     = true;
-    mSizeUpdated = true;
+    mSizeUpdated = (mDepthStencilTexture == nullptr) || (mDepthStencilTexture->GetWidth() != GetWidth() || mDepthStencilTexture->GetHeight() != GetHeight());
 }
 
 GLenum
@@ -266,12 +271,18 @@ Framebuffer::CreateDepthStencilTexture(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(GetDepthAttachmentTexture() || GetStencilAttachmentTexture()) {
+       
+        if(!mIsSystem && GetDepthAttachmentTexture() && GetDepthAttachmentTexture()->GetDepthStencilTexture()) {
+           mDepthStencilTexture = GetDepthAttachmentTexture()->GetDepthStencilTexture();
+           mDepthStencilTexture->IncreaseDepthStencilTextureRefCount();
+           return;
+        }
 
         if(mDepthStencilTexture != nullptr) {
             delete mDepthStencilTexture;
             mDepthStencilTexture = nullptr;
         }
-
+        
         mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
@@ -282,14 +293,72 @@ Framebuffer::CreateDepthStencilTexture(void)
         // convert to supported format
         vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
         mDepthStencilTexture->SetVkFormat(vkformat);
-        mDepthStencilTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         mDepthStencilTexture->SetVkImageTiling();
         GLenum glformat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
         mDepthStencilTexture->InitState();
-        mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat), GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), NULL);
+        mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat),
+                                       GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), nullptr);
         mDepthStencilTexture->Allocate();
+
+        if(!mIsSystem && GetDepthAttachmentTexture()) {
+            GetDepthAttachmentTexture()->SetDepthStencilTexture(mDepthStencilTexture);
+            mDepthStencilTexture->IncreaseDepthStencilTextureRefCount();
+        }
     }
+}
+
+void
+Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t stencilMaskFront, const Rect& clearRect)
+{
+    GLenum glFormat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
+    size_t numElements = GlInternalFormatTypeToNumElements(glFormat, mDepthStencilTexture->GetExplicitType());
+    ImageRect srcRect(clearRect, numElements, 1, Texture::GetDefaultInternalAlignment());
+
+    ImageRect dstRect = srcRect;
+    dstRect.x = 0;
+    dstRect.y = 0;
+    size_t dstByteSize = dstRect.GetRectBufferSize();
+    uint8_t* dstData = new uint8_t[dstByteSize];
+
+    //retrieve the stored stencil data
+    mDepthStencilTexture->SetDataNoInvertion(true);
+    mDepthStencilTexture->SetImageBufferCopyStencil(true);
+    mDepthStencilTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, glFormat, dstData);
+
+    // size of an entire row in bytes
+    uint32_t dataRowStride = dstRect.GetRectAlignedRowInBytes();
+
+    // rectangle offset in the memory block
+    uint32_t dataCurrentRowIndex = dstRect.GetStartRowIndex(dataRowStride);
+
+    // obtain ptr locations with the byte offset
+    uint8_t* dataPtr = static_cast<uint8_t*>(dstData) + dataCurrentRowIndex;
+
+    GLint depthBits = 0;
+    GLint stencilBits = 0;
+    GlFormatToStorageBits(glFormat, nullptr, nullptr, nullptr, nullptr, &depthBits, &stencilBits);
+    assert(stencilBits > 0);
+
+    // perform the conversion
+    for(int row = 0; row < srcRect.height; ++row) {
+        for(int col = 0; col < srcRect.width; ++col) {
+            uint32_t dataIndex = col * srcRect.GetPixelByteOffset();
+            uint8_t oldStencilValue = dataPtr[dataIndex];
+            uint8_t newStencilValue = (clearStencil & 0xFF) | ((oldStencilValue & 0xFF) & (~(stencilMaskFront & 0xFF)));
+
+            dataPtr[dataIndex] = newStencilValue;
+        }
+        // offset by the number of bytes per row
+        dataPtr = dataPtr + dataRowStride;
+    }
+
+    //update the stencil data
+    mDepthStencilTexture->CopyPixelsFromHost(&dstRect, &srcRect, 0, 0, glFormat, dstData);
+    mDepthStencilTexture->SetImageBufferCopyStencil(false);
+
+    delete[] dstData;
 }
 
 void

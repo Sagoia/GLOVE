@@ -70,16 +70,16 @@ public:
 
 // Set Functions
              void             SetClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-             void             SetClearDepth(GLfloat depth);
+             void             SetClearDepth(GLclampf depth);
       inline void             SetClearStencil(GLint stencil)                    { FUN_ENTRY(GL_LOG_TRACE); mClearStencil    = stencil; }
       inline void             SetClearStencilOld(uint32_t stencil)              { FUN_ENTRY(GL_LOG_TRACE); mClearStencilOld = stencil; }
 
 // Update Functions
       bool                    UpdateClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-      bool                    UpdateClearDepth(GLfloat depth);
+      bool                    UpdateClearDepth(GLclampf depth);
       bool                    UpdateClearStencil(GLint stencil);
       bool                    UpdateColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-      bool                    UpdateDepthMask(GLenum enable);
+      bool                    UpdateDepthMask(GLboolean enable);
       bool                    UpdateStencilMask(GLuint mask);
       bool                    UpdateStencilMaskFront(GLuint mask);
       bool                    UpdateStencilMaskBack(GLuint mask);

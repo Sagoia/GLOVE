@@ -45,7 +45,7 @@ Renderbuffer::~Renderbuffer()
 }
 
 void
-Renderbuffer::Release()
+Renderbuffer::Release(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -53,6 +53,16 @@ Renderbuffer::Release()
         delete mTexture;
         mTexture = nullptr;
     }
+}
+
+void
+Renderbuffer::InitTexture(void)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    
+    mTexture = new Texture(mVkContext, mCommandBufferManager);
+    mTexture->SetTarget(GL_TEXTURE_2D);
+    mTexture->InitState();
 }
 
 bool
@@ -70,18 +80,17 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
 
     if(GlFormatIsColorRenderable(mInternalFormat)) {
         mTexture->SetVkFormat(vkformat);
-        mTexture->SetVkImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     } else {
         // convert to supported format
         vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
         mTexture->SetVkFormat(vkformat);
-        mTexture->SetVkImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-        mTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     }
     mTexture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
     mTexture->SetVkImageTiling();
-    mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat), GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), NULL);
+    mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat),
+                       GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), nullptr);
 
     return mTexture->Allocate();
 }

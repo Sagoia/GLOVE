@@ -45,7 +45,7 @@ Fence::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkFence != VK_NULL_HANDLE) {
-        vkDestroyFence(mVkContext->vkDevice, mVkFence, NULL);
+        vkDestroyFence(mVkContext->vkDevice, mVkFence, nullptr);
         mVkFence = VK_NULL_HANDLE;
     }
 }
@@ -88,10 +88,10 @@ Fence::Create(bool signaled)
 
     VkFenceCreateInfo info;
     info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    info.pNext = NULL;
+    info.pNext = nullptr;
     info.flags = signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
 
-    VkResult err = vkCreateFence(mVkContext->vkDevice, &info, NULL, &mVkFence);
+    VkResult err = vkCreateFence(mVkContext->vkDevice, &info, nullptr, &mVkFence);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

@@ -35,7 +35,7 @@ ClearPass::ClearPass()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    memset((void *)&mVkClearRect, 0, sizeof(mVkClearRect));
+    memset(static_cast<void *>(&mVkClearRect), 0, sizeof(mVkClearRect));
     mVkClearRect.baseArrayLayer      = 0;
     mVkClearRect.layerCount          = 1;
 
