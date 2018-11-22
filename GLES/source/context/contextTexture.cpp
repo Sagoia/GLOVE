@@ -395,7 +395,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = GlFormatToVkFormat(type,format);
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(format, type));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -481,7 +481,7 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = GlFormatToVkFormat(type,format);
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(format, type));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -573,7 +573,7 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = GlFormatToVkFormat(activeTexture->GetType(),activeTexture->GetFormat());
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -655,7 +655,7 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     delete[] stagePixels;
 
     if(activeTexture->IsCompleted()) {
-        VkFormat vkformat = GlFormatToVkFormat(activeTexture->GetType(),activeTexture->GetFormat());
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }

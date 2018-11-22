@@ -147,10 +147,11 @@ public:
     inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
     inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
+    VkFormat                FindSupportedColorFormat(VkFormat format)           { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedColorFormat(format); }
 
 // Set Functions
     inline void             SetCommandBufferManager(
-                                vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
+                                vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
 
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;

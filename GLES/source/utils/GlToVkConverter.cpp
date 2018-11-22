@@ -336,43 +336,34 @@ GlInternalFormatToVkFormat(GLenum internalformat)
     }
 }
 
-VkFormat GlFormatToVkFormat(GLenum type, GLenum format)
+VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    VkFormat vkformat = VK_FORMAT_R8G8B8A8_UNORM;
     switch(type) {
         case GL_UNSIGNED_BYTE: {
             switch(format) {
                 case GL_RGB:
-                    vkformat = VK_FORMAT_R8G8B8_UNORM;
-                    break;
+                    return  VK_FORMAT_R8G8B8_UNORM;
                 case GL_RGBA:
-                    vkformat = VK_FORMAT_R8G8B8A8_UNORM;
-                    break;
+                    return  VK_FORMAT_R8G8B8A8_UNORM;
             }
             break;
         }
         case GL_UNSIGNED_SHORT_5_6_5: {
             assert( format == GL_RGB );
-            vkformat = VK_FORMAT_R5G6B5_UNORM_PACK16;
-            break;
+            return          VK_FORMAT_R5G6B5_UNORM_PACK16;
         }
         case GL_UNSIGNED_SHORT_4_4_4_4: {
             assert( format == GL_RGB );
-            vkformat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
-            break;
+            return          VK_FORMAT_R4G4B4A4_UNORM_PACK16;
+        }
+        case GL_UNSIGNED_SHORT_5_5_5_1: {
+            assert( format == GL_RGBA );
+            return          VK_FORMAT_R5G5B5A1_UNORM_PACK16;
         }
     }
-    //Check if the selected vkformat supports VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
-    VkFormatProperties formatDeviceProps;
-    vkGetPhysicalDeviceFormatProperties(vulkanAPI::GetContext()->vkGpus[0], vkformat, &formatDeviceProps);
-
-    if(formatDeviceProps.bufferFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) {
-        return vkformat;
-    } else {
-        return VK_FORMAT_R8G8B8A8_UNORM;
-    }
+    return VK_FORMAT_R8G8B8A8_UNORM;
 }
 
 VkFormat
