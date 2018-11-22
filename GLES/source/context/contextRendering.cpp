@@ -133,6 +133,8 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
         mStateManager.GetFramebufferOperationsState()->GetColorMask(colormask);
         GLubyte colorMaskPackRGB = GlColorMaskPack(colormask[0], colormask[1], colormask[2], GL_FALSE);
         pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(colorMaskPackRGB));
+    } else {
+        pipeline->SetColorBlendAttachmentWriteMask(mStateManager.GetFramebufferOperationsState()->GetColorMask());
     }
 
     pipeline->SetUpdatePipeline(true);
@@ -142,10 +144,6 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     if(!pipeline->Create(mWriteFBO->GetVkRenderPass())) {
         Finish();
         return;
-    }
-
-    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
-        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
     }
 
     mCommandBufferManager->BeginVkDrawCommandBuffer();
