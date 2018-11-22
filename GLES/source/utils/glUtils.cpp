@@ -670,10 +670,8 @@ GlFormatIsColorRenderable(GLenum format)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(format) {
-// TODO: not-renderable formats !! - to be removed
     case GL_RGB8_OES:
     case GL_RGBA8_OES:
-// -----------------------------------------------
     case GL_RGB565:
     case GL_RGBA4:
     case GL_RGB5_A1:                    return true;
