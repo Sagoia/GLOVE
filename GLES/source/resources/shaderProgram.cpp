@@ -567,9 +567,9 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
         offset = reinterpret_cast<VkDeviceSize>(indices);
 
         if(type == GL_UNSIGNED_BYTE) {
-            actualSize = ibo->GetSize();
-            uint8_t* srcData = new uint8_t[actualSize];
-            ibo->GetData(actualSize, offset, srcData);
+            assert(indexCount <= ibo->GetSize());
+            uint8_t* srcData = new uint8_t[indexCount];
+            ibo->GetData(indexCount, offset, srcData);
             offset = 0;
             validatedBuffer = ConvertIndexBufferToUint16(srcData, indexCount, &ibo);
             delete[] srcData;
@@ -586,7 +586,7 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
         size_t sizeOne = type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort);
         uint8_t* srcData = new uint8_t[indexCount * sizeOne];
 
-        ibo->GetData(actualSize, offset, srcData);
+        ibo->GetData(actualSize - sizeOne, offset, srcData);
         LineLoopConversion(srcData, indexCount, sizeOne);
 
         validatedBuffer = AllocateExplicitIndexBuffer(srcData, actualSize, &ibo);
