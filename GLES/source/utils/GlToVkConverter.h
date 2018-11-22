@@ -27,6 +27,7 @@
 #include "GLES/gl.h"
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
+#include "vulkan/context.h"
 #include "vulkan/vulkan.h"
 
 VkBool32                GlBooleanToVkBool(GLboolean value);
@@ -49,5 +50,6 @@ VkFormat                GlInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatStencil);
 VkFormat                GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized);
 VkIndexType             GlToVkIndexType(GLenum type);
+VkFormat                GlFormatToVkFormat(GLenum type, GLenum format);
 
 #endif // __GLTOVKCONVERTER_H__

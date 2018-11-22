@@ -1197,6 +1197,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                                 activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
                             }
                         }
+                        activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
                         activeTexture->Allocate();
                     }
 
