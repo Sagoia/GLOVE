@@ -30,6 +30,7 @@
 #include "utils/glUtils.h"
 #include "utils/glLogger.h"
 #include <algorithm>
+#include <string>
 
 ShaderResourceInterface::ShaderResourceInterface()
 : mLiveAttributes(0), mLiveUniforms(0), mLiveUniformBlocks(0),

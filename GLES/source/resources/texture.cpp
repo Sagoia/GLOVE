@@ -501,7 +501,7 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     const size_t     baseLevel  = 0;
     const size_t     baseSize   = dstRect.GetRectBufferSize();
-          uint8_t   *basePixels[mLayersCount];
+          uint8_t  **basePixels = new uint8_t*[mLayersCount];
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
         basePixels[layer] = new uint8_t[baseSize];
         CopyPixelsToHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);
@@ -517,6 +517,8 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
         CopyPixelsFromHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);
         delete[] basePixels[layer];
     }
+
+    delete [] basePixels;
 
     // Blit LoD Level '0' to rest layers
     VkImageBlit imageBlit;

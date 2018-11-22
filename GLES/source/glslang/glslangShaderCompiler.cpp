@@ -21,6 +21,7 @@
  *
  */
 
+#include <sstream>
 #include "glslangShaderCompiler.h"
 
 bool GlslangShaderCompiler::mSlangInitialized = false;

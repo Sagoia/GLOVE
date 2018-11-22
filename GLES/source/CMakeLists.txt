@@ -87,6 +87,17 @@ set(LIBS
     m
 )
 
+if(WIN32)
+    set(LIBS
+        ${Vulkan_LIBRARY}
+        glslang
+        SPIRV
+        HLSL
+        OGLCompiler
+        OSDependent
+    )
+endif()
+
 # Where the .h files included in the source files can be found.
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include
@@ -98,26 +109,53 @@ include_directories(${GLES_PATH}/source
 link_directories(${GLSLANG_PATH}/lib)
 
 # Ensure we re-link if our external libraries change.
-add_library(glslang STATIC IMPORTED)
-set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libglslang.a)
+if(WIN32)
+    add_library(glslang STATIC IMPORTED)
+    set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/glslangd.lib)
 
-add_library(SPIRV STATIC IMPORTED)
-set_target_properties(SPIRV PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libSPIRV.a)
+    add_library(SPIRV STATIC IMPORTED)
+    set_target_properties(SPIRV PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/SPIRVd.lib)
 
-add_library(HLSL STATIC IMPORTED)
-set_target_properties(HLSL PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libHLSL.a)
+    add_library(HLSL STATIC IMPORTED)
+    set_target_properties(HLSL PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/HLSLd.lib)
 
-add_library(OGLCompiler STATIC IMPORTED)
-set_target_properties(OGLCompiler PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOGLCompiler.a)
+    add_library(OGLCompiler STATIC IMPORTED)
+    set_target_properties(OGLCompiler PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/OGLCompilerd.lib)
 
-add_library(OSDependent STATIC IMPORTED)
-set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
+    add_library(OSDependent STATIC IMPORTED)
+    set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/OSDependentd.lib)
+
+    set(OTHER_LINK_FLAGS "/INCREMENTAL:NO")
+else()
+    add_library(glslang STATIC IMPORTED)
+    set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libglslang.a)
+
+    add_library(SPIRV STATIC IMPORTED)
+    set_target_properties(SPIRV PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libSPIRV.a)
+
+    add_library(HLSL STATIC IMPORTED)
+    set_target_properties(HLSL PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libHLSL.a)
+
+    add_library(OGLCompiler STATIC IMPORTED)
+    set_target_properties(OGLCompiler PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOGLCompiler.a)
+
+    add_library(OSDependent STATIC IMPORTED)
+    set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
+
+    set(OTHER_LINK_FLAGS "-Wl,-Bsymbolic")
+endif()
 
 add_library(GLESv2 SHARED ${SOURCES})
-set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                        LINK_FLAGS "-Wl,-Bsymbolic"
-                                        INSTALL_RPATH_USE_LINK_PATH TRUE
-                                        INSTALL_RPATH "\$ORIGIN")
+
+set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                     LINK_FLAGS ${OTHER_LINK_FLAGS}
+                                     INSTALL_RPATH_USE_LINK_PATH TRUE
+                                     INSTALL_RPATH "\$ORIGIN")
 target_link_libraries(GLESv2 ${LIBS})
 
-install(TARGETS GLESv2 LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+if(WIN32)
+    install(TARGETS GLESv2 RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+else()
+    install(TARGETS GLESv2 LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+endif()
+

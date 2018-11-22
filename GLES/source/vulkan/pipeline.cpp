@@ -27,6 +27,7 @@
  */
 
 #include "pipeline.h"
+#include <algorithm>
 
 namespace vulkanAPI {
 

@@ -30,6 +30,13 @@
 #include "vulkan/framebuffer.h"
 #include "utils/arrays.hpp"
 
+#ifdef WIN32
+    #ifdef DELETE
+        #undef DELETE
+    #endif
+#endif // WIN32
+
+
 typedef enum {
     GLOVE_SURFACE_INVALID,
     GLOVE_SURFACE_WINDOW,

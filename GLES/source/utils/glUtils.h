@@ -25,6 +25,7 @@
 #define __GLUTILS_H__
 
 #include <cstdio>
+#include <cstdint>
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
 

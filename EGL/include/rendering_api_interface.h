@@ -73,6 +73,18 @@ typedef struct rendering_api_interface {
     bind_to_texture_cb_t bind_to_texture_cb;
 } rendering_api_interface_t;
 
+extern rendering_api_interface_t GLES2Interface;
+
+#ifdef WIN32
+#ifdef __cplusplus
+extern "C" {
+#endif
+EGLAPI rendering_api_interface_t * EGLAPIENTRY GetGLES2Interface(void);
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 typedef struct vkSyncItems_t {
     VkSemaphore                         vkAcquireSemaphore;
     bool                                acquireSemaphoreFlag;

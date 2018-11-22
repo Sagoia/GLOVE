@@ -13,4 +13,13 @@ set(GRAPHICS_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/utilities/profiler.c
 )
 
-add_library(GRAPHICS_ENGINE SHARED ${GRAPHICS_ENGINE_SOURCES})
+if(WIN32)
+    set(LIBS
+        ${LIBS}
+        EGLUT
+    )
+    add_library(GRAPHICS_ENGINE STATIC ${GRAPHICS_ENGINE_SOURCES})
+    target_link_libraries(GRAPHICS_ENGINE ${LIBS})
+else()
+    add_library(GRAPHICS_ENGINE SHARED ${GRAPHICS_ENGINE_SOURCES})
+endif()

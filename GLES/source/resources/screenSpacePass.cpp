@@ -26,6 +26,7 @@
 #include "shaderProgram.h"
 #include "glslang/glslangShaderCompiler.h"
 #include "context/context.h"
+#include <array>
 
 struct ScreenSpaceVertex {
     float pos[2];

@@ -28,6 +28,7 @@
 
 #include "shaderProgram.h"
 #include "context/context.h"
+#include <iterator>
 
 ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mGLContext(nullptr)

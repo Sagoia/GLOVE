@@ -17,6 +17,7 @@ set(SOURCES
     platform/vulkan/vulkanAPI.cpp
     platform/vulkan/vulkanResources.cpp
     platform/vulkan/WSIPlaneDisplay.cpp
+    platform/vulkan/WSIWindows.cpp
     platform/vulkan/WSIXcb.cpp
     rendering_api/rendering_api.c
     utils/eglUtils.cpp
@@ -54,10 +55,22 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 add_library(EGL SHARED ${SOURCES})
+
+if(WIN32)
+    set(OTHER_LINK_FLAGS "/INCREMENTAL:NO")
+else()
+    set(OTHER_LINK_FLAGS "-Wl,-Bsymbolic")
+endif()
+
 set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                     LINK_FLAGS "-Wl,-Bsymbolic"
+                                     LINK_FLAGS ${OTHER_LINK_FLAGS}
                                      INSTALL_RPATH_USE_LINK_PATH TRUE
                                      INSTALL_RPATH "\$ORIGIN")
+
 target_link_libraries(EGL ${LIBS})
 
-install(TARGETS EGL LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+if(WIN32)
+    install(TARGETS EGL RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+else()
+    install(TARGETS EGL LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+endif()
