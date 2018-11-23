@@ -31,10 +31,9 @@ Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool 
     GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
     if(clearColorEnabled) {
         stateFramebufferOperations->GetClearColor(clearColorValue);
-    }
-
-    if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
-        clearColorValue[3] = 1.0f;
+        if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
+            clearColorValue[3] = 1.0f;
+        }
     }
 
     GLfloat clearDepthValue    = clearDepthEnabled   ? stateFramebufferOperations->GetClearDepth() : 0.0f;
@@ -118,7 +117,6 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     // clearColor is passed as a uniform and masked through VkPipelineColorBlendAttachmentState
     GLfloat clearColorValue[4] = {0.0f,0.0f,0.0f,0.0f};
     stateFramebufferOperations->GetClearColor(clearColorValue);
-
     if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
         clearColorValue[3] = 1.0f;
     }
@@ -134,7 +132,7 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
         GLubyte colorMaskPackRGB = GlColorMaskPack(colormask[0], colormask[1], colormask[2], GL_FALSE);
         pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(colorMaskPackRGB));
     } else {
-        pipeline->SetColorBlendAttachmentWriteMask(mStateManager.GetFramebufferOperationsState()->GetColorMask());
+        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
     }
 
     pipeline->SetUpdatePipeline(true);
