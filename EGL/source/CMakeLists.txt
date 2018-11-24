@@ -57,15 +57,19 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
 add_library(EGL SHARED ${SOURCES})
 
 if(WIN32)
-    set(OTHER_LINK_FLAGS "/INCREMENTAL:NO")
+    set_target_properties(EGL PROPERTIES PREFIX "lib"
+                                         POSITION_INDEPENDENT_CODE ON
+                                         LINK_FLAGS "/INCREMENTAL:NO"
+                                         INSTALL_RPATH_USE_LINK_PATH TRUE
+                                         INSTALL_RPATH "\$ORIGIN")
 else()
-    set(OTHER_LINK_FLAGS "-Wl,-Bsymbolic")
+    set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                         LINK_FLAGS "-Wl,-Bsymbolic"
+                                         INSTALL_RPATH_USE_LINK_PATH TRUE
+                                         INSTALL_RPATH "\$ORIGIN")
 endif()
 
-set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                     LINK_FLAGS ${OTHER_LINK_FLAGS}
-                                     INSTALL_RPATH_USE_LINK_PATH TRUE
-                                     INSTALL_RPATH "\$ORIGIN")
+
 
 target_link_libraries(EGL ${LIBS})
 

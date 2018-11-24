@@ -30,6 +30,10 @@
 #include "vulkan/vulkan.h"
 #include "rendering_api_interface.h"
 
+#if defined(DEBUG) || defined(_DEBUG)
+#define ENABLE_VK_DEBUG_REPORTER
+#endif
+
 using namespace std;
 
 namespace vulkanAPI {
@@ -49,6 +53,9 @@ namespace vulkanAPI {
         }
 
         VkInstance                                          vkInstance;
+#ifdef ENABLE_VK_DEBUG_REPORTER
+        VkDebugReportCallbackEXT                            vkDebugReporter;
+#endif
         vector<VkPhysicalDevice>                            vkGpus;
         VkQueue                                             vkQueue;
         uint32_t                                            vkGraphicsQueueNodeIndex;

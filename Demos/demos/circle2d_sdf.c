@@ -48,9 +48,9 @@ bool InitGL()
 // Initialize Mesh
     InitMesh      (&mesh_screen_quad, 2, 2, squad_vertex_buffer_data, sizeof(squad_vertex_buffer_data),
                                             squad_uv_buffer_data    , sizeof(squad_uv_buffer_data)    ,
-                                            squad_color_buffer_data , sizeof(squad_color_buffer_data) ,
-                                            squad_index_buffer_data , sizeof(squad_index_buffer_data) ,
-                                            diffuse_textures, 0);
+                                            NULL                    , 0 ,
+                                            NULL                    , 0 ,
+                                            NULL                    , 0);
 
 // Initialize Camera
     InitCamera    (&camera);
@@ -88,7 +88,7 @@ bool InitGL()
     return true;
 }
 
-void DrawGL()
+void DrawGL(void)
 {
   // Set Viewport
     glViewport(0, 0, viewport.mWidth, viewport.mHeight);

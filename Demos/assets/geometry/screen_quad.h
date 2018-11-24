@@ -34,7 +34,10 @@ static const GLfloat squad_uv_buffer_data   [] = {
     0.0f, 1.0f
 };
 
+// Array size must greater than 0 while using MSVC
+#ifndef WIN32
 static const GLfloat squad_color_buffer_data[] = {};
 static const GLuint  squad_index_buffer_data[] = {};
+#endif
 
 #endif // __SCREENQUAD_H_

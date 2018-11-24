@@ -87,17 +87,6 @@ set(LIBS
     m
 )
 
-if(WIN32)
-    set(LIBS
-        ${Vulkan_LIBRARY}
-        glslang
-        SPIRV
-        HLSL
-        OGLCompiler
-        OSDependent
-    )
-endif()
-
 # Where the .h files included in the source files can be found.
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include
@@ -110,6 +99,15 @@ link_directories(${GLSLANG_PATH}/lib)
 
 # Ensure we re-link if our external libraries change.
 if(WIN32)
+    set(LIBS
+        ${Vulkan_LIBRARY}
+        glslang
+        SPIRV
+        HLSL
+        OGLCompiler
+        OSDependent
+    )
+
     add_library(glslang STATIC IMPORTED)
     set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/glslangd.lib)
 
@@ -147,10 +145,19 @@ endif()
 
 add_library(GLESv2 SHARED ${SOURCES})
 
-set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                     LINK_FLAGS ${OTHER_LINK_FLAGS}
-                                     INSTALL_RPATH_USE_LINK_PATH TRUE
-                                     INSTALL_RPATH "\$ORIGIN")
+if(WIN32)
+    set_target_properties(GLESv2 PROPERTIES PREFIX "lib"
+                                            POSITION_INDEPENDENT_CODE ON
+                                            LINK_FLAGS "/INCREMENTAL:NO"
+                                            INSTALL_RPATH_USE_LINK_PATH TRUE
+                                            INSTALL_RPATH "\$ORIGIN")
+else()
+    set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                            LINK_FLAGS "-Wl,-Bsymbolic"
+                                            INSTALL_RPATH_USE_LINK_PATH TRUE
+                                            INSTALL_RPATH "\$ORIGIN")
+endif()
+
 target_link_libraries(GLESv2 ${LIBS})
 
 if(WIN32)

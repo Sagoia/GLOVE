@@ -34,6 +34,28 @@ namespace vulkanAPI {
 
 #define GLOVE_VK_VALIDATION_LAYERS                      false
 
+#ifdef ENABLE_VK_DEBUG_REPORTER
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_XCB_SURFACE_EXTENSION_NAME };
+#elif defined (VK_USE_PLATFORM_ANDROID_KHR)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_ANDROID_SURFACE_EXTENSION_NAME };
+#elif defined (VK_USE_PLATFORM_WIN32_KHR)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
+#else // native
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_DISPLAY_EXTENSION_NAME };
+#endif
+
+#else
+
 #ifdef VK_USE_PLATFORM_XCB_KHR
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_XCB_SURFACE_EXTENSION_NAME};
@@ -47,6 +69,8 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_DISPLAY_EXTENSION_NAME};
 #endif
+
+#endif //ENABLE_VK_DEBUG_REPORTER
 
 static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
@@ -66,6 +90,11 @@ bool CreateVkDevice(void);
 bool CreateVkCommandPool(void);
 bool CreateVkSemaphores(void);
 void InitVkQueue(void);
+
+#ifdef ENABLE_VK_DEBUG_REPORTER
+bool CreateVkDebugReporter(void);
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data);
+#endif
 
 bool
 InitVkLayers(uint32_t* nLayers)
@@ -405,6 +434,9 @@ void
 ResetContextResources()
 {
     GloveVkContext.vkInstance                   = VK_NULL_HANDLE;
+#ifdef ENABLE_VK_DEBUG_REPORTER
+    GloveVkContext.vkDebugReporter              = VK_NULL_HANDLE;
+#endif
     GloveVkContext.vkGpus.clear();
     GloveVkContext.vkQueue                      = VK_NULL_HANDLE;
     GloveVkContext.vkGraphicsQueueNodeIndex     = 0;
@@ -427,17 +459,17 @@ InitContext()
 
     ResetContextResources();
 
-    if( !CheckVkInstanceExtensions()  ||
-        !CreateVkInstance()           ||
-        !EnumerateVkGpus()            ||
-        !InitVkQueueFamilyIndex()     ||
-        !CheckVkDeviceExtensions()    ||
-        !CreateVkDevice()             ||
-        !CreateVkSemaphores()
-      ) {
-        assert(false);
-        return false;
-    }
+    if( !CheckVkInstanceExtensions() )  { assert(false); return false; }
+    if( !CreateVkInstance() )           { assert(false); return false; }
+#ifdef ENABLE_VK_DEBUG_REPORTER
+    if( !CreateVkDebugReporter() )      { assert(false); return false; }
+#endif
+    if( !EnumerateVkGpus() )            { assert(false); return false; }
+    if( !InitVkQueueFamilyIndex() )     { assert(false); return false; }
+    if( !CheckVkDeviceExtensions() )    { assert(false); return false; }
+    if( !CreateVkDevice() )             { assert(false); return false; }
+    if( !CreateVkSemaphores() )         { assert(false); return false; }
+
     InitVkQueue();
 
     GloveVkContext.mInitialized = true;
@@ -464,6 +496,15 @@ TerminateContext()
         GloveVkContext.vkSyncItems->vkDrawSemaphore = VK_NULL_HANDLE;
     }
 
+#ifdef ENABLE_VK_DEBUG_REPORTER
+    if(GloveVkContext.vkDebugReporter != VK_NULL_HANDLE) {
+        PFN_vkDestroyDebugReportCallbackEXT _vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkDestroyDebugReportCallbackEXT");
+        if (_vkDestroyDebugReportCallbackEXT) {
+            _vkDestroyDebugReportCallbackEXT(GloveVkContext.vkInstance, GloveVkContext.vkDebugReporter, nullptr);
+        }
+    }
+#endif
+
     if(GloveVkContext.vkDevice != VK_NULL_HANDLE ) {
         vkDeviceWaitIdle(GloveVkContext.vkDevice);
         vkDestroyDevice(GloveVkContext.vkDevice, nullptr);
@@ -474,5 +515,34 @@ TerminateContext()
 
     ResetContextResources();
 }
+
+#ifdef ENABLE_VK_DEBUG_REPORTER
+
+bool CreateVkDebugReporter()
+{
+    PFN_vkCreateDebugReportCallbackEXT _vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkCreateDebugReportCallbackEXT");
+    if (!_vkCreateDebugReportCallbackEXT) {
+        return false;
+    }
+
+    VkDebugReportCallbackCreateInfoEXT debugReportInfo;
+    memset(static_cast<void *>(&debugReportInfo), 0, sizeof(debugReportInfo));
+    debugReportInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT;
+    debugReportInfo.pfnCallback = DebugLayerCallback;
+
+    VkResult err = _vkCreateDebugReportCallbackEXT(GloveVkContext.vkInstance, &debugReportInfo, nullptr, &(GloveVkContext.vkDebugReporter));
+    assert(!err);
+
+    return (err == VK_SUCCESS);
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data)
+{
+    fprintf(stderr, "Vulkan validation layer log: %s \n", message);
+    return VK_FALSE;
+}
+
+#endif
 
 };

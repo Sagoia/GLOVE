@@ -39,7 +39,7 @@ system's GLESv2.
     #define GLESv2_LIBRARY_NAME "libGLESv2_GLOVE.so"
     #define GLESv2_INTERFACE_NAME "GLES2Interface"
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
-    #define GLESv2_LIBRARY_NAME "GLESv2.dll"
+    #define GLESv2_LIBRARY_NAME "libGLESv2.dll"
     #define GLESv2_INTERFACE_NAME "GetGLES2Interface"
 #else
     #define GLESv2_LIBRARY_NAME "libGLESv2.so"
@@ -129,10 +129,18 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
         return RENDERING_API_NOT_FOUND;
     }
 #else
-    library_info->handle = LoadLibrary(library_name);
+    EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+    CHAR DllPath[MAX_PATH] = { 0 };
+    GetModuleFileName((HINSTANCE)&__ImageBase, DllPath, _countof(DllPath));
+    char *r = strrchr(DllPath, '\\');
+    strcpy(r + 1, library_name);
+    library_info->handle = LoadLibrary(DllPath);
     if (!library_info->handle) {
-        fprintf(stderr, "0x%x\n", GetLastError());
-        return RENDERING_API_NOT_FOUND;
+        library_info->handle = LoadLibrary(library_name);
+        if (!library_info->handle) {
+            fprintf(stderr, "0x%x\n", GetLastError());
+            return RENDERING_API_NOT_FOUND;
+        }
     }
 
     typedef rendering_api_interface_t * p_api_interface;
