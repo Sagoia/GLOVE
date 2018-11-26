@@ -1188,7 +1188,8 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     /// Sampler might need an update
                     Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
                     mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
-
+                    // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
+                    // when the sampler’s associated texture object is not complete.
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
                         uint8_t pixels[4] = {0,0,0,255};
                         for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
