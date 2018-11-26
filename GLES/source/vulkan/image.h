@@ -118,6 +118,9 @@ public:
     inline void                       SetWidth(uint32_t width)                  { FUN_ENTRY(GL_LOG_TRACE); mWidth         = width;     }
     inline void                       SetHeight(uint32_t height)                { FUN_ENTRY(GL_LOG_TRACE); mHeight        = height;    }
     inline void                       SetMipLevels(uint32_t levels)             { FUN_ENTRY(GL_LOG_TRACE); mMipLevels     = levels;    }
+
+// Find Functions
+    VkFormat                          FindSupportedColorFormat(VkFormat format);
 };
 
 }

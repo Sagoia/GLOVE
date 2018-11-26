@@ -55,7 +55,6 @@ Context::BindTexture(GLenum target, GLuint texture)
             tex->SetVkContext(mVkContext);
             tex->SetCommandBufferManager(mCommandBufferManager);
             tex->SetTarget(target);
-            tex->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
             tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetVkImageTarget(target == GL_TEXTURE_2D ? vulkanAPI::Image::VK_IMAGE_TARGET_2D : vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);
             tex->SetVkImageTiling();
@@ -368,17 +367,17 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
      }
 
-     if(internalformat != format) {
-         RecordError(GL_INVALID_OPERATION);
-         return;
-     }
+    if(internalformat != format) {
+        RecordError(GL_INVALID_OPERATION);
+        return;
+    }
 
-     if((type == GL_UNSIGNED_BYTE && format != GL_RGBA && format != GL_RGB &&
-         format != GL_LUMINANCE_ALPHA && format != GL_LUMINANCE && format != GL_ALPHA) ||
-         (type == GL_UNSIGNED_SHORT_5_6_5                                          && format != GL_RGB) ||
-         ((type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1) && format != GL_RGBA)) {
-         RecordError(GL_INVALID_OPERATION);
-         return;
+    if((type == GL_UNSIGNED_BYTE && format != GL_RGBA && format != GL_RGB &&
+        format != GL_LUMINANCE_ALPHA && format != GL_LUMINANCE && format != GL_ALPHA) ||
+        (type == GL_UNSIGNED_SHORT_5_6_5                                          && format != GL_RGB) ||
+        ((type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1) && format != GL_RGBA)) {
+        RecordError(GL_INVALID_OPERATION);
+        return;
      }
 
     if(!width || !height) {
@@ -396,6 +395,8 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(format, type));
+        activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
 }
@@ -480,6 +481,8 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(format, type));
+        activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
 }
@@ -570,6 +573,8 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
+        activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
 }
@@ -650,6 +655,8 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     delete[] stagePixels;
 
     if(activeTexture->IsCompleted()) {
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToVkColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
+        activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
 }

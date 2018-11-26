@@ -352,4 +352,32 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     mVkImageLayout = newImageLayout;
 }
 
+VkFormat
+Image::FindSupportedColorFormat(VkFormat format)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    //Check if the selected vkformat supports VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
+    VkFormatProperties formatDeviceProps;
+    vkGetPhysicalDeviceFormatProperties(mVkContext->vkGpus[0], format, &formatDeviceProps);
+
+    switch(mVkImageTiling) {
+    case VK_IMAGE_TILING_OPTIMAL:
+        if(formatDeviceProps.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) {
+            return format;
+        }
+        break;
+
+    case VK_IMAGE_TILING_LINEAR:
+        if(formatDeviceProps.linearTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) {
+            return format;
+        }
+        break;
+
+    default:
+        NOT_REACHED();
+    }
+    return VK_FORMAT_R8G8B8A8_UNORM;
 }
+
+} 

@@ -49,5 +49,6 @@ VkFormat                GlInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatStencil);
 VkFormat                GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized);
 VkIndexType             GlToVkIndexType(GLenum type);
+VkFormat                GlColorFormatToVkColorFormat(GLenum format, GLenum type);
 
 #endif // __GLTOVKCONVERTER_H__

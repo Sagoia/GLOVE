@@ -187,7 +187,8 @@ Context::RenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width
         return;
     }
 
-    if(internalformat != GL_RGBA4             && internalformat != GL_RGB565 && internalformat != GL_RGB5_A1 &&
+    if(internalformat != GL_RGB8_OES          && internalformat != GL_RGBA8_OES &&
+       internalformat != GL_RGBA4             && internalformat != GL_RGB565 && internalformat != GL_RGB5_A1 &&
        internalformat != GL_DEPTH_COMPONENT16 && internalformat != GL_STENCIL_INDEX8) {
         RecordError(GL_INVALID_ENUM);
         return;
