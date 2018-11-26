@@ -120,7 +120,7 @@ public:
     inline void                       SetMipLevels(uint32_t levels)             { FUN_ENTRY(GL_LOG_TRACE); mMipLevels     = levels;    }
 
 // Find Functions
-    VkFormat                          FindSupportedColorFormat(VkFormat format);
+    VkFormat                          FindSupportedVkColorFormat(VkFormat format);
 };
 
 }

@@ -353,7 +353,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
 }
 
 VkFormat
-Image::FindSupportedColorFormat(VkFormat format)
+Image::FindSupportedVkColorFormat(VkFormat format)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -376,6 +376,7 @@ Image::FindSupportedColorFormat(VkFormat format)
 
     default:
         NOT_REACHED();
+        break;
     }
     return VK_FORMAT_R8G8B8A8_UNORM;
 }
