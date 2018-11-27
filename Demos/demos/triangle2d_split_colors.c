@@ -40,6 +40,9 @@ bool InitGL()
         return false;
 #endif
 
+// Initialize Program
+    InitProgram(&program);
+
 // Free Shader Compiler Resources
     glReleaseShaderCompiler();
 
@@ -75,6 +78,7 @@ bool InitGL()
 // Upload shader uniforms
     glUseProgram(program.mID);
     program.mLocationPos = glGetAttribLocation (program.mID, "v_posCoord_in");
+    program.mLocationUV  = glGetAttribLocation (program.mID, "v_texCoord_in");
     glUniform4f(glGetUniformLocation(program.mID, "uniform_color"  ), COLOR_YELLOW[0], COLOR_YELLOW[1], COLOR_YELLOW[2], COLOR_YELLOW[3]);
 
 #ifdef INFO_DISPLAY

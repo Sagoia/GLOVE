@@ -58,6 +58,12 @@ bool InitGL()
 // Free Shader Compiler Resources
     glReleaseShaderCompiler();
 
+// Initialize Program - CUBE
+    InitProgram(&program_cube);
+
+// Initialize Program - SCREEN QUAD
+    InitProgram(&program_screen_quad);
+
 // Initialize Mesh - CUBE
     InitMesh      (&mesh_cube       , 3, 12, cube_vertex_buffer_data, sizeof(cube_vertex_buffer_data),
                                              cube_uv_buffer_data    , sizeof(cube_uv_buffer_data)    ,
@@ -109,6 +115,7 @@ bool InitGL()
 
     glUseProgram(program_screen_quad.mID);
     program_screen_quad.mLocationPos = glGetAttribLocation (program_screen_quad.mID, "v_posCoord_in");
+    program_screen_quad.mLocationUV  = glGetAttribLocation (program_screen_quad.mID, "v_texCoord_in");    
     glUniform1i(glGetUniformLocation(program_screen_quad.mID, "uniform_texture"), 0);
     glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"), 1.0/(float)WIDTH, 1.0/(float)HEIGHT);
 
