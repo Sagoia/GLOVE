@@ -5,7 +5,8 @@
 #endif
 
 uniform sampler2D uniform_texture;
-uniform  vec2     uniform_resolution_div;
+uniform vec2      uniform_resolution_div;
+varying vec2      v_texCoord_out;
 
 vec4 SobelColor(vec2 coords)
 {
@@ -37,6 +38,5 @@ vec4 SobelColor(vec2 coords)
 
 void main()
 {
-    vec2 coords  = vec2(gl_FragCoord.x*uniform_resolution_div.x, gl_FragCoord.y*uniform_resolution_div.y);
-    gl_FragColor = SobelColor(coords);
+    gl_FragColor = SobelColor(v_texCoord_out);
 }

@@ -45,6 +45,23 @@ CacheManager::CleanUpVBOCache()
 }
 
 void
+CacheManager::CleanUpTextureCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if(!mTextureCache.empty()) {
+        for(uint32_t i = 0; i < mTextureCache.size(); ++i) {
+            if(mTextureCache[i] != nullptr) {
+                delete mTextureCache[i];
+                mTextureCache[i] = nullptr;
+            }
+        }
+
+        mTextureCache.clear();
+    }
+}
+
+void
 CacheManager::CleanUpVkPipelineObjectCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -78,6 +95,14 @@ CacheManager::CacheVBO(BufferObject *vbo)
 }
 
 void
+CacheManager::CacheTexture(Texture *tex)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mTextureCache.push_back(tex);
+}
+
+void
 CacheManager::CacheVkPipelineObject(VkPipeline pipeline)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -92,5 +117,6 @@ CacheManager::CleanUpCaches()
 
     CleanUpUBOCache();
     CleanUpVBOCache();
+    CleanUpTextureCache();
     CleanUpVkPipelineObjectCache();
 }
