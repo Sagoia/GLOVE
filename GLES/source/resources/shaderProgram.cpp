@@ -1212,12 +1212,15 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         uint8_t pixels[4] = {0,0,0,255};
                         for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
                             for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
-                                /// TODO:: how we handle this case should be investigated further
                                 activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
                             }
                         }
-                        activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
-                        activeTexture->Allocate();
+
+                        if(activeTexture->IsCompleted()) {
+                            activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                            activeTexture->Allocate();
+                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                        }
                     }
                     else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
 
