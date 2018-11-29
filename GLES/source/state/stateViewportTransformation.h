@@ -58,6 +58,7 @@ public:
                                                                                                         params[1] = static_cast<GLfloat>(mViewportRectangle.y);
                                                                                                         params[2] = static_cast<GLfloat>(mViewportRectangle.width);
                                                                                                         params[3] = static_cast<GLfloat>(mViewportRectangle.height); }
+      inline Rect             GetViewportRect(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mViewportRectangle; }
       inline int              GetViewportRectX(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mViewportRectangle.x; }
       inline int              GetViewportRectY(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mViewportRectangle.y; }
       inline int              GetViewportRectWidth(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mViewportRectangle.width; }
