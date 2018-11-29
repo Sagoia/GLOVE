@@ -46,6 +46,7 @@ typedef struct {
 class ResourceManager {
 private:
 
+    const vulkanAPI::vkContext_t              *mVkContext;
     typedef ObjectArray<Texture>               TextureArray;
     typedef ObjectArray<BufferObject>          BufferArray;
     typedef ObjectArray<Shader>                ShaderArray;
@@ -131,7 +132,7 @@ public:
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
 
     void                       UpdateFramebufferObjects(GLuint index, GLenum target);
-    void                       CreateDefaultTextures(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
+    void                       CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManager);
 
 };
 

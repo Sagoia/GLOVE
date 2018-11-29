@@ -30,6 +30,7 @@
 
 class GenericVertexAttribute {
 private:
+    const vulkanAPI::vkContext_t *      mVkContext;
     GLint                               mElements;
     GLenum                              mType;
     GLboolean                           mNormalized;
@@ -37,33 +38,38 @@ private:
     GLfloat                             mGenericValue[4];
     bool                                mEnabled;
 
-    uint32_t                            mOffset;
+    uintptr_t                           mOffset;
     uintptr_t                           mPtr;
-    BufferObject *                      mVbo;
-    bool                                mInternalVBO;
-    CacheManager *                      mCacheManager;
+    BufferObject                       *mInternalVbo;
+    BufferObject                       *mExternalVbo;
+    bool                                mInternalVBOStatus;
+    CacheManager                       *mCacheManager;
 
 public:
     GenericVertexAttribute();
     ~GenericVertexAttribute();
 
-    void                                ConvertFixedBufferToFloat(BufferObject* vbo, size_t byteSize, const void *srcData, size_t numVertices);
-    void                                MoveToCache(void);
+    void                                ConvertFixedBufferToFloat(BufferObject* vbo, size_t byteSize, void *srcData, size_t numVertices);
+    BufferObject                       *UpdateVertexAttribute(uint32_t numVertices, bool &updatedVBO);
+    BufferObject                       *UpdateGenericValueVBO(bool &updatedVBO);
+    BufferObject                       *GenerateUserSpaceVBO(uint32_t numVertices, bool &updatedVBO);
+    BufferObject                       *AttachDeviceSpaceVBO(uint32_t numVertices, bool &updatedVBO);
 
     // Release Functions
     void                                Release(void);
 
     // Get Functions
-    inline bool                         GetEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mEnabled;    }
+    inline bool                         IsEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mEnabled;    }
     inline GLint                        GetNumElements(void)              const { FUN_ENTRY(GL_LOG_TRACE); return mElements;   }
     inline GLenum                       GetType(void)                     const { FUN_ENTRY(GL_LOG_TRACE); return mType;       }
     inline GLboolean                    GetNormalized(void)               const { FUN_ENTRY(GL_LOG_TRACE); return mNormalized; }
     inline GLsizei                      GetStride(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mStride;     }
     inline uint32_t                     GetOffset(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mOffset;     }
     inline uintptr_t                    GetPointer(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mPtr;        }
-    inline BufferObject *               GetVbo(void)                      const { FUN_ENTRY(GL_LOG_TRACE); return mVbo;        }
+    inline const BufferObject *         GetExternalVbo(void)              const { FUN_ENTRY(GL_LOG_TRACE); return mExternalVbo;}
+
     inline VkFormat                     GetVkFormat(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return GlAttribPointerToVkFormat(mElements, mType, mNormalized); }
-    inline bool                         GetInternalVBOStatus(void)        const { FUN_ENTRY(GL_LOG_TRACE); return mInternalVBO;}
+    inline bool                         IsInternalVBO(void)        const { FUN_ENTRY(GL_LOG_TRACE); return mInternalVBOStatus;}
     inline void                         GetGenericValue(GLint *ptr)       const { FUN_ENTRY(GL_LOG_TRACE); ptr[0] = static_cast<GLint>(mGenericValue[0]);
                                                                                                            ptr[1] = static_cast<GLint>(mGenericValue[1]);
                                                                                                            ptr[2] = static_cast<GLint>(mGenericValue[2]);
@@ -74,16 +80,17 @@ public:
                                                                                                            ptr[3] = mGenericValue[3]; }
 
     // Set Functions
-           void                         Set(GLint nElements, GLenum type, GLboolean normalized, GLsizei stride, const void *ptr, BufferObject *vbo);
-           void                         SetVbo(BufferObject *vbo);
+    inline void                         SetVkContext(const vulkanAPI::vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
+           void                         Set(GLint nElements, GLenum type, GLboolean normalized, GLsizei stride, const void *ptr, BufferObject *vbo, bool internalVBO);
+           void                         SetCurrentVbo(BufferObject *vbo);
     inline void                         SetEnabled(bool enabled)                    { FUN_ENTRY(GL_LOG_TRACE); mEnabled         = enabled;     }
     inline void                         SetNumElements(GLint nElements)             { FUN_ENTRY(GL_LOG_TRACE); mElements        = nElements;   }
     inline void                         SetType(GLenum type)                        { FUN_ENTRY(GL_LOG_TRACE); mType            = type;        }
     inline void                         SetNormalized(GLboolean normalized)         { FUN_ENTRY(GL_LOG_TRACE); mNormalized      = normalized;  }
     inline void                         SetStride(GLsizei stride)                   { FUN_ENTRY(GL_LOG_TRACE); mStride          = stride;      }
-    inline void                         SetOffset(uint32_t offset)                  { FUN_ENTRY(GL_LOG_TRACE); mOffset          = offset;      }
+    inline void                         SetOffset(uintptr_t offset)                 { FUN_ENTRY(GL_LOG_TRACE); mOffset          = offset;      }
     inline void                         SetPointer(uintptr_t ptr)                   { FUN_ENTRY(GL_LOG_TRACE); mPtr             = ptr;         }
-    inline void                         SetInternalVBOStatus(bool internalVBO)      { FUN_ENTRY(GL_LOG_TRACE); mInternalVBO     = internalVBO; }
+    inline void                         SetInternalVBOStatus(bool internalVBO)      { FUN_ENTRY(GL_LOG_TRACE); mInternalVBOStatus     = internalVBO; }
     inline void                         SetCacheManager(CacheManager *cacheManager) { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
     inline void                         SetGenericValue(const GLfloat *ptr)         { FUN_ENTRY(GL_LOG_TRACE); mGenericValue[0] = ptr[0];
                                                                                                                mGenericValue[1] = ptr[1];
