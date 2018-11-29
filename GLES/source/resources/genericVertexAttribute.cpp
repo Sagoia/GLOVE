@@ -150,11 +150,12 @@ GenericVertexAttribute::ConvertFixedBufferToFloat(BufferObject* vbo, size_t byte
     memcpy(dstBuffer, srcBuffer, byteSize);
 
     // move the buffers by the corresponding offset (if any)
+    const size_t offset = GetOffset();
     const size_t numElements = static_cast<size_t>(GetNumElements());
     const size_t stride = static_cast<size_t>(GetStride());
 
     for(size_t ver = 0; ver < numVertices; ++ver) {
-        size_t vertexIndex = ver * stride;
+        size_t vertexIndex = offset + ver * stride;
         for(size_t el = 0; el < numElements; ++el) {
             size_t srcIndex = vertexIndex + el * sizeof(GLfixed);
             size_t dstIndex = vertexIndex + el * sizeof(float);
