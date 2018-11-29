@@ -43,6 +43,9 @@ bool InitGL()
 // Free Shader Compiler Resources
     glReleaseShaderCompiler();
 
+// Initialize Program
+    InitProgram(&program);
+
 // Initialize Mesh
     InitMesh      (&mesh_triangle, 2, 1,  triangle_vertex_buffer_data , sizeof(triangle_vertex_buffer_data) ,
                                           NULL                        , 0 ,
@@ -75,6 +78,7 @@ bool InitGL()
 // Upload shader uniforms
     glUseProgram(program.mID);
     program.mLocationPos = glGetAttribLocation (program.mID, "v_posCoord_in");
+    program.mLocationUV  = glGetAttribLocation (program.mID, "v_texCoord_in");
     glUniform4f(glGetUniformLocation(program.mID, "uniform_color"  ), COLOR_WHITE[0], COLOR_WHITE[1], COLOR_WHITE[2], COLOR_WHITE[3]);
 
 #ifdef INFO_DISPLAY

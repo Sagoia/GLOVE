@@ -45,6 +45,9 @@ bool InitGL()
 // Free Shader Compiler Resources
     glReleaseShaderCompiler();
 
+// Initialize Program    
+    InitProgram(&program);
+
 // Initialize Mesh
     InitMesh      (&mesh_screen_quad, 2, 2, squad_vertex_buffer_data, sizeof(squad_vertex_buffer_data),
                                             squad_uv_buffer_data    , sizeof(squad_uv_buffer_data)    ,
@@ -77,6 +80,8 @@ bool InitGL()
 // Upload shader uniforms
     glUseProgram(program.mID);
     program.mLocationPos = glGetAttribLocation (program.mID, "v_posCoord_in");
+    program.mLocationUV  = glGetAttribLocation (program.mID, "v_texCoord_in");
+
     glUniform4f(glGetUniformLocation(program.mID, "uniform_color"  ), COLOR_BLUE[0], COLOR_BLUE[1], COLOR_BLUE[2], COLOR_BLUE[3]);
 
 #ifdef INFO_DISPLAY
