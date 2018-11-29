@@ -50,12 +50,13 @@ GlslangCompiler::CleanUpShader(glslang::TShader* shader)
 }
 
 bool
-GlslangCompiler::IsDefinedInMacroError(const char* errors)
+GlslangCompiler::IsManageableError(const char* errors)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    size_t pos = string(errors).find("cannot use in preprocessor expression when expanded from macros");
-    if(pos == string::npos) {
+    size_t pragmaError = string(errors).find("\"on\" or \"off\" expected after '(' for 'debug' pragma");
+    size_t definedError = string(errors).find("cannot use in preprocessor expression when expanded from macros");
+    if(pragmaError == string::npos && definedError == string::npos) {
         return false;
     }
 
@@ -76,7 +77,7 @@ GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* reso
 
     bool result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgOnlyPreprocessor));
     if(!result) {
-        if(IsDefinedInMacroError(mSlangShader->getInfoLog())) {
+        if(IsManageableError(mSlangShader->getInfoLog())) {
             CleanUpShader(mSlangShader);
             mSlangShader = new glslang::TShader(language);
             mSlangShader->setStrings(source, 1);
@@ -101,6 +102,12 @@ GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* r
     mSlangShader400->setStrings(source, 1);
     bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules));
     if(!result) {
+        if(IsManageableError(mSlangShader400->getInfoLog())) {
+            CleanUpShader(mSlangShader400);
+            mSlangShader400 = new glslang::TShader(language);
+            mSlangShader400->setStrings(source, 1);
+            result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors));
+        }
         GLOVE_PRINT_ERR("shader 400:\n%s\n", mSlangShader400->getInfoLog());
     }
 

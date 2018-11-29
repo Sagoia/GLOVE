@@ -38,7 +38,7 @@ private:
     glslang::TShader* mSlangShader400;
 
     void CleanUpShader(glslang::TShader* shader);
-    bool IsDefinedInMacroError(const char* errors);
+    bool IsManageableError(const char* errors);
 
 public:
     GlslangCompiler();
