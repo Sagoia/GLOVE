@@ -261,6 +261,13 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
 
     size_t found = FindToken(uniformLiteralStr, source, 0);
     while(found != string::npos) {
+        size_t firstNL = source.rfind("\n", found);
+        string commentLine = source.substr(firstNL, found - firstNL);
+        if(commentLine.find("//") != string::npos) {
+            found = FindToken(uniformLiteralStr, source, found + uniformLiteralStr.length());
+            continue;
+        }
+
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + uniformLiteralStr.length());
 
