@@ -12,7 +12,7 @@
  */
 
 /**
- *  @file       rect.cpp
+ *  @file       rect.h
  *  @author     Think Silicon
  *  @date       25/07/2018
  *  @version    1.0
