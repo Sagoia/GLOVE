@@ -50,6 +50,19 @@ GlslangCompiler::CleanUpShader(glslang::TShader* shader)
 }
 
 bool
+GlslangCompiler::IsDefinedInMacroError(const char* errors)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    size_t pos = string(errors).find("cannot use in preprocessor expression when expanded from macros");
+    if(pos == string::npos) {
+        return false;
+    }
+
+    return true;
+}
+
+bool
 GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* resources, EShLanguage language)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -63,7 +76,13 @@ GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* reso
 
     bool result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgOnlyPreprocessor));
     if(!result) {
-        GLOVE_PRINT_ERR("%s\n", mSlangShader->getInfoLog());
+        if(IsDefinedInMacroError(mSlangShader->getInfoLog())) {
+            CleanUpShader(mSlangShader);
+            mSlangShader = new glslang::TShader(language);
+            mSlangShader->setStrings(source, 1);
+            result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgRelaxedErrors));
+        }
+        GLOVE_PRINT_ERR("shader 100:\n%s\n", mSlangShader->getInfoLog());
     }
 
     return result;
@@ -82,7 +101,7 @@ GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* r
     mSlangShader400->setStrings(source, 1);
     bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules));
     if(!result) {
-        GLOVE_PRINT_ERR("%s\n", mSlangShader400->getInfoLog());
+        GLOVE_PRINT_ERR("shader 400:\n%s\n", mSlangShader400->getInfoLog());
     }
 
     return result;

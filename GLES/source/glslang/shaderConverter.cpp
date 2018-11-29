@@ -105,6 +105,7 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
     FUN_ENTRY(GL_LOG_DEBUG);
 
     ProcessPragma(source);
+    ProcessDefined(source);
     ProcessMacros(source);
     ProcessHeader(source, uniformBlockMap);
     ProcessUniforms(source, uniformBlockMap);
@@ -155,6 +156,20 @@ ShaderConverter::ProcessHeader(std::string& source, const uniformBlockMap_t &uni
         source.replace(found, f1 - found, sourceHeader);
     } else {
         source.insert(0, sourceHeader);
+    }
+}
+
+void
+ShaderConverter::ProcessDefined(std::string& source)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    const string pragmaStr("#define AAA defined(BBB)");
+    size_t found = FindToken(pragmaStr, source, 0);
+
+    if(found != string::npos) {
+        size_t nextNewLine = source.find ('\n', found);
+        source.erase(found, nextNewLine - found);
     }
 }
 
