@@ -343,10 +343,9 @@ VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
     switch(type) {
         case GL_UNSIGNED_BYTE: {
             switch(format) {
-                case GL_RGB:
-                    return  VK_FORMAT_R8G8B8_UNORM;
-                case GL_RGBA:
-                    return  VK_FORMAT_R8G8B8A8_UNORM;
+                case GL_RGB:                        return VK_FORMAT_R8G8B8_UNORM;
+                case GL_RGBA:                       return VK_FORMAT_R8G8B8A8_UNORM;
+                default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
             }
             break;
         }
@@ -362,8 +361,10 @@ VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
             assert( format == GL_RGBA );
             return          VK_FORMAT_R5G5B5A1_UNORM_PACK16;
         }
+        default: {
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        }
     }
-    return VK_FORMAT_R8G8B8A8_UNORM;
 }
 
 VkFormat

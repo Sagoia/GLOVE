@@ -191,10 +191,6 @@ Texture::CreateVkTexture(void)
         return false;
     }
 
-    if(mMipLevelsCount > 1) {
-        PrepareVkImageLayout(VK_IMAGE_LAYOUT_GENERAL);
-    }
-
     if(!AllocateVkMemory()) {
         mImage->Release();
         return false;
@@ -205,6 +201,9 @@ Texture::CreateVkTexture(void)
         mMemory->Release();
         return false;
     }
+
+    PrepareVkImageLayout(VK_IMAGE_LAYOUT_GENERAL);
+
     return true;
 }
 

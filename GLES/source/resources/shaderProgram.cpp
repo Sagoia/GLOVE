@@ -1146,10 +1146,28 @@ ShaderProgram::UpdateDescriptorSet(void)
         mUpdateDescriptorData = false;
     }
 
+    // Check if any texture is attached to a user-based FBO
+    for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveUniforms(); ++i) {
+        if(mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D || mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_CUBE) {
+            for(int32_t j = 0; j < mShaderResourceInterface.GetUniformArraySize(i); ++j) {
+                const glsl_sampler_t textureUnit = *(glsl_sampler_t *)mShaderResourceInterface.GetUniformClientData(i);
+
+                /// Sampler might need an update
+                Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
+                mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
+                if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
+                    mUpdateDescriptorSets = true;
+                    break;
+                }
+            }
+        }
+    }
+
     /// This can be true only in three occasions:
     /// 1. This is a freshly linked shader. So the descriptor sets need to be created
     /// 2. There has been an update in a sampler via the glUniform1i()
     /// 3. glBindTexture has been called
+    /// 4. Texture is attached to a user-based FBO
     if(!mUpdateDescriptorSets) {
         return;
     }
@@ -1188,20 +1206,65 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     /// Sampler might need an update
                     Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
                     mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
-
+                    // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
+                    // when the sampler’s associated texture object is not complete.
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
                         uint8_t pixels[4] = {0,0,0,255};
                         for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
                             for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
-                                /// TODO:: how we handle this case should be investigated further
                                 activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
                             }
                         }
-                        activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
-                        activeTexture->Allocate();
-                    }
 
-                    mGLContext->SetFullScreenRender(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture));
+                        if(activeTexture->IsCompleted()) {
+                            activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                            activeTexture->Allocate();
+                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                        }
+                    }
+                    else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
+
+                        // Get Inverted Data from FBO's Color Attachment Texture
+                        GLenum dstInternalFormat = activeTexture->GetExplicitInternalFormat();
+                        ImageRect srcRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
+                            GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
+                            GlTypeToElementSize(activeTexture->GetExplicitType()),
+                            Texture::GetDefaultInternalAlignment());
+                        ImageRect dstRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
+                            GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
+                            GlTypeToElementSize(activeTexture->GetExplicitType()),
+                            Texture::GetDefaultInternalAlignment());
+
+                        uint8_t* dstData = new uint8_t[dstRect.GetRectBufferSize()];
+                        srcRect.y = activeTexture->GetInvertedYOrigin(&srcRect);
+                        activeTexture->CopyPixelsToHost  (&srcRect, &dstRect, 0, 0, dstInternalFormat, static_cast<void *>(dstData));
+
+                        // Create new Texture with this data 
+                        Texture *inverted_texture = new Texture(mVkContext, mCommandBufferManager);
+                        inverted_texture->SetTarget(GL_TEXTURE_2D);
+                        inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+                        inverted_texture->SetVkImageTiling();
+                        inverted_texture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
+                        inverted_texture->InitState();
+
+                        inverted_texture->SetVkFormat(activeTexture->GetVkFormat());
+                        inverted_texture->SetState(activeTexture->GetWidth(), activeTexture->GetHeight(),
+                                    0, 0,
+                                    GlInternalFormatToGlFormat(dstInternalFormat),
+                                    GlInternalFormatToGlType(dstInternalFormat),
+                                    Texture::GetDefaultInternalAlignment(),
+                                    dstData);
+                        
+                        if(inverted_texture->IsCompleted()) {
+                            inverted_texture->Allocate();
+                            inverted_texture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                            mCacheManager->CacheTexture(inverted_texture);
+                        }
+
+                        activeTexture = inverted_texture;
+
+                        delete[] dstData;
+                    }
 
                     activeTexture->CreateVkSampler();
 

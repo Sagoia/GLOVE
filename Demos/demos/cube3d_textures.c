@@ -43,6 +43,9 @@ bool InitGL()
 // Free Shader Compiler Resources
     glReleaseShaderCompiler();
 
+// Initialize Program
+    InitProgram(&program);
+
 // Initialize Mesh
     InitMesh      (&mesh_cube, 3, 12, cube_vertex_buffer_data, sizeof(cube_vertex_buffer_data),
                                       cube_uv_buffer_data    , sizeof(cube_uv_buffer_data)    ,

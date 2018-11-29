@@ -147,7 +147,7 @@ public:
     inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
     inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
-    VkFormat                FindSupportedColorFormat(VkFormat format)           { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedColorFormat(format); }
+    VkFormat                FindSupportedVkColorFormat(VkFormat format)           { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
 
 // Set Functions
     inline void             SetCommandBufferManager(

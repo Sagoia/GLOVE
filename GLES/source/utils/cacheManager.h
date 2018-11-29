@@ -14,6 +14,7 @@
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
 #include "resources/bufferObject.h"
+#include "resources/texture.h"
 
 class CacheManager {
 private:
@@ -22,10 +23,12 @@ private:
 
     std::vector<UniformBufferObject *>  mUBOCache;
     std::vector<BufferObject *>         mVBOCache;
+    std::vector<Texture *>              mTextureCache;
     std::vector<VkPipeline>             mVkPipelineObjectCache;
 
-    void                                CleanUpUBOCache(void);
+    void                                CleanUpUBOCache();
     void                                CleanUpVBOCache();
+    void                                CleanUpTextureCache();
     void                                CleanUpVkPipelineObjectCache();
 
 public:
@@ -34,6 +37,7 @@ public:
 
     void                                CacheUBO(UniformBufferObject *uniformBufferObject);
     void                                CacheVBO(BufferObject *vbo);
+    void                                CacheTexture(Texture *tex);
     void                                CacheVkPipelineObject(VkPipeline pipeline);
     void                                CleanUpCaches();
 };

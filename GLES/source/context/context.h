@@ -64,7 +64,6 @@ private:
 // ------------
     bool                                        mIsYInverted;
     bool                                        mIsModeLineLoop;
-    bool                                        mIsFullScreenRender;
 // ------------
     void                                       *mWriteSurface;
     void                                       *mReadSurface;
@@ -127,14 +126,12 @@ public:
 // Get Functions
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
     inline  ResourceManager *GetResourceManager(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mResourceManager; }
-    inline  bool            GetFullScreenRender(void)                      const  { FUN_ENTRY(GL_LOG_TRACE); return mIsFullScreenRender; }
     inline  bool            IsYInverted(void)                              const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }
     inline  bool            IsModeLineLoop(void)                           const  { FUN_ENTRY(GL_LOG_TRACE); return mIsModeLineLoop; }
 
 // Set Functions
             void            SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
     inline  void            SetNextImageIndex(uint32_t imageIndex)                { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
-    inline  void            SetFullScreenRender(bool value)                       { FUN_ENTRY(GL_LOG_TRACE); mIsFullScreenRender = value; }
     inline  void            BindToTexture(GLuint bind)                            { FUN_ENTRY(GL_LOG_DEBUG); mSystemFBO->SetBindToTexture(bind); }
 
     inline  bool            HasShaderCompiler(void);

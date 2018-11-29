@@ -67,7 +67,6 @@ Context::Context()
     //If VK_KHR_maintenance1 is supported, then there is no need to invert the Y
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsModeLineLoop     = false;
-    mIsFullScreenRender = false;
 
     mScreenSpacePass = new ScreenSpacePass(this, mVkContext, mCommandBufferManager);
     mScreenSpacePass->SetCacheManager(mCacheManager);

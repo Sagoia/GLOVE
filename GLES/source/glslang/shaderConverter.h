@@ -64,6 +64,7 @@ private:
     void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void ProcessMacros(std::string& source);
     void ProcessPragma(std::string& source);
+    void ProcessDefined(std::string& source);
     void ProcessHeader(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessUniforms(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessInvariantQualifier(std::string& source);
