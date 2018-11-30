@@ -106,6 +106,16 @@ Context::ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearS
 void
 Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
 {
+    // perform lazy initialization once
+    if(!mScreenSpacePass->Initialize()) {
+        return;
+    }
+
+    // validation check in case this functionality is not available
+    if(!mScreenSpacePass->Valid()) {
+        return;
+    }
+
     if(mWriteFBO->IsInClearState()) {
         Finish();
     }
