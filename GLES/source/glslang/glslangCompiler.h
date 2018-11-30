@@ -39,6 +39,7 @@ private:
 
     void CleanUpShader(glslang::TShader* shader);
     bool IsManageableError(const char* errors);
+    bool IsNotFullySupported(const char* source, const char* errors);
 
 public:
     GlslangCompiler();
