@@ -906,7 +906,7 @@ GlslangShaderCompiler::DumpSlangProgramReflection(const glslang::TProgram *prog)
 
     assert(prog);
 
-    const GlslangIoMapResolver *ioMapResolver = mSlangProgLinker->GetIoMapResolver();
+    
     int i;
     printf("**********");
     printf("\nGL_ACTIVE_UNIFORMS_BLOCKS: %d\n", prog->getNumLiveUniformBlocks());
@@ -929,23 +929,13 @@ GlslangShaderCompiler::DumpSlangProgramReflection(const glslang::TProgram *prog)
                                                                                       prog->getUniformArraySize(i));
     }
 
-    printf("\nGL_ACTIVE_ATTRIBUTES varyings in: %d\n", ioMapResolver->GetNumLiveVaryingInVariables());
-    for(uint32_t i = 0; i < ioMapResolver->GetNumLiveVaryingInVariables(); ++i) {
-        printf("%s (%s)\n", ioMapResolver->GetVaryingInName(i), ioMapResolver->GetVaryingInType(i));
-        printf("  hasLocation: %d = %d\n", ioMapResolver->GetVaryingInHasLocation(i), ioMapResolver->GetVaryingInLocation(i));
-    }
-
-    printf("\nACTIVE VARYINGS varyings out: %d\n", ioMapResolver->GetNumLiveVaryingOutVariables());
-    for(uint32_t i = 0; i < ioMapResolver->GetNumLiveVaryingOutVariables(); ++i) {
-        printf("%s (%s)\n", ioMapResolver->GetVaryingOutName(i), ioMapResolver->GetVaryingOutType(i));
-        printf("  hasLocation: %d = %d\n", ioMapResolver->GetVaryingInHasLocation(i), ioMapResolver->GetVaryingInLocation(i));
-    }
-
     printf("\nGL_ACTIVE_ATTRIBUTES: %d\n", prog->getNumLiveAttributes());
     for(i = 0; i < prog->getNumLiveAttributes(); ++i) {
         printf("%s (0x%x)\n", prog->getAttributeName(i), prog->getAttributeType(i));
         printf("  hasLocation: %d = %d\n", GetAttributeHasLocation(prog, i), GetAttributeLocation(prog, i));
     }
+
+    mSlangProgLinker->GetIoMapResolver()->PrintVaryingInfo();
 
     printf("**********\n\n");
 }

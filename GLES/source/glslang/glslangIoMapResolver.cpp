@@ -22,80 +22,86 @@
  */
 
 #include "glslangIoMapResolver.h"
-#include "utils/glLogger.h"
 
-#include <algorithm>
+GlslangIoMapResolver::GlslangIoMapResolver()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+}
+
+GlslangIoMapResolver::~GlslangIoMapResolver()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    Reset();
+}
+
+void
+GlslangIoMapResolver::Reset(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mVaryingINMap.clear();
+    mVaryingOUTMap.clear();
+}
 
 void
 GlslangIoMapResolver::FillInVaryingInfo(VaryingInfo *varyingInfo, const glslang::TType& type, const char *name)
 {
-    varyingInfo->name = name;
-    varyingInfo->type = type.getBasicString();
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    varyingInfo->name        = name;
+    varyingInfo->type        = type.getBasicString();
     varyingInfo->hasLocation = type.getQualifier().hasLocation();
-    varyingInfo->location = type.getQualifier().hasLocation() ? type.getQualifier().layoutLocation : -1;
-    varyingInfo->vectorSize = type.getVectorSize();
-    varyingInfo->matrixCols = type.getMatrixCols();
-}
-
-bool
-GlslangIoMapResolver::validateBinding(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return true;
-}
-
-int
-GlslangIoMapResolver::resolveBinding(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return -1;
-}
-
-
-int
-GlslangIoMapResolver::resolveSet(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return -1;
-}
-
-int
-GlslangIoMapResolver::resolveUniformLocation(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return -1;
-}
-
-bool
-GlslangIoMapResolver::validateInOut(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return true;
-}
-
-int
-GlslangIoMapResolver::resolveInOutLocation(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return -1;
-}
-
-int
-GlslangIoMapResolver::resolveInOutComponent(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return -1;
-}
-
-int
-GlslangIoMapResolver::resolveInOutIndex(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
-{
-    return -1;
+    varyingInfo->location    = type.getQualifier().hasLocation() ? type.getQualifier().layoutLocation : -1;
+    varyingInfo->vectorSize  = type.getVectorSize();
+    varyingInfo->matrixCols  = type.getMatrixCols();
 }
 
 void
-GlslangIoMapResolver::notifyBinding(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
+GlslangIoMapResolver::PrintVaryingInfo(void) const
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
 
+    printf("\nGL_ACTIVE_ATTRIBUTES varyings IN: %d\n", GetVaryingInNum());
+    for(uint32_t i = 0; i < GetVaryingInNum(); ++i) {
+        printf("Name: %s - Type: (%s)\n", GetVaryingInName(i), GetVaryingInType(i));
+        printf("Location: %d - Value: %d\n", GetVaryingInHasLocation(i), GetVaryingInLocation(i));
+    }
+
+    printf("\nACTIVE VARYINGS varyings OUT: %d\n", GetVaryingOutNum());
+    for(uint32_t i = 0; i < GetVaryingOutNum(); ++i) {
+        printf("Name: %s - Type: (%s)\n", GetVaryingOutName(i), GetVaryingOutType(i));
+        printf("Location: %d - Value: %d\n", GetVaryingOutHasLocation(i), GetVaryingOutLocation(i));
+    }
+}
+
+void
+GlslangIoMapResolver::CreateVaryingLocationMap(std::map<std::string, std::pair<int,bool>> *location_map)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    int location = 0;
+    for(uint32_t out = 0; out < GetVaryingOutNum(); ++out) {
+        for(uint32_t in = 0; in < GetVaryingInNum(); ++in) {
+            const char *inName  = GetVaryingInName(in);
+            const char *outName = GetVaryingOutName(out);
+            const int   inSize  = GetVaryingInVectorSize(in);
+            const int   outSize = GetVaryingOutVectorSize(out);
+
+            if(!strcmp(inName, outName)) {
+                assert(location_map->find(string(inName)) == location_map->end());
+
+                (*location_map)[std::string(inName)] = std::make_pair(location, (inSize == outSize));
+                location += GetVaryingInMatrixCols(in);
+            }
+        }
+    }
 }
 
 void
 GlslangIoMapResolver::notifyInOut(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     if(glslang::EvqVaryingIn == type.getQualifier().storage) {
         VaryingInfo varyingInfo;
@@ -110,113 +116,4 @@ GlslangIoMapResolver::notifyInOut(EShLanguage stage, const char* name, const gls
         FillInVaryingInfo(&varyingInfo, type, name);
         mVaryingOUTMap.push_back(varyingInfo);
     }
-}
-
-void
-GlslangIoMapResolver::endNotifications(EShLanguage stage)
-{
-
-}
-
-void
-GlslangIoMapResolver::beginNotifications(EShLanguage stage)
-{
-
-}
-
-void
-GlslangIoMapResolver::beginResolve(EShLanguage stage)
-{
-
-}
-
-void
-GlslangIoMapResolver::endResolve(EShLanguage stage)
-{
-
-}
-
-void
-GlslangIoMapResolver::Reset()
-{
-    mVaryingINMap.clear();
-    mVaryingOUTMap.clear();
-}
-
-const char *
-GlslangIoMapResolver::GetVaryingInName(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingINMap.size() - 1) ? nullptr : mVaryingINMap[index].name;
-}
-
-const char *
-GlslangIoMapResolver::GetVaryingInType(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingINMap.size() - 1) ? nullptr : mVaryingINMap[index].type;
-}
-
-bool
-GlslangIoMapResolver::GetVaryingInHasLocation(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingINMap.size() - 1) ? false : mVaryingINMap[index].hasLocation;
-}
-
-int
-GlslangIoMapResolver::GetVaryingInLocation(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].location;
-}
-
-int
-GlslangIoMapResolver::GetVaryingInSize(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].vectorSize;
-}
-
-int
-GlslangIoMapResolver::GetVaryingInLocations(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].vectorSize > 0 ? 1 : mVaryingINMap[index].matrixCols;
-}
-
-int
-GlslangIoMapResolver::GetVaryingOutSize(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingOUTMap.size() - 1) ? -1 : mVaryingOUTMap[index].vectorSize;
-}
-
-
-const char *
-GlslangIoMapResolver::GetVaryingOutName(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingOUTMap.size() - 1) ? nullptr : mVaryingOUTMap[index].name;
-}
-
-const char *
-GlslangIoMapResolver::GetVaryingOutType(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingOUTMap.size() - 1) ? nullptr : mVaryingOUTMap[index].type;
-}
-
-bool
-GlslangIoMapResolver::GetVaryingOutHasLocation(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingOUTMap.size() - 1) ? false : mVaryingOUTMap[index].hasLocation;
-}
-
-int
-GlslangIoMapResolver::GetVaryingOutLocation(uint32_t index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-    return (index > mVaryingOUTMap.size() - 1) ? -1 : mVaryingOUTMap[index].location;
 }

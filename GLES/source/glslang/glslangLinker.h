@@ -51,8 +51,8 @@ public:
     void                                GenerateSPV(std::vector<unsigned int>& spv, EShLanguage language, ESSL_VERSION version);
 
 // Get Functions
-    inline const GlslangIoMapResolver  *GetIoMapResolver(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return &mIoMapResolver; }
-                 glslang::TProgram     *GetProgram(ESSL_VERSION version);
+    inline GlslangIoMapResolver        *GetIoMapResolver(void)                       { FUN_ENTRY(GL_LOG_TRACE); return &mIoMapResolver; }
+           glslang::TProgram           *GetProgram(ESSL_VERSION version);
            const char                  *GetLinkInfoLog(ESSL_VERSION version)         { FUN_ENTRY(GL_LOG_TRACE); return GetProgram(version)->getInfoLog(); } 
 };
 

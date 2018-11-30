@@ -43,8 +43,8 @@ public:
     void Convert(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void Initialize(shader_conversion_type_t conversionType, shader_type_t shaderType);
 
-    void SetSlangProgram(glslang::TProgram* slangProgram)                       { FUN_ENTRY(GL_LOG_TRACE); mSlangProg = slangProgram; }
-    void SetIoMapResolver(const GlslangIoMapResolver * ioMapResolver)           { FUN_ENTRY(GL_LOG_TRACE); mIoMapResolver = ioMapResolver; }
+    void SetSlangProgram(glslang::TProgram* slangProgram)                { FUN_ENTRY(GL_LOG_TRACE); mSlangProg = slangProgram; }
+    void SetIoMapResolver(GlslangIoMapResolver *ioMapResolver)           { FUN_ENTRY(GL_LOG_TRACE); mIoMapResolver = ioMapResolver; }
 
 private:
     static const char * const   shaderVersion;
@@ -59,7 +59,7 @@ private:
     shader_type_t               mShaderType;
     string                      mMemLayoutQualifier;
     glslang::TProgram*          mSlangProg;
-    const GlslangIoMapResolver *mIoMapResolver;
+    GlslangIoMapResolver       *mIoMapResolver;
 
     void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void ProcessMacros(std::string& source);

@@ -390,27 +390,10 @@ ShaderConverter::ProcessVaryings(std::string& source)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    /// Handle varyings
-    assert(mSlangProg);
-
-    int location = 0;
-    map<string, std::pair<int,bool>> varyingsLocationMap;
-    for(uint32_t out = 0; out < mIoMapResolver->GetNumLiveVaryingOutVariables(); ++out) {
-        for(uint32_t in = 0; in < mIoMapResolver->GetNumLiveVaryingInVariables(); ++in) {
-            const char *inName  = mIoMapResolver->GetVaryingInName(in);
-            const char *outName = mIoMapResolver->GetVaryingOutName(out);
-            const int   inSize  = mIoMapResolver->GetVaryingInSize(in);
-            const int   outSize = mIoMapResolver->GetVaryingOutSize(out);
-
-            if(!strcmp(inName, outName)) {
-                assert(varyingsLocationMap.find(string(inName)) == varyingsLocationMap.end());
-                varyingsLocationMap[string(inName)] = make_pair(location, (inSize == outSize));
-                location += mIoMapResolver->GetVaryingInLocations(in);
-            }
-        }
-    }
-
     const string varyingLiteralStr("varying");
+
+    std::map<std::string, std::pair<int,bool>> varyingsLocationMap;
+    mIoMapResolver->CreateVaryingLocationMap(&varyingsLocationMap);
 
     size_t found = FindToken(varyingLiteralStr, source, 0);
     while(found != string::npos) {
