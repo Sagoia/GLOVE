@@ -30,7 +30,7 @@ GlslangIoMapResolver::GlslangIoMapResolver()
 
 GlslangIoMapResolver::~GlslangIoMapResolver()
 {
-    FUN_ENTRY(GL_LOG_DEBUG);
+    FUN_ENTRY(GL_LOG_TRACE);
 
     Release();
 }

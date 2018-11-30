@@ -38,7 +38,7 @@ GlslangCompiler::~GlslangCompiler()
 void
 GlslangCompiler::Release()
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     for(auto shader : mShaderMap) {
         SafeDelete(shader.second);

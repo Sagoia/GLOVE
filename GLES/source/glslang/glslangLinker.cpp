@@ -38,7 +38,7 @@ GlslangLinker::~GlslangLinker()
 void
 GlslangLinker::Release()
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     for(auto shader : mProgramMap) {
         SafeDelete(shader.second);
