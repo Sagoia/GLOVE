@@ -28,9 +28,10 @@ Context::BlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateBlendingColor(red, green, blue, alpha)) {
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateBlendingColor(red, green, blue, alpha)) {
         GLfloat    blendcolor[4];
-        mStateManager.GetFragmentOperationsState()->GetBlendingColor(blendcolor);
+        stateFragmentOperations->GetBlendingColor(blendcolor);
         mPipeline->SetColorBlendConstants(blendcolor);
     }
 }
@@ -45,9 +46,10 @@ Context::BlendEquation(GLenum mode)
         return;
     }
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateBlendingEquation(mode, mode)) {
-        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToVkBlendOp(mStateManager.GetFragmentOperationsState()->GetBlendingEquationRGB()));
-        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToVkBlendOp(mStateManager.GetFragmentOperationsState()->GetBlendingEquationAlpha()));
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateBlendingEquation(mode, mode)) {
+        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationRGB()));
+        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationAlpha()));
     }
 }
 
@@ -62,9 +64,10 @@ Context::BlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha)
         return;
     }
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateBlendingEquation(modeRGB, modeAlpha)) {
-        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToVkBlendOp(mStateManager.GetFragmentOperationsState()->GetBlendingEquationRGB()));
-        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToVkBlendOp(mStateManager.GetFragmentOperationsState()->GetBlendingEquationAlpha()));
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateBlendingEquation(modeRGB, modeAlpha)) {
+        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationRGB()));
+        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationAlpha()));
     }
 }
 
@@ -86,11 +89,12 @@ Context::BlendFunc(GLenum sfactor, GLenum dfactor)
         }
     }
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateBlendingFactors(sfactor, sfactor, dfactor, dfactor)) {
-        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorSourceRGB()));
-        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorDestinationRGB()));
-        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorSourceAlpha()));
-        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorDestinationAlpha()));
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateBlendingFactors(sfactor, sfactor, dfactor, dfactor)) {
+        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceRGB()));
+        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationRGB()));
+        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceAlpha()));
+        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationAlpha()));
     }
 }
 
@@ -112,11 +116,12 @@ Context::BlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum
         }
     }
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateBlendingFactors(srcRGB, srcAlpha, dstRGB, dstAlpha)) {
-        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorSourceRGB()));
-        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorDestinationRGB()));
-        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorSourceAlpha()));
-        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToVkBlendFactor(mStateManager.GetFragmentOperationsState()->GetBlendingFactorDestinationAlpha()));
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateBlendingFactors(srcRGB, srcAlpha, dstRGB, dstAlpha)) {
+        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceRGB()));
+        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationRGB()));
+        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceAlpha()));
+        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationAlpha()));
     }
 }
 
@@ -132,8 +137,9 @@ Context::DepthFunc(GLenum func)
         return;
     }
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateDepthTestFunc(func)) {
-        mPipeline->SetDepthCompareOp(GlCompareFuncToVkCompareOp(mStateManager.GetFragmentOperationsState()->GetDepthTestFunc()));
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateDepthTestFunc(func)) {
+        mPipeline->SetDepthCompareOp(GlCompareFuncToVkCompareOp(stateFragmentOperations->GetDepthTestFunc()));
     }
 }
 
@@ -142,8 +148,9 @@ Context::SampleCoverage(GLclampf value, GLboolean invert)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFragmentOperationsState()->UpdateSampleCoverageValue(value) ||
-       mStateManager.GetFragmentOperationsState()->UpdateSampleCoverageInvert(invert) ) {
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    if(stateFragmentOperations->UpdateSampleCoverageValue(value) ||
+       stateFragmentOperations->UpdateSampleCoverageInvert(invert) ) {
         //mPipeline->SetMultisampleMask(value, invert); // TODO
     }
 }

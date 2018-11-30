@@ -132,6 +132,7 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     }
 
     mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
+
     mScreenSpacePass->UpdateUniformBufferColor(clearColorValue[0], clearColorValue[1], clearColorValue[2], clearColorValue[3]);
 
     vulkanAPI::Pipeline* pipeline = mScreenSpacePass->GetPipeline();
@@ -475,7 +476,7 @@ Context::SetClearRect(void)
     int w = mWriteFBO->GetWidth();
     int h = mWriteFBO->GetHeight();
 
-    StateFragmentOperations* stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
 
     if(stateFragmentOperations->GetScissorTestEnabled()) {
         x = stateFragmentOperations->GetScissorRectX();
