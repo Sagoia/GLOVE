@@ -203,7 +203,7 @@ Context::GetIntegerv(GLenum pname, GLint* params)
     case GL_SAMPLE_COVERAGE_VALUE:              *params = static_cast<GLint>(roundf(mStateManager.GetFragmentOperationsState()->GetSampleCoverageValue())); break;
     case GL_SAMPLE_ALPHA_TO_COVERAGE:           *params = mStateManager.GetFragmentOperationsState()->GetSampleAlphaToCoverageEnabled(); break;
     case GL_SHADER_COMPILER:                    *params = 1; break;
-    case GL_SUBPIXEL_BITS:                      *params = 4; break;
+    case GL_SUBPIXEL_BITS:                      *params = static_cast<GLint>(GLOVE_SUBPIXEL_BITS); break;
     case GL_TEXTURE_BINDING_2D:                 *params = static_cast<GLint>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D))); break;
     case GL_TEXTURE_BINDING_CUBE_MAP:           *params = static_cast<GLint>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP))); break;
     case GL_ACTIVE_TEXTURE:                     *params = static_cast<GLint>(mStateManager.GetActiveObjectsState()->GetActiveTextureUnit()); break;
@@ -313,7 +313,7 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     case GL_SAMPLE_COVERAGE_INVERT:             *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetSampleCoverageInvert()); break;
     case GL_SAMPLE_COVERAGE_VALUE:              *params = mStateManager.GetFragmentOperationsState()->GetSampleCoverageValue(); break;
     case GL_SHADER_COMPILER:                    *params = 1.0f; break;
-    case GL_SUBPIXEL_BITS:                      *params = 4.0f; break;
+    case GL_SUBPIXEL_BITS:                      *params = static_cast<GLfloat>(GLOVE_SUBPIXEL_BITS);; break;
     case GL_TEXTURE_BINDING_2D:                 *params = static_cast<GLfloat>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_2D))); break;
     case GL_TEXTURE_BINDING_CUBE_MAP:           *params = static_cast<GLfloat>(mResourceManager->GetTextureID(mStateManager.GetActiveObjectsState()->GetActiveTexture(GL_TEXTURE_CUBE_MAP))); break;
     case GL_ACTIVE_TEXTURE:                     *params = static_cast<GLfloat>(mStateManager.GetActiveObjectsState()->GetActiveTextureUnit()); break;

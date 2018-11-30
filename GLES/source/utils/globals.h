@@ -64,6 +64,8 @@
 
 #define GLOVE_MAX_DRAW_BUFFERS                          1     // MIN VALUE:  1
 
+#define GLOVE_SUBPIXEL_BITS                             4     // MIN VALUE:  4
+
 #define GLOVE_MAX_TEXTURE_SIZE                          4096
 #define GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE                 4096
 #define GLOVE_MAX_RENDERBUFFER_SIZE                     4096
