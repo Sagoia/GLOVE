@@ -32,7 +32,7 @@ GlslangCompiler::~GlslangCompiler()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    for(auto shader : mShaderMap){
+    for(auto shader : mShaderMap) {
         SafeDelete(shader.second);
     }
     mShaderMap.clear();
@@ -43,7 +43,7 @@ GlslangCompiler::IsManageableError(const char* errors)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    size_t pragmaError = string(errors).find("\"on\" or \"off\" expected after '(' for 'debug' pragma");
+    size_t pragmaError  = string(errors).find("\"on\" or \"off\" expected after '(' for 'debug' pragma");
     size_t definedError = string(errors).find("cannot use in preprocessor expression when expanded from macros");
 
     return pragmaError != string::npos || definedError != string::npos;
@@ -91,7 +91,8 @@ GlslangCompiler::CompileShader(const char* const* source, const TBuiltInResource
             result = mShaderMap[version]->parse(resources, version, profile, false, false, messages);
         }
 
-        GLOVE_PRINT_ERR("%s\n", mShaderMap[version]->getInfoLog());
+        GLOVE_PRINT_ERR("%s Shader Compiler v%s : %s\n", language == EShLangVertex ? "Vertex" : "Fragment", 
+                                                         to_string(version) , mShaderMap[version]->getInfoLog());
     }
 
     return result;

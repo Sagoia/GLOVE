@@ -32,7 +32,7 @@ GlslangLinker::~GlslangLinker()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    for(auto shader : mProgramMap){
+    for(auto shader : mProgramMap) {
         SafeDelete(shader.second);
     }
     mProgramMap.clear();
@@ -66,11 +66,11 @@ GlslangLinker::LinkProgram(glslang::TShader* vertShader, glslang::TShader* fragS
    
     bool result = mProgramMap[version]->link(EShMsgDefault);
     if(!result) {
-        GLOVE_PRINT_ERR("%s\n", mProgramMap[version]->getInfoLog());
+        GLOVE_PRINT_ERR("Program Link v%s : %s\n", to_string(version), mProgramMap[version]->getInfoLog());
         return false;
     }
 
-    return mProgramMap[version]->buildReflection();
+    return mProgramMap[version]->buildReflection(); 
 }
 
 bool
