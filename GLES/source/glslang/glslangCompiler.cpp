@@ -95,7 +95,10 @@ GlslangCompiler::CompileShader(const char* const* source, const TBuiltInResource
             SafeDelete(mShaderMap[version]);
             mShaderMap[version] = new glslang::TShader(language);
             mShaderMap[version]->setStrings(source, 1);
-            messages = (version == ESSL_VERSION_100) ? EShMsgRelaxedErrors : (EShMessages)(EShMsgVulkanRules | EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors);
+            messages = static_cast<EShMessages>(EShMsgOnlyPreprocessor | EShMsgRelaxedErrors);
+            if(version == ESSL_VERSION_400) {
+                messages = static_cast<EShMessages>(messages | EShMsgVulkanRules | EShMsgSpvRules);
+            }
             result = mShaderMap[version]->parse(resources, version, profile, false, false, messages);
         }
 
