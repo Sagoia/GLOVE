@@ -59,6 +59,11 @@ GlslangShaderCompiler::CleanUp()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if (mSlangProgLinker) {
+        delete mSlangProgLinker;
+        mSlangProgLinker = nullptr;
+    }
+
     if(mSlangVertCompiler) {
         delete mSlangVertCompiler;
         mSlangVertCompiler = nullptr;
@@ -67,11 +72,6 @@ GlslangShaderCompiler::CleanUp()
     if(mSlangFragCompiler) {
         delete mSlangFragCompiler;
         mSlangFragCompiler = nullptr;
-    }
-
-    if(mSlangProgLinker) {
-        delete mSlangProgLinker;
-        mSlangProgLinker = nullptr;
     }
 
     delete mShaderReflection;
@@ -83,6 +83,11 @@ GlslangShaderCompiler::CompileVertexShader(const char* const* source)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     assert(mSlangInitialized);
+
+    if (mSlangProgLinker) {
+        delete mSlangProgLinker;
+        mSlangProgLinker = nullptr;
+    }
 
     if(mSlangVertCompiler) {
         delete mSlangVertCompiler;
@@ -101,6 +106,11 @@ GlslangShaderCompiler::CompileFragmentShader(const char* const* source)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     assert(mSlangInitialized);
+
+    if (mSlangProgLinker) {
+        delete mSlangProgLinker;
+        mSlangProgLinker = nullptr;
+    }
 
     if(mSlangFragCompiler) {
         delete mSlangFragCompiler;

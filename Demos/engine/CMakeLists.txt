@@ -6,6 +6,7 @@ set(GRAPHICS_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager/tgaLoader.c
     ${CMAKE_CURRENT_SOURCE_DIR}/renderer/framebufferobject.c
     ${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendering.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer/shaderprogram.c
     ${CMAKE_CURRENT_SOURCE_DIR}/renderer/shading.c
     ${CMAKE_CURRENT_SOURCE_DIR}/renderer/viewport.c
     ${CMAKE_CURRENT_SOURCE_DIR}/scenegraph/camera.c
