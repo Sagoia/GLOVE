@@ -103,6 +103,11 @@ GlslangIoMapResolver::notifyInOut(EShLanguage stage, const char* name, const gls
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    // Do not store inactive varyings
+    if(!is_live) {
+        return;
+    }
+
     if(glslang::EvqVaryingIn == type.getQualifier().storage) {
         VaryingInfo varyingInfo;
 
