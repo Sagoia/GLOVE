@@ -52,9 +52,9 @@ Context::ColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alp
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFramebufferOperationsState()->UpdateColorMask(red, green, blue, alpha)) {
-        mPipeline->SetColorBlendAttachmentWriteMask(
-                    GLColorMaskToVkColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
+    StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+    if(stateFramebufferOperations->UpdateColorMask(red, green, blue, alpha)) {
+        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
     }
 }
 
@@ -63,8 +63,9 @@ Context::DepthMask(GLboolean flag)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFramebufferOperationsState()->UpdateDepthMask(flag)) {
-        mPipeline->SetDepthWriteEnable(GlBooleanToVkBool(mStateManager.GetFramebufferOperationsState()->GetDepthMask()));
+    StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+    if(stateFramebufferOperations->UpdateDepthMask(flag)) {
+        mPipeline->SetDepthWriteEnable(GlBooleanToVkBool(stateFramebufferOperations->GetDepthMask()));
     }
 }
 
@@ -73,9 +74,10 @@ Context::StencilMask(GLuint mask)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mStateManager.GetFramebufferOperationsState()->UpdateStencilMask(mask)) {
-        mPipeline->SetStencilBackWriteMask(mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack());
-        mPipeline->SetStencilFrontWriteMask(mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront());
+    StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+    if(stateFramebufferOperations->UpdateStencilMask(mask)) {
+        mPipeline->SetStencilBackWriteMask(stateFramebufferOperations->GetStencilMaskBack());
+        mPipeline->SetStencilFrontWriteMask(stateFramebufferOperations->GetStencilMaskFront());
     }
 }
 
@@ -89,11 +91,12 @@ Context::StencilMaskSeparate(GLenum face, GLuint mask)
         return;
     }
 
-    if((face == GL_FRONT || face == GL_FRONT_AND_BACK) && mStateManager.GetFramebufferOperationsState()->UpdateStencilMaskFront(mask)) {
-        mPipeline->SetStencilFrontWriteMask(mStateManager.GetFramebufferOperationsState()->GetStencilMaskFront());
+    StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
+    if((face == GL_FRONT || face == GL_FRONT_AND_BACK) && stateFramebufferOperations->UpdateStencilMaskFront(mask)) {
+        mPipeline->SetStencilFrontWriteMask(stateFramebufferOperations->GetStencilMaskFront());
     }
 
-    if((face == GL_BACK || face == GL_FRONT_AND_BACK) && mStateManager.GetFramebufferOperationsState()->UpdateStencilMaskBack(mask)) {
-        mPipeline->SetStencilBackWriteMask(mStateManager.GetFramebufferOperationsState()->GetStencilMaskBack());
+    if((face == GL_BACK || face == GL_FRONT_AND_BACK) && stateFramebufferOperations->UpdateStencilMaskBack(mask)) {
+        mPipeline->SetStencilBackWriteMask(stateFramebufferOperations->GetStencilMaskBack());
     }
 }

@@ -94,7 +94,7 @@ private:
     void                                                ResetVulkanVertexInput(void);
     void                                                UpdateAttributeInterface(void);
     void                                                BuildShaderResourceInterface(void);
-    void                                                GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings);
+    bool                                                UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings, bool updatedVertexAttrib);
     void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
 
     void                                                LineLoopConversion(void* data, uint32_t indexCount, size_t elementByteSize);
@@ -109,7 +109,7 @@ public:
     void                                                SetPipelineVertexInputStateInfo(void);
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
     void                                                PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
-    void                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs);
+    bool                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, bool updatedVertexAttrib);
     Shader                                             *IsShaderAttached(Shader *shader);
     void                                                AttachShader(Shader *shader);
     void                                                DetachShader(Shader *shader);

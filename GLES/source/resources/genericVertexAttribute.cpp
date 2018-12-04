@@ -30,7 +30,9 @@
 
 GenericVertexAttribute::GenericVertexAttribute()
 : mElements(4), mType(GL_FLOAT), mNormalized(false), mStride(0), mEnabled(false),
-  mOffset(0), mPtr(0), mVbo(nullptr), mInternalVBO(false), mCacheManager(nullptr)
+  mOffset(0), mPtr(0),
+  mInternalVbo(nullptr), mExternalVbo(nullptr),
+  mInternalVBOStatus(true), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -47,23 +49,98 @@ GenericVertexAttribute::~GenericVertexAttribute()
     Release();
 }
 
-void
-GenericVertexAttribute::MoveToCache(void)
+BufferObject*
+GenericVertexAttribute::UpdateVertexAttribute(uint32_t numVertices, bool& updatedVBO)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mVbo != nullptr && mInternalVBO) {
-        mCacheManager->CacheVBO(mVbo);
-        mVbo         = nullptr;
-        mInternalVBO = false;
+    updatedVBO = false;
+
+    // if disabled, use the generic vertex attribute value registered to that location
+    // Otherwise, generate the appropriate vertex data
+    if(IsEnabled()) {
+        // Calculate stride if not given from user based on the actual data type
+        GLsizei stride = GetStride() > 0 ? GetStride() : GetNumElements() * GlAttribTypeToElementSize(GetType());
+        SetStride(stride);
+
+        // Create a vbo located on client-space (e.g, glVertexAttribPointer) or
+        // attach a vbo lotated on server-space (e.g., glBindBuffer)
+        return IsInternalVBO() ? GenerateUserSpaceVBO(numVertices, updatedVBO) : AttachDeviceSpaceVBO(numVertices, updatedVBO);
+     } else {
+        return UpdateGenericValueVBO(updatedVBO);
     }
+}
+
+BufferObject*
+GenericVertexAttribute::GenerateUserSpaceVBO(uint32_t numVertices, bool& updatedVBO)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    BufferObject *vbo = new VertexBufferObject(mVkContext);
+    void *srcData = reinterpret_cast<void*>(GetPointer());
+    size_t byteSize = numVertices * GetStride();
+
+    // explicitly convert GL_FIXED to GL_FLOAT
+    if(GetType() != GL_FIXED) {
+        vbo->Allocate(byteSize, srcData);
+    }
+    else {
+        ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
+    }
+
+    SetOffset(0);
+    SetCurrentVbo(vbo);
+    SetInternalVBOStatus(true);
+    updatedVBO = true;
+    return vbo;
+}
+
+BufferObject*
+GenericVertexAttribute::AttachDeviceSpaceVBO(uint32_t numVertices, bool& updatedVBO)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    BufferObject *vbo = mExternalVbo;
+    updatedVBO = false;
+    // explicitly convert GL_FIXED to GL_FLOAT from a buffer object
+    // NOTE: this is an inefficient operation and, thus, not a recommended good practice
+    if(GetType() == GL_FIXED) {
+        size_t byteSize = vbo->GetSize();
+        uint8_t *srcData = new uint8_t[byteSize];
+        vbo->GetData(byteSize, 0, srcData);
+        vbo = new VertexBufferObject(mVkContext);
+        ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
+        delete[] srcData;
+        mCacheManager->CacheVBO(vbo);
+        updatedVBO = true;
+    }
+    return vbo;
+}
+
+BufferObject*
+GenericVertexAttribute::UpdateGenericValueVBO(bool& updatedVBO)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    // TODO: do not recreate the VBO
+    BufferObject *vbo = new VertexBufferObject(mVkContext);
+    GLfloat genericValue[4];
+    GetGenericValue(genericValue);
+    vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
+    SetNumElements(4);
+    SetType(GL_FLOAT);
+    SetStride(0);
+    SetCurrentVbo(vbo);
+    SetInternalVBOStatus(true);
+    updatedVBO = true;
+    return vbo;
 }
 
 void
 GenericVertexAttribute::ConvertFixedBufferToFloat(BufferObject* vbo, size_t byteSize,
-                                                  const void *srcData, size_t numVertices) {
-
-    FUN_ENTRY(GL_LOG_TRACE);
+                                                  void *srcData, size_t numVertices)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     const uint8_t* srcBuffer = static_cast<const uint8_t*>(srcData);
     uint8_t* dstBuffer = new uint8_t[byteSize];
@@ -72,10 +149,13 @@ GenericVertexAttribute::ConvertFixedBufferToFloat(BufferObject* vbo, size_t byte
     // other data as well. For efficiency it can be commented out.
     memcpy(dstBuffer, srcBuffer, byteSize);
 
-    size_t numElements = static_cast<size_t>(GetNumElements());
-    size_t stride = static_cast<size_t>(GetStride());
+    // move the buffers by the corresponding offset (if any)
+    const size_t offset = GetOffset();
+    const size_t numElements = static_cast<size_t>(GetNumElements());
+    const size_t stride = static_cast<size_t>(GetStride());
+
     for(size_t ver = 0; ver < numVertices; ++ver) {
-        size_t vertexIndex = ver * stride;
+        size_t vertexIndex = offset + ver * stride;
         for(size_t el = 0; el < numElements; ++el) {
             size_t srcIndex = vertexIndex + el * sizeof(GLfixed);
             size_t dstIndex = vertexIndex + el * sizeof(float);
@@ -97,25 +177,29 @@ GenericVertexAttribute::Release(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mVbo != nullptr && mInternalVBO) {
-        delete mVbo;
-        mVbo         = nullptr;
-        mInternalVBO = false;
+   if(mInternalVbo != nullptr) {
+       delete mInternalVbo;
+       mInternalVbo        = nullptr;
     }
 }
 
 void
-GenericVertexAttribute::SetVbo(BufferObject *vbo)
+GenericVertexAttribute::SetCurrentVbo(BufferObject *vbo)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    MoveToCache();
+    if(mInternalVbo != nullptr) {
+        mCacheManager->CacheVBO(mInternalVbo);
+    }
 
-    mVbo = vbo;
+    mInternalVbo = mInternalVBOStatus ? vbo : nullptr;
+    mExternalVbo = mInternalVBOStatus ? nullptr : vbo;
 }
 
 void
-GenericVertexAttribute::Set(GLint nElements, GLenum type, GLboolean normalized, GLsizei stride, const void *ptr, BufferObject *vbo)
+GenericVertexAttribute::Set(GLint nElements, GLenum type, GLboolean normalized,
+                            GLsizei stride, const void *ptr, BufferObject *vbo,
+                            bool internalVBO)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -123,7 +207,8 @@ GenericVertexAttribute::Set(GLint nElements, GLenum type, GLboolean normalized, 
     SetStride(stride);
     SetNumElements(nElements);
     SetNormalized(normalized);
-    SetPointer(reinterpret_cast<uintptr_t>(ptr));
-    SetOffset(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(ptr)));
-    SetVbo(vbo);
+    SetPointer(internalVBO ? reinterpret_cast<uintptr_t>(ptr) : 0);
+    SetOffset(internalVBO ? 0 : reinterpret_cast<uintptr_t>(ptr));
+    SetInternalVBOStatus(internalVBO);
+    SetCurrentVbo(vbo);
 }

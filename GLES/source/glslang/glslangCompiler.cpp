@@ -50,16 +50,26 @@ GlslangCompiler::CleanUpShader(glslang::TShader* shader)
 }
 
 bool
-GlslangCompiler::IsDefinedInMacroError(const char* errors)
+GlslangCompiler::IsManageableError(const char* errors)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    size_t pos = string(errors).find("cannot use in preprocessor expression when expanded from macros");
-    if(pos == string::npos) {
-        return false;
-    }
+    size_t pragmaError = string(errors).find("\"on\" or \"off\" expected after '(' for 'debug' pragma");
+    size_t definedError = string(errors).find("cannot use in preprocessor expression when expanded from macros");
 
-    return true;
+    return pragmaError != string::npos || definedError != string::npos;
+}
+
+bool
+GlslangCompiler::IsNotFullySupported(const char* source, const char* errors)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    size_t nonConstError = string(errors).find("'non-constant initializer' : not supported with this profile: es");
+    size_t matrixCompMult = string(source).find("matrixCompMult(");
+    size_t mod = string(source).find("mod(");
+
+    return nonConstError != string::npos && (matrixCompMult != string::npos || mod != string::npos);
 }
 
 bool
@@ -74,13 +84,13 @@ GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* reso
 
     mSlangShader->setStrings(source, 1);
 
-    bool result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgOnlyPreprocessor));
+    bool result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgDefault));
     if(!result) {
-        if(IsDefinedInMacroError(mSlangShader->getInfoLog())) {
+        if(IsManageableError(mSlangShader->getInfoLog()) || IsNotFullySupported(*source, mSlangShader->getInfoLog())) {
             CleanUpShader(mSlangShader);
             mSlangShader = new glslang::TShader(language);
             mSlangShader->setStrings(source, 1);
-            result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgRelaxedErrors));
+            result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgOnlyPreprocessor | EShMsgRelaxedErrors));
         }
         GLOVE_PRINT_ERR("shader 100:\n%s\n", mSlangShader->getInfoLog());
     }
@@ -101,6 +111,12 @@ GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* r
     mSlangShader400->setStrings(source, 1);
     bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules));
     if(!result) {
+        if(IsManageableError(mSlangShader400->getInfoLog())) {
+            CleanUpShader(mSlangShader400);
+            mSlangShader400 = new glslang::TShader(language);
+            mSlangShader400->setStrings(source, 1);
+            result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors));
+        }
         GLOVE_PRINT_ERR("shader 400:\n%s\n", mSlangShader400->getInfoLog());
     }
 

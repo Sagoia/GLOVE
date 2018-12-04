@@ -106,6 +106,16 @@ Context::ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearS
 void
 Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
 {
+    // perform lazy initialization once
+    if(!mScreenSpacePass->Initialize()) {
+        return;
+    }
+
+    // validation check in case this functionality is not available
+    if(!mScreenSpacePass->Valid()) {
+        return;
+    }
+
     if(mWriteFBO->IsInClearState()) {
         Finish();
     }
@@ -122,6 +132,7 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     }
 
     mStateManager.GetFramebufferOperationsState()->GetClearColor(clearColorValue);
+
     mScreenSpacePass->UpdateUniformBufferColor(clearColorValue[0], clearColorValue[1], clearColorValue[2], clearColorValue[3]);
 
     vulkanAPI::Pipeline* pipeline = mScreenSpacePass->GetPipeline();
@@ -167,32 +178,24 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
 void
 Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
 {
-    if(pipeline->GetUpdateViewportState()) {
-        pipeline->ComputeViewport(mWriteFBO->GetWidth(),
-                                   mWriteFBO->GetHeight(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectX(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectY(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
-                                   mStateManager.GetViewportTransformationState()->GetViewportRectHeight(),
-                                   mStateManager.GetViewportTransformationState()->GetMinDepthRange(),
-                                   mStateManager.GetViewportTransformationState()->GetMaxDepthRange());
+    StateFragmentOperations* stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+    StateViewportTransformation* stateViewportTransformation = mStateManager.GetViewportTransformationState();
 
-        if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
-            pipeline->ComputeScissor(mWriteFBO->GetWidth(),
-                                      mWriteFBO->GetHeight(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectX(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectY(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectWidth(),
-                                      mStateManager.GetFragmentOperationsState()->GetScissorRectHeight());
-        } else {
-            pipeline->ComputeScissor(mWriteFBO->GetWidth(),
-                                      mWriteFBO->GetHeight(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectX(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectY(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectWidth(),
-                                      mStateManager.GetViewportTransformationState()->GetViewportRectHeight());
-        }
-        pipeline->SetUpdateViewportState(false);
+    if(pipeline->GetUpdateViewportState()) {
+        Rect viewportRect = stateViewportTransformation->GetViewportRect();
+
+        pipeline->ComputeViewport(mWriteFBO->GetWidth(), mWriteFBO->GetHeight(),
+                                  viewportRect.x, viewportRect.y,
+                                  viewportRect.width, viewportRect.height,
+                                  stateViewportTransformation->GetMinDepthRange(), stateViewportTransformation->GetMaxDepthRange());
+
+        Rect scissorRect = stateFragmentOperations->GetScissorTestEnabled() ?
+                    stateFragmentOperations->GetScissorRect() : viewportRect;
+
+        pipeline->ComputeScissor(mWriteFBO->GetWidth(), mWriteFBO->GetHeight(),
+                                 scissorRect.x, scissorRect.y,
+                                 scissorRect.width, scissorRect.height);
+       pipeline->SetUpdateViewportState(false);
     }
 }
 
@@ -288,8 +291,9 @@ Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
     /// A glVertexAttrib related function has been called. Check to see if mVkPipelineVertexInput needs to be updated.
     /// If this is true then VkPipeline needs to be updated too.
     /// Otherwise only the buffer that will be bound with vkCmdBindVertexBuffers need to be updated
-    if(mPipeline->GetUpdateVertexAttribVBOs() || firstVertex) {
-        mStateManager.GetActiveShaderProgram()->PrepareVertexAttribBufferObjects(vertCount, firstVertex, mResourceManager->GetGenericVertexAttributes());
+    if(mStateManager.GetActiveShaderProgram()->PrepareVertexAttribBufferObjects(vertCount, firstVertex,
+                                                                                mResourceManager->GetGenericVertexAttributes(),
+                                                                                mPipeline->GetUpdateVertexAttribVBOs())) {
         mPipeline->SetUpdatePipeline(true);
         mPipeline->SetUpdateVertexAttribVBOs(false);
     }
@@ -472,23 +476,25 @@ Context::SetClearRect(void)
     int w = mWriteFBO->GetWidth();
     int h = mWriteFBO->GetHeight();
 
-    if(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()) {
-        x = mStateManager.GetFragmentOperationsState()->GetScissorRectX();
-        y = mWriteFBO->GetHeight() - mStateManager.GetFragmentOperationsState()->GetScissorRectY() - mStateManager.GetFragmentOperationsState()->GetScissorRectHeight();
+    StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
+
+    if(stateFragmentOperations->GetScissorTestEnabled()) {
+        x = stateFragmentOperations->GetScissorRectX();
+        y = mWriteFBO->GetHeight() - stateFragmentOperations->GetScissorRectY() - stateFragmentOperations->GetScissorRectHeight();
 
         if(x < mWriteFBO->GetX()) {
-            w = mStateManager.GetFragmentOperationsState()->GetScissorRectWidth() + x;
+            w = stateFragmentOperations->GetScissorRectWidth() + x;
         } else {
-            w = mStateManager.GetFragmentOperationsState()->GetScissorRectWidth();
+            w = stateFragmentOperations->GetScissorRectWidth();
             if(w > mWriteFBO->GetWidth() - x) {
                 w = mWriteFBO->GetWidth() - x;
             }
         }
 
         if(y < mWriteFBO->GetY()) {
-            h = mStateManager.GetFragmentOperationsState()->GetScissorRectHeight() + y;
+            h = stateFragmentOperations->GetScissorRectHeight() + y;
         } else {
-            h = mStateManager.GetFragmentOperationsState()->GetScissorRectHeight();
+            h = stateFragmentOperations->GetScissorRectHeight();
             if(h > mWriteFBO->GetHeight() - y) {
                 h = mWriteFBO->GetHeight() - y;
             }
