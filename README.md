@@ -91,3 +91,7 @@ See details in [Demos README](Demos/README_demos.md).
 # Benchmarking
 
 GLOVE is aiming to take advantage of Vulkan in terms of performance. Our preliminary results are very promising and further major performance upgrades are also in progress. Instructions to use some available benchmarks for testing can be found in the [Benchmarking README](Benchmarking/README_benchmarking.md).
+
+# Credits
+
+Full Credit list at [Credits page](CREDITS.md).

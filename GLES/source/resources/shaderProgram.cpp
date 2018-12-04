@@ -604,30 +604,27 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
     }
 }
 
-void
-ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs)
+bool
+ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex,
+                                                std::vector<GenericVertexAttribute>& genericVertAttribs,
+                                                bool updatedVertexAttrib)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(firstVertex) {
-        for(auto& gva : genericVertAttribs) {
-            gva.Release();
-        }
-    }
 
     // store the location-binding associations for faster lookup
     std::map<uint32_t, uint32_t> vboLocationBindings;
 
-    // reset active buffers
-    memset(mActiveVertexVkBuffers, VK_NULL_HANDLE, sizeof(VkBuffer) * mActiveVertexVkBuffersCount);
-    mActiveVertexVkBuffersCount = 0;
-
-    GenerateVertexAttribProperties(vertCount, firstVertex, genericVertAttribs, vboLocationBindings);
-    GenerateVertexInputProperties(genericVertAttribs, vboLocationBindings);
+    if(UpdateVertexAttribProperties(vertCount, firstVertex, genericVertAttribs, vboLocationBindings, updatedVertexAttrib)) {
+        GenerateVertexInputProperties(genericVertAttribs, vboLocationBindings);
+        return true;
+    }
+    return false;
 }
 
-void
-ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings)
+bool
+ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex,
+                                              std::vector<GenericVertexAttribute>& genericVertAttribs,
+                                              std::map<uint32_t, uint32_t>& vboLocationBindings, bool updatedVertexAttrib)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -654,64 +651,12 @@ ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVe
             }
 
             GenericVertexAttribute& gva = genericVertAttribs[location];
-            VkBuffer bo       = VK_NULL_HANDLE;
-            BufferObject *vbo = nullptr;
-
-            if(gva.GetEnabled()) {
-                // Calculate stride if not given from user based on the actual data type
-                if(gva.GetStride() == 0) {
-                    GLsizei stride = gva.GetNumElements() * GlAttribTypeToElementSize(gva.GetType());
-                    gva.SetStride(stride);
-                }
-                // Create new vbo if user passed pointer to data
-                // This happens when vertex data are located in user space, instead of stored in a Vertex Buffer Objects
-                if(gva.GetVbo() == nullptr || gva.GetVbo()->GetVkBuffer() == VK_NULL_HANDLE) {
-                    vbo = new VertexBufferObject(mVkContext);
-                    void *srcData = reinterpret_cast<void*>(gva.GetPointer());
-                    size_t byteSize = (firstVertex + vertCount) * gva.GetStride();
-                    size_t numVertices = firstVertex + vertCount;
-
-                    // explicitly convert GL_FIXED to GL_FLOAT
-                    if(gva.GetType() != GL_FIXED) {
-                        vbo->Allocate(byteSize, srcData);
-                    }
-                    else {
-                        gva.ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
-                    }
-
-                    gva.SetOffset(0);
-                    gva.SetVbo(vbo);
-                    gva.SetInternalVBOStatus(true);
-                    bo = vbo->GetVkBuffer();
-                } else {
-                    vbo = gva.GetVbo();
-                    // explicitly convert GL_FIXED to GL_FLOAT from a buffer object
-                    // NOTE: this is an inefficient operation and, thus, not a recommended good practice
-                    if(gva.GetType() == GL_FIXED) {
-                        size_t numVertices = firstVertex + vertCount;
-                        size_t byteSize = vbo->GetSize();
-                        uint8_t *srcData = new uint8_t[byteSize];
-                        vbo->GetData(byteSize, 0, srcData);
-                        vbo = new VertexBufferObject(mVkContext);
-                        gva.ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
-                        delete[] srcData;
-                        mCacheManager->CacheVBO(vbo);
-                    }
-                    bo = vbo->GetVkBuffer();
-                }
-            } else {
-                // Use the generic vertex attribute value registered to that location
-                vbo = new VertexBufferObject(mVkContext);
-                GLfloat genericValue[4];
-                gva.GetGenericValue(genericValue);
-                vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
-                gva.SetNumElements(4);
-                gva.SetType(GL_FLOAT);
-                gva.SetStride(0);
-                gva.SetVbo(vbo);
-                gva.SetInternalVBOStatus(true);
-                bo = vbo->GetVkBuffer();
+            bool updatedVBO   = false;
+            BufferObject *vbo = gva.UpdateVertexAttribute(static_cast<uint32_t>(firstVertex + vertCount), updatedVBO);
+            if(updatedVBO) {
+                updatedVertexAttrib = true;
             }
+            VkBuffer bo       = vbo->GetVkBuffer();
 
             // If the primitives are rendered with GL_LINE_LOOP, which is not
             // supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
@@ -731,6 +676,7 @@ ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVe
                 delete[] dataNew;
                 bo          = vboLineLoopUpdated->GetVkBuffer();
                 mCacheManager->CacheVBO(vboLineLoopUpdated);
+                updatedVertexAttrib = true;
             }
 
             // store each location
@@ -740,6 +686,13 @@ ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVe
             locationUsed.push_back(location);
         }
     }
+
+    if(!updatedVertexAttrib) {
+        return false;
+    }
+
+    memset(mActiveVertexVkBuffers, VK_NULL_HANDLE, sizeof(VkBuffer) * mActiveVertexVkBuffersCount);
+    mActiveVertexVkBuffersCount = 0;
 
     // generate unique bindings for each VKbuffer/stride pair
     uint32_t current_binding = 0;
@@ -752,6 +705,7 @@ ShaderProgram::GenerateVertexAttribProperties(size_t vertCount, uint32_t firstVe
         ++current_binding;
     }
     mActiveVertexVkBuffersCount = current_binding;
+    return true;
 }
 
 void

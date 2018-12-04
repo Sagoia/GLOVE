@@ -70,10 +70,7 @@ Context::Context()
 
     mScreenSpacePass = new ScreenSpacePass(this, mVkContext, mCommandBufferManager);
     mScreenSpacePass->SetCacheManager(mCacheManager);
-    if(mScreenSpacePass->Initialize()) {
-        mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
-        mScreenSpacePass->CreateDefaultPipelineStates();
-    }
+    mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
 
 }
 

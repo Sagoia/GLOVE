@@ -28,8 +28,7 @@
 
 class Shader {
 private:
-    const
-    vulkanAPI::vkContext_t *            mVkContext;
+    const vulkanAPI::vkContext_t *      mVkContext;
     VkShaderModule                      mVkShaderModule;
     ShaderCompiler *                    mShaderCompiler;
 

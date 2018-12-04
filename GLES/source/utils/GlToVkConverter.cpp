@@ -344,10 +344,12 @@ VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
         case GL_UNSIGNED_BYTE: {
             switch(format) {
                 case GL_RGB:                        return VK_FORMAT_R8G8B8_UNORM;
+                case GL_LUMINANCE:
+                case GL_ALPHA:
+                case GL_LUMINANCE_ALPHA:
                 case GL_RGBA:                       return VK_FORMAT_R8G8B8A8_UNORM;
                 default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
             }
-            break;
         }
         case GL_UNSIGNED_SHORT_5_6_5: {
             assert( format == GL_RGB );

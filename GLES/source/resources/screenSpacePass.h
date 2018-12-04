@@ -87,8 +87,8 @@ struct ShaderData {
 
     // buffers
 
-    bool                                        mInitializedData;
-    bool                                        mInitializedPipeline;
+    bool                                        mInitialized;
+    bool                                        mValid;
 
     bool                                        CreateShaderData();
     bool                                        CreateMeshData();
@@ -125,7 +125,8 @@ public:
     bool                                        UpdateUniformBufferColor(float r, float g, float b, float a);
 
 // Get Functions
-    inline vulkanAPI::Pipeline*                 GetPipeline()                     { return mPipeline; }
+    inline bool                                 Valid()                           {  FUN_ENTRY(GL_LOG_TRACE); return mValid; }
+    inline vulkanAPI::Pipeline*                 GetPipeline()                     {  FUN_ENTRY(GL_LOG_TRACE); return mPipeline; }
 
 // Set Functions
     void                                        SetCacheManager(CacheManager* cacheManager);

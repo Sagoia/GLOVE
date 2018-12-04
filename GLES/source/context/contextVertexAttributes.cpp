@@ -36,13 +36,13 @@ Context::GetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
     const GenericVertexAttribute* gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
 
     switch(pname) {
-    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(gVertexAttrib->GetEnabled());     break;
+    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(gVertexAttrib->IsEnabled());     break;
     case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLfloat>(gVertexAttrib->GetNumElements()); break;
     case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLfloat>(gVertexAttrib->GetStride());      break;
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLfloat>(gVertexAttrib->GetType());        break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLfloat>(gVertexAttrib->GetNormalized());  break;
     case GL_CURRENT_VERTEX_ATTRIB:              gVertexAttrib->GetGenericValue(params);                          break;
-    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: { const BufferObject *vbo = gVertexAttrib->GetVbo();
+    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: { const BufferObject *vbo = gVertexAttrib->GetExternalVbo();
                                                   *params = vbo ? static_cast<GLfloat>(mResourceManager->GetBufferID(vbo)) : 0.0f;
                                                   break;
                                                 }
@@ -63,13 +63,13 @@ Context::GetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
     const GenericVertexAttribute* gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
 
     switch(pname) {
-    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(gVertexAttrib->GetEnabled());          break;
+    case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(gVertexAttrib->IsEnabled());          break;
     case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = static_cast<GLint>(gVertexAttrib->GetNumElements());      break;
     case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = static_cast<GLint>(gVertexAttrib->GetStride());           break;
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = static_cast<GLint>(gVertexAttrib->GetType());             break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = static_cast<GLint>(gVertexAttrib->GetNormalized());       break;
     case GL_CURRENT_VERTEX_ATTRIB:              gVertexAttrib->GetGenericValue(params); break;
-    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: { const BufferObject *vbo = gVertexAttrib->GetVbo();
+    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: { const BufferObject *vbo = gVertexAttrib->GetExternalVbo();
                                                   *params = vbo ? static_cast<GLint>(mResourceManager->GetBufferID(vbo)) : 0;
                                                   break;
                                                 }
@@ -226,7 +226,7 @@ Context::EnableVertexAttribArray(GLuint index)
 
     GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
 
-    if(!gVertexAttrib->GetEnabled()) {
+    if(!gVertexAttrib->IsEnabled()) {
         gVertexAttrib->SetEnabled(true);
         mPipeline->SetUpdateVertexAttribVBOs(true);
     }
@@ -244,7 +244,7 @@ Context::DisableVertexAttribArray(GLuint index)
 
     GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
 
-    if(gVertexAttrib->GetEnabled()) {
+    if(gVertexAttrib->IsEnabled()) {
         gVertexAttrib->SetEnabled(false);
         mPipeline->SetUpdateVertexAttribVBOs(true);
     }
@@ -265,6 +265,8 @@ Context::VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean no
         return;
     }
 
-    mResourceManager->GetGenericVertexAttribute(index)->Set(size, type, normalized, stride, ptr, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER));
+    BufferObject* attachedVBO = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER);
+    bool requiresInternalVBO = attachedVBO == nullptr;
+    mResourceManager->GetGenericVertexAttribute(index)->Set(size, type, normalized, stride, ptr, attachedVBO, requiresInternalVBO);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }

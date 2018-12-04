@@ -140,6 +140,7 @@ public:
       void                    GetScissorRect(GLint *params)             const;
       void                    GetScissorRect(GLfloat *params)           const;
       inline GLboolean        GetScissorTestEnabled(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestEnabled; }
+      inline Rect             GetScissorRect(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle; }
       inline int              GetScissorRectX(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle.x; }
       inline int              GetScissorRectY(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle.y; }
       inline int              GetScissorRectWidth(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mScissorTestRectangle.width; }

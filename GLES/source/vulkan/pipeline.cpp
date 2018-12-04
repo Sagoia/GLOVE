@@ -103,18 +103,16 @@ Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewpo
 
     viewportW = std::min(viewportW, fboWidth);
     viewportH = std::min(viewportH, fboHeight);
-    int viewportYinv = 0, viewportHinv = 0;
     if(mVkContext->mIsMaintenanceExtSupported) {
-        viewportYinv = fboHeight - viewportY;
-        viewportHinv = -viewportH;
-    } else {
-        viewportYinv = viewportY;
-        viewportHinv = viewportH;
+        viewportY = fboHeight - viewportY;
+        viewportH = -viewportH;
     }
 
     mVkViewport = {
-                   (float)viewportX, (float)viewportYinv,
-                   (float)viewportW, (float)viewportHinv,
+        static_cast<float>(viewportX),
+        static_cast<float>(viewportY),
+        static_cast<float>(viewportW),
+        static_cast<float>(viewportH),
                    minDepth , maxDepth};
 }
 
@@ -129,8 +127,8 @@ Pipeline::ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY
     int scissorYinv = fboHeight - scissorY - scissorH;
 
     mVkScissorRect  = {
-                        {scissorX, scissorYinv},
-                        {(uint32_t)scissorW, (uint32_t)scissorH}
+                        { scissorX, scissorYinv },
+                        { static_cast<uint32_t>(scissorW), static_cast<uint32_t>(scissorH) }
                       };
 }
 

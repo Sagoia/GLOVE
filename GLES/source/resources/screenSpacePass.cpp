@@ -12,7 +12,7 @@
  */
 
 /**
- *  @file       screenSpacePass.h
+ *  @file       screenSpacePass.cpp
  *  @author     Think Silicon
  *  @date       26/10/2018
  *  @version    1.0
@@ -42,7 +42,7 @@ ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_
     mVertexVkBuffer(VK_NULL_HANDLE), mVertexVkBufferOffset(0),
     mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)),
     mPipeline(new vulkanAPI::Pipeline(vkContext)),
-    mInitializedData(false), mInitializedPipeline(false)
+    mInitialized(false), mValid(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -251,6 +251,12 @@ ScreenSpacePass::Initialize()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if(mInitialized) {
+        return true;
+    }
+
+    mInitialized = true;
+
     if(!CreateShaderData()) {
         return false;
     }
@@ -259,18 +265,18 @@ ScreenSpacePass::Initialize()
         return false;
     }
 
-    mInitializedData = true;
-    return mInitializedData;
+    if(!CreateDefaultPipelineStates()) {
+       return false;
+    }
+
+    mValid = true;
+    return mValid;
 }
 
 bool
 ScreenSpacePass::CreateDefaultPipelineStates()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(!mInitializedData) {
-        return false;
-    }
 
     // the format of the vertex data that will be passed to the vertex shader
     mVertexInputInfo = {};
@@ -288,8 +294,7 @@ ScreenSpacePass::CreateDefaultPipelineStates()
 
     mPipeline->SetDepthTestEnable(false);
 
-    mInitializedPipeline = true;
-    return mInitializedPipeline;
+    return true;
 }
 
 bool
@@ -318,8 +323,9 @@ ScreenSpacePass::UpdateUniformBufferColor(float r, float g, float b, float a)
     UniformBufferObject_ScreenSpace ubo = { r,g,b,a };
     GLint loc = mShaderData.shaderProgram->GetUniformLocation("clearColor");
     if(loc >= 0) {
-        mShaderData.shaderProgram->SetUniformData(static_cast<uint32_t>(loc), sizeof(UniformBufferObject_ScreenSpace), static_cast<void *>(&ubo.color));
-
+        mShaderData.shaderProgram->SetUniformData(static_cast<uint32_t>(loc),
+                                                  sizeof(UniformBufferObject_ScreenSpace),
+                                                  static_cast<void *>(&ubo.color));
     }
 
     return true;
