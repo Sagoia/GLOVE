@@ -123,7 +123,7 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     }
 
     if(GLOVE_DUMP_ORIGINAL_SHADER_SOURCE) {
-        cout << "\n\nSOURCE v"<< mShaderVersion << ":\n" << mSource << "\n\n";
+        GlslPrintShaderSource(mShaderType, mShaderVersion, mSource);
     }
 }
 

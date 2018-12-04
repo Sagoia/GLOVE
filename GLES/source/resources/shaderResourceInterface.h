@@ -213,8 +213,6 @@ public:
     void UpdateAttributeInterface(void);
     void CreateInterface(void);
     inline void SetReflection(ShaderReflection* reflection)                           { FUN_ENTRY(GL_LOG_TRACE); mShaderReflection = reflection; };
-
-    void DumpGloveShaderVertexInputInterface(void);
 };
 
 #endif // __SHADERRESOURCEINTERFACE_H__

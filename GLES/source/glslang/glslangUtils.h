@@ -26,6 +26,8 @@
 
 #include <map>
 #include <string>
+#include "glslang/Public/ShaderLang.h"
+#include "glslang/Include/Types.h"
 #include "utils/glUtils.h"
 #include "utils/glsl_types.h"
 
@@ -128,6 +130,38 @@ struct uniform_t {
 };
 typedef struct uniform_t            uniform_t;
 
-template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
+/// Delete Functions
+template<typename T>  inline void SafeDelete(T*& ptr)                         { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
+
+/// Get Functions
+inline bool GetAttributeHasLocation(const glslang::TProgram* prog, int index) { FUN_ENTRY(GL_LOG_TRACE); 
+                                                                                const  glslang::TType *attributeType = prog->getAttributeTType(index);
+                                                                                return attributeType->getQualifier().hasLocation(); }
+
+inline int  GetAttributeLocation(const glslang::TProgram* prog, int index)    { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                const  glslang::TType *attributeType = prog->getAttributeTType(index);
+                                                                                return attributeType->getQualifier().hasLocation() ? attributeType->getQualifier().layoutLocation : -1; }
+
+inline bool GetUniformHasLocation(const glslang::TProgram* prog, int index)   { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                return uniformType->getQualifier().hasLocation(); }
+
+inline int  GetUniformLocation(const glslang::TProgram* prog, int index)       { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                 const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                 return uniformType->getQualifier().hasLocation() ? uniformType->getQualifier().layoutLocation : -1; }
+
+inline bool GetUniformHasBinding(const glslang::TProgram* prog, int index)     { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                 const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                 return uniformType->getQualifier().hasBinding(); }
+
+inline int  GetUniformBinding(const glslang::TProgram* prog, int index)        { FUN_ENTRY(GL_LOG_TRACE); return prog->getUniformBinding(index); }
+
+inline bool GetUniformHasSet(const glslang::TProgram* prog, int index)         { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                 const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                 return uniformType->getQualifier().hasSet(); }
+
+inline int  GetUniformSet(const glslang::TProgram* prog, int index)            { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                 const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                 return uniformType->getQualifier().hasSet() ? uniformType->getQualifier().layoutSet : -1; }
 
 #endif // __GLSLANG_UTILS_H__

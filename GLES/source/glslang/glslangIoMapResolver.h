@@ -25,8 +25,7 @@
 #define __GLSLANGIOMAPRESOLVER_H__
 
 #include "utils/glLogger.h"
-#include "glslang/Public/ShaderLang.h"
-#include "glslang/Include/Types.h"
+#include "glslangUtils.h"
 
 class GlslangIoMapResolver : public glslang::TIoMapResolver
 {

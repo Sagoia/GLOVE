@@ -476,22 +476,3 @@ ShaderResourceInterface::SetActiveUniformMaxLength(void)
         }
     }
 }
-
-void
-ShaderResourceInterface::DumpGloveShaderVertexInputInterface(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    printf("Shader's vertex input interface:\n");
-
-    for(const auto &vi : mAttributeInterface) {
-        printf("%s: \n", vi.name.c_str());
-#ifdef NDEBUG
-        printf("  location: %d glsl type: %s\n", vi.location, GlAttribTypeToString(vi.glType));
-#else
-        printf("  location: %d glsl type: 0x%04x\n", vi.location, vi.glType);
-#endif // NDEBUG
-    }
-
-    printf("\n\n");
-}

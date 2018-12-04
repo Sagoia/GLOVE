@@ -46,7 +46,7 @@ public:
     virtual uint32_t            DeserializeReflection(const void* binary) = 0;
     
 /// Print Functions
-    virtual void                DumpUniforms(void) = 0;
+    virtual void                PrintUniforms(void) = 0;
 
 /// Get Functions
     virtual ShaderReflection*   GetShaderReflection(void) = 0;

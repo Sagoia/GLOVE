@@ -62,16 +62,19 @@ GlslangIoMapResolver::PrintVaryingInfo(void) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    printf("\nGL_ACTIVE_ATTRIBUTES varyings IN: %d\n", GetVaryingInNum());
+    printf("\n[ACTIVE VARYINGS IN] [%d]\n\n", GetVaryingInNum());
     for(uint32_t i = 0; i < GetVaryingInNum(); ++i) {
-        printf("Name: %s - Type: (%s)\n", GetVaryingInName(i), GetVaryingInType(i));
-        printf("Location: %d - Value: %d\n", GetVaryingInHasLocation(i), GetVaryingInLocation(i));
+        printf("%s (%s)\n", GetVaryingInName(i), GetVaryingInType(i));
+        printf("  hasLocation: %d = %d\n", GetVaryingInHasLocation(i), GetVaryingInLocation(i));
+        printf("  array  size: %d\n"     , GetVaryingInVectorSize(i));
+        printf("  matrix size: %d\n"     , GetVaryingInMatrixCols(i));
     }
 
-    printf("\nACTIVE VARYINGS varyings OUT: %d\n", GetVaryingOutNum());
+    printf("\n[ACTIVE VARYINGS OUT] [%d]\n\n", GetVaryingOutNum());
     for(uint32_t i = 0; i < GetVaryingOutNum(); ++i) {
-        printf("Name: %s - Type: (%s)\n", GetVaryingOutName(i), GetVaryingOutType(i));
-        printf("Location: %d - Value: %d\n", GetVaryingOutHasLocation(i), GetVaryingOutLocation(i));
+        printf("%s (%s)\n", GetVaryingOutName(i), GetVaryingOutType(i));
+        printf("  hasLocation: %d = %d\n", GetVaryingOutHasLocation(i), GetVaryingOutLocation(i));
+        printf("  array  size: %d\n"     , GetVaryingOutVectorSize(i));
     }
 }
 

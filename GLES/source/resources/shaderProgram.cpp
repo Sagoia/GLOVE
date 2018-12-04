@@ -409,7 +409,7 @@ ShaderProgram::ValidateProgram(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    bool validated;
+    
     const Shader *vs = mShaders[0];
     const Shader *fs = mShaders[1];
 
@@ -421,9 +421,8 @@ ShaderProgram::ValidateProgram(void)
     if(GLOVE_DUMP_INPUT_SHADER_REFLECTION) {
         mShaderCompiler->EnablePrintReflection(ESSL_VERSION_100);
     }
-    validated = mShaderCompiler->ValidateProgram(ESSL_VERSION_100);
-
-    return validated;
+    
+    return mShaderCompiler->ValidateProgram(ESSL_VERSION_100);
 }
 
 bool
@@ -480,9 +479,9 @@ ShaderProgram::LinkProgram()
     }
 
     if(GLOVE_DUMP_VULKAN_SHADER_REFLECTION) {
-        printf("Glove's vulkan shader reflection:\n");
-        mShaderCompiler->DumpUniforms();
-        mShaderResourceInterface.DumpGloveShaderVertexInputInterface();
+        printf("-------- SHADER PROGRAM REFLECTION GLOVE --------\n");
+        mShaderCompiler->PrintUniforms();
+        printf("-------------------------------------------------\n");
     }
 
     return mLinked;

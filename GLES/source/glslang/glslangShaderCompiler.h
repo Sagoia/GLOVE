@@ -88,8 +88,8 @@ private:
 /// Convert Functions
     const char             *ConvertShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted);
     
-    void                    PrintReadableSPV(uintptr_t program_ptr);
-    void                    SaveBinaryToFiles(uintptr_t program_ptr);
+    void                    PrintReadableSPV(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
+    void                    SaveBinaryToFiles(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
     void                    SaveShaderSourceToFile(uintptr_t program_ptr, bool processed, const char* source, shader_compiler_type_t type) const;
 
     void                    CompileAttributes(const glslang::TProgram* prog);
@@ -99,36 +99,6 @@ private:
     void                    BuildUniformReflection(void);
     void                    PrintReflection(const glslang::TProgram* prog, ESSL_VERSION version) const;    
 
-/// Get Functions
-    bool GetAttributeHasLocation(const glslang::TProgram* prog, int index)   const { FUN_ENTRY(GL_LOG_TRACE); 
-                                                                                     const  glslang::TType *attributeType = prog->getAttributeTType(index);
-                                                                                     return attributeType->getQualifier().hasLocation(); }
-
-    int  GetAttributeLocation(const glslang::TProgram* prog, int index)      const { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                     const  glslang::TType *attributeType = prog->getAttributeTType(index);
-                                                                                     return attributeType->getQualifier().hasLocation() ? attributeType->getQualifier().layoutLocation : -1; }
-
-    bool GetUniformHasLocation(const glslang::TProgram* prog, int index)     const { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
-                                                                                     return uniformType->getQualifier().hasLocation(); }
-
-    int  GetUniformLocation(const glslang::TProgram* prog, int index)        const { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
-                                                                                     return uniformType->getQualifier().hasLocation() ? uniformType->getQualifier().layoutLocation : -1; }
-
-    bool GetUniformHasBinding(const glslang::TProgram* prog, int index)     const  { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
-                                                                                     return uniformType->getQualifier().hasBinding(); }
-
-    int  GetUniformBinding(const glslang::TProgram* prog, int index)        const  { FUN_ENTRY(GL_LOG_TRACE); return prog->getUniformBinding(index); }
-
-    bool GetUniformHasSet(const glslang::TProgram* prog, int index)         const  { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
-                                                                                     return uniformType->getQualifier().hasSet(); }
-
-    int  GetUniformSet(const glslang::TProgram* prog, int index)            const  { FUN_ENTRY(GL_LOG_TRACE);
-                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
-                                                                                     return uniformType->getQualifier().hasSet() ? uniformType->getQualifier().layoutSet : -1; }
 public:
     GlslangShaderCompiler();
     ~GlslangShaderCompiler();
@@ -156,7 +126,7 @@ public:
                                            ESSL_VERSION version)              override;
 
 /// Print Functions
-    void                     DumpUniforms(void)                               override;
+    void                     PrintUniforms(void)                              override;
 
 /// Get Functions
     const char              *GetProgramInfoLog(ESSL_VERSION version)          override;

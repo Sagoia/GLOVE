@@ -24,6 +24,8 @@
 #ifndef __GLSL_TYPES_H__
 #define __GLSL_TYPES_H__
 
+#include <iostream>
+
 typedef uint32_t                            glsl_bool_t;
 typedef int32_t                             glsl_int_t;
 typedef uint32_t                            glsl_uint_t;
@@ -62,8 +64,19 @@ enum ESSL_VERSION {
      ESSL_VERSION_MAX = 0
 };
 
+inline void GlslPrintShaderSource(shader_type_t shaderType, 
+                            ESSL_VERSION version,
+                            const std::string source) { FUN_ENTRY(GL_LOG_TRACE); 
+                                                        std::cout << "\n\n-------- " << 
+                                                        ((shaderType == SHADER_TYPE_VERTEX) ? "VERTEX" : "FRAGMENT")  <<
+                                                        " SHADER v" << version << " --------\n\n" << source << "\n"   <<
+                                                        "--------------------------------------\n\n"; }
+
+
 inline size_t GlslTypeToAllignment(GLenum type)
 {
+    FUN_ENTRY(GL_LOG_TRACE); 
+
     switch(type) {
     case GL_BOOL:
     case GL_INT:
@@ -93,6 +106,8 @@ inline size_t GlslTypeToAllignment(GLenum type)
 
 inline size_t GlslTypeToSize(GLenum type)
 {
+    FUN_ENTRY(GL_LOG_TRACE); 
+
     switch(type) {
     case GL_BOOL:                           return sizeof(glsl_bool_t);
     case GL_INT:                            return sizeof(glsl_int_t);

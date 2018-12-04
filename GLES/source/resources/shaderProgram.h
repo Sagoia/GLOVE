@@ -79,7 +79,6 @@ private:
     ShaderCompiler                                     *mShaderCompiler;
     ShaderResourceInterface                             mShaderResourceInterface;
 
-    void                                                DumpGloveShaderVertexInputInterface(void);
     bool                                                ValidateProgram(void);
     void                                                ReleaseVkObjects(void);
     bool                                                AllocateVkDescriptoSet(void);
