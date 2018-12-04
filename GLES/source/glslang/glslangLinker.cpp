@@ -74,7 +74,7 @@ GlslangLinker::LinkProgram(glslang::TShader* vertShader, glslang::TShader* fragS
    
     bool result = mProgramMap[version]->link(EShMsgDefault);
     if(!result) {
-        GLOVE_PRINT_ERR("Program Link v%s : %s\n", to_string(version), mProgramMap[version]->getInfoLog());
+        GLOVE_PRINT_ERR("Program Link v%s : %s\n", to_string(version).c_str(), mProgramMap[version]->getInfoLog());
         return false;
     }
 

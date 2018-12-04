@@ -103,7 +103,7 @@ GlslangCompiler::CompileShader(const char* const* source, const TBuiltInResource
         }
 
         GLOVE_PRINT_ERR("%s Shader Compiler v%s : %s\n", language == EShLangVertex ? "Vertex" : "Fragment", 
-                                                         to_string(version) , mShaderMap[version]->getInfoLog());
+                                                         to_string(version).c_str() , mShaderMap[version]->getInfoLog());
     }
 
     return result;
