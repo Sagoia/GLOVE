@@ -7,7 +7,7 @@ During 2016, GLOVE was able to support simple 3D demos as well as a set of KHRON
 Presently, the Think Silicon developer team is comprised of (sorted by GitHub user name):
 
 * [Andreas Vasilakis (abasilak)](https://github.com/abasilak)
-* [Dennis Mpakas (de2nis)](https://github.com/de2nis)
+* [Dennis Bakas (de2nis)](https://github.com/de2nis)
 * [Dimitris Georgakakis (dgeorg79)](https://github.com/dgeorg79)
 * [Qinglai Xiao (jigsawecho)](https://github.com/jigsawecho)
 * [Kostas Alexiou (kalexio)](https://github.com/kalexio)
