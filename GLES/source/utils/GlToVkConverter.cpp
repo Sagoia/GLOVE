@@ -356,7 +356,7 @@ VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
             return          VK_FORMAT_R5G6B5_UNORM_PACK16;
         }
         case GL_UNSIGNED_SHORT_4_4_4_4: {
-            assert( format == GL_RGB );
+            assert( format == GL_RGBA );
             return          VK_FORMAT_R4G4B4A4_UNORM_PACK16;
         }
         case GL_UNSIGNED_SHORT_5_5_5_1: {
