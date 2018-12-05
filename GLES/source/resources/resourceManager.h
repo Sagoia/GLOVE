@@ -88,12 +88,12 @@ public:
     inline void                DeallocateShaderProgram(ShaderProgram *program)  { FUN_ENTRY(GL_LOG_TRACE); mShaderPrograms.Deallocate(mShaderPrograms.GetObjectId(program)); }
 
 // Get Functions
-    inline std::vector<GenericVertexAttribute>& GetGenericVertexAttributes(void) { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes;}
-    inline GenericVertexAttribute* GetGenericVertexAttribute(size_t index)      { FUN_ENTRY(GL_LOG_TRACE); return &mGenericVertexAttributes[index];}
+    inline std::vector<GenericVertexAttribute>& GetGenericVertexAttributes(void) { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes; }
+    inline GenericVertexAttribute* GetGenericVertexAttribute(size_t index)      { FUN_ENTRY(GL_LOG_TRACE); return &mGenericVertexAttributes[index]; }
 
     inline TextureArray       *GetTextureArray(void)                            { FUN_ENTRY(GL_LOG_TRACE); return &mTextures; }
     inline ShaderArray        *GetShaderArray(void)                             { FUN_ENTRY(GL_LOG_TRACE); return &mShaders;  }
-    inline ShaderProgramArray *GetShaderProgramArray(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mShaderPrograms;}
+    inline ShaderProgramArray *GetShaderProgramArray(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mShaderPrograms; }
     inline RenderbufferArray  *GetRenderbufferArray(void)                       { FUN_ENTRY(GL_LOG_TRACE); return &mRenderbuffers; }
 
     inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
@@ -101,7 +101,7 @@ public:
     inline Framebuffer *       GetFramebuffer(GLuint index)                     { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers.GetObject(index); }
     inline Renderbuffer *      GetRenderbuffer(GLuint index)                    { FUN_ENTRY(GL_LOG_TRACE); return mRenderbuffers.GetObject(index); }
     inline BufferObject *      GetBuffer(GLuint index)                          { FUN_ENTRY(GL_LOG_TRACE); return mBuffers.GetObject(index); }
-    inline uint32_t            GetTextureID(const Texture *texture)             { FUN_ENTRY(GL_LOG_TRACE); return (texture == mDefaultTexture2D) || (texture == mDefaultTextureCubeMap) ? 0 : mTextures.GetObjectId(texture);}
+    inline uint32_t            GetTextureID(const Texture *texture)             { FUN_ENTRY(GL_LOG_TRACE); return (texture == mDefaultTexture2D) || (texture == mDefaultTextureCubeMap) ? 0 : mTextures.GetObjectId(texture); }
     inline uint32_t            GetBufferID(const BufferObject *bo)              { FUN_ENTRY(GL_LOG_TRACE); return mBuffers.GetObjectId(bo); }
     inline Shader *            GetShader(GLuint index)                          { FUN_ENTRY(GL_LOG_TRACE); return mShaders.GetObject(index); }
     inline ShaderProgram *     GetShaderProgram(GLuint index)                   { FUN_ENTRY(GL_LOG_TRACE); return mShaderPrograms.GetObject(index); }
@@ -114,7 +114,7 @@ public:
     void                       SetCacheManager(CacheManager *cacheManager);
 
 // Map Functions
-    inline uint32_t            PushShadingObject(ShadingNamespace_t obj)        { FUN_ENTRY(GL_LOG_TRACE); mShadingObjectPool[mShadingObjectCount] = obj; return mShadingObjectCount++;}
+    inline uint32_t            PushShadingObject(ShadingNamespace_t obj)        { FUN_ENTRY(GL_LOG_TRACE); mShadingObjectPool[mShadingObjectCount] = obj; return mShadingObjectCount++; }
     inline void                EraseShadingObject(GLuint index)                 { FUN_ENTRY(GL_LOG_TRACE); mShadingObjectPool.erase(index); }
 
     inline bool                TextureExists(GLuint index)                const { FUN_ENTRY(GL_LOG_TRACE); return mTextures.ObjectExists(index); }
