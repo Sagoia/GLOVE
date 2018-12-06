@@ -823,9 +823,6 @@ ShaderProgram::GetUniformData(uint32_t location, size_t size, void *ptr) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    assert(ptr);
-    assert(IsLinked());
-
     mShaderResourceInterface.GetUniformClientData(location, size, ptr);
 }
 
@@ -833,10 +830,6 @@ void
 ShaderProgram::SetUniformData(uint32_t location, size_t size, const void *ptr)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
-
-    assert(mLinked);
-    assert(size);
-    assert(ptr);
 
     mShaderResourceInterface.SetUniformClientData(location, size, ptr);
     mUpdateDescriptorData = true;
@@ -900,11 +893,6 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mVkDescSetLayoutBind != nullptr) {
-        delete mVkDescSetLayoutBind;
-        mVkDescSetLayoutBind = nullptr;
-    }
-
     if(nLiveUniformBlocks) {
         mVkDescSetLayoutBind = new VkDescriptorSetLayoutBinding[nLiveUniformBlocks];
         assert(mVkDescSetLayoutBind);
@@ -949,7 +937,11 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
         assert(0);
         return false;
     }
-    assert(mVkPipelineLayout != VK_NULL_HANDLE);
+    
+    if(nLiveUniformBlocks) {
+        delete[] mVkDescSetLayoutBind;
+        mVkDescSetLayoutBind = nullptr;
+    }
 
     mCommandBufferManager->RefResource(mVkPipelineLayout, vulkanAPI::RESOURCE_TYPE_PIPELINE_LAYOUT);
 
@@ -1042,9 +1034,6 @@ ShaderProgram::AllocateVkDescriptoSet(void)
         assert(0);
         return false;
     }
-
-    delete[] mVkDescSetLayoutBind;
-    mVkDescSetLayoutBind = nullptr;
 
     return true;
 }
@@ -1257,7 +1246,6 @@ ShaderProgram::UpdateSamplerDescriptors(void)
             writes[i].pBufferInfo     = mShaderResourceInterface.GetUniformBufferObject(i)->GetBufferDescInfo();
         }
     }
-    assert(samp == nSamplers);
 
     vkUpdateDescriptorSets(mVkContext->vkDevice, nLiveUniformBlocks, writes, 0, nullptr);
 
