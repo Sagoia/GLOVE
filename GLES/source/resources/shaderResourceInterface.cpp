@@ -201,7 +201,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
             size_t   srcsize = 0;
             uint8_t *srcData = nullptr;
 
-            if(itBlock->second.pBufferObject) {
+            if(itBlock->second.pBufferObject && itBlock->second.pBufferObject->GetSize() > 0) {
                 mCacheManager->CacheUBO(itBlock->second.pBufferObject);
 
                 // memcopy data
