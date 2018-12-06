@@ -112,7 +112,7 @@ Memory::GetBufferMemoryRequirements(VkBuffer &buffer)
     memset(static_cast<void *>(&mVkRequirements), 0, sizeof(mVkRequirements));
     vkGetBufferMemoryRequirements(mVkContext->vkDevice, buffer, &mVkRequirements);
 
-    return true;
+    return mVkRequirements.size > 0 ? true : false;
 }
 
 void
