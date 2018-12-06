@@ -631,32 +631,6 @@ Context::LinkProgram(GLuint program)
 }
 
 void
-Context::ProgramBinaryOES(GLuint program, GLenum binaryFormat, const void *binary, GLint length)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(   GLOVE_HOST_X86_BINARY != binaryFormat
-       && GLOVE_HOST_ARM_BINARY != binaryFormat
-       && GLOVE_DEV_BINARY != binaryFormat) {
-        RecordError(GL_INVALID_ENUM);
-        return;
-    }
-
-    ShaderProgram *progPtr = GetProgramPtr(program);
-    if(!progPtr) {
-        return;
-    }
-
-    GLuint vs = CreateShader(GL_VERTEX_SHADER);
-    GLuint fs = CreateShader(GL_FRAGMENT_SHADER);
-    AttachShader(program, vs);
-    AttachShader(program, fs);
-
-    progPtr->UsePrecompiledBinary(binary, length);
-    progPtr->SetShaderModules();
-}
-
-void
 Context::Uniform1f(GLint location, GLfloat x)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -1456,4 +1430,36 @@ Context::ValidateProgram(GLuint program)
     if(!progPtr->IsValidated()){
         //TODO: INFO LOG HERE:
     }
+}
+
+/// ----------------------------------------------------------- ///
+/// ------------------------ Extensions ----------------------- ///
+/// ----------------------------------------------------------- ///
+
+// [OES_get_program_binary]
+
+void
+Context::ProgramBinaryOES(GLuint program, GLenum binaryFormat, const void *binary, GLint length)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(   GLOVE_HOST_X86_BINARY != binaryFormat
+       && GLOVE_HOST_ARM_BINARY != binaryFormat
+       && GLOVE_DEV_BINARY != binaryFormat) {
+        RecordError(GL_INVALID_ENUM);
+        return;
+    }
+
+    ShaderProgram *progPtr = GetProgramPtr(program);
+    if(!progPtr) {
+        return;
+    }
+
+    GLuint vs = CreateShader(GL_VERTEX_SHADER);
+    GLuint fs = CreateShader(GL_FRAGMENT_SHADER);
+    AttachShader(program, vs);
+    AttachShader(program, fs);
+
+    progPtr->UsePrecompiledBinary(binary, length);
+    progPtr->SetShaderModules();
 }
