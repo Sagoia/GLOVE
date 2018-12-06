@@ -44,7 +44,7 @@ Context::GetString(GLenum name)
                                   "OpenGL ES 2.0 Over Vulkan\0",
                                   "OpenGL ES 2.0\0",
                                   "OpenGL ES GLSL ES 1.00\0",
-                                  "GL_OES_get_program_binary GL_OES_rgb8_rgba8\0"};
+                                  "GL_OES_get_program_binary GL_OES_rgb8_rgba8 GL_OES_depth24 GL_OES_depth32 GL_OES_stencil4 GL_OES_texture_stencil8 GL_OES_required_internalformat GL_OES_packed_depth_stencil GL_APPLE_texture_format_BGRA8888\0"};
     switch(name) {
     case GL_VENDOR:                     return (const GLubyte *)strings[0];
     case GL_RENDERER:                   return (const GLubyte *)strings[1];
