@@ -32,6 +32,8 @@
 void
 _eglutNativeInitDisplay(void)
 {
+    XInitThreads();
+
    _eglut->native_dpy = XOpenDisplay(_eglut->display_name);
    if (!_eglut->native_dpy)
       fprintf(stderr, "[eglut_x11.c] [_eglutNativeInitDisplay()]: failed to initialize native display %s\n", _eglut->display_name);
