@@ -58,6 +58,7 @@ namespace vulkanAPI {
 #endif
         vector<VkPhysicalDevice>                            vkGpus;
         VkQueue                                             vkQueue;
+        VkQueue                                             vkAuxQueue;
         uint32_t                                            vkGraphicsQueueNodeIndex;
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;

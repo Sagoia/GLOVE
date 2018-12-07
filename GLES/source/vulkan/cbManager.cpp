@@ -460,7 +460,7 @@ CommandBufferManager::SubmitVkAuxCommandBuffer(void)
     info.commandBufferCount     = 1;
     info.pCommandBuffers        = &mVkAuxCommandBuffer;
 
-    VkResult err = vkQueueSubmit(mVkContext->vkQueue, 1, &info, mVkAuxFence);
+    VkResult err = vkQueueSubmit(mVkContext->vkAuxQueue, 1, &info, mVkAuxFence);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_DEVICE_LOST);
@@ -471,7 +471,7 @@ CommandBufferManager::WaitVkAuxCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkQueueWaitIdle(mVkContext->vkQueue);
+    VkResult err = vkQueueWaitIdle(mVkContext->vkAuxQueue);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_DEVICE_LOST);
