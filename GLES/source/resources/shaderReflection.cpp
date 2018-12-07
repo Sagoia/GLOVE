@@ -42,7 +42,7 @@ ShaderReflection::Reset(void)
 }
 
 uint32_t
-ShaderReflection::SerializeReflection(void *binary) const
+ShaderReflection::Serialize(void *binary) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -116,7 +116,7 @@ ShaderReflection::SerializeReflection(void *binary) const
 }
 
 uint32_t
-ShaderReflection::DeserializeReflection(const void *binary)
+ShaderReflection::Deserialize(const void *binary)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -190,7 +190,7 @@ ShaderReflection::DeserializeReflection(const void *binary)
 }
 
 void
-ShaderReflection::ReadReflection() const
+ShaderReflection::Print() const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

@@ -112,8 +112,8 @@ public:
     
 /// Reflection Functions
     void                     PrepareReflection(ESSL_VERSION version)          override;
-    uint32_t                 SerializeReflection(void* binary)                override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection->SerializeReflection(binary);  }
-    uint32_t                 DeserializeReflection(const void* binary)        override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection->DeserializeReflection(binary);}
+    uint32_t                 SerializeReflection(void* binary)                override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection->Serialize(binary);  }
+    uint32_t                 DeserializeReflection(const void* binary)        override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection->Deserialize(binary);}
 
 /// Shader Functions
     bool                     PreprocessShader(uintptr_t program_ptr,
