@@ -418,6 +418,8 @@ Framebuffer::CreateRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bo
 void
 Framebuffer::BeginVkRenderPass()
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), true);
 }
