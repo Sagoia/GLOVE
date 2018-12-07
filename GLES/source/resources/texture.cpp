@@ -40,7 +40,7 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
+mMipLevelsCount(0), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
 mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -106,6 +106,10 @@ Texture::IsCompleted(void)
         return false;
     }
 
+    if (mMipLevelsCount > 0) {
+        return true;
+    }
+
     State_t *state = &mState[0][0];
     if(state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
         return false;
@@ -136,13 +140,64 @@ Texture::IsCompleted(void)
             }
         }
 
-        if(count && count != levels-1)
+        if(count)
             return false;
     }
 
-    mMipLevelsCount = !count ? levels : 1;
+    mMipLevelsCount = levels;
 
     return true;
+}
+
+bool
+Texture::IsValid(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (mState == nullptr) {
+        return false;
+    }
+
+    State_t *state = &mState[0][0];
+    if (state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
+        return false;
+    }
+
+    GLenum format = state->format;
+    GLenum type = state->type;
+    GLint  width = state->width;
+    GLint  height = state->height;
+    GLint  levels = NUMBER_OF_MIP_LEVELS(state->width, state->height);
+
+    GLint levelsCount = INT32_MAX;
+    GLint count = 0;
+    for (GLint layer = 0; layer < mLayersCount; ++layer) {
+        count = 0;
+
+        for (GLint level = 0; level < levels; ++level) {
+
+            state = &mState[layer][level];
+
+            if (state->format == GL_INVALID_VALUE ||
+                state->type == GL_INVALID_VALUE ||
+                state->width != static_cast<GLint>(std::max(floor(width >> level), 1.0)) ||
+                state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+                break;
+            }
+            else if (state->format != format || state->type != type) {
+                break;
+            }
+
+            ++count;
+        }
+
+        levelsCount = std::min(levelsCount, count);
+
+    }
+
+    mMipLevelsCount = levelsCount;
+
+    return mMipLevelsCount > 0;
 }
 
 void
@@ -220,6 +275,9 @@ Texture::Allocate(void)
     SetType  (state->type);
     SetInternalFormat(GlFormatToGlInternalFormat(state->format, state->type));
 
+    if (mImage->GetFormat() == VK_FORMAT_UNDEFINED) {
+        SetVkFormat(FindSupportedVkColorFormat(GlColorFormatToVkColorFormat(state->format, state->type)));
+    }
     mExplicitInternalFormat = VkFormatToGlInternalformat(mImage->GetFormat());
     mExplicitType           = GlInternalFormatToGlType(mExplicitInternalFormat);
 
@@ -458,6 +516,10 @@ void
 Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (newImageLayout == mImage->GetImageLayout()) {
+        return;
+    }
 
     mCommandBufferManager->BeginVkAuxCommandBuffer();
     VkCommandBuffer cmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();

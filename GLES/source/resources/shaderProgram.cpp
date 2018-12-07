@@ -422,6 +422,13 @@ ShaderProgram::ValidateProgram(void)
         return false;
     }
 
+    // TODO: Reset shader compiler gently
+    const char *vsSource = vs->GetShaderSource();
+    mShaderCompiler->CompileVertexShader(&vsSource);
+
+    const char *fsSource = fs->GetShaderSource();
+    mShaderCompiler->CompileFragmentShader(&fsSource);
+
     if(GLOVE_DUMP_INPUT_SHADER_REFLECTION) {
         mShaderCompiler->EnableDumpInputShaderReflection();
     }
@@ -1167,17 +1174,22 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
                     // when the sampler’s associated texture object is not complete.
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
-                        uint8_t pixels[4] = {0,0,0,255};
-                        for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
-                            for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
-                                activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
-                            }
-                        }
-
-                        if(activeTexture->IsCompleted()) {
-                            activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                        if (activeTexture->IsValid()) {
                             activeTexture->Allocate();
-                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                        }
+                        else {
+                            uint8_t pixels[4] = {0,0,0,255};
+                            for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
+                                for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
+                                    activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
+                                }
+                            }
+
+                            if(activeTexture->IsCompleted()) {
+                                activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                                activeTexture->Allocate();
+                                activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                            }
                         }
                     }
                     else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {

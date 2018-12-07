@@ -207,6 +207,7 @@ public:
            bool             IsNPOT(void);
            bool             IsNPOTAccessCompleted(void);
            bool             IsCompleted(void);
+           bool             IsValid(void);
 };
 
 #endif // __TEXTURE_H__
