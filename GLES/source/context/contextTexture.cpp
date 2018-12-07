@@ -331,7 +331,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if(format != GL_ALPHA     && format != GL_RGB && format != GL_RGBA &&
+    if(format != GL_ALPHA     && format != GL_RGB && format != GL_RGBA && format != GL_BGRA_EXT &&
        format != GL_LUMINANCE && format != GL_LUMINANCE_ALPHA) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -348,7 +348,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if(internalformat != GL_ALPHA     && internalformat != GL_RGB && internalformat != GL_RGBA &&
+    if(internalformat != GL_ALPHA     && internalformat != GL_RGB && internalformat != GL_RGBA && internalformat != GL_BGRA_EXT &&
        internalformat != GL_LUMINANCE && internalformat != GL_LUMINANCE_ALPHA) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -372,7 +372,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if((type == GL_UNSIGNED_BYTE && format != GL_RGBA && format != GL_RGB &&
+    if((type == GL_UNSIGNED_BYTE && format != GL_RGBA && format != GL_RGB && format != GL_BGRA_EXT &&
         format != GL_LUMINANCE_ALPHA && format != GL_LUMINANCE && format != GL_ALPHA) ||
         (type == GL_UNSIGNED_SHORT_5_6_5                                          && format != GL_RGB) ||
         ((type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1) && format != GL_RGBA)) {

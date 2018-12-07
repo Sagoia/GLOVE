@@ -348,6 +348,7 @@ VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
                 case GL_ALPHA:
                 case GL_LUMINANCE_ALPHA:
                 case GL_RGBA:                       return VK_FORMAT_R8G8B8A8_UNORM;
+                case GL_BGRA_EXT:                   return VK_FORMAT_B8G8R8A8_UNORM;
                 default: { NOT_REACHED();           return VK_FORMAT_UNDEFINED; }
             }
         }
