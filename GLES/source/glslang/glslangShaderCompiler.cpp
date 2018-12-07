@@ -616,13 +616,19 @@ GlslangShaderCompiler::BuildUniformReflection(void)
     mShaderReflection->SetLiveUniforms(nLiveUniforms);
     mShaderReflection->SetLiveUniformBlocks(nLiveUniformBlocks);
 
+    std::vector<uniformBlock_t *> uniformBlockList;
+    uniformBlockList.resize(mUniformBlocks.size());
+    for (auto& block : mUniformBlocks) {
+        uniformBlockList[block.second.binding] = &block.second;
+    }
+
     int i = 0;
-    for(auto& block : mUniformBlocks) {
-        mShaderReflection->SetUniformBlockGlslBlockName(block.second.glslBlockName.c_str(), i);
-        mShaderReflection->SetUniformBlockBinding(block.second.binding, i);
-        mShaderReflection->SetUniformBlockBlockSize(block.second.blockSize, i);
-        mShaderReflection->SetUniformBlockBlockStage(block.second.blockStage, i);
-        mShaderReflection->SetUniformBlockOpaque(block.second.isOpaque, i);
+    for(auto block : uniformBlockList) {
+        mShaderReflection->SetUniformBlockGlslBlockName(block->glslBlockName.c_str(), i);
+        mShaderReflection->SetUniformBlockBinding(block->binding, i);
+        mShaderReflection->SetUniformBlockBlockSize(block->blockSize, i);
+        mShaderReflection->SetUniformBlockBlockStage(block->blockStage, i);
+        mShaderReflection->SetUniformBlockOpaque(block->isOpaque, i);
         ++i;
     }
 
@@ -630,8 +636,8 @@ GlslangShaderCompiler::BuildUniformReflection(void)
     for(auto& uni : mUniforms) {
         const uniformBlock_t *pBlock = uni.pBlock;
         uint32_t index = 0;
-        for(auto& block : mUniformBlocks) {
-            if(!block.second.glslBlockName.compare(pBlock->glslBlockName)) {
+        for (auto block : uniformBlockList) {
+            if(!block->glslBlockName.compare(pBlock->glslBlockName)) {
                 mShaderReflection->SetUniformReflectionName(uni.reflectionName.c_str(), i);
                 mShaderReflection->SetUniformLocation(uni.location, i);
                 mShaderReflection->SetUniformBlockIndex(index, i);
