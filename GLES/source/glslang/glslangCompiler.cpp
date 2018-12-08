@@ -99,7 +99,7 @@ GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* reso
 }
 
 bool
-GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* resources, EShLanguage language)
+GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* resources, EShLanguage language, EShMessages messages)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -109,13 +109,14 @@ GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* r
     assert(mSlangShader400);
 
     mSlangShader400->setStrings(source, 1);
-    bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules));
+    bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, messages);
     if(!result) {
         if(IsManageableError(mSlangShader400->getInfoLog())) {
             CleanUpShader(mSlangShader400);
             mSlangShader400 = new glslang::TShader(language);
             mSlangShader400->setStrings(source, 1);
-            result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors));
+            messages = EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors;
+            result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, messages);
         }
         GLOVE_PRINT_ERR("shader 400:\n%s\n", mSlangShader400->getInfoLog());
     }
