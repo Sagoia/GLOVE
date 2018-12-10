@@ -45,7 +45,6 @@ typedef enum {
     GLOVE_MAX_BINARY_FORMATS
 } glove_program_binary_formats_e;
 
-
 class Context {
 
 private:
@@ -65,8 +64,8 @@ private:
     bool                                        mIsYInverted;
     bool                                        mIsModeLineLoop;
 // ------------
-    void                                       *mWriteSurface;
-    void                                       *mReadSurface;
+    EGLSurfaceInterface                        *mWriteSurface;
+    EGLSurfaceInterface                        *mReadSurface;
     BufferObject                               *mExplicitIbo;
     Framebuffer                                *mWriteFBO;
 
@@ -120,6 +119,8 @@ public:
     Context();
     ~Context();
 
+    static void             DestroyAPISurfaceData(const vulkanAPI::vkContext_t *vkContext, EGLSurfaceInterface *eglSurfaceInterface);
+
     void                    DeleteShader(Shader *shaderPtr);
     void                    ReleaseSystemFBO(void);
 
@@ -131,7 +132,6 @@ public:
 
 // Set Functions
             void            SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
-    inline  void            SetNextImageIndex(uint32_t imageIndex)                { FUN_ENTRY(GL_LOG_TRACE); if(mStateManager.GetActiveObjectsState()->IsDefaultFramebufferObjectActive()) mWriteFBO->SetWriteBufferIndex(imageIndex); }
     inline  void            BindToTexture(GLuint bind)                            { FUN_ENTRY(GL_LOG_DEBUG); mSystemFBO->SetBindToTexture(bind); }
 
     inline  bool            HasShaderCompiler(void);

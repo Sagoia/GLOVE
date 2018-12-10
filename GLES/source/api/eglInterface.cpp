@@ -26,15 +26,15 @@
 #include "glFunctions.h"
 
 static vkInterface_t  vkInterface;
-api_state_t           gles2_state = nullptr;
+static api_state_t    gles2_state = nullptr;
 
 api_state_t           init_API();
           void        terminate_API();
 api_context_t         create_context();
 void                  set_read_write_surface(api_context_t api_context, EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
+void                  delete_shared_surface_data(EGLSurfaceInterface *eglSurfaceInterface);
 void                  delete_context(api_context_t api_context);
 void                  release_system_fbo(api_context_t api_context);
-void                  set_next_image_index(api_context_t api_context, uint32_t index);
 GLPROC                get_proc_addr(const char* procname);
 void                  flush(api_context_t api_context);
 void                  finish(api_context_t api_context);
@@ -48,9 +48,9 @@ rendering_api_interface_t GLES2Interface = {
     terminate_API,
     create_context,
     set_read_write_surface,
+    delete_shared_surface_data,
     delete_context,
     release_system_fbo,
-    set_next_image_index,
     get_proc_addr,
     flush,
     finish,
@@ -105,6 +105,14 @@ void set_read_write_surface(api_context_t api_context, EGLSurfaceInterface *eglR
     SetCurrentContext(ctx);
 }
 
+void delete_shared_surface_data(EGLSurfaceInterface *eglSurfaceInterface)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    vulkanAPI::vkContext_t *vkContext = vulkanAPI::GetContext();
+    Context::DestroyAPISurfaceData(vkContext, eglSurfaceInterface);
+}
+
 void delete_context(api_context_t api_context)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -119,14 +127,6 @@ void release_system_fbo(api_context_t api_context)
 
     Context *ctx = reinterpret_cast<Context *>(api_context);
     ctx->ReleaseSystemFBO();
-}
-
-void set_next_image_index(api_context_t api_context, uint32_t index)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    Context *ctx = reinterpret_cast<Context *>(api_context);
-    ctx->SetNextImageIndex(index);
 }
 
 GLPROC get_proc_addr(const char* procname)

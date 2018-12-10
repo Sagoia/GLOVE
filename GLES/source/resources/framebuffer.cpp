@@ -32,8 +32,10 @@
 
 Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
-mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mState(IDLE),
-mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr), mIsSystem(false), mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID)
+mTarget(GL_INVALID_VALUE), mState(IDLE),
+mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr),
+mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID),
+mIsSystem(false), mEGLSurfaceInterface(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -79,8 +81,13 @@ Framebuffer::Release(void)
         delete fb;
         fb = nullptr;
     }
-
     mFramebuffers.clear();
+}
+
+size_t
+Framebuffer::GetCurrentBufferIndex() const
+{
+    return mIsSystem ? mEGLSurfaceInterface->nextImageIndex : 0;
 }
 
 Texture *
@@ -89,7 +96,8 @@ Framebuffer::GetColorAttachmentTexture(void) const
     FUN_ENTRY(GL_LOG_TRACE);
 
     if(mIsSystem) {
-        return mAttachmentColors[mWriteBufferIndex]->GetTexture();
+        size_t bufferIndex = GetCurrentBufferIndex();
+        return mAttachmentColors[bufferIndex]->GetTexture();
     }
 
     Texture * tex   = nullptr;
@@ -237,11 +245,6 @@ Framebuffer::CheckStatus(void)
         }
     }
 
-    // The combination of internal formats of the attached images violates an implementation-dependent set of restrictions.
-    //  if() {
-    //      return GL_FRAMEBUFFER_UNSUPPORTED;
-    //  }
-
     return GL_FRAMEBUFFER_COMPLETE;
 }
 
@@ -362,7 +365,7 @@ Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t sten
 }
 
 void
-Framebuffer::IsUpdated()
+Framebuffer::CheckForUpdatedResources()
 {
     if(GetColorAttachmentTexture()) {
 
@@ -377,6 +380,15 @@ Framebuffer::IsUpdated()
         }
         GetColorAttachmentTexture()->SetDataUpdated(false);
     }
+}
+
+VkFramebuffer*
+Framebuffer::GetActiveVkFramebuffer() const
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    size_t bufferIndex = mIsSystem ? mEGLSurfaceInterface->nextImageIndex : 0;
+    return mFramebuffers[bufferIndex]->GetFramebuffer();
 }
 
 void
@@ -419,7 +431,8 @@ void
 Framebuffer::BeginVkRenderPass()
 {
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
-    mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), true);
+    size_t bufferIndex = GetCurrentBufferIndex();
+    mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[bufferIndex]->GetFramebuffer(), true);
 }
 
 bool

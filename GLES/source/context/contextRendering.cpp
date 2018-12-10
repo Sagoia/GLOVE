@@ -468,8 +468,9 @@ void
 Context::SetClearRect(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
-    mWriteFBO->IsUpdated();
+    mWriteFBO->CheckForUpdatedResources();
 
     int x = 0;
     int y = 0;

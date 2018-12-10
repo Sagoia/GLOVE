@@ -79,7 +79,6 @@ private:
         ~State() { FUN_ENTRY(GL_LOG_TRACE); }
     } State;
 
-    static CommandBufferManager    *mInstance;
     VkCommandPool                   mVkCmdPool;
     const vkContext_t              *mVkContext;
 

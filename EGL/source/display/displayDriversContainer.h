@@ -39,27 +39,15 @@ private:
     using EGLDriverMap     = std::unordered_map<EGLDisplay_t*, DisplayDriver *>;
 
     EGLDriverMap                       mDriverMap;
-    uint32_t                           mDriversNumber;
-    static DisplayDriversContainer    *mInstance;
-
-    DisplayDriversContainer();
-    ~DisplayDriversContainer() {}
-
-    DisplayDriver                     *FindDriver(EGLDisplay_t* display);
-    DisplayDriver                     *GetDriver(EGLDisplay_t* display);
-    DisplayDriver                     *RemoveDriver(EGLDisplay_t* display);
-
-    static DisplayDriversContainer    *GetInstance();
-    static void                        DestroyInstance();
 
 public:
-    static DisplayDriver              *FindDisplayDriver(EGLDisplay_t* display);
-    static DisplayDriver              *AddDisplayDriver(EGLDisplay_t* display);
-    static void                        RemoveDisplayDriver(EGLDisplay_t* display);
-    static void                        Destroy();
-    static EGLBoolean                  IsEmpty();
+    DisplayDriversContainer();
+    ~DisplayDriversContainer();
 
-    inline uint32_t                    GetDriversNumber()                  const { FUN_ENTRY(EGL_LOG_TRACE); return mDriversNumber; }
+    DisplayDriver                     *FindDriver(EGLDisplay_t* display);
+    DisplayDriver                     *AddDriver(EGLDisplay_t* display);
+    void                               RemoveDriver(EGLDisplay_t* display);
+    EGLBoolean                         IsEmpty();
 };
 
 #endif // __DISPLAY_DRIVERS_CONTAINER_H__
