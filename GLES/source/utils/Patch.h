@@ -97,7 +97,7 @@ public:
                 size_t{});
     }
 
-    StringRef src() const { return Src; }
+    const StringRef& src() const { return Src; }
 
 private:
     void init();
@@ -110,33 +110,32 @@ template <typename T, typename SFINAN = void>
 class Patch {};
 
 // Note: Patch is a stateless class.
-template <typename T>
-class Patch<T, typename std::enable_if<std::is_base_of<Expr, T>::value>::type> {
+// ``It'' must an iterator of sub-class of Expr.
+template <typename It>
+class Patch<It, typename std::enable_if<std::is_base_of<Expr, typename It::value_type>::value>::type> {
 public:
     Patch(const Text& TheTxt) : Txt{TheTxt} {}
 
-    std::string Apply(const std::vector<T>& Exprs) const {
+    std::string Apply(It Begin, It End) const {
         FUN_ENTRY(GL_LOG_DEBUG);
-        return DoApply(Location(), Twine(), Exprs.begin(), Exprs.end());
+        return DoApply(Location(), Twine(), Begin, End);
     }
 
 private:
-    using ExprIt = typename std::vector<T>::const_iterator;
-
-    std::string DoApply(Location Curr, const Twine Root, ExprIt It, ExprIt End) const {
-        if (It == End) {
+    std::string DoApply(Location Loc, const Twine Root, It Curr, It End) const {
+        if (Curr == End) {
             // Attach rest of Src
-            auto Idx = Txt.index(Curr);
+            auto Idx = Txt.index(Loc);
             auto D = Txt.src().data() + Idx;
             auto L = Txt.src().length() - Idx;
             return (Root + StringRef(D, L)).str();
         }
 
-        const auto& E = *It++;
-        auto S = Txt.Segment(Curr, E.Begin);
+        const auto& E = *Curr++;
+        auto S = Txt.Segment(Loc, E.Begin);
         // String for this expression is generated here to ensure
         // all strings stay on stack.
-        return DoApply(E.End, Root + S + Twine(E.Lit()), It, End);
+        return DoApply(E.End, Root + S + Twine(E.Lit()), Curr, End);
     }
 
     const Text &Txt;

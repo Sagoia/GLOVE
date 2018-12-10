@@ -551,7 +551,7 @@ FixSamplers(const AccessChainList& samplers, std::string& source)
     // Note that the patches must be sorted,
     // becasue they are operated in lexical sequence.
     std::sort(Patches.begin(), Patches.end());
-    Patch<SamplerPatch> Pat {Txt};
+    Patch<std::vector<SamplerPatch>::const_iterator> Pat {Txt};
 
-    return Pat.Apply(Patches);
+    return Pat.Apply(Patches.begin(), Patches.end());
 }
