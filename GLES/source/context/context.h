@@ -33,7 +33,7 @@
 #include "vulkan/pipeline.h"
 #include "vulkan/clearPass.h"
 #include "resources/screenSpacePass.h"
-#include "vulkan/cbManager.h"
+#include "vulkan/commandBufferManager.h"
 #include "rendering_api_interface.h"
 #include <utility>
 #include <map>

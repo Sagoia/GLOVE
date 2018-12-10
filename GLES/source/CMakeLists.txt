@@ -68,7 +68,7 @@ set(SOURCES
     utils/cacheManager.cpp
     utils/Twine.cpp
     utils/Text.cpp
-    vulkan/cbManager.cpp
+    vulkan/commandBufferManager.cpp
     vulkan/commandBufferPool.cpp
     vulkan/clearPass.cpp
     vulkan/renderPass.cpp

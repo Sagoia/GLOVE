@@ -28,7 +28,7 @@
  */
 
 #include "context.h"
-#include "cbManager.h"
+#include "commandBufferManager.h"
 
 namespace vulkanAPI {
 

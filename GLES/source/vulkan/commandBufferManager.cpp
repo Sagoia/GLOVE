@@ -12,7 +12,7 @@
  */
 
 /**
- *  @file       cbManager.cpp
+ *  @file       commandBufferManager.cpp
  *  @author     Think Silicon
  *  @date       25/07/2018
  *  @version    1.0
@@ -31,7 +31,7 @@
  *
  */
 
-#include "cbManager.h"
+#include "commandBufferManager.h"
 
 namespace vulkanAPI {
 
