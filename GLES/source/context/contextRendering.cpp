@@ -24,7 +24,9 @@
 #include "context.h"
 
 void
-Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled) {
+Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
 
@@ -60,7 +62,7 @@ Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool 
 void
 Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     PrepareRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
     mCommandBufferManager->BeginVkDrawCommandBuffer();
@@ -95,6 +97,8 @@ Context::Clear(GLbitfield mask)
 void
 Context::ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     if(mWriteFBO->IsInDrawState()) {
         Finish();
     }
@@ -106,6 +110,8 @@ Context::ClearSimple(bool clearColorEnabled, bool clearDepthEnabled, bool clearS
 void
 Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     // perform lazy initialization once
     if(!mScreenSpacePass->Initialize()) {
         return;
@@ -178,6 +184,8 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
 void
 Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     StateFragmentOperations* stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     StateViewportTransformation* stateViewportTransformation = mStateManager.GetViewportTransformationState();
 
@@ -202,7 +210,7 @@ Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
 void
 Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     SetClearRect();
 
@@ -275,7 +283,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 void
 Context::UpdateIndices(uint32_t* offset, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mPipeline->GetUpdateIndexBuffer() || indices) {
         mStateManager.GetActiveShaderProgram()->PrepareIndexBufferObject(offset, maxIndex, indexCount, type, indices, ibo);
@@ -286,7 +294,7 @@ Context::UpdateIndices(uint32_t* offset, uint32_t* maxIndex, uint32_t indexCount
 void
 Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     /// A glVertexAttrib related function has been called. Check to see if mVkPipelineVertexInput needs to be updated.
     /// If this is true then VkPipeline needs to be updated too.
@@ -302,7 +310,7 @@ Context::UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex)
 void
 Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     if(*mStateManager.GetActiveShaderProgram()->GetVkDescSet()) {
         mStateManager.GetActiveShaderProgram()->UpdateBuiltInUniformData(mStateManager.GetViewportTransformationState()->GetMinDepthRange(),
@@ -315,7 +323,7 @@ Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
 void
 Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount()) {
         VkDeviceSize offsets[mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount()];
@@ -327,7 +335,7 @@ Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer)
 void
 Context::BindIndexBuffer(VkCommandBuffer *CmdBuffer, uint32_t offset, VkIndexType type)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mStateManager.GetActiveShaderProgram()->GetActiveIndexVkBuffer()) {
         vkCmdBindIndexBuffer(*CmdBuffer, mStateManager.GetActiveShaderProgram()->GetActiveIndexVkBuffer(), offset, type);
@@ -337,7 +345,7 @@ Context::BindIndexBuffer(VkCommandBuffer *CmdBuffer, uint32_t offset, VkIndexTyp
 void
 Context::DrawGeometry(VkCommandBuffer *CmdBuffer, bool indexed, uint32_t firstVertex, uint32_t vertCount)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     if(indexed == false) {
         vkCmdDraw(*CmdBuffer, vertCount, 1, firstVertex, 0);
@@ -467,7 +475,6 @@ Context::Flush(void)
 void
 Context::SetClearRect(void)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
     FUN_ENTRY(GL_LOG_DEBUG);
 
     mWriteFBO->CheckForUpdatedResources();
