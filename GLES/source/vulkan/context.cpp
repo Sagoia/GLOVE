@@ -543,7 +543,7 @@ bool CreateVkDebugReporter()
     VkDebugReportCallbackCreateInfoEXT debugReportInfo;
     memset(static_cast<void *>(&debugReportInfo), 0, sizeof(debugReportInfo));
     debugReportInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT;
+    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
     debugReportInfo.pfnCallback = DebugLayerCallback;
 
     VkResult err = _vkCreateDebugReportCallbackEXT(GloveVkContext.vkInstance, &debugReportInfo, nullptr, &(GloveVkContext.vkDebugReporter));
