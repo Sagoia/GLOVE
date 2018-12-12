@@ -78,6 +78,8 @@ private:
     Texture                    *mDepthStencilTexture;
     uint32_t                    mDepthStencilTextureRefCount;
 
+    bool                        mDirty;
+
     vulkanAPI::Image*           mImage;
     vulkanAPI::Memory*          mMemory;
     vulkanAPI::Sampler*         mSampler;

@@ -40,8 +40,8 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(0), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
-mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u)
+mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
+mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -106,7 +106,7 @@ Texture::IsCompleted(void)
         return false;
     }
 
-    if (mMipLevelsCount > 0) {
+    if (!mDirty) {
         return true;
     }
 
@@ -145,6 +145,8 @@ Texture::IsCompleted(void)
     }
 
     mMipLevelsCount = levels;
+
+    mDirty = false;
 
     return true;
 }
@@ -196,6 +198,8 @@ Texture::IsValid(void)
     }
 
     mMipLevelsCount = levelsCount;
+
+    mDirty = false;
 
     return mMipLevelsCount > 0;
 }
@@ -345,6 +349,8 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
                       &srcRect, pixels,
                       &dstRect, data);
     }
+
+    mDirty = true;
 }
 
 void
