@@ -144,3 +144,28 @@ ResourceManager::IsTextureAttachedToFBO(const Texture *texture)
 
     return false;
 }
+
+void
+ResourceManager::CleanPurgeList()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    //Buffers
+    for (auto it = mPurgeListBufferObject.begin(); it != mPurgeListBufferObject.end(); ) {
+        if ((*it)->GetRefCount() == 0) {
+            delete *it;
+            it = mPurgeListBufferObject.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    //Textures
+    for (auto it = mPurgeListTexture.begin(); it != mPurgeListTexture.end(); ) {
+        if ((*it)->GetRefCount() == 0) {
+            delete *it;
+            it = mPurgeListTexture.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}

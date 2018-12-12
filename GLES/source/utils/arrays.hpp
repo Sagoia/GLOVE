@@ -98,6 +98,20 @@ public:
     }
 
     /**
+    * @brief Removes from the map container a single element with the given
+    * key value (element is NOT destroyed).
+    */
+    bool RemoveFromList(uint32_t index)
+    {
+        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
+        if(it != mObjects.end()) {
+            mObjects.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @brief Searches the container for an element with a key equivalent to
      * index and returns it.
      * @param index: The GL handle of the element to be found or to be created.

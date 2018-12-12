@@ -68,6 +68,8 @@ private:
     Texture                                   *mDefaultTexture2D;
     Texture                                   *mDefaultTextureCubeMap;
     std::vector<GenericVertexAttribute>        mGenericVertexAttributes;
+    std::vector<BufferObject*>                 mPurgeListBufferObject;
+    std::vector<Texture*>                      mPurgeListTexture;
 
 public:
     ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
@@ -86,6 +88,8 @@ public:
     inline void                DeallocateFramebuffer(uint32_t index)            { FUN_ENTRY(GL_LOG_TRACE); mFramebuffers.Deallocate(index); }
     inline void                DeallocateShader(Shader *shader)                 { FUN_ENTRY(GL_LOG_TRACE); mShaders.Deallocate(mShaders.GetObjectId(shader)); }
     inline void                DeallocateShaderProgram(ShaderProgram *program)  { FUN_ENTRY(GL_LOG_TRACE); mShaderPrograms.Deallocate(mShaderPrograms.GetObjectId(program)); }
+    inline void                RemoveFromListTexture(uint32_t index)            { FUN_ENTRY(GL_LOG_TRACE); mTextures.RemoveFromList(index); }
+    inline void                RemoveFromListBuffer(uint32_t index)             { FUN_ENTRY(GL_LOG_TRACE); mBuffers.RemoveFromList(index); }
 
 // Get Functions
     inline std::vector<GenericVertexAttribute>& GetGenericVertexAttributes(void) { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes; }
@@ -134,6 +138,10 @@ public:
     void                       UpdateFramebufferObjects(GLuint index, GLenum target);
     void                       CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManager);
 
+//PurgeList Functions
+    void                       AddToPurgeList(BufferObject *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListBufferObject.push_back(object); }
+    void                       AddToPurgeList(Texture *object)                  { FUN_ENTRY(GL_LOG_TRACE); mPurgeListTexture.push_back(object); }
+    void                       CleanPurgeList();
 };
 
 #endif //__RESOURCEMANAGER_H__

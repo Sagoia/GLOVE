@@ -41,6 +41,7 @@ set(SOURCES
     resources/bufferObject.cpp
     resources/framebuffer.cpp
     resources/genericVertexAttribute.cpp
+    resources/refObject.cpp
     resources/resourceManager.cpp
     resources/renderbuffer.cpp
     resources/shader.cpp
