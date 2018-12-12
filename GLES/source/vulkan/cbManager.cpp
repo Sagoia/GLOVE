@@ -418,7 +418,7 @@ CommandBufferManager::WaitLastSubmition(void)
         return true;
     }
 
-    return false;
+    return true;
 }
 
 bool
