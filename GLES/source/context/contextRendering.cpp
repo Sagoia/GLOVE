@@ -422,11 +422,11 @@ Context::Finish(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(!Flush()) {
+    if (!mCommandBufferManager->WaitLastSubmition()) {
         return;
     }
 
-    if(!mCommandBufferManager->WaitLastSubmition()) {
+    if(!Flush()) {
         return;
     }
 
