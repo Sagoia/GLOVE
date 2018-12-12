@@ -32,9 +32,9 @@
 
 namespace vulkanAPI {
 
-#define GLOVE_VK_VALIDATION_LAYERS                      false
-
 #ifdef ENABLE_VK_DEBUG_REPORTER
+
+#define GLOVE_VK_VALIDATION_LAYERS                      true
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
@@ -56,6 +56,8 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 
 #else
 
+#define GLOVE_VK_VALIDATION_LAYERS                      false
+
 #ifdef VK_USE_PLATFORM_XCB_KHR
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_XCB_SURFACE_EXTENSION_NAME};
@@ -75,6 +77,8 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 static const std::vector<const char*> usefulDeviceExtensions     = {"VK_KHR_maintenance1"};
+
+static const std::vector<const char*> validationLayerNames       = {"VK_LAYER_LUNARG_standard_validation"};
 
 static       char **enabledInstanceLayers           = nullptr;
 
@@ -124,12 +128,23 @@ InitVkLayers(uint32_t* nLayers)
         enabledInstanceLayers = (char**)malloc(layerCount * sizeof(char*));
     }
 
-    *nLayers = layerCount;
-
-    for(uint32_t i = 0; i < layerCount; ++i) {
-        enabledInstanceLayers[i] = (char*)malloc(VK_MAX_EXTENSION_NAME_SIZE*sizeof(char));
-        strcpy(enabledInstanceLayers[i], vkLayerProperties[i].layerName);
+    uint32_t layers = 0;
+    for (uint32_t i = 0; i < layerCount; ++i) {
+        bool enable = false;
+        for (auto &layerName : validationLayerNames) {
+            if (!strcmp((const char *)layerName, vkLayerProperties[i].layerName)) {
+                enable = true;
+                break;
+            }
+        }
+        if (enable) {
+            enabledInstanceLayers[layers] = (char*)malloc(VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+            strcpy(enabledInstanceLayers[layers], vkLayerProperties[i].layerName);
+            ++layers;
+        }
     }
+
+    *nLayers = layers;
 
     if(vkLayerProperties) {
         free(vkLayerProperties);
