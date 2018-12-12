@@ -350,12 +350,12 @@ CreateVkDevice(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    float queue_priorities[2] = {0.0, 1.0};
+    float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;
     queueInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueInfo.pNext            = nullptr;
     queueInfo.flags            = 0;
-    queueInfo.queueCount       = 2;
+    queueInfo.queueCount       = 1;
     queueInfo.pQueuePriorities = queue_priorities;
     queueInfo.queueFamilyIndex = GloveVkContext.vkGraphicsQueueNodeIndex;
 
@@ -420,11 +420,6 @@ InitVkQueue(void)
                      GloveVkContext.vkGraphicsQueueNodeIndex,
                      0,
                      &GloveVkContext.vkQueue);
-
-    vkGetDeviceQueue(GloveVkContext.vkDevice,
-                     GloveVkContext.vkGraphicsQueueNodeIndex,
-                     1,
-                     &GloveVkContext.vkAuxQueue);
 }
 
 vkContext_t *
@@ -444,7 +439,6 @@ ResetContextResources()
 #endif
     GloveVkContext.vkGpus.clear();
     GloveVkContext.vkQueue                      = VK_NULL_HANDLE;
-    GloveVkContext.vkAuxQueue                   = VK_NULL_HANDLE;
     GloveVkContext.vkGraphicsQueueNodeIndex     = 0;
     GloveVkContext.vkDevice                     = VK_NULL_HANDLE;
     GloveVkContext.vkSyncItems                  = nullptr;
