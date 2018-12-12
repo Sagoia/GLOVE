@@ -384,6 +384,10 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
+    if(mWriteFBO->IsInDrawState()) {
+        Finish();
+    }
+
     // copy the buffer contents to the texture
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
@@ -447,6 +451,10 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
     // TODO:: We could pass a default subtexture instead
     if(pixels == nullptr) {
         return;
+    }
+
+    if(mWriteFBO->IsInDrawState()) {
+        Finish();
     }
 
     if(mWriteFBO != mSystemFBO && GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
@@ -516,6 +524,10 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
+    }
+
+    if(mWriteFBO->IsInDrawState()) {
+        Finish();
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
@@ -595,6 +607,10 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
+    }
+
+    if(mWriteFBO->IsInDrawState()) {
+        Finish();
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
