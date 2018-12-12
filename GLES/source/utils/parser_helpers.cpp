@@ -134,3 +134,14 @@ IsBuildInUniform(const std::string &token)
           !token.compare("gl_DepthRange.diff"));
 
 }
+
+void
+ReplaceAll(string& hays, const string& from, const string& to)
+{
+    auto pos = hays.find(from);
+
+    while(pos != string::npos) {
+        hays.replace(pos, from.size(), to);
+        pos = hays.find(from, pos + to.size());
+    }
+}

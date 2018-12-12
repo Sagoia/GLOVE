@@ -105,7 +105,7 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
 
     api_interface = (rendering_api_interface_t *) dlsym(library_info->handle, api_interface_name);
 
-    if(!api_interface->init_API_cb) {
+    if(!api_interface || !api_interface->init_API_cb) {
         dlclose(library_info->handle);
         char* error = dlerror();
         if(error)  {

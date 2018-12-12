@@ -71,7 +71,6 @@ Context::Context()
     mScreenSpacePass = new ScreenSpacePass(this, mVkContext, mCommandBufferManager);
     mScreenSpacePass->SetCacheManager(mCacheManager);
     mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
-
 }
 
 Context::~Context()
@@ -150,12 +149,9 @@ Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
     assert(eglSurfaceInterface->type == EGL_WINDOW_BIT);
 
     Framebuffer *fbo = InitializeFrameBuffer(eglSurfaceInterface);
-    Texture *tex = CreateDepthStencil(eglSurfaceInterface);
-    fbo->SetDepthStencilAttachmentTexture(tex);
     fbo->CreateVkRenderPass(false, false, false, true, true, false);
     fbo->Create();
     fbo->SetSurfaceType(GLOVE_SURFACE_WINDOW);
-    mSystemTextures.push_back(tex);
 
     return fbo;
 }
@@ -165,10 +161,10 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkImage *vkImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
-
+    VkImage *vkImages = static_cast<VkImage *>(eglSurfaceInterface->images);
     Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
 
+    // color images
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext, mCommandBufferManager);
 
@@ -194,9 +190,12 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         mSystemTextures.push_back(tex);
     }
 
+    // depth/stencil images
+    Texture *tex = CreateDepthStencil(eglSurfaceInterface);
+    fbo->SetDepthStencilAttachmentTexture(tex);
     fbo->SetTarget(GL_FRAMEBUFFER);
     fbo->SetIsSystem();
-    fbo->SetWriteBufferIndex(eglSurfaceInterface->nextImageIndex);
+    fbo->SetEGLSurfaceInterface(eglSurfaceInterface);
 
     return fbo;
 }
@@ -221,15 +220,46 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
     tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
 
-    GLenum glformat = VkFormatToGlInternalformat(depthStencilFormat);
-    tex->InitState();
-    tex->SetState(eglSurfaceInterface->width, eglSurfaceInterface->height,
+    if(!eglSurfaceInterface->depthBuffer) {
+        GLenum glformat = VkFormatToGlInternalformat(depthStencilFormat);
+        tex->InitState();
+        tex->SetState(eglSurfaceInterface->width, eglSurfaceInterface->height,
                   0, 0,
                   GlInternalFormatToGlFormat(glformat),
                   GlInternalFormatToGlType(glformat),
                   Texture::GetDefaultInternalAlignment(),
                   nullptr);
-    return tex->Allocate() ? tex : nullptr;
+        if(!tex->Allocate()) {
+            delete tex;
+            return nullptr;
+        }
+        VkImage vkImage = tex->GetImage()->GetImage();
+        eglSurfaceInterface->depthBuffer = reinterpret_cast<uint64_t>(vkImage);
+        tex->SetVkImage(vkImage);
+    } else {
+        VkImage vkImage = reinterpret_cast<VkImage>(eglSurfaceInterface->depthBuffer);
+        tex->SetVkImage(vkImage);
+        tex->CreateVkImageSubResourceRange();
+        tex->CreateVkImageView();
+    }
+    mSystemTextures.push_back(tex);
+    return tex;
+}
+
+void
+Context::DestroyAPISurfaceData(const vulkanAPI::vkContext_t *vkContext,
+                               EGLSurfaceInterface *eglSurfaceInterface)
+{
+    // destroy any surface resources allocated implicitly within GLES
+    if(eglSurfaceInterface &&
+       eglSurfaceInterface->contextRef == 0 &&
+       eglSurfaceInterface->depthBuffer != 0) {
+        VkImage vkImage = reinterpret_cast<VkImage>(eglSurfaceInterface->depthBuffer);
+        if(vkImage != VK_NULL_HANDLE) {
+            vkDestroyImage(vkContext->vkDevice, vkImage, nullptr);
+        }
+        eglSurfaceInterface->depthBuffer = 0;
+    }
 }
 
 void
@@ -243,17 +273,31 @@ Context::SetReadWriteSurfaces(EGLSurfaceInterface *eglReadSurfaceInterface, EGLS
     }
 
     FRAMEBUFFER_SURFACES_PAIR readWritePair = {eglReadSurfaceInterface, eglWriteSurfaceInterface};
+
     auto fboIter = mSystemFBOMap.find(readWritePair);
     if(fboIter != mSystemFBOMap.end()) {
         mWriteSurface = fboIter->first.first;
         mReadSurface = fboIter->first.second;
-        mWriteFBO = fboIter->second;
+
+        // if surface has been invalidated, recreate the FBO (e.g., resized on another context)
+        bool surfaceUpdated =
+                (eglWriteSurfaceInterface->width != static_cast<uint32_t>(mWriteFBO->GetWidth())) ||
+                (eglWriteSurfaceInterface->height != static_cast<uint32_t>(mWriteFBO->GetHeight()));
+        if(!surfaceUpdated) {
+            mWriteFBO = fboIter->second;
+        } else {
+            ReleaseSystemFBO();
+            mWriteFBO = CreateFBOFromEGLSurface(eglWriteSurfaceInterface);
+            mSystemFBOMap[readWritePair] = mWriteFBO;
+        }
+
     } else {
-        mWriteSurface = eglWriteSurfaceInterface->surface;
-        mReadSurface  = eglReadSurfaceInterface->surface;
+        mWriteSurface = eglWriteSurfaceInterface;
+        mReadSurface  = eglReadSurfaceInterface;
         mWriteFBO     = CreateFBOFromEGLSurface(eglWriteSurfaceInterface);
         mSystemFBOMap[readWritePair] = mWriteFBO;
     }
+
     SetSystemFramebuffer(mWriteFBO);
 }
 

@@ -37,7 +37,6 @@ private:
     GlslangCompiler* mSlangVertCompiler;
     GlslangCompiler* mSlangFragCompiler;
     GlslangLinker*   mSlangProgLinker;
-    ShaderConverter* mShaderConverter;
     ShaderReflection* mShaderReflection;
 
     bool mDumpVulkanShaderReflection;
@@ -55,6 +54,8 @@ private:
     std::vector<uint32_t> mFragSpv;
 
     void CleanUp(void);
+    bool CompileShader(ShaderProgram& shaderProgram, shader_type_t shaderType, bool isYInverted);
+    bool ReCompileShader(GlslangCompiler* Compiler, ShaderProgram& shaderProgram, shader_type_t shaderType);
     const char* ConvertShader(ShaderProgram& program, shader_type_t shaderType, bool isYInverted);
     void CompileShader400(ShaderProgram& program, shader_type_t shaderType);
     void DumpSlangProgramReflection(const glslang::TProgram* prog) const;

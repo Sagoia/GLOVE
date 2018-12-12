@@ -38,9 +38,9 @@ private:
     EGLContext_t           *mVGCurrentContext;
     EGLint                  mLastError;
 
-    void                    ResetCurrentContext(EGLContext_t* context);
-    void                    SetCurrentContext(EGLContext_t* eglContext);
+    void                    SetCurrentContext(EGLenum renderingAPI, EGLContext_t* eglContext);
     EGLBoolean              ValidateCurrentContext(class DisplayDriver* eglDriver, class EGLSurface_t* drawSurface, class EGLSurface_t* readSurface, EGLContext_t* eglContext);
+    void                    UpdateCurrentContextResourcesRef(EGLContext_t *eglContext, bool incrementCounters);
 
 public:
     RenderingThread(void);
@@ -53,12 +53,12 @@ public:
     EGLenum                 QueryAPI(void);
     EGLBoolean              WaitClient(void);
     EGLBoolean              ReleaseThread(void);
-    EGLContext              GetCurrentContext(void);
+    EGLContext_t           *GetCurrentContext(void);
     EGLSurface              GetCurrentSurface(EGLint readdraw);
     EGLDisplay              GetCurrentDisplay(void);
-    EGLContext              CreateContext(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list);
-    EGLBoolean              DestroyContext(EGLDisplay_t* dpy, EGLContext_t* eglContext);
-    EGLBoolean              QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLint attribute, EGLint *value);
+    EGLContext              CreateContext(class DisplayDriver* eglDriver, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list);
+    EGLBoolean              DestroyContext(class DisplayDriver* eglDriver, EGLContext_t* eglContext);
+    EGLBoolean              QueryContext(class DisplayDriver* eglDriver, EGLContext_t* eglContext, EGLint attribute, EGLint *value);
     EGLBoolean              MakeCurrent(class DisplayDriver* eglDriver, EGLDisplay_t* dpy, EGLSurface draw, EGLSurface read, EGLContext ctx);
     EGLBoolean              WaitGL(void);
     EGLBoolean              WaitNative(EGLint engine);

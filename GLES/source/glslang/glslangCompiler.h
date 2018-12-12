@@ -32,6 +32,11 @@
 #include "SPIRV/doc.h"
 #include "SPIRV/disassemble.h"
 
+// Treat EShMessages as bitmask
+inline EShMessages operator|(EShMessages lsh, EShMessages rsh) {
+    return static_cast<EShMessages>(static_cast<unsigned>(lsh) | static_cast<unsigned>(rsh));
+}
+
 class GlslangCompiler {
 private:
     glslang::TShader* mSlangShader;
@@ -46,7 +51,10 @@ public:
     ~GlslangCompiler();
 
     bool CompileShader(const char* const* source, TBuiltInResource* resources, EShLanguage language);
-    bool CompileShader400(const char* const* source, TBuiltInResource* resources, EShLanguage language);
+    bool CompileShader400(const char* const* source,
+                          TBuiltInResource* resources,
+                          EShLanguage language,
+                          EShMessages messages);
     const char* GetInfoLog();
 
     glslang::TShader* GetSlangShader()                                   const  { FUN_ENTRY(GL_LOG_TRACE); return mSlangShader; }

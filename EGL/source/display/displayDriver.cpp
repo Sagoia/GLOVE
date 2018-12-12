@@ -39,37 +39,47 @@ RenderingThread *callingThread = nullptr;
 
 void setCallingThread(RenderingThread *thread) { callingThread = thread; }
 
-DisplayDriver::DisplayDriver(void)
-: mActiveContext(nullptr), mWindowInterface(nullptr),
+DisplayDriver::DisplayDriver(EGLDisplay_t* eglDisplay)
+: mEGLDisplay(eglDisplay),
+  mActiveContext(nullptr), mWindowInterface(nullptr),
   mInitialized(false)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 }
 
-EGLBoolean DisplayDriver::CheckBadConfig(const EGLConfig_t* eglConfig) const
+DisplayDriver::~DisplayDriver(void)
 {
+    FUN_ENTRY(EGL_LOG_TRACE);
+}
+
+EGLBoolean
+DisplayDriver::CheckBadConfig(const EGLConfig_t* eglConfig) const
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
     if(eglConfig == nullptr) {
         currentThread.RecordError(EGL_BAD_CONFIG);
         return EGL_FALSE;
     }
 
-    const auto iter = std::find(mConfigList.begin(), mConfigList.end(), eglConfig);
-    if(iter == mConfigList.end()) {
+    if(mDisplayDriverResourceManager.FindEGLConfig(eglConfig) == EGL_FALSE) {
         currentThread.RecordError(EGL_BAD_CONFIG);
         return EGL_FALSE;
     }
     return EGL_TRUE;
 }
 
-EGLBoolean DisplayDriver::CheckBadSurface(const EGLSurface_t *surface) const
+EGLBoolean
+DisplayDriver::CheckBadSurface(const EGLSurface_t *eglSurface) const
 {
-    if(surface == nullptr) {
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    if(eglSurface == nullptr) {
         currentThread.RecordError(EGL_BAD_SURFACE);
         return EGL_FALSE;
     }
 
-    auto iter = std::find(mSurfaceList.begin(), mSurfaceList.end(), surface);
-    if(iter == mSurfaceList.end()) {
+    if(mDisplayDriverResourceManager.FindEGLSurface(eglSurface) == EGL_FALSE) {
         currentThread.RecordError(EGL_BAD_SURFACE);
         return EGL_FALSE;
     }
@@ -77,7 +87,24 @@ EGLBoolean DisplayDriver::CheckBadSurface(const EGLSurface_t *surface) const
 }
 
 EGLBoolean
-DisplayDriver::Initialize(EGLDisplay_t* dpy, EGLint *major, EGLint *minor)
+DisplayDriver::CheckBadContext(const EGLContext_t* eglContext) const
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    if(eglContext == nullptr) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+
+    if(mDisplayDriverResourceManager.FindEGLContext(eglContext) == EGL_FALSE) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+DisplayDriver::Initialize(EGLint *major, EGLint *minor)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -100,9 +127,11 @@ DisplayDriver::Initialize(EGLDisplay_t* dpy, EGLint *major, EGLint *minor)
 }
 
 EGLBoolean
-DisplayDriver::Terminate(EGLDisplay_t* dpy)
+DisplayDriver::Terminate()
 {
     FUN_ENTRY(DEBUG_DEPTH);
+
+    mDisplayDriverResourceManager.CleanResources(mWindowInterface);
 
     if(mWindowInterface->Terminate() == EGL_FALSE) {
         return EGL_FALSE;
@@ -118,16 +147,33 @@ DisplayDriver::Terminate(EGLDisplay_t* dpy)
     return EGL_TRUE;
 }
 
-void DisplayDriver::UpdateConfigMap(EGLConfig_t* eglConfig)
+EGLContext
+DisplayDriver::CreateContext(EGLenum rendering_api, EGLConfig_t* config, const EGLint* attribList)
 {
-    const auto iter = std::find(mConfigList.begin(), mConfigList.end(), eglConfig);
-    if(iter == mConfigList.end()) {
-        mConfigList.push_back(eglConfig);
-    }
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    EGLContext_t *eglContext = mDisplayDriverResourceManager.AddEGLContext(mEGLDisplay, rendering_api, config, attribList);
+    return static_cast<EGLContext>(eglContext);
 }
 
 EGLBoolean
-DisplayDriver::GetConfigs(EGLDisplay_t* dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config)
+DisplayDriver::DestroyContext(EGLContext_t* eglContext)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    return mDisplayDriverResourceManager.RemoveEGLContext(eglContext);
+}
+
+void
+DisplayDriver::CleanMarkedResources()
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    mDisplayDriverResourceManager.CleanMarkedResources(mWindowInterface);
+}
+
+EGLBoolean
+DisplayDriver::GetConfigs(EGLConfig *configs, EGLint config_size, EGLint *num_config)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -152,19 +198,19 @@ DisplayDriver::GetConfigs(EGLDisplay_t* dpy, EGLConfig *configs, EGLint config_s
     // set configs and update the config list
     for(int32_t i = 0; i < count; ++i) {
         configs[i] = (EGLConfig)&EglConfigs[i];
-        UpdateConfigMap((EGLConfig_t*)&EglConfigs[i]);
+        mDisplayDriverResourceManager.AddEGLConfig((EGLConfig_t*)&EglConfigs[i]);
     }
 
     return EGL_TRUE;
 }
 
 EGLBoolean
-DisplayDriver::ChooseConfig(EGLDisplay_t* dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config)
+DisplayDriver::ChooseConfig(const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
     EGLConfig_t criteria;
-    if(ParseConfigAttribList(&criteria, dpy, attrib_list) == EGL_FALSE) {
+    if(ParseConfigAttribList(&criteria, mEGLDisplay, attrib_list) == EGL_FALSE) {
         currentThread.RecordError(EGL_BAD_ATTRIBUTE);
         return EGL_FALSE;
     }
@@ -180,14 +226,14 @@ DisplayDriver::ChooseConfig(EGLDisplay_t* dpy, const EGLint *attrib_list, EGLCon
     // update the config list
     EGLConfig_t** matchedConfigs = reinterpret_cast<EGLConfig_t **>(configs);
     for (int i = 0; i < *num_config; ++i) {
-        UpdateConfigMap(matchedConfigs[i]);
+        mDisplayDriverResourceManager.AddEGLConfig(matchedConfigs[i]);
     }
 
     return EGL_TRUE;
 }
 
 EGLBoolean
-DisplayDriver::GetConfigAttrib(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLint attribute, EGLint *value)
+DisplayDriver::GetConfigAttrib(EGLConfig_t* eglConfig, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -201,13 +247,14 @@ DisplayDriver::GetConfigAttrib(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLint
 }
 
 EGLSurface
-DisplayDriver::CreateWindowSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativeWindowType win, const EGLint *attrib_list)
+DisplayDriver::CreateWindowSurface(EGLConfig_t* eglConfig, EGLNativeWindowType win, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLSurface_t *eglSurface = new EGLSurface_t();
+    EGLSurface_t *eglSurface = mDisplayDriverResourceManager.AddEGLSurface();
     if(!eglSurface) {
         currentThread.RecordError(EGL_BAD_ALLOC);
+        delete eglSurface;
         return EGL_NO_SURFACE;
     }
 
@@ -221,7 +268,7 @@ DisplayDriver::CreateWindowSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EG
     PlatformResources *platformResources = PlatformFactory::GetResources();
     eglSurface->SetPlatformResources(platformResources);
 
-    if(mWindowInterface->CreateSurface(dpy, win, eglSurface) == EGL_FALSE) {
+    if(mWindowInterface->CreateSurface(mEGLDisplay, win, eglSurface) == EGL_FALSE) {
         delete eglSurface;
         return EGL_NO_SURFACE;
     }
@@ -233,13 +280,11 @@ DisplayDriver::CreateWindowSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EG
 
     CreateEGLSurfaceInterface(eglSurface);
 
-    mSurfaceList.push_back(eglSurface);
-
     return static_cast<EGLSurface>(eglSurface);
 }
 
 EGLSurface
-DisplayDriver::CreatePbufferSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, const EGLint *attrib_list)
+DisplayDriver::CreatePbufferSurface(EGLConfig_t* eglConfig, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -268,7 +313,7 @@ DisplayDriver::CreatePbufferSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, c
 }
 
 EGLSurface
-DisplayDriver::CreatePixmapSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list)
+DisplayDriver::CreatePixmapSurface(EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -289,41 +334,36 @@ DisplayDriver::CreateEGLSurfaceInterface(EGLSurface_t *eglSurface)
 
     surfaceInterface->surface = reinterpret_cast<void *>(eglSurface);
     if(eglSurface->GetType() == EGL_WINDOW_BIT) {
-        surfaceInterface->images          = eglSurface->GetPlatformSurfaceImages();
-        surfaceInterface->imageCount      = eglSurface->GetPlatformSurfaceImageCount();
+        surfaceInterface->images            = eglSurface->GetPlatformSurfaceImages();
+        surfaceInterface->imageCount        = eglSurface->GetPlatformSurfaceImageCount();
+        surfaceInterface->depthBuffer       = 0;
+        surfaceInterface->contextRef        = 0;
     }
-    surfaceInterface->type                = eglSurface->GetType();
-    surfaceInterface->width               = eglSurface->GetWidth();
-    surfaceInterface->height              = eglSurface->GetHeight();
-    surfaceInterface->depthSize           = eglSurface->GetDepthSize();
-    surfaceInterface->stencilSize         = eglSurface->GetStencilSize();
-    surfaceInterface->surfaceColorFormat  = eglSurface->GetColorFormat();
-    surfaceInterface->nextImageIndex      = eglSurface->GetCurrentImageIndex();
+    surfaceInterface->type                  = eglSurface->GetType();
+    surfaceInterface->width                 = eglSurface->GetWidth();
+    surfaceInterface->height                = eglSurface->GetHeight();
+    surfaceInterface->depthSize             = eglSurface->GetDepthSize();
+    surfaceInterface->stencilSize           = eglSurface->GetStencilSize();
+    surfaceInterface->surfaceColorFormat    = eglSurface->GetColorFormat();
+    surfaceInterface->nextImageIndex        = eglSurface->GetCurrentImageIndex();
 }
 
 EGLBoolean
-DisplayDriver::DestroySurface(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)
+DisplayDriver::DestroySurface(EGLSurface_t* eglSurface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    mWindowInterface->DestroySurfaceImages(eglSurface);
-    mWindowInterface->DestroySurface(eglSurface);
+    eglSurface->MarkForDeletion();
 
-    if(eglSurface->GetPlatformResources() != nullptr) {
-        delete eglSurface->GetPlatformResources();
-    }
-    delete eglSurface;
-
-    auto iter = std::find(mSurfaceList.begin(), mSurfaceList.end(), eglSurface);
-    if (iter != mSurfaceList.end()) {
-        mSurfaceList.erase(iter);
+    if(eglSurface->FreeForDeletion()) {
+        mDisplayDriverResourceManager.RemoveEGLSurface(mWindowInterface, eglSurface);
     }
 
     return EGL_TRUE;
 }
 
 EGLBoolean
-DisplayDriver::QuerySurface(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint attribute, EGLint *value)
+DisplayDriver::QuerySurface(EGLSurface_t* eglSurface, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -336,7 +376,7 @@ DisplayDriver::QuerySurface(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
 }
 
 EGLSurface
-DisplayDriver::CreatePbufferFromClientBuffer(EGLDisplay_t* dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig_t* eglConfig, const EGLint *attrib_list)
+DisplayDriver::CreatePbufferFromClientBuffer(EGLenum buftype, EGLClientBuffer buffer, EGLConfig_t* eglConfig, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
     //TODO: Currently there is no support for OpenVG
@@ -347,7 +387,7 @@ DisplayDriver::CreatePbufferFromClientBuffer(EGLDisplay_t* dpy, EGLenum buftype,
 }
 
 EGLBoolean
-DisplayDriver::SurfaceAttrib(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint attribute, EGLint value)
+DisplayDriver::SurfaceAttrib(EGLSurface_t* eglSurface, EGLint attribute, EGLint value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -381,7 +421,7 @@ DisplayDriver::SurfaceAttrib(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint
 }
 
 EGLBoolean
-DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint buffer)
+DisplayDriver::BindTexImage(EGLSurface_t* eglSurface, EGLint buffer)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -417,7 +457,7 @@ DisplayDriver::BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint 
 }
 
 EGLBoolean
-DisplayDriver::ReleaseTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint buffer)
+DisplayDriver::ReleaseTexImage(EGLSurface_t* eglSurface, EGLint buffer)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -437,7 +477,7 @@ DisplayDriver::ReleaseTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLi
 }
 
 EGLBoolean
-DisplayDriver::SwapInterval(EGLDisplay_t* dpy, EGLint interval)
+DisplayDriver::SwapInterval(EGLint interval)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -456,14 +496,14 @@ DisplayDriver::SwapInterval(EGLDisplay_t* dpy, EGLint interval)
     if(interval != surface->GetSwapInterval()) {
         surface->ClampSwapInterval(interval);
         mActiveContext->Finish();
-        UpdateSurface(dpy, surface);
+        UpdateSurface(surface);
     }
     return EGL_TRUE;
 }
 
 
 EGLBoolean
-DisplayDriver::SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)
+DisplayDriver::SwapBuffers(EGLSurface_t* eglSurface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -478,36 +518,36 @@ DisplayDriver::SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)
     mActiveContext->Finish();
 
     if(mWindowInterface->PresentImage(eglSurface) == EGL_FALSE) {
-        UpdateSurface(dpy, eglSurface);
+        UpdateSurface(eglSurface);
     }
 
     uint32_t imageIndex;
     while(mWindowInterface->AcquireNextImage(eglSurface, &imageIndex) == EGL_FALSE) {
-        UpdateSurface(dpy, eglSurface);
+        UpdateSurface(eglSurface);
     }
 
-    mActiveContext->SetNextImageIndex(imageIndex);
+    eglSurface->GetEGLSurfaceInterface()->nextImageIndex = imageIndex;
 
     return EGL_TRUE;
 }
 
 void
-DisplayDriver::UpdateSurface(EGLDisplay_t* dpy, EGLSurface_t* eglSurface)
+DisplayDriver::UpdateSurface(EGLSurface_t* eglSurface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
     assert(mActiveContext != nullptr);
     assert(mWindowInterface != nullptr);
 
-    mActiveContext->Release();
+    mActiveContext->ReleaseSurfaceResources();
     mWindowInterface->DestroySurfaceImages(eglSurface);
     mWindowInterface->AllocateSurfaceImages(eglSurface);
     CreateEGLSurfaceInterface(eglSurface);
-    mActiveContext->MakeCurrent(dpy, eglSurface, eglSurface);
+    mActiveContext->MakeCurrent(mEGLDisplay, eglSurface, eglSurface);
 }
 
 EGLBoolean
-DisplayDriver::CopyBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLNativePixmapType target)
+DisplayDriver::CopyBuffers(EGLSurface_t* eglSurface, EGLNativePixmapType target)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -521,7 +561,7 @@ DisplayDriver::CopyBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLNativ
 }
 
 EGLImageKHR
-DisplayDriver::CreateImageNativeBufferAndroid(EGLDisplay_t* dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
+DisplayDriver::CreateImageNativeBufferAndroid(EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -565,13 +605,13 @@ DisplayDriver::CreateImageNativeBufferAndroid(EGLDisplay_t* dpy, EGLContext ctx,
 }
 
 EGLImageKHR
-DisplayDriver::CreateImageKHR(EGLDisplay_t* dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
+DisplayDriver::CreateImageKHR(EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
     switch(target) {
         case EGL_NATIVE_BUFFER_ANDROID:
-            return CreateImageNativeBufferAndroid(dpy, ctx, target, buffer, attrib_list);
+            return CreateImageNativeBufferAndroid(ctx, target, buffer, attrib_list);
         case EGL_GL_TEXTURE_2D_KHR:
         case EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_X_KHR:
         case EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_X_KHR:
@@ -591,7 +631,7 @@ DisplayDriver::CreateImageKHR(EGLDisplay_t* dpy, EGLContext ctx, EGLenum target,
 }
 
 EGLBoolean
-DisplayDriver::DestroyImageKHR(EGLDisplay_t* dpy, EGLImageKHR image)
+DisplayDriver::DestroyImageKHR(EGLImageKHR image)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -617,7 +657,7 @@ DisplayDriver::DestroyImageKHR(EGLDisplay_t* dpy, EGLImageKHR image)
 }
 
 EGLSyncKHR
-DisplayDriver::CreateSyncKHR(EGLDisplay_t* dpy, EGLenum type, const EGLint *attrib_list)
+DisplayDriver::CreateSyncKHR(EGLenum type, const EGLint *attrib_list)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
@@ -625,7 +665,7 @@ DisplayDriver::CreateSyncKHR(EGLDisplay_t* dpy, EGLenum type, const EGLint *attr
 }
 
 EGLBoolean
-DisplayDriver::DestroySyncKHR(EGLDisplay_t* dpy, EGLSyncKHR sync)
+DisplayDriver::DestroySyncKHR(EGLSyncKHR sync)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
@@ -633,7 +673,7 @@ DisplayDriver::DestroySyncKHR(EGLDisplay_t* dpy, EGLSyncKHR sync)
 }
 
 EGLint
-DisplayDriver::ClientWaitSyncKHR(EGLDisplay_t* dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
+DisplayDriver::ClientWaitSyncKHR(EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 

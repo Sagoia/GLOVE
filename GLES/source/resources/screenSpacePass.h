@@ -28,7 +28,7 @@
 #include "utils/glLogger.h"
 #include "bufferObject.h"
 #include "vulkan/context.h"
-#include "vulkan/cbManager.h"
+#include "vulkan/commandBufferManager.h"
 #include "vulkan/renderPass.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/pipelineCache.h"

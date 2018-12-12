@@ -27,6 +27,7 @@
 #include "EGL/egl.h"
 #include <cmath>
 #include <algorithm>
+#include "eglRefObject.h"
 #include "eglContext.h"
 #include "eglConfig.h"
 #include "rendering_api/rendering_api.h"
@@ -38,7 +39,7 @@
 #endif // DEBUG_DEPTH
 #define DEBUG_DEPTH EGL_LOG_DEBUG
 
-class EGLSurface_t
+class EGLSurface_t : public EGLRefObject
 {
 private:
     EGLConfig_t                     *Config;
@@ -82,7 +83,7 @@ private:
 
 public:
     EGLSurface_t();
-    ~EGLSurface_t() {}
+    ~EGLSurface_t();
 
     EGLBoolean                       InitSurface(EGLint type, EGLConfig_t *config, const EGLint *attrib_list, EGLint* error);
 
@@ -107,6 +108,7 @@ public:
     inline void                      SetSwapBehavior(EGLint swapBehavior)                       { FUN_ENTRY(EGL_LOG_TRACE); SwapBehavior = swapBehavior; }
     inline void                      SetBindToTexture(EGLint bindToTexture)                     { FUN_ENTRY(EGL_LOG_TRACE); BindToTexture = bindToTexture; }
            void                      ClampSwapInterval(EGLint swapInterval);
+           void                      UpdateRef(bool increaseRef) override;
 
     inline EGLint                    GetType()                                            const { FUN_ENTRY(EGL_LOG_TRACE); return Type; }
     inline EGLint                    GetWidth()                                           const { FUN_ENTRY(EGL_LOG_TRACE); return Width; }

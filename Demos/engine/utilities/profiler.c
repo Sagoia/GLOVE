@@ -45,7 +45,7 @@ double GpuTimer						(const char *title)
     double timePerFrame      = 0.0;
     static double totalTimePerFrame = 0.0;
 
-    char  str[80];
+    char  str[256];
 
     if(t0 == 0.0) {
         gettimeofday(&tim, NULL);

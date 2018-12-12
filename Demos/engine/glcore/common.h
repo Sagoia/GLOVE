@@ -28,7 +28,14 @@
 #define SOURCES_PATH       "../"
 #define SHADERS_PATH       "assets/shaders/"
 #define TEXTURES_PATH      "assets/textures/"
-#define EXECUTABLE_NAME(name) ( (strchr(name, '/')) ? (strchr(name, '/') + 1) : (name) )
+
+static char*
+getExecutableName(char* path) {
+    uintptr_t delimiterPos = (uintptr_t)(strrchr(&path[0], '/'));
+    uintptr_t pos = delimiterPos > 0 ? delimiterPos - (uintptr_t)&path[0] + 1 : delimiterPos;
+    return &path[pos];
+}
+#define EXECUTABLE_NAME(name) getExecutableName(name);
 
 static const GLfloat COLOR_BLACK [] = { 0.0f, 0.0f, 0.0f, 1.0f };
 static const GLfloat COLOR_WHITE [] = { 1.0f, 1.0f, 1.0f, 1.0f };

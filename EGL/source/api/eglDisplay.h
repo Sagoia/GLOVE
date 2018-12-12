@@ -49,13 +49,6 @@ struct EGLDisplay_t {
         display_id(nullptr), display(nullptr),
         displayDriver(nullptr), created(false)
     { }
-
-    static struct EGLDisplay_t globalDisplayList[MAX_NUM_DISPLAYS];
-    static EGLDisplay_t* GetDisplayByID(EGLNativeDisplayType display_id);
-    static EGLDisplay_t* FindDisplay(EGLDisplay display);
-    static EGLBoolean InitializeDisplay(EGLDisplay dpy, void* displayDriver);
-    static void TerminateDisplay(EGLDisplay display);
-    static EGLBoolean CheckBadDisplay(const EGLDisplay_t* eglDisplay);
 };
 
 #endif // __DISPLAY_CONTAINER_H__

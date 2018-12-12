@@ -22,11 +22,13 @@
  */
 
 #include "eglSurface.h"
+#include <algorithm>
 
 #define NUMBER_OF_MIP_LEVELS(w, h)                      (std::floor(std::log2(std::max((w),(h)))) + 1)
 
-EGLSurface_t::EGLSurface_t()
-: Config(nullptr), Type(0), Width(0), Height(0),
+EGLSurface_t::EGLSurface_t():
+EGLRefObject (),
+Config(nullptr), Type(0), Width(0), Height(0),
 DepthSize(0), StencilSize(0), RedSize(0), GreenSize(0), BlueSize(0), AlphaSize(0),
 TextureFormat(0), TextureTarget(0), MipmapTexture(EGL_FALSE),
 LargestPbuffer(EGL_FALSE), RenderBuffer(0), VGAlphaFormat(0), VGColorspace(0),
@@ -37,6 +39,11 @@ CurrentImageIndex(0), mPlatformResources(nullptr)
     FUN_ENTRY(EGL_LOG_TRACE);
 
     memset(&SurfaceInterface, 0, sizeof(SurfaceInterface));
+}
+
+EGLSurface_t::~EGLSurface_t()
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
 }
 
 /**
@@ -350,7 +357,7 @@ EGLSurface_t::QuerySurface(EGLint attribute, EGLint *value)
 void
 EGLSurface_t::SetMipmapLevel(EGLint mipmapLevel)
 {
-    FUN_ENTRY(EGL_LOG_TRACE);
+    FUN_ENTRY(DEBUG_DEPTH);
 
     EGLint maxMipmapLevel = NUMBER_OF_MIP_LEVELS(Width, Height);
     MipmapLevel = std::max(0, std::min(mipmapLevel, maxMipmapLevel));
@@ -359,8 +366,19 @@ EGLSurface_t::SetMipmapLevel(EGLint mipmapLevel)
 void
 EGLSurface_t::ClampSwapInterval(EGLint interval)
 {
+    FUN_ENTRY(DEBUG_DEPTH);
+
     EGLint minInterval     = GetConfigKey(Config, EGL_MIN_SWAP_INTERVAL);
     EGLint maxInterval     = GetConfigKey(Config, EGL_MAX_SWAP_INTERVAL);
     EGLint clampedInterval = std::max(minInterval, std::min(interval, maxInterval));
     SwapInterval           = clampedInterval;
+}
+
+void
+EGLSurface_t::UpdateRef(bool increaseRef)
+{
+    FUN_ENTRY(DEBUG_DEPTH);
+
+    EGLRefObject::UpdateRef(increaseRef);
+    SurfaceInterface.contextRef = mRefCounter;
 }

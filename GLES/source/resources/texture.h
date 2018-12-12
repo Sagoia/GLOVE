@@ -29,7 +29,7 @@
 #include "bufferObject.h"
 #include "vulkan/sampler.h"
 #include "vulkan/imageView.h"
-#include "vulkan/cbManager.h"
+#include "vulkan/commandBufferManager.h"
 #include "utils/GlToVkConverter.h"
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))

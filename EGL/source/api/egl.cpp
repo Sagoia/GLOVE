@@ -21,7 +21,7 @@
  *
  */
 
-#include "display/displayDriversContainer.h"
+#include "eglGlobalResourceManager.h"
 #include "api/eglDisplay.h"
 #include "display/displayDriver.h"
 #include "utils/eglLogger.h"
@@ -35,18 +35,19 @@
 #define DEBUG_DEPTH                          EGL_LOG_INFO
 
 RenderingThread currentThread;
+EGLGlobalResourceManager eglGlobalResourceManager;
 
 #define THREAD_EXEC_RETURN(func)             FUN_ENTRY(DEBUG_DEPTH);                                                      \
                                              return currentThread.func;
 
 #define CHECK_BAD_DISPLAY(eglDisplayPtr, dpy, erroRetValue)                                                               \
-                                             EGLDisplay_t *eglDisplayPtr = EGLDisplay_t::FindDisplay(dpy);                \
-                                             if(EGLDisplay_t::CheckBadDisplay(eglDisplayPtr) == EGL_FALSE)                \
+                                             EGLDisplay_t *eglDisplayPtr = eglGlobalResourceManager.FindDisplay(dpy);     \
+                                             if(eglGlobalResourceManager.CheckBadDisplay(eglDisplayPtr) == EGL_FALSE)     \
                                              { return erroRetValue; }
 
-#define CHECK_UNINITIALIZED_DISPLAY(eglDriverPtr, eglDisplayPtr, erroRetValue)                                                         \
-                                             DisplayDriver *eglDriverPtr = DisplayDriversContainer::FindDisplayDriver(eglDisplayPtr);  \
-                                             if(DisplayDriver::CheckNonInitializedDisplay(eglDriver) == EGL_FALSE)                     \
+#define CHECK_UNINITIALIZED_DISPLAY(eglDriverPtr, eglDisplayPtr, erroRetValue)                                                  \
+                                             DisplayDriver *eglDriverPtr = eglGlobalResourceManager.FindDriver(eglDisplayPtr);  \
+                                             if(DisplayDriver::CheckNonInitializedDisplay(eglDriver) == EGL_FALSE)              \
                                              { return erroRetValue; }
 
 #define CHECK_BAD_CONFIG(eglDriverPtr, eglConfigPtr, eglConfig, erroRetValue)                                             \
@@ -59,26 +60,17 @@ RenderingThread currentThread;
                                              if(eglDriverPtr->CheckBadSurface(eglSurfacePtr) == EGL_FALSE)                \
                                              { return erroRetValue; }
 
-#define CHECK_BAD_CONTEXT(eglContextPtr, eglContext, erroRetValue)                                                        \
+#define CHECK_BAD_CONTEXT(eglDriverPtr, eglContextPtr, eglContext, erroRetValue)                                          \
                                              EGLContext_t *eglContextPtr = static_cast<EGLContext_t*>(eglContext);        \
-                                             if(EGLContext_t::CheckBadContext(eglContextPtr) == EGL_FALSE)                \
+                                             if(eglDriverPtr->CheckBadContext(eglContextPtr) == EGL_FALSE)                \
                                              { return erroRetValue; }
-
-static void cleanUpResources()
-{
-    FUN_ENTRY(EGL_LOG_DEBUG);
-
-    if(DisplayDriversContainer::IsEmpty()) {
-        DisplayDriversContainer::Destroy();
-    };
-}
 
 EGLAPI EGLDisplay EGLAPIENTRY
 eglGetDisplay(EGLNativeDisplayType display_id)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLDisplay_t *eglDisplay = EGLDisplay_t::GetDisplayByID(display_id);
+    EGLDisplay_t *eglDisplay = eglGlobalResourceManager.GetDisplayByID(display_id);
     return reinterpret_cast<EGLDisplay>(eglDisplay);
 }
 
@@ -140,7 +132,7 @@ eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context, con
     CHECK_BAD_CONFIG(eglDriver, eglConfig, config, EGL_NO_CONTEXT)
     EGLContext_t* eglShareContext = static_cast<EGLContext_t*>(share_context);
     // TODO::check for valid context
-    THREAD_EXEC_RETURN(CreateContext(eglDisplay, eglConfig, eglShareContext, attrib_list));
+    THREAD_EXEC_RETURN(CreateContext(eglDriver, eglConfig, eglShareContext, attrib_list));
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -150,8 +142,8 @@ eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    CHECK_BAD_CONTEXT(eglContext, ctx, EGL_FALSE)
-    THREAD_EXEC_RETURN(DestroyContext(eglDisplay, eglContext));
+    CHECK_BAD_CONTEXT(eglDriver, eglContext, ctx, EGL_FALSE)
+    THREAD_EXEC_RETURN(DestroyContext(eglDriver, eglContext));
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -160,7 +152,7 @@ eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
     FUN_ENTRY(DEBUG_DEPTH);
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
-    DisplayDriver *eglDriver = DisplayDriversContainer::FindDisplayDriver(eglDisplay);
+    DisplayDriver *eglDriver = eglGlobalResourceManager.FindDriver(eglDisplay);
 
     // check for non initialized display only if context/surfaces are not nullptr
     if((ctx != EGL_NO_CONTEXT || draw != EGL_NO_SURFACE || read != EGL_NO_SURFACE) &&
@@ -168,11 +160,7 @@ eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
         return EGL_FALSE;
     }
 
-    EGLBoolean res = currentThread.MakeCurrent(eglDriver, eglDisplay, draw, read, ctx);
-    if(res == EGL_TRUE) {
-        eglDriver->SetActiveContext(ctx);
-    }
-    return res;
+    return currentThread.MakeCurrent(eglDriver, eglDisplay, draw, read, ctx);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -182,8 +170,8 @@ eglQueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value)
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    CHECK_BAD_CONTEXT(eglContext, ctx, EGL_FALSE)
-    THREAD_EXEC_RETURN(QueryContext(eglDisplay, eglContext, attribute, value));
+    CHECK_BAD_CONTEXT(eglDriver, eglContext, ctx, EGL_FALSE)
+    THREAD_EXEC_RETURN(QueryContext(eglDriver, eglContext, attribute, value));
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -204,10 +192,11 @@ eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     FUN_ENTRY(DEBUG_DEPTH);
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
-    DisplayDriver *eglDriver = DisplayDriversContainer::AddDisplayDriver(eglDisplay);
-    EGLBoolean res = eglDriver->Initialize(eglDisplay, major, minor);
+    // TODO:: EGLDisplay and DisplayDriver could be fused together, as they are 1-1
+    DisplayDriver *eglDriver = eglGlobalResourceManager.AddDriver(eglDisplay);
+    EGLBoolean res = eglDriver->Initialize(major, minor);
     if(eglDriver->Initialized()) {
-        EGLDisplay_t::InitializeDisplay(dpy, eglDriver);
+        eglGlobalResourceManager.InitializeDisplay(dpy, eglDriver);
     }
     return res;
 }
@@ -218,16 +207,18 @@ eglTerminate(EGLDisplay dpy)
     FUN_ENTRY(DEBUG_DEPTH);
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
-    DisplayDriver *eglDriver = DisplayDriversContainer::FindDisplayDriver(eglDisplay);
+    DisplayDriver *eglDriver = eglGlobalResourceManager.FindDriver(eglDisplay);
     if(eglDriver == nullptr || !eglDriver->Initialized()) {
         return EGL_FALSE;
     }
 
-    EGLBoolean res = eglDriver->Terminate(eglDisplay);
-    DisplayDriversContainer::RemoveDisplayDriver(eglDisplay);
-    cleanUpResources();
+    // Note: eglTerminate specifies that if any display-related resources are current,
+    // termination should occur later on, during eglReleaseThread or eglMakeCurrent
+    // This is not yet supported and termination of these resources is forced here.
+    EGLBoolean res = eglDriver->Terminate();
+    eglGlobalResourceManager.RemoveDriver(eglDisplay);
     if(res == EGL_TRUE) {
-       EGLDisplay_t::TerminateDisplay(dpy);
+       eglGlobalResourceManager.TerminateDisplay(dpy);
     }
 
     return res;
@@ -261,7 +252,7 @@ eglGetConfigs(EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *nu
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    return eglDriver->GetConfigs(eglDisplay, configs, config_size, num_config);
+    return eglDriver->GetConfigs(configs, config_size, num_config);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -271,7 +262,7 @@ eglChooseConfig(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, E
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    return eglDriver->ChooseConfig(eglDisplay, attrib_list, configs, config_size, num_config);
+    return eglDriver->ChooseConfig(attrib_list, configs, config_size, num_config);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -282,7 +273,7 @@ eglGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *v
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_CONFIG(eglDriver, eglConfig, config, EGL_FALSE)
-    return eglDriver->GetConfigAttrib(eglDisplay, eglConfig, attribute, value);
+    return eglDriver->GetConfigAttrib(eglConfig, attribute, value);
 }
 
 EGLAPI EGLSurface EGLAPIENTRY
@@ -293,7 +284,7 @@ eglCreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_NO_SURFACE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_NO_SURFACE)
     CHECK_BAD_CONFIG(eglDriver, eglConfig, config, EGL_NO_SURFACE)
-    return eglDriver->CreateWindowSurface(eglDisplay, eglConfig, win, attrib_list);
+    return eglDriver->CreateWindowSurface(eglConfig, win, attrib_list);
 }
 
 EGLAPI EGLSurface EGLAPIENTRY
@@ -304,7 +295,7 @@ eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config, const EGLint *attrib_l
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_NO_SURFACE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_NO_SURFACE)
     CHECK_BAD_CONFIG(eglDriver, eglConfig, config, EGL_NO_SURFACE)
-    return eglDriver->CreatePbufferSurface(eglDisplay, eglConfig, attrib_list);
+    return eglDriver->CreatePbufferSurface(eglConfig, attrib_list);
 }
 
 EGLAPI EGLSurface EGLAPIENTRY
@@ -315,7 +306,7 @@ eglCreatePixmapSurface(EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pix
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_NO_SURFACE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_NO_SURFACE)
     CHECK_BAD_CONFIG(eglDriver, eglConfig, config, EGL_NO_SURFACE)
-    return eglDriver->CreatePixmapSurface(eglDisplay, eglConfig, pixmap, attrib_list);
+    return eglDriver->CreatePixmapSurface(eglConfig, pixmap, attrib_list);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -326,7 +317,7 @@ eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->DestroySurface(eglDisplay, eglSurface);
+    return eglDriver->DestroySurface(eglSurface);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -337,7 +328,8 @@ eglQuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *va
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->QuerySurface(eglDisplay, eglSurface, attribute, value);
+    return eglDriver->QuerySurface(eglSurface, attribute, value);
+
 }
 
 EGLAPI EGLSurface EGLAPIENTRY
@@ -348,7 +340,7 @@ eglCreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EGLClientBuffe
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_NO_SURFACE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_NO_SURFACE)
     CHECK_BAD_CONFIG(eglDriver, eglConfig, config, EGL_NO_SURFACE)
-    return eglDriver->CreatePbufferFromClientBuffer(eglDisplay, buftype, buffer, eglConfig, attrib_list);
+    return eglDriver->CreatePbufferFromClientBuffer(buftype, buffer, eglConfig, attrib_list);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -359,7 +351,7 @@ eglSurfaceAttrib(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint va
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->SurfaceAttrib(eglDisplay, eglSurface, attribute, value);
+    return eglDriver->SurfaceAttrib(eglSurface, attribute, value);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -370,7 +362,7 @@ eglBindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->BindTexImage(eglDisplay, eglSurface, buffer);
+    return eglDriver->BindTexImage(eglSurface, buffer);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -381,7 +373,7 @@ eglReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->ReleaseTexImage(eglDisplay, eglSurface, buffer);
+    return eglDriver->ReleaseTexImage(eglSurface, buffer);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -391,7 +383,7 @@ eglSwapInterval(EGLDisplay dpy, EGLint interval)
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    return eglDriver->SwapInterval(eglDisplay, interval);
+    return eglDriver->SwapInterval(interval);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -402,7 +394,7 @@ eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->SwapBuffers(eglDisplay, eglSurface);
+    return eglDriver->SwapBuffers(eglSurface);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -413,7 +405,7 @@ eglCopyBuffers(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target)
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
     CHECK_BAD_SURFACE(eglDriver, eglSurface, surface, EGL_FALSE)
-    return eglDriver->CopyBuffers(eglDisplay, eglSurface, target);
+    return eglDriver->CopyBuffers(eglSurface, target);
 }
 
 EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
@@ -452,8 +444,8 @@ eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffe
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_NO_IMAGE_KHR)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_NO_IMAGE_KHR)
-    CHECK_BAD_CONTEXT(eglContext, ctx, EGL_NO_IMAGE_KHR)
-    return eglDriver->CreateImageKHR(eglDisplay, ctx, target, buffer, attrib_list);
+    CHECK_BAD_CONTEXT(eglDriver, eglContext, ctx, EGL_NO_IMAGE_KHR)
+    return eglDriver->CreateImageKHR(ctx, target, buffer, attrib_list);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -463,7 +455,7 @@ eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    return eglDriver->DestroyImageKHR(eglDisplay, image);
+    return eglDriver->DestroyImageKHR(image);
 }
 
 //TODO: Implement the KHR_fence_sync extension
@@ -474,7 +466,7 @@ eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_NO_SYNC_KHR)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_NO_SYNC_KHR)
-    return eglDriver->CreateSyncKHR(eglDisplay, type, attrib_list);
+    return eglDriver->CreateSyncKHR(type, attrib_list);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY
@@ -484,7 +476,7 @@ eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    return eglDriver->DestroySyncKHR(eglDisplay, sync);
+    return eglDriver->DestroySyncKHR(sync);
 }
 
 EGLAPI EGLint EGLAPIENTRY
@@ -494,5 +486,5 @@ eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR t
 
     CHECK_BAD_DISPLAY(eglDisplay, dpy, EGL_FALSE)
     CHECK_UNINITIALIZED_DISPLAY(eglDriver, eglDisplay, EGL_FALSE)
-    return eglDriver->ClientWaitSyncKHR(eglDisplay, sync, flags, timeout);
+    return eglDriver->ClientWaitSyncKHR(sync, flags, timeout);
 }
