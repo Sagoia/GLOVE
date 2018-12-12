@@ -28,8 +28,9 @@
 #include "GLES2/gl2ext.h"
 #include "vulkan/buffer.h"
 #include "vulkan/memory.h"
+#include "refObject.h"
 
-class BufferObject {
+class BufferObject : public refObject {
 private:
     const
     vulkanAPI::vkContext_t* mVkContext;

@@ -27,6 +27,7 @@
 #include "rect.h"
 #include "sampler.h"
 #include "bufferObject.h"
+#include "refObject.h"
 #include "vulkan/sampler.h"
 #include "vulkan/imageView.h"
 #include "vulkan/commandBufferManager.h"
@@ -34,7 +35,7 @@
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
 
-class Texture {
+class Texture : public refObject {
 
     struct State {
         GLint                      width;
@@ -74,7 +75,7 @@ private:
     bool                        mDataUpdated;
     bool                        mDataNoInvertion;
     bool                        mFboColorAttached;
-    
+
     Texture                    *mDepthStencilTexture;
     uint32_t                    mDepthStencilTextureRefCount;
 
