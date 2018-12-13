@@ -128,6 +128,12 @@ struct uniform_t {
 };
 typedef struct uniform_t            uniform_t;
 
+enum ESSL_VERSION {
+     ESSL_VERSION_100 = 100,
+     ESSL_VERSION_400 = 400,
+     ESSL_VERSION_MAX
+};
+
 template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 
 #endif // __GLSLANG_UTILS_H__

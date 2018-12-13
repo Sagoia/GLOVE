@@ -40,13 +40,6 @@ inline EShMessages operator|(EShMessages lsh, EShMessages rsh) {
 
 class GlslangCompiler {
 
-public:
-enum ESSL_VERSION {
-    ESSL_VERSION_100 = 100,
-    ESSL_VERSION_400 = 400,
-    ESSL_VERSION_MAX
-};
-
 private:
     std::map<ESSL_VERSION, glslang::TShader *> mShaderMap;
 

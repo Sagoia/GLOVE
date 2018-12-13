@@ -22,7 +22,6 @@
  */
 
 #include "glslangCompiler.h"
-#include "utils/glLogger.h"
 
 GlslangCompiler::GlslangCompiler()
 {

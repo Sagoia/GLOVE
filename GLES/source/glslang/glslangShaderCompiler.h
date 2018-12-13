@@ -29,6 +29,7 @@
 #include "glslangCompiler.h"
 #include "glslangLinker.h"
 #include "resources/shaderReflection.h"
+#include "resources/shaderProgram.h"
 
 class GlslangShaderCompiler : public ShaderCompiler {
 private:

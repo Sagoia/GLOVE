@@ -189,7 +189,7 @@ GlslangShaderCompiler::CompileVertexShader(const char* const* source)
     mSlangVertCompiler = new GlslangCompiler();
     assert(mSlangVertCompiler);
 
-    return mSlangVertCompiler->CompileShader(source, &slangShaderResources, EShLangVertex, GlslangCompiler::ESSL_VERSION_100);
+    return mSlangVertCompiler->CompileShader(source, &slangShaderResources, EShLangVertex, ESSL_VERSION_100);
 }
 
 bool
@@ -207,7 +207,7 @@ GlslangShaderCompiler::CompileFragmentShader(const char* const* source)
     mSlangFragCompiler = new GlslangCompiler();
     assert(mSlangFragCompiler);
 
-    return mSlangFragCompiler->CompileShader(source, &slangShaderResources, EShLangFragment, GlslangCompiler::ESSL_VERSION_100);
+    return mSlangFragCompiler->CompileShader(source, &slangShaderResources, EShLangFragment, ESSL_VERSION_100);
 }
 
 const char*
@@ -215,9 +215,7 @@ GlslangShaderCompiler::GetProgramInfoLog()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    assert(mSlangInitialized);
-
-    return (mSlangProgLinker) ? mSlangProgLinker->GetInfoLog() : "";
+    return (mSlangProgLinker) ? mSlangProgLinker->GetLinkInfoLog(ESSL_VERSION_100) : "";
 }
 
 const char*
@@ -231,12 +229,12 @@ GlslangShaderCompiler::GetShaderInfoLog(shader_type_t shaderType)
         if(!mSlangVertCompiler) {
             return "";
         }
-        return mSlangVertCompiler->GetCompileInfoLog(GlslangCompiler::ESSL_VERSION_100);
+        return mSlangVertCompiler->GetCompileInfoLog(ESSL_VERSION_100);
     } else {
         if(!mSlangFragCompiler) {
             return "";
         }
-        return mSlangFragCompiler->GetCompileInfoLog(GlslangCompiler::ESSL_VERSION_100);
+        return mSlangFragCompiler->GetCompileInfoLog(ESSL_VERSION_100);
     }
 }
 
@@ -249,11 +247,11 @@ GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shade
         SaveShaderSourceToFile(&program, false, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource.c_str() : mFragSource.c_str(), shaderType);
     }
 
-    ShaderConverter SC {};
-    SC.Initialize(ShaderConverter::SHADER_CONVERSION_100_400, shaderType);
-    SC.SetSlangProgram(mSlangProgLinker->GetSlangProgram());
-    SC.SetIoMapResolver(mSlangProgLinker->GetIoMapResolver());
-    SC.Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection, isYInverted);
+    mShaderConverter = new ShaderConverter();
+    mShaderConverter->Initialize(ShaderConverter::SHADER_CONVERSION_100_400, shaderType);
+    mShaderConverter->SetSlangProgram(mSlangProgLinker->GetProgram(ESSL_VERSION_100));
+    mShaderConverter->SetIoMapResolver(mSlangProgLinker->GetIoMapResolver());
+    mShaderConverter->Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection, isYInverted);
     if(mSaveSourceToFiles) {
         SaveShaderSourceToFile(&program, true, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource400.c_str() : mFragSource400.c_str(), shaderType);
     }
@@ -278,8 +276,8 @@ GlslangShaderCompiler::PrepareReflection(void)
     assert(mSlangInitialized);
 
     mShaderReflection->ResetReflection();
-    CompileAttributes(mSlangProgLinker->GetSlangProgram());
-    CompileUniforms(mSlangProgLinker->GetSlangProgram());
+    CompileAttributes(mSlangProgLinker->GetProgram(ESSL_VERSION_100));
+    CompileUniforms(mSlangProgLinker->GetProgram(ESSL_VERSION_100));
 }
 
 bool
@@ -350,14 +348,14 @@ GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYI
 
     mVertSource400 = string(mVertSource);
     const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
-    bool result = mSlangVertCompiler->CompileShader(&source, &slangShaderResources, EShLangVertex, GlslangCompiler::ESSL_VERSION_400);
+    result = mSlangVertCompiler->CompileShader(&source, &slangShaderResources, EShLangVertex, ESSL_VERSION_400);
     if(!result) {
         return false;
     }
 
     mFragSource400 = string(mFragSource);
     source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
-    result = mSlangFragCompiler->CompileShader(&source, &slangShaderResources, EShLangFragment, GlslangCompiler::ESSL_VERSION_400);
+    result = mSlangFragCompiler->CompileShader(&source, &slangShaderResources, EShLangFragment, ESSL_VERSION_400);
     if(!result) {
         return false;
     }
@@ -372,17 +370,19 @@ GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
 
     Shader* fragment = shaderProgram.GetFragmentShader();
     assert(fragment);
-    bool result = mSlangProgLinker->LinkProgram(mSlangVertCompiler->GetShader(GlslangCompiler::ESSL_VERSION_400),
-                                                mSlangFragCompiler->GetShader(GlslangCompiler::ESSL_VERSION_400));
+    bool result = mSlangProgLinker->LinkProgram(mSlangVertCompiler->GetShader(ESSL_VERSION_400),
+                                                mSlangFragCompiler->GetShader(ESSL_VERSION_400),
+                                                ESSL_VERSION_400);
     if(!result) {
         return false;
     }
 
-    SetUniformBlocksSizes(mSlangProgLinker->GetSlangProgram400());
-    SetUniformBlocksOffset(mSlangProgLinker->GetSlangProgram400());
+    SetUniformBlocksSizes(mSlangProgLinker->GetProgram(ESSL_VERSION_400));
+    SetUniformBlocksOffset(mSlangProgLinker->GetProgram(ESSL_VERSION_400));
     BuildUniformReflection();
 
-    mSlangProgLinker->GenerateSPV(vertex->GetSPV(), fragment->GetSPV());
+    mSlangProgLinker->GenerateSPV(vertex->GetSPV(), EShLangVertex, ESSL_VERSION_400);
+    mSlangProgLinker->GenerateSPV(fragment->GetSPV(), EShLangFragment, ESSL_VERSION_400);
 
     if(mSaveBinaryToFiles) {
         SaveBinaryToFiles(&shaderProgram);
@@ -394,7 +394,7 @@ GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
 
     if(mDumpVulkanShaderReflection) {
         printf("glslang's vulkan shader reflection:\n");
-        DumpSlangProgramReflection(mSlangProgLinker->GetSlangProgram400());
+        DumpSlangProgramReflection(mSlangProgLinker->GetProgram(ESSL_VERSION_400));
     }
 
     return result;
@@ -405,7 +405,9 @@ GlslangShaderCompiler::PrintReadableSPV(ShaderProgram* program)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mSlangProgLinker->GenerateSPV(mVertSpv, mFragSpv);
+    mSlangProgLinker->GenerateSPV(mVertSpv, EShLangVertex, ESSL_VERSION_400);
+    mSlangProgLinker->GenerateSPV(mFragSpv, EShLangFragment, ESSL_VERSION_400);
+
     if(!mVertSpv.empty()) {
         stringstream filename;
         filename << "vert_" << hex << (uintptr_t)program << ".spv.txt";
@@ -433,7 +435,8 @@ GlslangShaderCompiler::SaveBinaryToFiles(ShaderProgram* program)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVertSpv.empty() || mFragSpv.empty()) {
-        mSlangProgLinker->GenerateSPV(mVertSpv, mFragSpv);
+        mSlangProgLinker->GenerateSPV(mVertSpv, EShLangVertex, ESSL_VERSION_400);
+        mSlangProgLinker->GenerateSPV(mFragSpv, EShLangFragment, ESSL_VERSION_400);
     }
     stringstream filename;
     filename << "vert_" << hex << (uintptr_t)program << ".spv.bin";
@@ -460,12 +463,13 @@ GlslangShaderCompiler::ValidateProgram(void)
     mSlangProgLinker = new GlslangLinker();
     assert(mSlangProgLinker);
 
-    result = mSlangProgLinker->ValidateProgram(mSlangVertCompiler->GetShader(GlslangCompiler::ESSL_VERSION_100),
-                                               mSlangFragCompiler->GetShader(GlslangCompiler::ESSL_VERSION_100));
+    result = mSlangProgLinker->ValidateProgram(mSlangVertCompiler->GetShader(ESSL_VERSION_100),
+                                               mSlangFragCompiler->GetShader(ESSL_VERSION_100),
+                                               ESSL_VERSION_100);
 
     if(mDumpInputShaderReflection) {
         printf("Glslang's input shader reflection:\n");
-        DumpSlangProgramReflection(mSlangProgLinker->GetSlangProgram());
+        DumpSlangProgramReflection(mSlangProgLinker->GetProgram(ESSL_VERSION_100));
     }
 
     return result;

@@ -24,34 +24,36 @@
 #ifndef __GLSLANGLINKER_H__
 #define __GLSLANGLINKER_H__
 
+#include "utils/glLogger.h"
+#include "glslangUtils.h"
 #include "glslang/Include/ShHandle.h"
 #include "glslang/Public/ShaderLang.h"
 #include "SPIRV/GlslangToSpv.h"
 #include "SPIRV/doc.h"
 #include "SPIRV/disassemble.h"
-#include "resources/shaderProgram.h"
 #include "glslangIoMapResolver.h"
 
 class GlslangLinker {
 private:
-    glslang::TProgram* mSlangProgram;
-    glslang::TProgram* mSlangProgram400;
-    GlslangIoMapResolver mIoMapResolver;
-
-    void CleanUp();
+    
+    std::map<ESSL_VERSION, glslang::TProgram *> mProgramMap;
+    GlslangIoMapResolver                        mIoMapResolver;
 
 public:
     GlslangLinker();
     ~GlslangLinker();
 
-    void GenerateSPV(std::vector<unsigned int>& vertSPV, std::vector<unsigned int>& fragSPV);
-    const char* GetInfoLog();
-    bool LinkProgram(glslang::TShader* vertShader, glslang::TShader* fragShader);
-    bool ValidateProgram(glslang::TShader* vertShader, glslang::TShader* fragShader);
+// Link/Validate Functions
+    bool                                LinkProgram    (glslang::TShader* vertShader, glslang::TShader* fragShader, ESSL_VERSION version);
+    bool                                ValidateProgram(glslang::TShader* vertShader, glslang::TShader* fragShader, ESSL_VERSION version);
 
-    inline glslang::TProgram* GetSlangProgram()                           const { FUN_ENTRY(GL_LOG_TRACE); return mSlangProgram; }
-    inline glslang::TProgram* GetSlangProgram400()                        const { FUN_ENTRY(GL_LOG_TRACE); return mSlangProgram400; }
-    inline const GlslangIoMapResolver* GetIoMapResolver()                 const { FUN_ENTRY(GL_LOG_TRACE); return &mIoMapResolver; }
+// Generate Functions
+    void                                GenerateSPV(std::vector<unsigned int>& spv, EShLanguage language, ESSL_VERSION version);
+
+// Get Functions
+    inline const GlslangIoMapResolver  *GetIoMapResolver(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return &mIoMapResolver; }
+                 glslang::TProgram     *GetProgram(ESSL_VERSION version);
+           const char                  *GetLinkInfoLog(ESSL_VERSION version)         { FUN_ENTRY(GL_LOG_TRACE); return GetProgram(version)->getInfoLog(); } 
 };
 
 #endif // __GLSLANGLINKER_H__

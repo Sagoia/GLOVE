@@ -22,10 +22,8 @@
  */
 
 #include "glslangLinker.h"
-#include "utils/glLogger.h"
 
 GlslangLinker::GlslangLinker()
-: mSlangProgram(nullptr), mSlangProgram400(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -34,86 +32,57 @@ GlslangLinker::~GlslangLinker()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    CleanUp();
+    for(auto shader : mProgramMap){
+        SafeDelete(shader.second);
+    }
+    mProgramMap.clear();
+}
+
+glslang::TProgram *
+GlslangLinker::GetProgram(ESSL_VERSION version)
+{ 
+    FUN_ENTRY(GL_LOG_DEBUG); 
+    
+    return mProgramMap.find(version) != mProgramMap.end() ? mProgramMap[version] : nullptr;
 }
 
 void
-GlslangLinker::CleanUp()
+GlslangLinker::GenerateSPV(std::vector<unsigned int>& spv, EShLanguage language, ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mSlangProgram) {
-        delete mSlangProgram;
-        mSlangProgram = nullptr;
-    }
-
-    if(mSlangProgram400) {
-        delete mSlangProgram400;
-        mSlangProgram400 = nullptr;
-    }
-}
-
-void
-GlslangLinker::GenerateSPV(std::vector<unsigned int>& vertSPV, std::vector<unsigned int>& fragSPV)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    glslang::GlslangToSpv(*mSlangProgram400->getIntermediate(EShLangVertex), vertSPV);
-    glslang::GlslangToSpv(*mSlangProgram400->getIntermediate(EShLangFragment), fragSPV);
-}
-
-const char*
-GlslangLinker::GetInfoLog()
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return mSlangProgram->getInfoLog();
+    glslang::GlslangToSpv(*mProgramMap[version]->getIntermediate(language), spv);
 }
 
 bool
-GlslangLinker::LinkProgram(glslang::TShader* slangVertShader, glslang::TShader* slangFragShader)
+GlslangLinker::LinkProgram(glslang::TShader* vertShader, glslang::TShader* fragShader, ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    bool result;
-
-    mSlangProgram400 = new glslang::TProgram();
-    assert(mSlangProgram400);
-
-    mSlangProgram400->addShader(slangVertShader);
-    mSlangProgram400->addShader(slangFragShader);
-
-    result = mSlangProgram400->link(EShMsgDefault);
+    SafeDelete(mProgramMap[version]);
+    mProgramMap[version] = new glslang::TProgram();
+    mProgramMap[version]->addShader(vertShader);
+    mProgramMap[version]->addShader(fragShader);
+   
+    bool result = mProgramMap[version]->link(EShMsgDefault);
     if(!result) {
-        GLOVE_PRINT_ERR("%s\n", mSlangProgram400->getInfoLog());
-        return result;
+        GLOVE_PRINT_ERR("%s\n", mProgramMap[version]->getInfoLog());
+        return false;
     }
 
-    return mSlangProgram400->buildReflection();
+    return mProgramMap[version]->buildReflection();
 }
 
 bool
-GlslangLinker::ValidateProgram(glslang::TShader* slangVertShader, glslang::TShader* slangFragShader)
+GlslangLinker::ValidateProgram(glslang::TShader* vertShader, glslang::TShader* fragShader, ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    bool result;
-
-    mSlangProgram = new glslang::TProgram();
-    assert(mSlangProgram);
-
-    mSlangProgram->addShader(slangVertShader);
-    mSlangProgram->addShader(slangFragShader);
-
-    result = mSlangProgram->link(EShMsgDefault);
-    if(!result) {
-        return result;
-    }
-
-    result = mSlangProgram->buildReflection();
+    if(!LinkProgram(vertShader, fragShader, version))
+        return false;
 
     mIoMapResolver.Reset();
-    mSlangProgram->mapIO(&mIoMapResolver);
+    mProgramMap[version]->mapIO(&mIoMapResolver);
 
-    return result;
+    return true;
 }
