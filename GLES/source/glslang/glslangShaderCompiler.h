@@ -33,11 +33,27 @@
 
 class GlslangShaderCompiler : public ShaderCompiler {
 private:
-    static bool mSlangInitialized;
-    GlslangCompiler* mSlangVertCompiler;
-    GlslangCompiler* mSlangFragCompiler;
-    GlslangLinker*   mSlangProgLinker;
-    ShaderReflection* mShaderReflection;
+
+    typedef enum {
+        SHADER_COMPILER_VERTEX   = 0,
+        SHADER_COMPILER_FRAGMENT = 1,
+        SHADER_COMPILER_TYPE_MAX
+    } shader_compiler_type_t;
+
+    static bool             mInitialized;
+    static TBuiltInResource mTBuiltInResource;
+
+    GlslangCompiler*        mShaderCompiler[SHADER_COMPILER_TYPE_MAX];
+    GlslangLinker*          mProgramLinker;
+    ShaderConverter*        mShaderConverter;
+    ShaderReflection*       mShaderReflection;
+
+    std::string             mVertSource;
+    std::string             mFragSource;
+    std::string             mVertSource400;
+    std::string             mFragSource400;
+    std::vector<uint32_t>   mVertSpv;
+    std::vector<uint32_t>   mFragSpv;
 
     bool mDumpVulkanShaderReflection;
     bool mDumpInputShaderReflection;
@@ -46,23 +62,24 @@ private:
     bool mSaveSourceToFiles;
     bool mSaveSpvTextToFile;
 
-    string mVertSource;
-    string mFragSource;
-    string mVertSource400;
-    string mFragSource400;
-    std::vector<uint32_t> mVertSpv;
-    std::vector<uint32_t> mFragSpv;
+/// Init Functions
+    void InitCompiler(void);
+    void InitCompilerResources(void);
+    void InitReflection(void);
 
+/// Terminate Functions
+    void TerminateCompiler(void);
+
+/// Release Functions
     void Release(void);
+
     const char* ConvertShader(ShaderProgram& program, shader_type_t shaderType, bool isYInverted);
     void CompileShader400(ShaderProgram& program, shader_type_t shaderType);
     void DumpSlangProgramReflection(const glslang::TProgram* prog) const;
-    bool InitializeGlslang(void);
-    void InitSlangShaderResources(void);
+
     void PrintReadableSPV(ShaderProgram* program);
     void SaveBinaryToFiles(ShaderProgram* program);
     void SaveShaderSourceToFile(ShaderProgram* program, bool processed, const char* source, shader_type_t shaderType) const;
-    void TerminateGlslang(void);
 
     void CompileAttributes(const glslang::TProgram* prog);
     void CompileUniforms(const glslang::TProgram* prog);
@@ -83,7 +100,7 @@ private:
     int  GetUniformSet(const glslang::TProgram* prog, int index) const;
 
     /// All active uniform variables as reported by glslang
-    std::vector<uniform_t>                   mUniforms;
+    std::vector<uniform_t>              mUniforms;
 
     /// uniforms that are an aggregation of basic types
     aggregateMap_t                      mAggregates;
