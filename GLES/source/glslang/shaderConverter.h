@@ -25,10 +25,10 @@
 #define __SHADER_CONVERTER_H__
 
 #include "resources/shaderReflection.h"
-#include "glslang/glslang_utils.h"
 #include "glslang/Include/ShHandle.h"
 #include "glslangIoMapResolver.h"
 #include "utils/parser_helpers.h"
+#include "glslangUtils.h"
 
 class ShaderConverter {
 public:

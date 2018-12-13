@@ -24,8 +24,9 @@
 #ifndef __GLSLANGCOMPILER_H__
 #define __GLSLANGCOMPILER_H__
 
+
 #include "utils/glLogger.h"
-#include "utils/parser_helpers.h"
+#include "glslangUtils.h"
 #include "glslang/Include/ShHandle.h"
 #include "glslang/Public/ShaderLang.h"
 #include "SPIRV/GlslangToSpv.h"
@@ -38,27 +39,30 @@ inline EShMessages operator|(EShMessages lsh, EShMessages rsh) {
 }
 
 class GlslangCompiler {
-private:
-    glslang::TShader* mSlangShader;
-    glslang::TShader* mSlangShader400;
 
-    void CleanUpShader(glslang::TShader* shader);
-    bool IsManageableError(const char* errors);
-    bool IsNotFullySupported(const char* source, const char* errors);
+public:
+enum ESSL_VERSION {
+    ESSL_VERSION_100 = 100,
+    ESSL_VERSION_400 = 400,
+    ESSL_VERSION_MAX
+};
+
+private:
+    std::map<ESSL_VERSION, glslang::TShader *> mShaderMap;
+
+    bool                 IsManageableError(const char* errors);
+    bool                 IsNotFullySupported(const char* source, const char* errors);
 
 public:
     GlslangCompiler();
     ~GlslangCompiler();
 
-    bool CompileShader(const char* const* source, TBuiltInResource* resources, EShLanguage language);
-    bool CompileShader400(const char* const* source,
-                          TBuiltInResource* resources,
-                          EShLanguage language,
-                          EShMessages messages);
-    const char* GetInfoLog();
-
-    glslang::TShader* GetSlangShader()                                   const  { FUN_ENTRY(GL_LOG_TRACE); return mSlangShader; }
-    glslang::TShader* GetSlangShader400()                                const  { FUN_ENTRY(GL_LOG_TRACE); return mSlangShader400; }
+    /// Compile Functions
+    bool                 CompileShader(const char* const* source, const TBuiltInResource* resources, EShLanguage language, ESSL_VERSION version);
+    
+    /// Get Functions
+    glslang::TShader    *GetShader(ESSL_VERSION version);
+    const  char         *GetCompileInfoLog(ESSL_VERSION version)     { FUN_ENTRY(GL_LOG_TRACE); return GetShader(version)->getInfoLog();}
 };
 
 #endif // __GLSLANGCOMPILER_H__

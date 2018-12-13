@@ -25,7 +25,6 @@
 #include "utils/glLogger.h"
 
 GlslangCompiler::GlslangCompiler()
-: mSlangShader(nullptr), mSlangShader400(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -34,19 +33,10 @@ GlslangCompiler::~GlslangCompiler()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    CleanUpShader(mSlangShader);
-    CleanUpShader(mSlangShader400);
-}
-
-void
-GlslangCompiler::CleanUpShader(glslang::TShader* shader)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(shader) {
-        delete shader;
-        shader = nullptr;
+    for(auto shader : mShaderMap){
+        SafeDelete(shader.second);
     }
+    mShaderMap.clear();
 }
 
 bool
@@ -72,62 +62,38 @@ GlslangCompiler::IsNotFullySupported(const char* source, const char* errors)
     return nonConstError != string::npos && (matrixCompMult != string::npos || mod != string::npos);
 }
 
-bool
-GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* resources, EShLanguage language)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    CleanUpShader(mSlangShader);
-
-    mSlangShader = new glslang::TShader(language);
-    assert(mSlangShader);
-
-    mSlangShader->setStrings(source, 1);
-
-    bool result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgDefault));
-    if(!result) {
-        if(IsManageableError(mSlangShader->getInfoLog()) || IsNotFullySupported(*source, mSlangShader->getInfoLog())) {
-            CleanUpShader(mSlangShader);
-            mSlangShader = new glslang::TShader(language);
-            mSlangShader->setStrings(source, 1);
-            result = mSlangShader->parse(resources, 100, ENoProfile, false, false, static_cast<EShMessages>(EShMsgOnlyPreprocessor | EShMsgRelaxedErrors));
-        }
-        GLOVE_PRINT_ERR("shader 100:\n%s\n", mSlangShader->getInfoLog());
-    }
-
-    return result;
+glslang::TShader *
+GlslangCompiler::GetShader(ESSL_VERSION version)
+{ 
+    FUN_ENTRY(GL_LOG_DEBUG); 
+    
+    return mShaderMap.find(version) != mShaderMap.end() ? mShaderMap[version] : nullptr;
 }
 
 bool
-GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* resources, EShLanguage language, EShMessages messages)
+GlslangCompiler::CompileShader(const char* const* source, const TBuiltInResource* resources, EShLanguage language, ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    CleanUpShader(mSlangShader400);
+    EShMessages messages = (version == ESSL_VERSION_100) ? EShMsgDefault : (EShMessages)(EShMsgVulkanRules | EShMsgSpvRules);
+    EProfile    profile  = (version == ESSL_VERSION_100) ? EEsProfile    : ENoProfile;
 
-    mSlangShader400 = new glslang::TShader(language);
-    assert(mSlangShader400);
+    SafeDelete(mShaderMap[version]);
+    mShaderMap[version] = new glslang::TShader(language);
+    mShaderMap[version]->setStrings(source, 1);
 
-    mSlangShader400->setStrings(source, 1);
-    bool result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, messages);
+    bool result = mShaderMap[version]->parse(resources, version, profile, false, false, messages);
     if(!result) {
-        if(IsManageableError(mSlangShader400->getInfoLog())) {
-            CleanUpShader(mSlangShader400);
-            mSlangShader400 = new glslang::TShader(language);
-            mSlangShader400->setStrings(source, 1);
-            messages = EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors;
-            result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, messages);
+        if(IsManageableError(mShaderMap[version]->getInfoLog()) || IsNotFullySupported(*source, mShaderMap[version]->getInfoLog()) ) {
+            SafeDelete(mShaderMap[version]);
+            mShaderMap[version] = new glslang::TShader(language);
+            mShaderMap[version]->setStrings(source, 1);
+            messages = (version == ESSL_VERSION_100) ? EShMsgRelaxedErrors : (EShMessages)(EShMsgVulkanRules | EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors);
+            result = mShaderMap[version]->parse(resources, version, profile, false, false, messages);
         }
-        GLOVE_PRINT_ERR("shader 400:\n%s\n", mSlangShader400->getInfoLog());
+
+        GLOVE_PRINT_ERR("%s\n", mShaderMap[version]->getInfoLog());
     }
 
     return result;
-}
-
-const char*
-GlslangCompiler::GetInfoLog()
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    return mSlangShader->getInfoLog();
 }

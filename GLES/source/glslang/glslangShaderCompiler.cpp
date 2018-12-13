@@ -17,7 +17,7 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      Shaders compilation and linking module. It implements ShaderCompiler interface, using glslang
+ *  @brief      Shaders compilation and linking module. It implements ShaderCompiler interface using glslang 
  *
  */
 
@@ -189,7 +189,7 @@ GlslangShaderCompiler::CompileVertexShader(const char* const* source)
     mSlangVertCompiler = new GlslangCompiler();
     assert(mSlangVertCompiler);
 
-    return mSlangVertCompiler->CompileShader(source, &slangShaderResources, EShLangVertex);
+    return mSlangVertCompiler->CompileShader(source, &slangShaderResources, EShLangVertex, GlslangCompiler::ESSL_VERSION_100);
 }
 
 bool
@@ -207,7 +207,7 @@ GlslangShaderCompiler::CompileFragmentShader(const char* const* source)
     mSlangFragCompiler = new GlslangCompiler();
     assert(mSlangFragCompiler);
 
-    return mSlangFragCompiler->CompileShader(source, &slangShaderResources, EShLangFragment);
+    return mSlangFragCompiler->CompileShader(source, &slangShaderResources, EShLangFragment, GlslangCompiler::ESSL_VERSION_100);
 }
 
 const char*
@@ -231,12 +231,12 @@ GlslangShaderCompiler::GetShaderInfoLog(shader_type_t shaderType)
         if(!mSlangVertCompiler) {
             return "";
         }
-        return mSlangVertCompiler->GetInfoLog();
+        return mSlangVertCompiler->GetCompileInfoLog(GlslangCompiler::ESSL_VERSION_100);
     } else {
         if(!mSlangFragCompiler) {
             return "";
         }
-        return mSlangFragCompiler->GetInfoLog();
+        return mSlangFragCompiler->GetCompileInfoLog(GlslangCompiler::ESSL_VERSION_100);
     }
 }
 
@@ -349,12 +349,19 @@ GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYI
     }
 
     mVertSource400 = string(mVertSource);
-    if (!CompileShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted)) {
+    const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
+    bool result = mSlangVertCompiler->CompileShader(&source, &slangShaderResources, EShLangVertex, GlslangCompiler::ESSL_VERSION_400);
+    if(!result) {
         return false;
     }
 
     mFragSource400 = string(mFragSource);
-    return CompileShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
+    source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
+    result = mSlangFragCompiler->CompileShader(&source, &slangShaderResources, EShLangFragment, GlslangCompiler::ESSL_VERSION_400);
+    if(!result) {
+        return false;
+    }
+    return result;
 }
 
 bool
@@ -365,8 +372,8 @@ GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
 
     Shader* fragment = shaderProgram.GetFragmentShader();
     assert(fragment);
-    bool result = mSlangProgLinker->LinkProgram(mSlangVertCompiler->GetSlangShader400(),
-                                           mSlangFragCompiler->GetSlangShader400());
+    bool result = mSlangProgLinker->LinkProgram(mSlangVertCompiler->GetShader(GlslangCompiler::ESSL_VERSION_400),
+                                                mSlangFragCompiler->GetShader(GlslangCompiler::ESSL_VERSION_400));
     if(!result) {
         return false;
     }
@@ -453,8 +460,8 @@ GlslangShaderCompiler::ValidateProgram(void)
     mSlangProgLinker = new GlslangLinker();
     assert(mSlangProgLinker);
 
-    result = mSlangProgLinker->ValidateProgram(mSlangVertCompiler->GetSlangShader(),
-                                               mSlangFragCompiler->GetSlangShader());
+    result = mSlangProgLinker->ValidateProgram(mSlangVertCompiler->GetShader(GlslangCompiler::ESSL_VERSION_100),
+                                               mSlangFragCompiler->GetShader(GlslangCompiler::ESSL_VERSION_100));
 
     if(mDumpInputShaderReflection) {
         printf("Glslang's input shader reflection:\n");

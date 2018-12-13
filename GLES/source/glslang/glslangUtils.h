@@ -12,7 +12,7 @@
  */
 
 /**
- *  @file       glslang_utils.h
+ *  @file       glslangUtils.h
  *  @author     Think Silicon
  *  @date       25/07/2018
  *  @version    1.0
@@ -24,7 +24,12 @@
 #ifndef __GLSLANG_UTILS_H__
 #define __GLSLANG_UTILS_H__
 
+#include <map>
+#include <string>
+#include "utils/glUtils.h"
 #include "utils/glsl_types.h"
+
+using namespace std;
 
 namespace glslang {
     class TShader;
@@ -122,5 +127,7 @@ struct uniform_t {
     }
 };
 typedef struct uniform_t            uniform_t;
+
+template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 
 #endif // __GLSLANG_UTILS_H__
