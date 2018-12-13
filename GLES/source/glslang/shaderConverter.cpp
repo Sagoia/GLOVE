@@ -75,8 +75,8 @@ const char * const ShaderConverter::shaderLimitsBuiltIns = "#define gl_MaxVertex
                                                            "\n";
 
 ShaderConverter::ShaderConverter()
-: mConversionType(INVALID_SHADER_CONVERSION),
-  mShaderType(INVALID_SHADER),
+: mConversionType(SHADER_CONVERSION_INVALID),
+  mShaderType(SHADER_TYPE_INVALID),
   mMemLayoutQualifier("std140")
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -94,7 +94,7 @@ ShaderConverter::Convert(std::string& source, const uniformBlockMap_t &uniformBl
 
     switch(mConversionType) {
         case SHADER_CONVERSION_100_400 : Convert100To400(source, uniformBlockMap, reflection, isYInverted); break;
-        case INVALID_SHADER_CONVERSION : NOT_REACHED(); break;
+        case SHADER_CONVERSION_INVALID : NOT_REACHED(); break;
         default: break;
     }
 }
@@ -515,5 +515,5 @@ ShaderConverter::EsslVersionToShaderConversionType(ESSL_VERSION version_in, ESSL
         return SHADER_CONVERSION_100_400;   
     }
 
-    return INVALID_SHADER_CONVERSION; 
+    return SHADER_CONVERSION_INVALID; 
 }

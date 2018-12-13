@@ -31,7 +31,7 @@
 
 Shader::Shader(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mShaderCompiler(nullptr), mSource(nullptr),
-  mSourceLength(0), mShaderType(INVALID_SHADER), mShaderVersion(ESSL_VERSION_100), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
+  mSourceLength(0), mShaderType(SHADER_TYPE_INVALID), mShaderVersion(ESSL_VERSION_100), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }

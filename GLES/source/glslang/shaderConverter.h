@@ -44,7 +44,7 @@ public:
 
 private:
     typedef enum {
-        INVALID_SHADER_CONVERSION,
+        SHADER_CONVERSION_INVALID,
         SHADER_CONVERSION_100_400
     } shader_conversion_type_t;
 
@@ -75,9 +75,7 @@ private:
     void ConvertGLToVulkanCoordSystem(string& source);
     void ConvertGLToVulkanDepthRange(string& source);
 
-    shader_conversion_type_t EsslVersionToShaderConversionType(ESSL_VERSION version_in, 
-                                                               ESSL_VERSION version_out);
-
+    shader_conversion_type_t EsslVersionToShaderConversionType(ESSL_VERSION version_in, ESSL_VERSION version_out);
 };
 
 #endif // __SHADER_CONVERTER_H__

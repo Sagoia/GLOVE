@@ -155,7 +155,7 @@ struct uniformBlock_t;
 
 ```
 typedef enum {
-    INVALID_SHADER,
+    SHADER_TYPE_INVALID,
     SHADER_TYPE_VERTEX,
     SHADER_TYPE_FRAGMENT
 } shaderType_e;

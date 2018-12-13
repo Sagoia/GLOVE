@@ -53,7 +53,7 @@ typedef struct { glsl_vec4_t fm[4]; }       glsl_mat4_t;
 typedef uint32_t                            glsl_sampler_t;
 
 typedef enum {
-    INVALID_SHADER       = 0,
+    SHADER_TYPE_INVALID  = 0,
     SHADER_TYPE_VERTEX   = 1 << 0,
     SHADER_TYPE_FRAGMENT = 1 << 1
 } shader_type_t;
