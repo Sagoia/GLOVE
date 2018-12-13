@@ -126,7 +126,7 @@ public:
                                            ESSL_VERSION version)              override;
 
 /// Print Functions
-    void                     PrintUniforms(void)                              override;
+    void                     PrintUniformReflection(void)                     override;
 
 /// Get Functions
     const char              *GetProgramInfoLog(ESSL_VERSION version)          override;

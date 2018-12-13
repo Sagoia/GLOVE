@@ -479,9 +479,9 @@ ShaderProgram::LinkProgram()
     }
 
     if(GLOVE_DUMP_VULKAN_SHADER_REFLECTION) {
-        printf("-------- SHADER PROGRAM REFLECTION GLOVE --------\n");
-        mShaderCompiler->PrintUniforms();
-        printf("-------------------------------------------------\n");
+        printf("-------- SHADER PROGRAM REFLECTION GLOVE --------\n\n");
+        mShaderCompiler->PrintUniformReflection();
+        printf("-------------------------------------------------\n\n");
     }
 
     return mLinked;
@@ -1225,7 +1225,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     }
     assert(samp == nSamplers);
 
-    samp = 0;
+    //samp = 0;
     VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
     memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
@@ -1239,7 +1239,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
             writes[i].pImageInfo      = &textureDescriptors[map_block_texDescriptor[i]];
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             writes[i].descriptorCount = mShaderResourceInterface.GetUniformArraySize(i);
-            samp += mShaderResourceInterface.GetUniformArraySize(i);
+            //samp += mShaderResourceInterface.GetUniformArraySize(i);
         } else {
             writes[i].descriptorCount = 1;
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

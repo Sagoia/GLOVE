@@ -44,15 +44,12 @@ public:
     virtual void                PrepareReflection(ESSL_VERSION version) = 0;
     virtual uint32_t            SerializeReflection(void* binary) = 0;
     virtual uint32_t            DeserializeReflection(const void* binary) = 0;
-    
-/// Print Functions
-    virtual void                PrintUniforms(void) = 0;
+    virtual void                PrintUniformReflection(void) = 0;    
 
 /// Get Functions
     virtual ShaderReflection*   GetShaderReflection(void) = 0;
     virtual const char*         GetProgramInfoLog(ESSL_VERSION version) = 0;
-    virtual const char*         GetShaderInfoLog(shader_type_t shaderType,
-                                                 ESSL_VERSION version) = 0;
+    virtual const char*         GetShaderInfoLog(shader_type_t shaderType, ESSL_VERSION version) = 0;
 
 /// Enable Functions
     virtual void                EnablePrintReflection(ESSL_VERSION version) = 0;
