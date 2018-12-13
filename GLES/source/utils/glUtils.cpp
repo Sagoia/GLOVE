@@ -707,3 +707,10 @@ OccupiedLocationsPerGlType(GLenum type)
         default: NOT_REACHED();     return 0;
     }
 }
+
+bool
+IsGlSampler(GLenum type)
+{
+    return (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE);
+}
+

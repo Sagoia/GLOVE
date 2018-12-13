@@ -25,6 +25,7 @@
 #define __PARSER_HELPERS_H__
 
 #include <iostream>
+#include <utility> 
 
 #define STRINGIFY(expr)         #expr
 #define STRINGIFY_MACRO(expr)   STRINGIFY(expr)
@@ -37,7 +38,9 @@ bool                    IsWhiteSpace(char c);
 bool                    IsBuildInUniform(const string &source);
 string::size_type       SkipWhiteSpaces(const string &source, string::size_type pos);
 string::size_type       FindToken(const string &token, const string &source, string::size_type pos);
-string                  GetNextToken(const string &source, string::size_type start);
+std::string             GetNextToken(const string &source, string::size_type start);
+int32_t                 RemoveBrackets(std::string &source);
+void                    ReplaceString(const std::string &s_in, const std::string &s_out, std::string &source);
 bool                    IsPrecisionQualifier(const string &token);
 bool                    CanTypeBeInUniformBlock(const string &token);
 

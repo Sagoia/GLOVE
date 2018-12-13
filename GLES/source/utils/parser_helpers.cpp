@@ -88,7 +88,7 @@ FindToken(const std::string &token, const std::string &source, std::string::size
     return pos;
 }
 
-string
+std::string
 GetNextToken(const std::string &source, std::string::size_type start)
 {
     std::string::size_type pos = start;
@@ -96,6 +96,32 @@ GetNextToken(const std::string &source, std::string::size_type start)
         ++pos;
     }
     return std::string(source, start, pos - start);
+}
+
+int32_t
+RemoveBrackets(std::string &source)
+{
+    int32_t index = -1;
+    size_t  firstOpenBracket = source.find_first_of("[");
+    size_t  firstCloseBracket;
+    while(firstOpenBracket != string::npos) {
+        firstCloseBracket = source.find_first_of("]") + 1;
+        index  = stoi(string(source, firstOpenBracket + 1, firstCloseBracket - firstOpenBracket - 1));
+        source = string(source, 0, firstOpenBracket)  + string(source, firstCloseBracket, source.size());
+        firstOpenBracket = source.find_first_of("[");
+    }
+
+    return index;
+}
+
+void
+ReplaceString(const std::string &s_in, const std::string &s_out, std::string &source)
+{
+    size_t first = source.find_first_of(s_in);
+
+    if(first != string::npos) {
+        source = s_out + string(source, first, source.size());
+    }
 }
 
 bool
@@ -132,7 +158,6 @@ IsBuildInUniform(const std::string &token)
   return (!token.compare("gl_DepthRange.near") ||
           !token.compare("gl_DepthRange.far")  ||
           !token.compare("gl_DepthRange.diff"));
-
 }
 
 void

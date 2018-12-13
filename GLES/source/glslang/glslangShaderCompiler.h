@@ -87,17 +87,30 @@ private:
 
 /// Convert Functions
     const char             *ConvertShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted);
-    
+
+/// In/Out File Functions
     void                    PrintReadableSPV(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
     void                    SaveBinaryToFiles(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
     void                    SaveShaderSourceToFile(uintptr_t program_ptr, bool processed, const char* source, shader_compiler_type_t type) const;
 
-    void                    CompileAttributes(const glslang::TProgram* prog);
-    void                    CompileUniforms(const glslang::TProgram* prog);
-    void                    SetUniformBlocksOffset(const glslang::TProgram* prog);
-    void                    SetUniformBlocksSizes(const glslang::TProgram* prog);
-    void                    BuildUniformReflection(void);
-    void                    PrintReflection(const glslang::TProgram* prog, ESSL_VERSION version) const;    
+/// Reflection Functions (IN)
+    void                    CreateUniforms(ESSL_VERSION version);
+    void                    CreateUniformBlocks(void);
+    aggregatePairList_t     CreateAggregates(const std::string uniformName);
+    void                    LinkUniformsToUniformBlocks(void);
+    void                    SetAttributesReflection(ESSL_VERSION version);
+
+/// Reflection Functions (OUT)
+    void                    UpdateUniformArraySizes(ESSL_VERSION version);
+    void                    SetUniformLocations(void);
+    void                    SetUniformBlocksSizes(ESSL_VERSION version);
+    void                    SetUniformNestedStructSizes(ESSL_VERSION version);
+    void                    SetUniformOffsets(ESSL_VERSION version);
+
+    void                    SetUniformsReflection(void);
+    
+/// Reflection Functions (Print)
+    void                    PrintReflection(ESSL_VERSION version) const;
 
 public:
     GlslangShaderCompiler();

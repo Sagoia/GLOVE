@@ -35,6 +35,7 @@ set(SOURCES
     glslang/glslangLinker.cpp
     glslang/glslangIoMapResolver.cpp
     glslang/glslangShaderCompiler.cpp
+    glslang/glslangUtils.cpp
     glslang/shaderConverter.cpp
     glslang/FixSampler.cpp
     resources/attachment.cpp

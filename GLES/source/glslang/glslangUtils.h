@@ -28,47 +28,52 @@
 #include <string>
 #include "glslang/Public/ShaderLang.h"
 #include "glslang/Include/Types.h"
+#include "utils/glLogger.h"
 #include "utils/glUtils.h"
 #include "utils/glsl_types.h"
 
 using namespace std;
 
-namespace glslang {
-    class TShader;
-    class TProgram;
-}
-
 typedef struct {
-    string                          name;
-    int32_t                         arraySize;                  /// Array size. 1 for non arrays
+    std::string                     name;
+    size_t                          memorySize;     /// Memory size 
+    int32_t                         arraySize;      /// Array size (1 for non arrays)
+    bool                            isBlock;        /// True if uniform block
 } aggregate_t;
-typedef map<string, aggregate_t>    aggregateMap_t;
+
+typedef map<string, aggregate_t>        aggregateMap_t;
+typedef pair<aggregate_t *, int32_t>    aggregatePair_t;
+typedef vector<aggregatePair_t>         aggregatePairList_t;
 
 struct uniformBlock_t {
-    string                          name;                       /// For debug
-    string                          glslBlockName;              /// Block name that will be generated in final GLSL
-    uint32_t                        binding;                    /// layout decoration
-    bool                            isOpaque;                   /// true for opaque types (samplers)
-    size_t                          blockSize;                  /// Uniform block's size in bytes (including inactive variables)
-    shader_type_t                   blockStage;                 /// Uniform block's shader stage
+    string                          name;           /// For debug
+    string                          glslName;       /// Block name that will be generated in final GLSL
+    uint32_t                        binding;        /// layout decoration
+    bool                            isOpaque;       /// true for opaque types (samplers)
+    size_t                          memorySize;     /// Uniform block's size in bytes (including inactive variables)
+    int32_t                         arraySize;      /// Uniform block's Array size 
+    shader_type_t                   stage;          /// Uniform block's shader stage
     const aggregate_t *             pAggregate;
 
     uniformBlock_t():
         binding(0),
         isOpaque(false),
-        blockSize(0),
-        blockStage(INVALID_SHADER),
+        memorySize(0),
+        arraySize(0),
+        stage(SHADER_TYPE_INVALID),
         pAggregate(nullptr)
     {
         FUN_ENTRY(GL_LOG_TRACE);
     }
-    uniformBlock_t(string n, string gbn, uint32_t b, bool io, size_t bs, shader_type_t bStage, const aggregate_t *pAggr)
+
+    uniformBlock_t(string n, string gbn, uint32_t b, bool io, size_t bs, int32_t ba, shader_type_t bStage, const aggregate_t *pAggr)
      : name(n),
-       glslBlockName(gbn),
+       glslName(gbn),
        binding(b),
        isOpaque(io),
-       blockSize(bs),
-       blockStage(bStage),
+       memorySize(bs),
+       arraySize(ba),
+       stage(bStage),
        pAggregate(pAggr)
     {
         FUN_ENTRY(GL_LOG_TRACE);
@@ -83,39 +88,21 @@ typedef struct uniformBlock_t       uniformBlock_t;
 typedef map<string, uniformBlock_t> uniformBlockMap_t;
 
 struct uniform_t {
-    string                          variableName;               /// Uniform's name without aggregate's name
-    string                          reflectionName;             /// Full reflection name
-    GLenum                          glType;                     /// glType
-    uint32_t                        location;                   /// Location assigned to uniform
-    int32_t                         arraySize;                  /// Array size. 1 for non arrays
-    int32_t                         indexIntoAggregateArray;    /// Array index in aggregate array (-1 if it aggregate is not an array or if does not belong to one)
-    const aggregate_t *             pAggregate;                 /// Pointer to aggregate type (if belongs to one)
-    uniformBlock_t *                pBlock;                     /// Pointer to uniformBlock_t this uniform belongs
-    shader_type_t                   stage;                      /// Uniform's shader stage
-    size_t                          offset;                     /// Offset from start of uniform block's data
+    string                          name;               /// Full reflection name
+    GLenum                          type;               /// format type
+    uint32_t                        location;           /// Location assigned to uniform
+    int32_t                         arraySize;          /// Array size (1 for non arrays)
+    const aggregatePairList_t       aggregatePairList;  /// Pointer to aggregate type (if belongs to one)
+    uniformBlock_t *                pBlock;             /// Pointer to uniformBlock_t this uniform belongs
+    shader_type_t                   stage;              /// Uniform's shader stage
+    size_t                          offset;             /// Offset from start of uniform block's data
 
-    uniform_t()
-     : glType(0),
-       location(0),
-       arraySize(0),
-       indexIntoAggregateArray(-1),
-       pAggregate(nullptr),
-       pBlock(nullptr),
-       stage(INVALID_SHADER),
-       offset(0)
-    {
-        FUN_ENTRY(GL_LOG_TRACE);
-        assert(0);
-    }
-
-    uniform_t(string vn, string rn, GLenum glt, uint32_t loc, int32_t as, int32_t ind, const aggregate_t *pag, uniformBlock_t *pub, shader_type_t stg, size_t off)
-     : variableName(vn),
-       reflectionName(rn),
-       glType(glt),
+    uniform_t(string rn, GLenum glt, uint32_t loc, int32_t as, const aggregatePairList_t pagl, uniformBlock_t *pub, shader_type_t stg, size_t off)
+     : name(rn),
+       type(glt),
        location(loc),
        arraySize(as),
-       indexIntoAggregateArray(ind),
-       pAggregate(pag),
+       aggregatePairList(pagl),
        pBlock(pub),
        stage(stg),
        offset(off)
@@ -130,10 +117,8 @@ struct uniform_t {
 };
 typedef struct uniform_t            uniform_t;
 
-/// Delete Functions
-template<typename T>  inline void SafeDelete(T*& ptr)                         { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
-
 /// Get Functions
+       int  GetUniformOffset(const glslang::TProgram* prog, string name);
 inline bool GetAttributeHasLocation(const glslang::TProgram* prog, int index) { FUN_ENTRY(GL_LOG_TRACE); 
                                                                                 const  glslang::TType *attributeType = prog->getAttributeTType(index);
                                                                                 return attributeType->getQualifier().hasLocation(); }
@@ -163,5 +148,8 @@ inline bool GetUniformHasSet(const glslang::TProgram* prog, int index)         {
 inline int  GetUniformSet(const glslang::TProgram* prog, int index)            { FUN_ENTRY(GL_LOG_TRACE);
                                                                                  const glslang::TType *uniformType = prog->getUniformTType(index);
                                                                                  return uniformType->getQualifier().hasSet() ? uniformType->getQualifier().layoutSet : -1; }
+
+/// Delete Functions
+template<typename T>  inline void SafeDelete(T*& ptr)                          { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 
 #endif // __GLSLANG_UTILS_H__

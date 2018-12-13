@@ -363,7 +363,7 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
             source.insert(f1, layoutSyntax);
             f1 += layoutSyntax.length();
 
-            blockSyntax = block.glslBlockName + string(" {");
+            blockSyntax = block.glslName + string(" {");
             source.insert(f1 + strlen("uniform\0") + 1, blockSyntax);
         } else {
             /// inactive uniform
