@@ -43,6 +43,7 @@ class GlslangCompiler {
 private:
     std::map<ESSL_VERSION, glslang::TShader *> mShaderMap;
 
+    void                 Release(void);
     bool                 IsManageableError(const char* errors);
     bool                 IsNotFullySupported(const char* source, const char* errors);
 

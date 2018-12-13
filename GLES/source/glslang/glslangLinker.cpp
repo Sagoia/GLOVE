@@ -32,6 +32,14 @@ GlslangLinker::~GlslangLinker()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
+    Release();
+}
+
+void
+GlslangLinker::Release()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
     for(auto shader : mProgramMap) {
         SafeDelete(shader.second);
     }
@@ -81,7 +89,7 @@ GlslangLinker::ValidateProgram(glslang::TShader* vertShader, glslang::TShader* f
     if(!LinkProgram(vertShader, fragShader, version))
         return false;
 
-    mIoMapResolver.Reset();
+    mIoMapResolver.Release();
     mProgramMap[version]->mapIO(&mIoMapResolver);
 
     return true;

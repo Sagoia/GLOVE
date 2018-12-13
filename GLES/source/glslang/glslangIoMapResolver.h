@@ -66,8 +66,8 @@ public:
 
     void               notifyInOut(EShLanguage stage, const char* name, const glslang::TType& type, bool is_live) override;
 
-/// Reset Functions
-    void               Reset(void);
+/// Release Functions
+    void               Release(void);
 
 ///  Print Functions
     void               PrintVaryingInfo(void) const;

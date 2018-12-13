@@ -39,6 +39,7 @@ private:
     std::map<ESSL_VERSION, glslang::TProgram *> mProgramMap;
     GlslangIoMapResolver                        mIoMapResolver;
 
+    void                                Release(void);
 public:
     GlslangLinker();
     ~GlslangLinker();

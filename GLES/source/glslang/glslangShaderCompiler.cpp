@@ -126,16 +126,10 @@ bool GlslangShaderCompiler::mSlangInitialized = false;
 static TBuiltInResource slangShaderResources;
 
 GlslangShaderCompiler::GlslangShaderCompiler()
-: mSlangVertCompiler(nullptr),
-  mSlangFragCompiler(nullptr),
-  mSlangProgLinker(nullptr),
-  mShaderReflection(nullptr),
-  mDumpVulkanShaderReflection(false),
-  mDumpInputShaderReflection(false),
-  mDumpProcessedShaderSource(false),
-  mSaveBinaryToFiles(false),
-  mSaveSourceToFiles(false),
-  mSaveSpvTextToFile(false)
+: mSlangVertCompiler(nullptr), mSlangFragCompiler(nullptr), mSlangProgLinker(nullptr), 
+  mShaderConverter(nullptr), mShaderReflection(nullptr),
+  mDumpVulkanShaderReflection(false), mDumpInputShaderReflection(false), mDumpProcessedShaderSource(false),
+  mSaveBinaryToFiles(false), mSaveSourceToFiles(false), mSaveSpvTextToFile(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -148,30 +142,18 @@ GlslangShaderCompiler::~GlslangShaderCompiler()
     FUN_ENTRY(GL_LOG_TRACE);
 
     TerminateGlslang();
-    CleanUp();
+    Release();
 }
 
 void
-GlslangShaderCompiler::CleanUp()
+GlslangShaderCompiler::Release()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mSlangVertCompiler) {
-        delete mSlangVertCompiler;
-        mSlangVertCompiler = nullptr;
-    }
-
-    if(mSlangFragCompiler) {
-        delete mSlangFragCompiler;
-        mSlangFragCompiler = nullptr;
-    }
-
-    if(mSlangProgLinker) {
-        delete mSlangProgLinker;
-        mSlangProgLinker = nullptr;
-    }
-
-    delete mShaderReflection;
+    SafeDelete(mSlangVertCompiler);
+    SafeDelete(mSlangFragCompiler);
+    SafeDelete(mSlangProgLinker);
+    SafeDelete(mShaderReflection);
 }
 
 bool

@@ -32,11 +32,11 @@ GlslangIoMapResolver::~GlslangIoMapResolver()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    Reset();
+    Release();
 }
 
 void
-GlslangIoMapResolver::Reset(void)
+GlslangIoMapResolver::Release(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
