@@ -37,6 +37,7 @@ private:
 
     uint32_t                            mSourceLength;
     shader_type_t                       mShaderType;
+    ESSL_VERSION                        mShaderVersion;
     int                                 mRefCounter;
     bool                                mMarkForDeletion;
     bool                                mCompiled;

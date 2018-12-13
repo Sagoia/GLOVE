@@ -160,7 +160,7 @@ ShaderProgram::GetInfoLogLength(void) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    return mShaderCompiler->GetProgramInfoLog() ? (int)strlen(mShaderCompiler->GetProgramInfoLog()) + 1 : 0;
+    return mShaderCompiler->GetProgramInfoLog(ESSL_VERSION_100) ? (int)strlen(mShaderCompiler->GetProgramInfoLog(ESSL_VERSION_100)) + 1 : 0;
 }
 
 Shader *
@@ -419,9 +419,9 @@ ShaderProgram::ValidateProgram(void)
     }
 
     if(GLOVE_DUMP_INPUT_SHADER_REFLECTION) {
-        mShaderCompiler->EnableDumpInputShaderReflection();
+        mShaderCompiler->EnablePrintReflection(ESSL_VERSION_100);
     }
-    validated = mShaderCompiler->ValidateProgram();
+    validated = mShaderCompiler->ValidateProgram(ESSL_VERSION_100);
 
     return validated;
 }
@@ -439,10 +439,6 @@ ShaderProgram::LinkProgram()
         mShaderCompiler->EnableSaveSourceToFiles();
     }
 
-    if(GLOVE_DUMP_PROCESSED_SHADER_SOURCE) {
-        mShaderCompiler->EnableDumpProcessedShaderSource();
-    }
-
     if(GLOVE_SAVE_SPIRV_BINARY_TO_FILES) {
         mShaderCompiler->EnableSaveBinaryToFiles();
     }
@@ -451,19 +447,24 @@ ShaderProgram::LinkProgram()
         mShaderCompiler->EnableSaveSpvTextToFile();
     }
 
+    if(GLOVE_DUMP_PROCESSED_SHADER_SOURCE) {
+        mShaderCompiler->EnablePrintConvertedShader();
+    }
+
     if(GLOVE_DUMP_VULKAN_SHADER_REFLECTION) {
-        mShaderCompiler->EnableDumpVulkanShaderReflection();
+        mShaderCompiler->EnablePrintReflection(ESSL_VERSION_400);
     }
 
     ResetVulkanVertexInput();
 
-    mShaderCompiler->PrepareReflection();
+    mShaderCompiler->PrepareReflection(ESSL_VERSION_100);
     UpdateAttributeInterface();
-    mLinked = mShaderCompiler->PreprocessShaders(*this, mGLContext->IsYInverted());
+    mLinked = mShaderCompiler->PreprocessShader((uintptr_t)this, SHADER_TYPE_VERTEX  , ESSL_VERSION_100, ESSL_VERSION_400, mGLContext->IsYInverted()) &&
+              mShaderCompiler->PreprocessShader((uintptr_t)this, SHADER_TYPE_FRAGMENT, ESSL_VERSION_100, ESSL_VERSION_400, mGLContext->IsYInverted());
     if(!mLinked) {
         return false;
     }
-    mLinked = mShaderCompiler->LinkProgram(*this);
+    mLinked = mShaderCompiler->LinkProgram((uintptr_t)this, ESSL_VERSION_400, GetVertexShader()->GetSPV(), GetFragmentShader()->GetSPV());
     if(!mLinked) {
         return false;
     }
@@ -808,10 +809,10 @@ ShaderProgram::GetInfoLog(void) const
     char *log = nullptr;
 
     if(mShaderCompiler) {
-        uint32_t len = strlen(mShaderCompiler->GetProgramInfoLog()) + 1;
+        uint32_t len = strlen(mShaderCompiler->GetProgramInfoLog(ESSL_VERSION_100)) + 1;
         log = new char[len];
 
-        memcpy(log, mShaderCompiler->GetProgramInfoLog(), len);
+        memcpy(log, mShaderCompiler->GetProgramInfoLog(ESSL_VERSION_100), len);
         log[len - 1] = '\0';
     }
 

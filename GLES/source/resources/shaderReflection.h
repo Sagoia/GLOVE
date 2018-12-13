@@ -77,7 +77,7 @@ public:
     ShaderReflection();
     ~ShaderReflection();
 
-    void ResetReflection(void);
+    void Reset(void);
     int GetAttributeLocation(const char *name) const;
     GLenum GetAttributeType(const char *name) const;
     uint32_t DeserializeReflection(const void *binary);

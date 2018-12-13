@@ -34,7 +34,7 @@ ShaderReflection::~ShaderReflection()
 }
 
 void
-ShaderReflection::ResetReflection(void)
+ShaderReflection::Reset(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

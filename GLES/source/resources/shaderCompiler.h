@@ -26,32 +26,41 @@
 
 #include "shaderReflection.h"
 
-class ShaderProgram;
-
 class ShaderCompiler {
 
 public:
     ShaderCompiler() {}
     virtual ~ShaderCompiler() {}
 
-    virtual bool CompileVertexShader(const char* const* source) = 0;
-    virtual bool CompileFragmentShader(const char* const* source) = 0;
-    virtual const char* GetProgramInfoLog(void) = 0;
-    virtual const char* GetShaderInfoLog(shader_type_t shaderType) = 0;
-    virtual bool PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted) = 0;
-    virtual bool LinkProgram(ShaderProgram& shaderProgram) = 0;
-    virtual void PrepareReflection(void) = 0;
-    virtual uint32_t SerializeReflection(void* binary) = 0;
-    virtual uint32_t DeserializeReflection(const void* binary) = 0;
-    virtual bool ValidateProgram(void) = 0;
-    virtual void DumpUniforms(void) = 0;
-    virtual ShaderReflection* GetShaderReflection(void) = 0;
-    virtual void EnableDumpInputShaderReflection(void) = 0;
-    virtual void EnableDumpVulkanShaderReflection(void) = 0;
-    virtual void EnableDumpProcessedShaderSource(void) = 0;
-    virtual void EnableSaveBinaryToFiles(void) = 0;
-    virtual void EnableSaveSourceToFiles(void) = 0;
-    virtual void EnableSaveSpvTextToFile(void) = 0;
+/// Shader Functions
+    virtual bool                PreprocessShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted) = 0;
+    virtual bool                CompileShader(const char* const* source, shader_type_t shaderType, ESSL_VERSION version) = 0;
+
+/// Shader Program Functions
+    virtual bool                LinkProgram(uintptr_t program_ptr, ESSL_VERSION version, vector<uint32_t> &vertSpv, vector<uint32_t> &fragSpv) = 0;
+    virtual bool                ValidateProgram(ESSL_VERSION version) = 0;
+    
+/// Reflection Functions
+    virtual void                PrepareReflection(ESSL_VERSION version) = 0;
+    virtual uint32_t            SerializeReflection(void* binary) = 0;
+    virtual uint32_t            DeserializeReflection(const void* binary) = 0;
+    
+/// Print Functions
+    virtual void                DumpUniforms(void) = 0;
+
+/// Get Functions
+    virtual ShaderReflection*   GetShaderReflection(void) = 0;
+    virtual const char*         GetProgramInfoLog(ESSL_VERSION version) = 0;
+    virtual const char*         GetShaderInfoLog(shader_type_t shaderType,
+                                                 ESSL_VERSION version) = 0;
+
+/// Enable Functions
+    virtual void                EnablePrintReflection(ESSL_VERSION version) = 0;
+    virtual void                EnablePrintConvertedShader(void) = 0;
+
+    virtual void                EnableSaveBinaryToFiles(void) = 0;
+    virtual void                EnableSaveSourceToFiles(void) = 0;
+    virtual void                EnableSaveSpvTextToFile(void) = 0;
 };
 
 #endif // __SHADERCOMPILER_H__

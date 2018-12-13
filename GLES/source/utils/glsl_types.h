@@ -56,6 +56,12 @@ typedef enum {
     SHADER_TYPE_FRAGMENT = 1 << 1
 } shader_type_t;
 
+enum ESSL_VERSION {
+     ESSL_VERSION_100 = 100,
+     ESSL_VERSION_400 = 400,
+     ESSL_VERSION_MAX = 0
+};
+
 inline size_t GlslTypeToAllignment(GLenum type)
 {
     switch(type) {

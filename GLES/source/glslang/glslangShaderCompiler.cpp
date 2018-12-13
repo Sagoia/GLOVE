@@ -126,15 +126,17 @@ bool             GlslangShaderCompiler::mInitialized = false;
 TBuiltInResource GlslangShaderCompiler::mTBuiltInResource;
 
 GlslangShaderCompiler::GlslangShaderCompiler()
-: mProgramLinker(nullptr), 
-  mShaderConverter(nullptr), mShaderReflection(nullptr),
-  mDumpVulkanShaderReflection(false), mDumpInputShaderReflection(false), mDumpProcessedShaderSource(false),
+: mProgramLinker(nullptr), mShaderConverter(nullptr), mShaderReflection(nullptr),
+  mPrintConvertedShader(false),
   mSaveBinaryToFiles(false), mSaveSourceToFiles(false), mSaveSpvTextToFile(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     mShaderCompiler[SHADER_COMPILER_VERTEX]   = nullptr;
     mShaderCompiler[SHADER_COMPILER_FRAGMENT] = nullptr;
+
+    mPrintReflection[ESSL_VERSION_100] = false;
+    mPrintReflection[ESSL_VERSION_400] = false;
 
     InitCompiler();
     InitReflection();
@@ -181,11 +183,9 @@ GlslangShaderCompiler::InitCompilerResources(void)
     mTBuiltInResource.maxVaryingVectors             = GLOVE_MAX_VARYING_VECTORS;
     mTBuiltInResource.maxVertexUniformVectors       = GLOVE_MAX_VERTEX_UNIFORM_VECTORS;
     mTBuiltInResource.maxFragmentUniformVectors     = GLOVE_MAX_FRAGMENT_UNIFORM_VECTORS;
-
     mTBuiltInResource.maxVertexTextureImageUnits    = GLOVE_MAX_VERTEX_TEXTURE_IMAGE_UNITS;
     mTBuiltInResource.maxTextureUnits               = GLOVE_MAX_TEXTURE_IMAGE_UNITS;
     mTBuiltInResource.maxCombinedTextureImageUnits  = GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS;
-    
     mTBuiltInResource.maxDrawBuffers                = GLOVE_MAX_DRAW_BUFFERS;
 }
 
@@ -209,86 +209,59 @@ GlslangShaderCompiler::TerminateCompiler()
 }
 
 bool
-GlslangShaderCompiler::CompileVertexShader(const char* const* source)
+GlslangShaderCompiler::CompileShader(const char* const* source, shader_type_t shaderType, ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    SafeDelete(mShaderCompiler[SHADER_COMPILER_VERTEX]);
+    shader_compiler_type_t  type = (shaderType == SHADER_TYPE_VERTEX) ? SHADER_COMPILER_VERTEX : SHADER_COMPILER_FRAGMENT;
+    EShLanguage             lang = (shaderType == SHADER_TYPE_VERTEX) ? EShLangVertex          : EShLangFragment;
 
-    mVertSource   = string(*source);
-    mShaderCompiler[SHADER_COMPILER_VERTEX] = new GlslangCompiler();
-    return mShaderCompiler[SHADER_COMPILER_VERTEX]->CompileShader(source, &mTBuiltInResource, EShLangVertex, ESSL_VERSION_100);
-}
-
-bool
-GlslangShaderCompiler::CompileFragmentShader(const char* const* source)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    SafeDelete(mShaderCompiler[SHADER_COMPILER_FRAGMENT]);
-
-    mFragSource   = string(*source);
-    mShaderCompiler[SHADER_COMPILER_FRAGMENT] = new GlslangCompiler();
-
-    return mShaderCompiler[SHADER_COMPILER_FRAGMENT]->CompileShader(source, &mTBuiltInResource, EShLangFragment, ESSL_VERSION_100);
+    SafeDelete(mShaderCompiler[type]);
+    mSourceMap[version][type] = string(*source);
+    mShaderCompiler[type]     = new GlslangCompiler();
+    return mShaderCompiler[type]->CompileShader(source, &mTBuiltInResource, lang, version);
 }
 
 const char*
-GlslangShaderCompiler::GetShaderInfoLog(shader_type_t shaderType)
+GlslangShaderCompiler::ConvertShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     shader_compiler_type_t type = (shaderType == SHADER_TYPE_VERTEX) ? SHADER_COMPILER_VERTEX : SHADER_COMPILER_FRAGMENT;
-
-    return mShaderCompiler[type] ? mShaderCompiler[type]->GetCompileInfoLog(ESSL_VERSION_100) : "";
-}
-
-const char*
-GlslangShaderCompiler::GetProgramInfoLog()
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return mProgramLinker ? mProgramLinker->GetLinkInfoLog(ESSL_VERSION_100) : "";
-}
-
-const char*
-GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shaderType, bool isYInverted)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
     if(mSaveSourceToFiles) {
-        SaveShaderSourceToFile(&program, false, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource.c_str() : mFragSource.c_str(), shaderType);
+        SaveShaderSourceToFile(program_ptr, false, mSourceMap[version_in][type].c_str(), type);
     }
 
     mShaderConverter = new ShaderConverter();
-    mShaderConverter->Initialize(ShaderConverter::SHADER_CONVERSION_100_400, shaderType);
-    mShaderConverter->SetSlangProgram(mProgramLinker->GetProgram(ESSL_VERSION_100));
+    mShaderConverter->Initialize(shaderType, version_in, version_out);
+    mShaderConverter->SetProgram(mProgramLinker->GetProgram(version_in));
     mShaderConverter->SetIoMapResolver(mProgramLinker->GetIoMapResolver());
-    mShaderConverter->Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection, isYInverted);
+    mShaderConverter->Convert(mSourceMap[version_out][type], mUniformBlocks, mShaderReflection, isYInverted);
+
     if(mSaveSourceToFiles) {
-        SaveShaderSourceToFile(&program, true, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource400.c_str() : mFragSource400.c_str(), shaderType);
+        SaveShaderSourceToFile(program_ptr, true, mSourceMap[version_out][type].c_str(), type);
     }
 
-    if(mDumpProcessedShaderSource) {
-        cout << "\n\nFINAL SOURCE:\n" << endl;
-        if(shaderType == SHADER_TYPE_VERTEX) {
-            cout << mVertSource400 << "\n\n" << endl;
-        } else {
-            cout << mFragSource400 << "\n\n" << endl;
-        }
+    if(mPrintConvertedShader) {
+        cout << "\n\nSOURCE v"<< version_out << ":\n" << mSourceMap[version_out][type] << "\n\n";
     }
 
-    return (shaderType == SHADER_TYPE_VERTEX) ? mVertSource400.c_str() : mFragSource400.c_str();
+    delete mShaderConverter;
+
+    return mSourceMap[version_out][type].c_str();
 }
 
-void
-GlslangShaderCompiler::PrepareReflection(void)
+bool
+GlslangShaderCompiler::PreprocessShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mShaderReflection->ResetReflection();
-    CompileAttributes(mProgramLinker->GetProgram(ESSL_VERSION_100));
-    CompileUniforms(mProgramLinker->GetProgram(ESSL_VERSION_100));
+    shader_compiler_type_t type = (shaderType == SHADER_TYPE_VERTEX) ? SHADER_COMPILER_VERTEX : SHADER_COMPILER_FRAGMENT;
+    EShLanguage            lang = (shaderType == SHADER_TYPE_VERTEX) ? EShLangVertex          : EShLangFragment;
+
+    mSourceMap[version_out][type] = string(mSourceMap[version_in][type]);
+    const char* source = ConvertShader(program_ptr, shaderType, version_in, version_out, isYInverted);
+    return mShaderCompiler[type]->CompileShader(&source, &mTBuiltInResource, lang, version_out);
 }
 
 bool
@@ -346,136 +319,342 @@ GlslangShaderCompiler::CompileShader(ShaderProgram& shaderProgram, shader_type_t
 }
 
 bool
-GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted)
+GlslangShaderCompiler::LinkProgram(uintptr_t program_ptr, ESSL_VERSION version, vector<uint32_t> &vertSpv, vector<uint32_t> &fragSpv)
 {
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    bool result;
-
-    if(mSaveSourceToFiles) {
-        SaveShaderSourceToFile(&shaderProgram, false, mVertSource.c_str(), SHADER_TYPE_VERTEX);
-        SaveShaderSourceToFile(&shaderProgram, false, mFragSource.c_str(), SHADER_TYPE_FRAGMENT);
-    }
-
-    mVertSource400 = string(mVertSource);
-    const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
-    result = mShaderCompiler[SHADER_COMPILER_VERTEX]->CompileShader(&source, &mTBuiltInResource, EShLangVertex, ESSL_VERSION_400);
+    bool result = mProgramLinker->LinkProgram(mShaderCompiler[SHADER_COMPILER_VERTEX]->GetShader(version),
+                                              mShaderCompiler[SHADER_COMPILER_FRAGMENT]->GetShader(version),
+                                              version);
     if(!result) {
         return false;
     }
 
-    mFragSource400 = string(mFragSource);
-    source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
-    result = mShaderCompiler[SHADER_COMPILER_FRAGMENT]->CompileShader(&source, &mTBuiltInResource, EShLangFragment, ESSL_VERSION_400);
-    if(!result) {
-        return false;
-    }
-    return result;
-}
-
-bool
-GlslangShaderCompiler::LinkProgram(ShaderProgram& shaderProgram)
-{
-    Shader* vertex = shaderProgram.GetVertexShader();
-    assert(vertex);
-
-    Shader* fragment = shaderProgram.GetFragmentShader();
-    assert(fragment);
-    bool result = mProgramLinker->LinkProgram(mShaderCompiler[SHADER_COMPILER_VERTEX]->GetShader(ESSL_VERSION_400),
-                                              mShaderCompiler[SHADER_COMPILER_FRAGMENT]->GetShader(ESSL_VERSION_400),
-                                              ESSL_VERSION_400);
-    if(!result) {
-        return false;
-    }
-
-    SetUniformBlocksSizes(mProgramLinker->GetProgram(ESSL_VERSION_400));
-    SetUniformBlocksOffset(mProgramLinker->GetProgram(ESSL_VERSION_400));
+    SetUniformBlocksSizes(mProgramLinker->GetProgram(version));
+    SetUniformBlocksOffset(mProgramLinker->GetProgram(version));
     BuildUniformReflection();
 
-    mProgramLinker->GenerateSPV(vertex->GetSPV(), EShLangVertex, ESSL_VERSION_400);
-    mProgramLinker->GenerateSPV(fragment->GetSPV(), EShLangFragment, ESSL_VERSION_400);
+    mProgramLinker->GenerateSPV(vertSpv, EShLangVertex  , version);
+    mProgramLinker->GenerateSPV(fragSpv, EShLangFragment, version);
 
     if(mSaveBinaryToFiles) {
-        SaveBinaryToFiles(&shaderProgram);
+        SaveBinaryToFiles(program_ptr);
     }
 
     if(mSaveSpvTextToFile) {
-        PrintReadableSPV(&shaderProgram);
+        PrintReadableSPV(program_ptr);
     }
 
-    if(mDumpVulkanShaderReflection) {
-        printf("glslang's vulkan shader reflection:\n");
-        DumpSlangProgramReflection(mProgramLinker->GetProgram(ESSL_VERSION_400));
+    if(mPrintReflection[version]) {
+        PrintReflection(mProgramLinker->GetProgram(version), version);
     }
 
     return result;
 }
 
-void
-GlslangShaderCompiler::PrintReadableSPV(ShaderProgram* program)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    mProgramLinker->GenerateSPV(mVertSpv, EShLangVertex, ESSL_VERSION_400);
-    mProgramLinker->GenerateSPV(mFragSpv, EShLangFragment, ESSL_VERSION_400);
-
-    if(!mVertSpv.empty()) {
-        stringstream filename;
-        filename << "vert_" << hex << (uintptr_t)program << ".spv.txt";
-
-        ofstream out;
-        out.open(filename.str(), ios::binary | ios::out);
-        spv::Disassemble(out, mVertSpv);
-        out.close();
-    }
-
-    if(!mFragSpv.empty()) {
-        stringstream filename;
-        filename << "frag_" << hex << (uintptr_t)program << ".spv.txt";
-
-        ofstream out;
-        out.open(filename.str(), ios::binary | ios::out);
-        spv::Disassemble(out, mFragSpv);
-        out.close();
-    }
-}
-
-void
-GlslangShaderCompiler::SaveBinaryToFiles(ShaderProgram* program)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(mVertSpv.empty() || mFragSpv.empty()) {
-        mProgramLinker->GenerateSPV(mVertSpv, EShLangVertex, ESSL_VERSION_400);
-        mProgramLinker->GenerateSPV(mFragSpv, EShLangFragment, ESSL_VERSION_400);
-    }
-    stringstream filename;
-    filename << "vert_" << hex << (uintptr_t)program << ".spv.bin";
-    glslang::OutputSpvBin(mVertSpv, filename.str().c_str());
-
-    filename.str(string());
-    filename << "frag_" << hex << (uintptr_t)program << ".spv.bin";
-    glslang::OutputSpvBin(mFragSpv, filename.str().c_str());
-}
-
 bool
-GlslangShaderCompiler::ValidateProgram(void)
+GlslangShaderCompiler::ValidateProgram(ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     SafeDelete(mProgramLinker);
 
     mProgramLinker = new GlslangLinker();
-    bool result = mProgramLinker->ValidateProgram(mShaderCompiler[SHADER_COMPILER_VERTEX]->GetShader(ESSL_VERSION_100),
-                                                  mShaderCompiler[SHADER_COMPILER_FRAGMENT]->GetShader(ESSL_VERSION_100),
-                                                  ESSL_VERSION_100);
+    bool result = mProgramLinker->ValidateProgram(mShaderCompiler[SHADER_COMPILER_VERTEX]->GetShader(version),
+                                                  mShaderCompiler[SHADER_COMPILER_FRAGMENT]->GetShader(version),
+                                                  version);
+    if(!result) {
+        return false;
+    }
 
-    if(mDumpInputShaderReflection) {
-        printf("Glslang's input shader reflection:\n");
-        DumpSlangProgramReflection(mProgramLinker->GetProgram(ESSL_VERSION_100));
+    if(mPrintReflection[version]) {
+        PrintReflection(mProgramLinker->GetProgram(version), version);
     }
 
     return result;
+}
+
+void
+GlslangShaderCompiler::PrintReadableSPV(uintptr_t program_ptr)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mProgramLinker->GenerateSPV(mSpv[SHADER_COMPILER_VERTEX]  , EShLangVertex  , ESSL_VERSION_400);
+    mProgramLinker->GenerateSPV(mSpv[SHADER_COMPILER_FRAGMENT], EShLangFragment, ESSL_VERSION_400);
+
+    if(!mSpv[SHADER_COMPILER_VERTEX].empty()) {
+        stringstream filename;
+        filename << "vert_" << hex << program_ptr << ".spv.txt";
+
+        ofstream out;
+        out.open(filename.str(), ios::binary | ios::out);
+        spv::Disassemble(out, mSpv[SHADER_COMPILER_VERTEX]);
+        out.close();
+    }
+
+    if(!mSpv[SHADER_COMPILER_FRAGMENT].empty()) {
+        stringstream filename;
+        filename << "frag_" << hex << program_ptr << ".spv.txt";
+
+        ofstream out;
+        out.open(filename.str(), ios::binary | ios::out);
+        spv::Disassemble(out, mSpv[SHADER_COMPILER_FRAGMENT]);
+        out.close();
+    }
+}
+
+void
+GlslangShaderCompiler::SaveBinaryToFiles(uintptr_t program_ptr)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(mSpv[SHADER_COMPILER_VERTEX].empty() || mSpv[SHADER_COMPILER_FRAGMENT].empty()) {
+        mProgramLinker->GenerateSPV(mSpv[SHADER_COMPILER_VERTEX]  , EShLangVertex  , ESSL_VERSION_400);
+        mProgramLinker->GenerateSPV(mSpv[SHADER_COMPILER_FRAGMENT], EShLangFragment, ESSL_VERSION_400);
+    }
+
+    stringstream filename;
+    filename << "vert_" << hex << program_ptr << ".spv.bin";
+    glslang::OutputSpvBin(mSpv[SHADER_COMPILER_VERTEX], filename.str().c_str());
+
+    filename.str(string());
+    filename << "frag_" << hex << program_ptr << ".spv.bin";
+    glslang::OutputSpvBin(mSpv[SHADER_COMPILER_FRAGMENT], filename.str().c_str());
+}
+
+void
+GlslangShaderCompiler::PrintReflection(const glslang::TProgram *prog, ESSL_VERSION version) const
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+    
+    int i;
+
+    printf("Shader Reflection: %d\n", (int)version);
+    printf("**********");
+    printf("\nGL_ACTIVE_UNIFORMS_BLOCKS: %d\n", prog->getNumLiveUniformBlocks());
+    for(i = 0; i < prog->getNumLiveUniformBlocks(); ++i) {
+        printf("%s\n", prog->getUniformBlockName(i));
+        printf("  hasLocation: %d = %d\n", GetUniformHasLocation(prog, i), GetUniformLocation(prog, i));
+        printf("  getUniformHasBinding: %d = %d\n", GetUniformHasBinding(prog, i), GetUniformBinding(prog, i));
+        printf("  getUniformHasSet: %d = %d\n", GetUniformHasSet(prog, i), GetUniformSet(prog, i));
+        printf("  block size: %d\n", prog->getUniformBlockSize(i));
+    }
+
+    printf("\nGL_ACTIVE_UNIFORMS: %d\n", prog->getNumLiveUniformVariables());
+    for(i = 0; i < prog->getNumLiveUniformVariables(); ++i) {
+        printf("%s (0x%x)\n", prog->getUniformName(i), prog->getUniformType(i));
+        printf("  hasLocation: %d = %d\n", GetUniformHasLocation(prog, i), GetUniformLocation(prog, i));
+        printf("  getUniformHasBinding: %d = %d\n", GetUniformHasBinding(prog, i), GetUniformBinding(prog, i));
+        printf("  getUniformHasSet: %d = %d\n", GetUniformHasSet(prog, i), GetUniformSet(prog, i));
+        printf("  Uniform Block index: %d Uniform Block offset : %d Arraysize: %d\n", prog->getUniformBlockIndex(i),
+                                                                                      prog->getUniformBufferOffset(i),
+                                                                                      prog->getUniformArraySize(i));
+    }
+
+    printf("\nGL_ACTIVE_ATTRIBUTES: %d\n", prog->getNumLiveAttributes());
+    for(i = 0; i < prog->getNumLiveAttributes(); ++i) {
+        printf("%s (0x%x)\n", prog->getAttributeName(i), prog->getAttributeType(i));
+        printf("  hasLocation: %d = %d\n", GetAttributeHasLocation(prog, i), GetAttributeLocation(prog, i));
+    }
+
+    mProgramLinker->GetIoMapResolver()->PrintVaryingInfo();
+
+    printf("**********\n\n");
+}
+
+void
+GlslangShaderCompiler::SaveShaderSourceToFile(uintptr_t program_ptr, bool processed, const char* source, shader_compiler_type_t type) const
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    string filename = static_cast<ostringstream *>(&(ostringstream().flush() << (processed ? "shader_processed" : "shader_") << hex << program_ptr))->str();
+    filename = filename + string(type == SHADER_COMPILER_VERTEX ? ".vert" : ".frag");
+
+    FILE *fp = fopen(filename.c_str(), "w");
+    assert(fp);
+
+    if(fp) {
+        size_t ASSERT_ONLY bytes;
+        bytes = fwrite(source, 1, strlen(source), fp);
+
+        assert(bytes == strlen(source));
+
+        fclose(fp);
+    }
+}
+
+const char*
+GlslangShaderCompiler::GetShaderInfoLog(shader_type_t shaderType, ESSL_VERSION version)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    shader_compiler_type_t type = (shaderType == SHADER_TYPE_VERTEX) ? SHADER_COMPILER_VERTEX : SHADER_COMPILER_FRAGMENT;
+    return mShaderCompiler[type] ? mShaderCompiler[type]->GetCompileInfoLog(version) : "";
+}
+
+const char*
+GlslangShaderCompiler::GetProgramInfoLog(ESSL_VERSION version)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    return mProgramLinker ? mProgramLinker->GetLinkInfoLog(version) : "";
+}
+
+void
+GlslangShaderCompiler::SetUniformBlocksSizes(const glslang::TProgram* prog)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    /// Get uniform block sizes
+    for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformBlocks(); ++index) {
+        assert(prog->getUniformBlockSize(index) != -1);
+        for(auto& block : mUniformBlocks) {
+            if(!block.second.glslBlockName.compare(prog->getUniformBlockName(index))) {
+                assert(!block.second.isOpaque);
+                block.second.blockSize = prog->getUniformBlockSize(index);
+            }
+        }
+    }
+}
+
+void
+GlslangShaderCompiler::SetUniformBlocksOffset(const glslang::TProgram* prog)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    for(auto& block : mUniformBlocks) {
+        if(block.second.pAggregate == nullptr) {
+            continue;
+        }
+
+        const uniformBlock_t *pBlock = &block.second;
+        size_t aggregateSize = pBlock->blockSize / pBlock->pAggregate->arraySize;
+        for(auto& uni : mUniforms) {
+            if(uni.pAggregate != pBlock->pAggregate) {
+                continue;
+            }
+
+            assert(uni.pBlock);
+            assert((uni.pBlock == pBlock && uni.pAggregate == pBlock->pAggregate) || (uni.pBlock != pBlock && uni.pAggregate != pBlock->pAggregate));
+            string variableName = uni.variableName;
+
+            /// Remove any other "[*]" from uniformName too
+            size_t lastOpenBracket = variableName.find_last_of("[");
+            while(lastOpenBracket > 0 && lastOpenBracket != string::npos){
+                const size_t lastCloseBracket = variableName.find_last_of("]");
+                variableName.erase(lastOpenBracket, lastCloseBracket - lastOpenBracket + 1);
+                lastOpenBracket = variableName.find_last_of("[");
+            }
+
+            /// Query uniform's offset in block from glslang
+            size_t offset = GLOVE_INVALID_OFFSET;
+            string uniName;
+            if(uni.pAggregate->name.compare("gl_DepthRange")) {
+                uniName = uni.pAggregate->name + string(".") + variableName;
+            } else {
+                uniName = string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + string(".") + variableName;
+            }
+
+            for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformVariables(); ++index) {
+                if(!strcmp(uniName.c_str(), prog->getUniformName(index))) {
+                    offset = prog->getUniformBufferOffset(index);
+                    break;
+                }
+            }
+            assert(offset != GLOVE_INVALID_OFFSET);
+
+            uni.offset = (uni.indexIntoAggregateArray > -1 ? uni.indexIntoAggregateArray : 0) * aggregateSize + offset;
+        }
+    }
+}
+
+void
+GlslangShaderCompiler::BuildUniformReflection(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    const int nLiveUniforms = mUniforms.size();
+    const int nLiveUniformBlocks = mUniformBlocks.size();
+    mShaderReflection->SetLiveUniforms(nLiveUniforms);
+    mShaderReflection->SetLiveUniformBlocks(nLiveUniformBlocks);
+
+    int i = 0;
+    for(auto& block : mUniformBlocks) {
+        mShaderReflection->SetUniformBlockGlslBlockName(block.second.glslBlockName.c_str(), i);
+        mShaderReflection->SetUniformBlockBinding(block.second.binding, i);
+        mShaderReflection->SetUniformBlockBlockSize(block.second.blockSize, i);
+        mShaderReflection->SetUniformBlockBlockStage(block.second.blockStage, i);
+        mShaderReflection->SetUniformBlockOpaque(block.second.isOpaque, i);
+        ++i;
+    }
+
+    i = 0;
+    for(auto& uni : mUniforms) {
+        const uniformBlock_t *pBlock = uni.pBlock;
+        uint32_t index = 0;
+        for(auto& block : mUniformBlocks) {
+            if(!block.second.glslBlockName.compare(pBlock->glslBlockName)) {
+                mShaderReflection->SetUniformReflectionName(uni.reflectionName.c_str(), i);
+                mShaderReflection->SetUniformLocation(uni.location, i);
+                mShaderReflection->SetUniformBlockIndex(index, i);
+                mShaderReflection->SetUniformArraySize(uni.arraySize, i);
+                mShaderReflection->SetUniformType(uni.glType, i);
+                mShaderReflection->SetUniformOffset(uni.offset, i);
+
+                break;
+            }
+            ++index;
+        }
+        ++i;
+    }
+}
+
+void
+GlslangShaderCompiler::DumpUniforms(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    printf("Shader resource interface:\n");
+
+    printf("UNIFORMS\n");
+    for(const auto &uni : mUniforms) {
+        /// Print aggregate name
+        if(uni.pAggregate) {
+            printf("%s", uni.pAggregate->name.c_str());
+            if(uni.indexIntoAggregateArray > -1) {
+                printf("[%d]", uni.indexIntoAggregateArray);
+            }
+            printf(".");
+        }
+
+        /// Rest of variable's name without base aggregate
+        printf("%s\n", uni.variableName.c_str());
+
+        printf("  reflection name: %s\n", uni.reflectionName.c_str());
+        printf("  GL type: 0x%04x\n", uni.glType);
+        printf("  location: %u\n", uni.location);
+        printf("  arraySize: %d\n", uni.arraySize > 1 ? uni.arraySize : 0);
+        printf("  belongs to block: %s with offset: %zu", uni.pBlock ? uni.pBlock->glslBlockName.c_str() : "", uni.offset);
+        printf("\n\n");
+    }
+
+    printf("UNIFORM BLOCKS\n");
+
+    for(auto &it : mUniformBlocks) {
+        printf("%s\n", it.second.glslBlockName.c_str());
+        printf("  with size: %zu\n", it.second.blockSize);
+        printf("  encapsulates aggregate type: %s\n", it.second.pAggregate ? it.second.pAggregate->name.c_str() : "(none)");
+    }
+
+    printf("\n\n");
+}
+
+void
+GlslangShaderCompiler::PrepareReflection(ESSL_VERSION version)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mShaderReflection->Reset();
+    CompileAttributes(mProgramLinker->GetProgram(version));
+    CompileUniforms(mProgramLinker->GetProgram(version));
 }
 
 void
@@ -483,23 +662,13 @@ GlslangShaderCompiler::CompileAttributes(const glslang::TProgram* prog)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    int location;
-
     const int nLiveAttributes = prog->getNumLiveAttributes();
     mShaderReflection->SetLiveAttributes(nLiveAttributes);
-    if(!nLiveAttributes) {
-        return;
-    }
-
+    
     for(int i = 0; i < nLiveAttributes; ++i) {
-        if(GetAttributeHasLocation(prog, i)) {
-            location = GetAttributeLocation(prog, i);
-        } else {
-            location = GLOVE_INVALID_OFFSET;
-        }
 
-        string attributeName = prog->getAttributeName(i);
-        mShaderReflection->SetAttributeName(attributeName.c_str(), i);
+        int     location = GetAttributeHasLocation(prog, i) ? GetAttributeLocation(prog, i) : GLOVE_INVALID_OFFSET;
+        mShaderReflection->SetAttributeName(prog->getAttributeName(i), i);
         mShaderReflection->SetAttributeType(prog->getAttributeType(i), i);
         mShaderReflection->SetAttributeLocation((uint32_t)location, i);
     }
@@ -640,302 +809,4 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
             location += uni.arraySize ? uni.arraySize : 1;
         }
     }
-}
-
-void
-GlslangShaderCompiler::SetUniformBlocksSizes(const glslang::TProgram* prog)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    /// Get uniform block sizes
-    for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformBlocks(); ++index) {
-        assert(prog->getUniformBlockSize(index) != -1);
-        for(auto& block : mUniformBlocks) {
-            if(!block.second.glslBlockName.compare(prog->getUniformBlockName(index))) {
-                assert(!block.second.isOpaque);
-                block.second.blockSize = prog->getUniformBlockSize(index);
-            }
-        }
-    }
-}
-
-void
-GlslangShaderCompiler::SetUniformBlocksOffset(const glslang::TProgram* prog)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    for(auto& block : mUniformBlocks) {
-        if(block.second.pAggregate == nullptr) {
-            continue;
-        }
-
-        const uniformBlock_t *pBlock = &block.second;
-        size_t aggregateSize = pBlock->blockSize / pBlock->pAggregate->arraySize;
-        for(auto& uni : mUniforms) {
-            if(uni.pAggregate != pBlock->pAggregate) {
-                continue;
-            }
-
-            assert(uni.pBlock);
-            assert((uni.pBlock == pBlock && uni.pAggregate == pBlock->pAggregate) || (uni.pBlock != pBlock && uni.pAggregate != pBlock->pAggregate));
-            string variableName = uni.variableName;
-
-            /// Remove any other "[*]" from uniformName too
-            size_t lastOpenBracket = variableName.find_last_of("[");
-            while(lastOpenBracket > 0 && lastOpenBracket != string::npos){
-                const size_t lastCloseBracket = variableName.find_last_of("]");
-                variableName.erase(lastOpenBracket, lastCloseBracket - lastOpenBracket + 1);
-                lastOpenBracket = variableName.find_last_of("[");
-            }
-
-            /// Query uniform's offset in block from glslang
-            size_t offset = GLOVE_INVALID_OFFSET;
-            string uniName;
-            if(uni.pAggregate->name.compare("gl_DepthRange")) {
-                uniName = uni.pAggregate->name + string(".") + variableName;
-            } else {
-                uniName = string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + string(".") + variableName;
-            }
-
-            for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformVariables(); ++index) {
-                if(!strcmp(uniName.c_str(), prog->getUniformName(index))) {
-                    offset = prog->getUniformBufferOffset(index);
-                    break;
-                }
-            }
-            assert(offset != GLOVE_INVALID_OFFSET);
-
-            uni.offset = (uni.indexIntoAggregateArray > -1 ? uni.indexIntoAggregateArray : 0) * aggregateSize + offset;
-        }
-    }
-}
-
-void
-GlslangShaderCompiler::BuildUniformReflection(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    const int nLiveUniforms = mUniforms.size();
-    const int nLiveUniformBlocks = mUniformBlocks.size();
-    mShaderReflection->SetLiveUniforms(nLiveUniforms);
-    mShaderReflection->SetLiveUniformBlocks(nLiveUniformBlocks);
-
-    int i = 0;
-    for(auto& block : mUniformBlocks) {
-        mShaderReflection->SetUniformBlockGlslBlockName(block.second.glslBlockName.c_str(), i);
-        mShaderReflection->SetUniformBlockBinding(block.second.binding, i);
-        mShaderReflection->SetUniformBlockBlockSize(block.second.blockSize, i);
-        mShaderReflection->SetUniformBlockBlockStage(block.second.blockStage, i);
-        mShaderReflection->SetUniformBlockOpaque(block.second.isOpaque, i);
-        ++i;
-    }
-
-    i = 0;
-    for(auto& uni : mUniforms) {
-        const uniformBlock_t *pBlock = uni.pBlock;
-        uint32_t index = 0;
-        for(auto& block : mUniformBlocks) {
-            if(!block.second.glslBlockName.compare(pBlock->glslBlockName)) {
-                mShaderReflection->SetUniformReflectionName(uni.reflectionName.c_str(), i);
-                mShaderReflection->SetUniformLocation(uni.location, i);
-                mShaderReflection->SetUniformBlockIndex(index, i);
-                mShaderReflection->SetUniformArraySize(uni.arraySize, i);
-                mShaderReflection->SetUniformType(uni.glType, i);
-                mShaderReflection->SetUniformOffset(uni.offset, i);
-
-                break;
-            }
-            ++index;
-        }
-        ++i;
-    }
-}
-
-bool
-GlslangShaderCompiler::GetAttributeHasLocation(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *attributeType = prog->getAttributeTType(index);
-    return attributeType->getQualifier().hasLocation();
-}
-
-int
-GlslangShaderCompiler::GetAttributeLocation(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *attributeType = prog->getAttributeTType(index);
-    return attributeType->getQualifier().hasLocation() ? attributeType->getQualifier().layoutLocation : -1;
-}
-
-bool
-GlslangShaderCompiler::GetUniformHasLocation(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *uniformType = prog->getUniformTType(index);
-    return uniformType->getQualifier().hasLocation();
-}
-
-int
-GlslangShaderCompiler::GetUniformLocation(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *uniformType = prog->getUniformTType(index);
-    return uniformType->getQualifier().hasLocation() ? uniformType->getQualifier().layoutLocation : -1;
-}
-
-bool
-GlslangShaderCompiler::GetUniformHasBinding(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *uniformType = prog->getUniformTType(index);
-    return uniformType->getQualifier().hasBinding();
-}
-
-int
-GlslangShaderCompiler::GetUniformBinding(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    return prog->getUniformBinding(index);
-}
-
-bool
-GlslangShaderCompiler::GetUniformHasSet(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *uniformType = prog->getUniformTType(index);
-    return uniformType->getQualifier().hasSet();
-}
-
-int
-GlslangShaderCompiler::GetUniformSet(const glslang::TProgram* prog, int index) const
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    const glslang::TType *uniformType = prog->getUniformTType(index);
-    return uniformType->getQualifier().hasSet() ? uniformType->getQualifier().layoutSet : -1;
-}
-
-void
-GlslangShaderCompiler::DumpUniforms(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    printf("Shader resource interface:\n");
-
-    printf("UNIFORMS\n");
-    for(const auto &uni : mUniforms) {
-        /// Print aggregate name
-        if(uni.pAggregate) {
-            printf("%s", uni.pAggregate->name.c_str());
-            if(uni.indexIntoAggregateArray > -1) {
-                printf("[%d]", uni.indexIntoAggregateArray);
-            }
-            printf(".");
-        }
-
-        /// Rest of variable's name without base aggregate
-        printf("%s\n", uni.variableName.c_str());
-
-        printf("  reflection name: %s\n", uni.reflectionName.c_str());
-        printf("  GL type: 0x%04x\n", uni.glType);
-        printf("  location: %u\n", uni.location);
-        printf("  arraySize: %d\n", uni.arraySize > 1 ? uni.arraySize : 0);
-        printf("  belongs to block: %s with offset: %zu", uni.pBlock ? uni.pBlock->glslBlockName.c_str() : "", uni.offset);
-        printf("\n\n");
-    }
-
-    printf("UNIFORM BLOCKS\n");
-
-    for(auto &it : mUniformBlocks) {
-        printf("%s\n", it.second.glslBlockName.c_str());
-        printf("  with size: %zu\n", it.second.blockSize);
-        printf("  encapsulates aggregate type: %s\n", it.second.pAggregate ? it.second.pAggregate->name.c_str() : "(none)");
-    }
-
-    printf("\n\n");
-}
-
-void
-GlslangShaderCompiler::DumpSlangProgramReflection(const glslang::TProgram *prog) const
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    assert(prog);
-
-    
-    int i;
-    printf("**********");
-    printf("\nGL_ACTIVE_UNIFORMS_BLOCKS: %d\n", prog->getNumLiveUniformBlocks());
-    for(i = 0; i < prog->getNumLiveUniformBlocks(); ++i) {
-        printf("%s\n", prog->getUniformBlockName(i));
-        printf("  hasLocation: %d = %d\n", GetUniformHasLocation(prog, i), GetUniformLocation(prog, i));
-        printf("  getUniformHasBinding: %d = %d\n", GetUniformHasBinding(prog, i), GetUniformBinding(prog, i));
-        printf("  getUniformHasSet: %d = %d\n", GetUniformHasSet(prog, i), GetUniformSet(prog, i));
-        printf("  block size: %d\n", prog->getUniformBlockSize(i));
-    }
-
-    printf("\nGL_ACTIVE_UNIFORMS: %d\n", prog->getNumLiveUniformVariables());
-    for(i = 0; i < prog->getNumLiveUniformVariables(); ++i) {
-        printf("%s (0x%x)\n", prog->getUniformName(i), prog->getUniformType(i));
-        printf("  hasLocation: %d = %d\n", GetUniformHasLocation(prog, i), GetUniformLocation(prog, i));
-        printf("  getUniformHasBinding: %d = %d\n", GetUniformHasBinding(prog, i), GetUniformBinding(prog, i));
-        printf("  getUniformHasSet: %d = %d\n", GetUniformHasSet(prog, i), GetUniformSet(prog, i));
-        printf("  Uniform Block index: %d Uniform Block offset : %d Arraysize: %d\n", prog->getUniformBlockIndex(i),
-                                                                                      prog->getUniformBufferOffset(i),
-                                                                                      prog->getUniformArraySize(i));
-    }
-
-    printf("\nGL_ACTIVE_ATTRIBUTES: %d\n", prog->getNumLiveAttributes());
-    for(i = 0; i < prog->getNumLiveAttributes(); ++i) {
-        printf("%s (0x%x)\n", prog->getAttributeName(i), prog->getAttributeType(i));
-        printf("  hasLocation: %d = %d\n", GetAttributeHasLocation(prog, i), GetAttributeLocation(prog, i));
-    }
-
-    mProgramLinker->GetIoMapResolver()->PrintVaryingInfo();
-
-    printf("**********\n\n");
-}
-
-void
-GlslangShaderCompiler::SaveShaderSourceToFile(ShaderProgram* program, bool processed, const char* source, shader_type_t shaderType) const
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    string filename = static_cast<ostringstream *>(&(ostringstream().flush() << (processed ? "shader_processed" : "shader_") << hex << (uintptr_t)program))->str();
-    filename = filename + string(shaderType == SHADER_TYPE_VERTEX ? ".vert" : ".frag");
-
-    FILE *fp = fopen(filename.c_str(), "w");
-    assert(fp);
-
-    if(fp) {
-        size_t ASSERT_ONLY bytes;
-        bytes = fwrite(source, 1, strlen(source), fp);
-
-        assert(bytes == strlen(source));
-
-        fclose(fp);
-    }
-}
-
-uint32_t
-GlslangShaderCompiler::SerializeReflection(void* binary)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return mShaderReflection->SerializeReflection(binary);
-}
-
-uint32_t
-GlslangShaderCompiler::DeserializeReflection(const void* binary)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return mShaderReflection->DeserializeReflection(binary);
 }

@@ -126,11 +126,11 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
 }
 
 void
-ShaderConverter::Initialize(shader_conversion_type_t conversionType, shader_type_t shaderType)
+ShaderConverter::Initialize(shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mConversionType = conversionType;
+    mConversionType = EsslVersionToShaderConversionType(version_in, version_out);
     mShaderType     = shaderType;
 }
 
@@ -485,6 +485,8 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 void
 ShaderConverter::ConvertGLToVulkanCoordSystem(string& source)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     // Find last "}"
     size_t pos = source.rfind("}");
     //If the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
@@ -495,9 +497,23 @@ ShaderConverter::ConvertGLToVulkanCoordSystem(string& source)
 void
 ShaderConverter::ConvertGLToVulkanDepthRange(string& source)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     // Find last "}"
     size_t pos = source.rfind("}");
 
     string GlToVkDepthRangeConversion = string("    gl_Position.z = (gl_Position.z + gl_Position.w) / 2.0;\n");
     source.insert(pos, GlToVkDepthRangeConversion);
+}
+
+ShaderConverter::shader_conversion_type_t 
+ShaderConverter::EsslVersionToShaderConversionType(ESSL_VERSION version_in, ESSL_VERSION version_out)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+    
+    if(version_in == ESSL_VERSION_100 && version_out == ESSL_VERSION_400) {
+        return SHADER_CONVERSION_100_400;   
+    }
+
+    return INVALID_SHADER_CONVERSION; 
 }

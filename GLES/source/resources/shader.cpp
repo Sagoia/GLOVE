@@ -31,7 +31,7 @@
 
 Shader::Shader(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mShaderCompiler(nullptr), mSource(nullptr),
-  mSourceLength(0), mShaderType(INVALID_SHADER), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
+  mSourceLength(0), mShaderType(INVALID_SHADER), mShaderVersion(ESSL_VERSION_100), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -49,7 +49,7 @@ Shader::GetInfoLogLength(void) const
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    return mShaderCompiler->GetShaderInfoLog(mShaderType) ? (int)strlen(mShaderCompiler->GetShaderInfoLog(mShaderType)) : 0;
+    return mShaderCompiler->GetShaderInfoLog(mShaderType, mShaderVersion) ? (int)strlen(mShaderCompiler->GetShaderInfoLog(mShaderType, mShaderVersion)) : 0;
 }
 
 void
@@ -123,7 +123,7 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     }
 
     if(GLOVE_DUMP_ORIGINAL_SHADER_SOURCE) {
-        cout << "\n\nINPUT SOURCE:\n" << mSource << "\n\n";
+        cout << "\n\nSOURCE v"<< mShaderVersion << ":\n" << mSource << "\n\n";
     }
 }
 
@@ -158,10 +158,10 @@ Shader::GetInfoLog(void) const
     char *log = nullptr;
 
     if(mShaderCompiler) {
-        uint32_t len = strlen(mShaderCompiler->GetShaderInfoLog(mShaderType)) + 1;
+        uint32_t len = strlen(mShaderCompiler->GetShaderInfoLog(mShaderType, mShaderVersion)) + 1;
         log = new char[len];
 
-        memcpy(log, mShaderCompiler->GetShaderInfoLog(mShaderType), len);
+        memcpy(log, mShaderCompiler->GetShaderInfoLog(mShaderType, mShaderVersion), len);
 
         /// NULL terminate it
         if(log[len - 1] != '\0') {
@@ -197,14 +197,7 @@ Shader::CompileShader(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    assert(mSource);
-    assert(mShaderType == SHADER_TYPE_VERTEX || mShaderType == SHADER_TYPE_FRAGMENT);
-
-    if(mShaderType == SHADER_TYPE_VERTEX) {
-        mCompiled = mShaderCompiler->CompileVertexShader(&mSource);
-    } else {
-        mCompiled = mShaderCompiler->CompileFragmentShader(&mSource);
-    }
+    mCompiled = mShaderCompiler->CompileShader(&mSource, mShaderType, mShaderVersion);
 
     return mCompiled;
 }

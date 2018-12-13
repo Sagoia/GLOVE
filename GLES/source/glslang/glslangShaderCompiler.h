@@ -17,7 +17,7 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      Shaders compilation and linking module. It implements ShaderCompiler interface, using glslang 
+ *  @brief      Shaders compilation and linking module. It implements ShaderCompiler interface using glslang 
  *
  */
 
@@ -48,62 +48,22 @@ private:
     ShaderConverter*        mShaderConverter;
     ShaderReflection*       mShaderReflection;
 
-    std::string             mVertSource;
-    std::string             mFragSource;
-    std::string             mVertSource400;
-    std::string             mFragSource400;
-    std::vector<uint32_t>   mVertSpv;
-    std::vector<uint32_t>   mFragSpv;
+    std::map<ESSL_VERSION, std::string[SHADER_COMPILER_TYPE_MAX]> 
+                            mSourceMap;
+    std::vector<uint32_t>   mSpv[SHADER_COMPILER_TYPE_MAX];
 
-    bool mDumpVulkanShaderReflection;
-    bool mDumpInputShaderReflection;
-    bool mDumpProcessedShaderSource;
-    bool mSaveBinaryToFiles;
-    bool mSaveSourceToFiles;
-    bool mSaveSpvTextToFile;
-
-/// Init Functions
-    void InitCompiler(void);
-    void InitCompilerResources(void);
-    void InitReflection(void);
-
-/// Terminate Functions
-    void TerminateCompiler(void);
-
-/// Release Functions
-    void Release(void);
-
-    const char* ConvertShader(ShaderProgram& program, shader_type_t shaderType, bool isYInverted);
-    void CompileShader400(ShaderProgram& program, shader_type_t shaderType);
-    void DumpSlangProgramReflection(const glslang::TProgram* prog) const;
-
-    void PrintReadableSPV(ShaderProgram* program);
-    void SaveBinaryToFiles(ShaderProgram* program);
-    void SaveShaderSourceToFile(ShaderProgram* program, bool processed, const char* source, shader_type_t shaderType) const;
-
-    void CompileAttributes(const glslang::TProgram* prog);
-    void CompileUniforms(const glslang::TProgram* prog);
-    void SetUniformBlocksOffset(const glslang::TProgram* prog);
-    void SetUniformBlocksSizes(const glslang::TProgram* prog);
-    void BuildUniformReflection(void);
-
-    bool GetAttributeHasLocation(const glslang::TProgram* prog, int index) const;
-    int  GetAttributeLocation(const glslang::TProgram* prog, int index) const;
-
-    bool GetUniformHasLocation(const glslang::TProgram* prog, int index) const;
-    int  GetUniformLocation(const glslang::TProgram* prog, int index) const;
-
-    bool GetUniformHasBinding(const glslang::TProgram* prog, int index) const;
-    int  GetUniformBinding(const glslang::TProgram* prog, int index) const;
-
-    bool GetUniformHasSet(const glslang::TProgram* prog, int index) const;
-    int  GetUniformSet(const glslang::TProgram* prog, int index) const;
+    std::map<ESSL_VERSION, bool> 
+                            mPrintReflection;
+    bool                    mPrintConvertedShader;
+    bool                    mSaveBinaryToFiles;
+    bool                    mSaveSourceToFiles;
+    bool                    mSaveSpvTextToFile;
 
     /// All active uniform variables as reported by glslang
-    std::vector<uniform_t>              mUniforms;
+    std::vector<uniform_t>  mUniforms;
 
     /// uniforms that are an aggregation of basic types
-    aggregateMap_t                      mAggregates;
+    aggregateMap_t          mAggregates;
 
     /// All uniform blocks that will be constructed in the final source.
     /// This map associates all uniform variable names, as reported by glslang,
@@ -112,33 +72,104 @@ private:
     /// 1. Basic types and arrays of them
     /// 2. Aggregates of basic types and arrays of them
     /// 3. Opaque types (although they can not be in a uniform block, they are stored here for easy reference)
-    std::map<string, uniformBlock_t>         mUniformBlocks;
-    typedef map<string, uniformBlock_t> uniformBlockMap_t;
-    const uniformBlockMap_t &           GetUniformBlocks(void)            const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks; }
+    uniformBlockMap_t       mUniformBlocks;
 
+/// Init Functions
+    void                    InitCompiler(void);
+    void                    InitCompilerResources(void);
+    void                    InitReflection(void);
+
+/// Terminate Functions
+    void                    TerminateCompiler(void);
+
+/// Release Functions
+    void                    Release(void);
+
+/// Convert Functions
+    const char             *ConvertShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted);
+    
+    void                    PrintReadableSPV(uintptr_t program_ptr);
+    void                    SaveBinaryToFiles(uintptr_t program_ptr);
+    void                    SaveShaderSourceToFile(uintptr_t program_ptr, bool processed, const char* source, shader_compiler_type_t type) const;
+
+    void                    CompileAttributes(const glslang::TProgram* prog);
+    void                    CompileUniforms(const glslang::TProgram* prog);
+    void                    SetUniformBlocksOffset(const glslang::TProgram* prog);
+    void                    SetUniformBlocksSizes(const glslang::TProgram* prog);
+    void                    BuildUniformReflection(void);
+    void                    PrintReflection(const glslang::TProgram* prog, ESSL_VERSION version) const;    
+
+/// Get Functions
+    bool GetAttributeHasLocation(const glslang::TProgram* prog, int index)   const { FUN_ENTRY(GL_LOG_TRACE); 
+                                                                                     const  glslang::TType *attributeType = prog->getAttributeTType(index);
+                                                                                     return attributeType->getQualifier().hasLocation(); }
+
+    int  GetAttributeLocation(const glslang::TProgram* prog, int index)      const { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                     const  glslang::TType *attributeType = prog->getAttributeTType(index);
+                                                                                     return attributeType->getQualifier().hasLocation() ? attributeType->getQualifier().layoutLocation : -1; }
+
+    bool GetUniformHasLocation(const glslang::TProgram* prog, int index)     const { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                     return uniformType->getQualifier().hasLocation(); }
+
+    int  GetUniformLocation(const glslang::TProgram* prog, int index)        const { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                     return uniformType->getQualifier().hasLocation() ? uniformType->getQualifier().layoutLocation : -1; }
+
+    bool GetUniformHasBinding(const glslang::TProgram* prog, int index)     const  { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                     return uniformType->getQualifier().hasBinding(); }
+
+    int  GetUniformBinding(const glslang::TProgram* prog, int index)        const  { FUN_ENTRY(GL_LOG_TRACE); return prog->getUniformBinding(index); }
+
+    bool GetUniformHasSet(const glslang::TProgram* prog, int index)         const  { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                     return uniformType->getQualifier().hasSet(); }
+
+    int  GetUniformSet(const glslang::TProgram* prog, int index)            const  { FUN_ENTRY(GL_LOG_TRACE);
+                                                                                     const glslang::TType *uniformType = prog->getUniformTType(index);
+                                                                                     return uniformType->getQualifier().hasSet() ? uniformType->getQualifier().layoutSet : -1; }
 public:
     GlslangShaderCompiler();
     ~GlslangShaderCompiler();
 
-    bool CompileVertexShader(const char* const* source) override;
-    bool CompileFragmentShader(const char* const* source) override;
-    const char* GetProgramInfoLog(void) override;
-    const char* GetShaderInfoLog(shader_type_t shaderType) override;
-    bool PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted) override;
-    bool LinkProgram(ShaderProgram& shaderProgram) override;
-    void PrepareReflection(void) override;
-    uint32_t SerializeReflection(void* binary) override;
-    uint32_t DeserializeReflection(const void* binary) override;
-    bool ValidateProgram(void) override;
-    void DumpUniforms(void) override;
+/// Linking Functions
+    bool                     LinkProgram(uintptr_t program_ptr,
+                                         ESSL_VERSION version,
+                                         vector<uint32_t> &vertSpv, 
+                                         vector<uint32_t> &fragSpv)           override;
+    bool                     ValidateProgram(ESSL_VERSION version)            override;
+    
+/// Reflection Functions
+    void                     PrepareReflection(ESSL_VERSION version)          override;
+    uint32_t                 SerializeReflection(void* binary)                override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection->SerializeReflection(binary);  }
+    uint32_t                 DeserializeReflection(const void* binary)        override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection->DeserializeReflection(binary);}
 
-    ShaderReflection* GetShaderReflection(void)                        override { return mShaderReflection; }
-    void EnableDumpVulkanShaderReflection(void)                        override { mDumpVulkanShaderReflection = true; }
-    void EnableDumpInputShaderReflection(void)                         override { mDumpInputShaderReflection = true; }
-    void EnableDumpProcessedShaderSource(void)                         override { mDumpProcessedShaderSource = true; }
-    void EnableSaveBinaryToFiles(void)                                 override { mSaveBinaryToFiles = true; }
-    void EnableSaveSourceToFiles(void)                                 override { mSaveSourceToFiles = true; }
-    void EnableSaveSpvTextToFile(void)                                 override { mSaveSpvTextToFile = true; }
+/// Shader Functions
+    bool                     PreprocessShader(uintptr_t program_ptr,
+                                              shader_type_t shaderType,
+                                              ESSL_VERSION version_in,
+                                              ESSL_VERSION version_out,
+                                              bool isYInverted)               override;
+    bool                     CompileShader(const char* const* source,
+                                           shader_type_t shaderType,
+                                           ESSL_VERSION version)              override;
+
+/// Print Functions
+    void                     DumpUniforms(void)                               override;
+
+/// Get Functions
+    const char              *GetProgramInfoLog(ESSL_VERSION version)          override;
+    const char              *GetShaderInfoLog(shader_type_t shaderType,
+                                              ESSL_VERSION  version)          override;
+    inline ShaderReflection *GetShaderReflection(void)                        override { FUN_ENTRY(GL_LOG_TRACE); return mShaderReflection; }
+
+/// Enable Functions
+    inline void              EnablePrintReflection(ESSL_VERSION version)      override { FUN_ENTRY(GL_LOG_TRACE); mPrintReflection[version]   = true; }
+    inline void              EnablePrintConvertedShader(void)                 override { FUN_ENTRY(GL_LOG_TRACE); mPrintConvertedShader       = true; }
+    inline void              EnableSaveBinaryToFiles(void)                    override { FUN_ENTRY(GL_LOG_TRACE); mSaveBinaryToFiles          = true; }
+    inline void              EnableSaveSourceToFiles(void)                    override { FUN_ENTRY(GL_LOG_TRACE); mSaveSourceToFiles          = true; }
+    inline void              EnableSaveSpvTextToFile(void)                    override { FUN_ENTRY(GL_LOG_TRACE); mSaveSpvTextToFile          = true; }
 };
 
 #endif // __GLSLANGSHADERCOMPILER_H__

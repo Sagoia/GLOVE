@@ -32,21 +32,22 @@
 
 class ShaderConverter {
 public:
+    ShaderConverter();
+    ~ShaderConverter();
+
+           void Initialize(shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out);
+           void Convert(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
+
+/// Set Functions
+    inline void SetProgram(glslang::TProgram* slangProgram)                { FUN_ENTRY(GL_LOG_TRACE); mSlangProg     = slangProgram;  }
+    inline void SetIoMapResolver(GlslangIoMapResolver *ioMapResolver)      { FUN_ENTRY(GL_LOG_TRACE); mIoMapResolver = ioMapResolver; }
+
+private:
     typedef enum {
         INVALID_SHADER_CONVERSION,
         SHADER_CONVERSION_100_400
     } shader_conversion_type_t;
 
-    ShaderConverter();
-    ~ShaderConverter();
-
-    void Convert(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
-    void Initialize(shader_conversion_type_t conversionType, shader_type_t shaderType);
-
-    void SetSlangProgram(glslang::TProgram* slangProgram)                { FUN_ENTRY(GL_LOG_TRACE); mSlangProg = slangProgram; }
-    void SetIoMapResolver(GlslangIoMapResolver *ioMapResolver)           { FUN_ENTRY(GL_LOG_TRACE); mIoMapResolver = ioMapResolver; }
-
-private:
     static const char * const   shaderVersion;
     static const char * const   shaderExtensions;
     static const char * const   shaderPrecision;
@@ -61,15 +62,21 @@ private:
     glslang::TProgram*          mSlangProg;
     GlslangIoMapResolver       *mIoMapResolver;
 
-    void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
+/// Process Functions
     void ProcessMacros(std::string& source);
     void ProcessHeader(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessUniforms(string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessInvariantQualifier(std::string& source);
     void ProcessVaryings(string& source);
     void ProcessVertexAttributes(string& source, ShaderReflection* reflection);
+
+/// Convert Functions
+    void Convert100To400(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void ConvertGLToVulkanCoordSystem(string& source);
     void ConvertGLToVulkanDepthRange(string& source);
+
+    shader_conversion_type_t EsslVersionToShaderConversionType(ESSL_VERSION version_in, 
+                                                               ESSL_VERSION version_out);
 
 };
 
