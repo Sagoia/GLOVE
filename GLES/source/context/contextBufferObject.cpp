@@ -28,6 +28,8 @@ Context::BindBuffer(GLenum target, GLuint buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    LOGS("GLOVE_LOGS: BindBuffer %d\n", buffer);
+
     if(target != GL_ARRAY_BUFFER && target != GL_ELEMENT_ARRAY_BUFFER) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -39,6 +41,18 @@ Context::BindBuffer(GLenum target, GLuint buffer)
         bo->SetTarget(target);
         bo->SetVkContext(mVkContext);
     }
+
+    BufferObject * activeBufferObject = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(target);
+
+    if(activeBufferObject) {
+        if(mResourceManager->GetBufferID(activeBufferObject)) {
+            activeBufferObject->Unbind();
+        }
+    }
+    if(buffer) {
+        bo->Bind();
+    }
+
     mStateManager.GetActiveObjectsState()->SetActiveBufferObject(target, bo);
 
     if(target == GL_ELEMENT_ARRAY_BUFFER || (bo && bo->IsIndexBuffer())) {
@@ -135,18 +149,21 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
 
     while(n-- != 0) {
         uint32_t buffer = *buffers++;
+        LOGS("GLOVE_LOGS: DeleteBuffers %d\n", buffer);
 
         if(buffer && mResourceManager->BufferExists(buffer)) {
 
             BufferObject *buf = mResourceManager->GetBuffer(buffer);
 
             if(mStateManager.GetActiveObjectsState()->EqualsActiveBufferObject(buf)) {
+                buf->Unbind();
                 mStateManager.GetActiveObjectsState()->ResetActiveBufferObject(buf->GetTarget());
             }
-
-            mResourceManager->DeallocateBuffer(buffer);
+            mResourceManager->AddToPurgeList(buf);
+            mResourceManager->RemoveFromListBuffer(buffer);
         }
     }
+    mResourceManager->CleanPurgeList();
 }
 
 void

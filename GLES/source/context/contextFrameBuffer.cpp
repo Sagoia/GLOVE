@@ -95,6 +95,11 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
         if(fboindex && mResourceManager->FramebufferExists(fboindex)) {
             Framebuffer *fbo = mResourceManager->GetFramebuffer(fboindex);
 
+            //Unbind the attached textures and renderbuffers
+            fbo->UnrefTexturesRenderbuffers(GL_COLOR_ATTACHMENT0);
+            fbo->UnrefTexturesRenderbuffers(GL_DEPTH_ATTACHMENT);
+            fbo->UnrefTexturesRenderbuffers(GL_STENCIL_ATTACHMENT);
+
             if(mWriteFBO == fbo) {
 
                 if(mWriteFBO->IsInDrawState()) {
@@ -112,6 +117,7 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
             mResourceManager->DeallocateFramebuffer(fboindex);
         }
     }
+    mResourceManager->CleanPurgeList();
 }
 
 void
@@ -144,6 +150,10 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         Finish();
     }
 
+    mWriteFBO->UnrefTexturesRenderbuffers(attachment);
+    //If there is a renderbuffer attached to this framebuffer that has been deleted
+    mWriteFBO->CleanCachedAttachedTexturesRenderbuffers(attachment);
+
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
         int width  = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetWidth()  : -1;
@@ -162,6 +172,8 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         mWriteFBO->SetStencilAttachmentName(renderbuffer);
         break;
     }
+    mWriteFBO->RefTexturesRenderbuffers(attachment);
+    mResourceManager->CleanPurgeList();
 }
 
 void
@@ -210,6 +222,10 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         Finish();
     }
 
+    mWriteFBO->UnrefTexturesRenderbuffers(attachment);
+    //If there is a texture attached to this framebuffer that has been deleted
+    mWriteFBO->CleanCachedAttachedTexturesRenderbuffers(attachment);
+
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
         int width  = texture ? mResourceManager->GetTexture(texture)->GetWidth()  : -1;
@@ -234,6 +250,8 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         mWriteFBO->SetStencilAttachmentLevel(0);
         break;
     }
+    mWriteFBO->RefTexturesRenderbuffers(attachment);
+    mResourceManager->CleanPurgeList();
 }
 
 void

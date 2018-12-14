@@ -168,4 +168,37 @@ ResourceManager::CleanPurgeList()
             ++it;
         }
     }
+    //Renderbuffer
+    for (auto it = mPurgeListRenderbuffers.begin(); it != mPurgeListRenderbuffers.end(); ) {
+        if ((*it)->GetRefCount() == 0) {
+            delete *it;
+            it = mPurgeListRenderbuffers.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void
+ResourceManager::FramebufferCacheAttachedTexture(Texture *texture)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+        mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
+
+        it->second->CacheAttachedTexture(texture);
+    }
+}
+
+void
+ResourceManager::FramebufferCacheAttachedRenderbuffer(Renderbuffer *renderbuffer, GLuint index)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+        mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
+
+        it->second->CacheAttachedRenderbuffer(renderbuffer, index);
+    }
 }

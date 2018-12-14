@@ -26,7 +26,7 @@
 
 #include "texture.h"
 
-class Renderbuffer
+class Renderbuffer : public refObject
 {
 private:
     const

@@ -11,46 +11,32 @@
  * Lesser General Public License for more details.
  */
 
-/**
- *  @file       refObject.cpp
- *  @author     Think Silicon
- *  @date       30/11/2018
- *  @version    1.0
- *
- *  @brief
- *
- */
+#include "refObject_test.h"
 
-#include "refObject.h"
+namespace Testing {
 
-refObject::refObject()
-: refCount(0), markForDeletion(false)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
+// Code here will be called immediately after the constructor (right
+// before each test).
+void refObjectTest::SetUp(void) {
+    return;
 }
 
-refObject::~refObject()
-{
-    FUN_ENTRY(GL_LOG_TRACE);
+// Code here will be called immediately after each test (right
+// before the destructor).
+void refObjectTest::TearDown() {
+    return;
 }
 
-int
-refObject::Bind()
-{
-    FUN_ENTRY(GL_LOG_TRACE);
+// Objects declared here can be used by all tests.
 
-    //TODO: mutex lock
-    refCount++;
-    return 0;
+TEST_F(refObjectTest, Bind)
+{
+    ASSERT_EQ(0, RefObject.Bind());
 }
 
-int
-refObject::Unbind()
+TEST_F(refObjectTest, Unbind)
 {
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    //TODO: mutex lock
-    refCount--;
-    assert(refCount >= 0);
-    return 0;
+    ASSERT_EQ(0, RefObject.Unbind());
 }
+
+} //end of namespace

@@ -48,6 +48,13 @@ Context::BindTexture(GLenum target, GLuint texture)
     }
 
     Texture *tex = nullptr;
+    Texture * activetexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
+    GLuint activeTextureId = mResourceManager->GetTextureID(activetexture);
+
+    //Mark the current active texture as unbinded
+    if(activeTextureId) {
+        activetexture->Unbind();
+    }
     if(texture)
     {
         tex = mResourceManager->GetTexture(texture);
@@ -65,8 +72,9 @@ Context::BindTexture(GLenum target, GLuint texture)
             return;
         }
 
+        tex->Bind();
         mResourceManager->UpdateFramebufferObjects(texture, GL_TEXTURE);
-        
+
     } else {
         tex = mResourceManager->GetDefaultTexture(target);
     }
@@ -103,33 +111,40 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
                 Finish();
             }
 
+            Texture *tex  = mResourceManager->GetTexture(texture);
             if(texture == mWriteFBO->GetColorAttachmentName()) {
                 mWriteFBO->SetColorAttachment(-1,-1);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
+                tex->Unbind();
             }
 
             if(texture == mWriteFBO->GetDepthAttachmentName()) {
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
+                tex->Unbind();
             }
 
             if(texture == mWriteFBO->GetStencilAttachmentName()) {
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
+                tex->Unbind();
             }
 
-            Texture *tex  = mResourceManager->GetTexture(texture);
+            mResourceManager->FramebufferCacheAttachedTexture(tex);
             GLenum target = tex->GetTarget();
             for(int i = 0; i < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS && target != GL_INVALID_VALUE; ++i) {
                 if(mStateManager.GetActiveObjectsState()->EqualsActiveTexture(target, i, tex)) {
                     mStateManager.GetActiveObjectsState()->SetActiveTexture(target, i, mResourceManager->GetDefaultTexture(target));
+                    //If the texture is active, then unbind it from all texture image units
+                    tex->Unbind();
                 }
             }
-
-            mResourceManager->DeallocateTexture(texture);
+            mResourceManager->AddToPurgeList(tex);
+            mResourceManager->RemoveFromListTexture(texture);
         }
     }
+    mResourceManager->CleanPurgeList();
 }
 
 void

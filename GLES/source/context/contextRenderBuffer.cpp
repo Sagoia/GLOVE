@@ -33,6 +33,15 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
         return;
     }
 
+    GLuint activeRenderbufferID = mStateManager.GetActiveObjectsState()->GetActiveRenderbufferObjectID();
+    Renderbuffer *activeRendbuff = mResourceManager->GetRenderbuffer(activeRenderbufferID);
+    if(activeRenderbufferID) {
+        activeRendbuff->Unbind();
+    }
+    if(renderbuffer) {
+        mResourceManager->GetRenderbuffer(renderbuffer)->Bind();
+    }
+
     if(!renderbuffer) {
         mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(0);
         return;
@@ -82,28 +91,37 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
                 Finish();
             }
 
+            //Check if the renderbuffer is attached to the mWriteFBO
+            Renderbuffer *rendbuff = mResourceManager->GetRenderbuffer(index);
             if(index == mWriteFBO->GetColorAttachmentName()) {
                 mWriteFBO->SetColorAttachment(-1,-1);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
+                rendbuff->Unbind();
             }
 
             if(index == mWriteFBO->GetDepthAttachmentName()) {
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
+                rendbuff->Unbind();
             }
 
             if(index == mWriteFBO->GetStencilAttachmentName()) {
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
+                rendbuff->Unbind();
             }
 
             if(mStateManager.GetActiveObjectsState()->EqualsActiveRenderbufferObject(index)) {
+                rendbuff->Unbind();
                 mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(0);
             }
-            mResourceManager->DeallocateRenderbuffer(index);
+            mResourceManager->FramebufferCacheAttachedRenderbuffer(rendbuff, index);
+            mResourceManager->AddToPurgeList(rendbuff);
+            mResourceManager->RemoveFromListRenderbuffer(index);
         }
     }
+    mResourceManager->CleanPurgeList();
 }
 
 void

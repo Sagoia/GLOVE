@@ -70,6 +70,7 @@ private:
     std::vector<GenericVertexAttribute>        mGenericVertexAttributes;
     std::vector<BufferObject*>                 mPurgeListBufferObject;
     std::vector<Texture*>                      mPurgeListTexture;
+    std::vector<Renderbuffer*>                 mPurgeListRenderbuffers;
 
 public:
     ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
@@ -90,6 +91,7 @@ public:
     inline void                DeallocateShaderProgram(ShaderProgram *program)  { FUN_ENTRY(GL_LOG_TRACE); mShaderPrograms.Deallocate(mShaderPrograms.GetObjectId(program)); }
     inline void                RemoveFromListTexture(uint32_t index)            { FUN_ENTRY(GL_LOG_TRACE); mTextures.RemoveFromList(index); }
     inline void                RemoveFromListBuffer(uint32_t index)             { FUN_ENTRY(GL_LOG_TRACE); mBuffers.RemoveFromList(index); }
+    inline void                RemoveFromListRenderbuffer(uint32_t index)       { FUN_ENTRY(GL_LOG_TRACE); mRenderbuffers.RemoveFromList(index); }
 
 // Get Functions
     inline std::vector<GenericVertexAttribute>& GetGenericVertexAttributes(void) { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes; }
@@ -141,7 +143,10 @@ public:
 //PurgeList Functions
     void                       AddToPurgeList(BufferObject *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListBufferObject.push_back(object); }
     void                       AddToPurgeList(Texture *object)                  { FUN_ENTRY(GL_LOG_TRACE); mPurgeListTexture.push_back(object); }
+    void                       AddToPurgeList(Renderbuffer *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListRenderbuffers.push_back(object); }
     void                       CleanPurgeList();
+    void                       FramebufferCacheAttachedTexture(Texture *texture);
+    void                       FramebufferCacheAttachedRenderbuffer(Renderbuffer *renderbuffer, GLuint index);
 };
 
 #endif //__RESOURCEMANAGER_H__

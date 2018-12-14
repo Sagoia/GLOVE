@@ -71,6 +71,14 @@ private:
     bool                            mIsSystem;
     const EGLSurfaceInterface      *mEGLSurfaceInterface;
 
+    //Cache for possible deleted textures and renderbuffers
+    Texture*                        mCacheColorTexture;
+    Texture*                        mCacheDepthTexture;
+    Texture*                        mCacheStencilTexture;
+    Renderbuffer*                   mCacheColorRenderbuffer;
+    Renderbuffer*                   mCacheDepthRenderbuffer;
+    Renderbuffer*                   mCacheStencilRenderbuffer;
+
     void                            Release(void);
     size_t                          GetCurrentBufferIndex(void) const;
 
@@ -101,6 +109,13 @@ public:
 
 // Update Functions
     void                    CheckForUpdatedResources(void);
+
+//Attachment Reference Functions
+    void                    CacheAttachedTexture(Texture *bTexture);
+    void                    CacheAttachedRenderbuffer(Renderbuffer *bRenderbuffer, GLuint index);
+    void                    CleanCachedAttachedTexturesRenderbuffers(GLenum attachment);
+    void                    UnrefTexturesRenderbuffers(GLenum attachment);
+    void                    RefTexturesRenderbuffers(GLenum attachment);
 
 // Get Functions
            VkFramebuffer   *GetActiveVkFramebuffer() const;
@@ -141,6 +156,7 @@ public:
            Texture *        GetStencilAttachmentTexture(void)           const;
     inline GLint            GetBindToTexture(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mBindToTexture;                  }
     inline GLint            GetSurfaceType(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mSurfaceType;                    }
+    inline Renderbuffer *   GetRenderbuffer(GLuint index)               const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderbufferArray->GetObject(index); }
 
 // Set Functions
     inline void             SetEGLSurfaceInterface(const EGLSurfaceInterface_t* eglSurfaceInterface) { FUN_ENTRY(GL_LOG_TRACE); mEGLSurfaceInterface = eglSurfaceInterface; }

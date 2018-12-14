@@ -35,7 +35,9 @@ Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::Com
 mTarget(GL_INVALID_VALUE), mState(IDLE),
 mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr),
 mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID),
-mIsSystem(false), mEGLSurfaceInterface(nullptr)
+mIsSystem(false), mEGLSurfaceInterface(nullptr),
+mCacheColorTexture(nullptr), mCacheDepthTexture(nullptr), mCacheStencilTexture(nullptr),
+mCacheColorRenderbuffer(nullptr), mCacheDepthRenderbuffer(nullptr), mCacheStencilRenderbuffer(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -106,9 +108,17 @@ Framebuffer::GetColorAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            if(mCacheColorTexture) {
+                tex = mCacheColorTexture;
+            } else {
+                tex = mTextureArray->GetObject(index);
+            }
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            if(mCacheColorRenderbuffer) {
+                tex = mCacheColorRenderbuffer->GetTexture();
+            } else {
+                tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            }
         }
     }
 
@@ -130,9 +140,17 @@ Framebuffer::GetDepthAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            if(mCacheDepthTexture) {
+                tex = mCacheDepthTexture;
+            } else {
+                tex = mTextureArray->GetObject(index);
+            }
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            if(mCacheDepthRenderbuffer) {
+                tex = mCacheDepthRenderbuffer->GetTexture();
+            } else {
+                tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            }
         }
     }
 
@@ -154,9 +172,17 @@ Framebuffer::GetStencilAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            if(mCacheStencilTexture) {
+                tex = mCacheStencilTexture;
+            } else {
+                tex = mTextureArray->GetObject(index);
+            }
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            if(mCacheStencilRenderbuffer) {
+                tex = mCacheStencilRenderbuffer->GetTexture();
+            } else {
+                tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            }
         }
     }
 
@@ -379,6 +405,202 @@ Framebuffer::CheckForUpdatedResources()
             mSizeUpdated = true;
         }
         GetColorAttachmentTexture()->SetDataUpdated(false);
+    }
+}
+
+void
+Framebuffer::CacheAttachedTexture(Texture *bTexture)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(GetColorAttachmentTexture() == bTexture && !mCacheColorTexture) {
+        mCacheColorTexture = bTexture;
+    }
+    if(GetDepthAttachmentTexture() == bTexture && !mCacheDepthTexture) {
+        mCacheDepthTexture = bTexture;
+    }
+    if(GetStencilAttachmentTexture() == bTexture && !mCacheStencilTexture) {
+        mCacheStencilTexture = bTexture;
+    }
+}
+
+void
+Framebuffer::CacheAttachedRenderbuffer(Renderbuffer *bRenderbuffer, GLuint index)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(index == GetColorAttachmentName() && !mCacheColorRenderbuffer) {
+        mCacheColorRenderbuffer = bRenderbuffer;
+    }
+
+    if(index == GetDepthAttachmentName() && !mCacheDepthRenderbuffer) {
+        mCacheDepthRenderbuffer = bRenderbuffer;
+    }
+
+    if(index == GetStencilAttachmentName() && !mCacheStencilRenderbuffer) {
+        mCacheStencilRenderbuffer = bRenderbuffer;
+    }
+}
+
+void
+Framebuffer::CleanCachedAttachedTexturesRenderbuffers(GLenum attachment)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    switch(attachment) {
+    case GL_COLOR_ATTACHMENT0: {
+        GLenum type  = GetColorAttachmentType();
+        uint32_t index = GetColorAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                if(mCacheColorTexture) {
+                    mCacheColorTexture = nullptr;
+                }
+            } else if(type == GL_RENDERBUFFER) {
+                if(mCacheColorRenderbuffer) {
+                    mCacheColorRenderbuffer = nullptr;
+                }
+            }
+        }
+        break; }
+    case GL_DEPTH_ATTACHMENT: {
+        GLenum type  = GetDepthAttachmentType();
+        uint32_t index = GetDepthAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                if(mCacheDepthTexture) {
+                    mCacheDepthTexture = nullptr;
+                }
+            } else if(type == GL_RENDERBUFFER) {
+                if(mCacheDepthRenderbuffer) {
+                    mCacheDepthRenderbuffer = nullptr;
+                }
+            }
+        }
+        break; }
+    case GL_STENCIL_ATTACHMENT: {
+        GLenum type  = GetStencilAttachmentType();
+        uint32_t index = GetStencilAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                if(mCacheStencilTexture) {
+                    mCacheStencilTexture = nullptr;
+                }
+            } else if(type == GL_RENDERBUFFER) {
+                if(mCacheStencilRenderbuffer) {
+                    mCacheStencilRenderbuffer = nullptr;
+                }
+            }
+        }
+        break; }
+    }
+}
+
+void
+Framebuffer::UnrefTexturesRenderbuffers(GLenum attachment)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    switch(attachment) {
+    case GL_COLOR_ATTACHMENT0: {
+        GLenum type  = GetColorAttachmentType();
+        uint32_t index = GetColorAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                if(mCacheColorTexture) {
+                    mCacheColorTexture->Unbind();
+                } else {
+                    mTextureArray->GetObject(index)->Unbind();
+                }
+            } else if(type == GL_RENDERBUFFER) {
+                if(mCacheColorRenderbuffer) {
+                    mCacheColorRenderbuffer->Unbind();
+                } else {
+                    mRenderbufferArray->GetObject(index)->Unbind();
+                }
+            }
+        }
+        break; }
+    case GL_DEPTH_ATTACHMENT: {
+        GLenum type  = GetDepthAttachmentType();
+        uint32_t index = GetDepthAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                if(mCacheDepthTexture) {
+                    mCacheDepthTexture->Unbind();
+                } else {
+                    mTextureArray->GetObject(index)->Unbind();
+                }
+            } else if(type == GL_RENDERBUFFER) {
+                if(mCacheDepthRenderbuffer) {
+                    mCacheDepthRenderbuffer->Unbind();
+                } else {
+                    mRenderbufferArray->GetObject(index)->Unbind();
+                }
+            }
+        }
+        break; }
+    case GL_STENCIL_ATTACHMENT: {
+        GLenum type  = GetStencilAttachmentType();
+        uint32_t index = GetStencilAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                if(mCacheStencilTexture) {
+                    mCacheStencilTexture->Unbind();
+                } else {
+                    mTextureArray->GetObject(index)->Unbind();
+                }
+            } else if(type == GL_RENDERBUFFER) {
+                if(mCacheStencilRenderbuffer) {
+                    mCacheStencilRenderbuffer->Unbind();
+                } else {
+                    mRenderbufferArray->GetObject(index)->Unbind();
+                }
+            }
+        }
+        break; }
+    }
+}
+
+void
+Framebuffer::RefTexturesRenderbuffers(GLenum attachment)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    switch(attachment) {
+    case GL_COLOR_ATTACHMENT0: {
+        GLenum type  = GetColorAttachmentType();
+        uint32_t index = GetColorAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                mTextureArray->GetObject(index)->Bind();
+            } else if(type == GL_RENDERBUFFER) {
+                mRenderbufferArray->GetObject(index)->Bind();
+            }
+        }
+        break; }
+    case GL_DEPTH_ATTACHMENT: {
+        GLenum type  = GetDepthAttachmentType();
+        uint32_t index = GetDepthAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                mTextureArray->GetObject(index)->Bind();
+            } else if(type == GL_RENDERBUFFER) {
+                mRenderbufferArray->GetObject(index)->Bind();
+            }
+        }
+        break; }
+    case GL_STENCIL_ATTACHMENT: {
+        GLenum type  = GetStencilAttachmentType();
+        uint32_t index = GetStencilAttachmentName();
+        if(index) {
+            if(type == GL_TEXTURE) {
+                mTextureArray->GetObject(index)->Bind();
+            } else if(type == GL_RENDERBUFFER) {
+                mRenderbufferArray->GetObject(index)->Bind();
+            }
+        }
+        break; }
     }
 }
 

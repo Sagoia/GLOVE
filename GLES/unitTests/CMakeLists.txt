@@ -1,7 +1,8 @@
 message(STATUS "  Building GLES Unit Tests")
 
 set(SOURCES
-    arrays_tests.cpp
+    utils/arrays_tests.cpp
+    resources/refObject_test.cpp
 )
 
 set(LIBS
