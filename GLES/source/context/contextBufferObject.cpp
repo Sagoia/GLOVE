@@ -28,8 +28,6 @@ Context::BindBuffer(GLenum target, GLuint buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    LOGS("GLOVE_LOGS: BindBuffer %d\n", buffer);
-
     if(target != GL_ARRAY_BUFFER && target != GL_ELEMENT_ARRAY_BUFFER) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -149,7 +147,6 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
 
     while(n-- != 0) {
         uint32_t buffer = *buffers++;
-        LOGS("GLOVE_LOGS: DeleteBuffers %d\n", buffer);
 
         if(buffer && mResourceManager->BufferExists(buffer)) {
 
