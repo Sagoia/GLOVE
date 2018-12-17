@@ -964,7 +964,6 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveUniformBlocks(); ++i) {
         descTypeCounts[i].descriptorCount = 1;
         descTypeCounts[i].type = mShaderResourceInterface.IsUniformBlockOpaque(i) ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        assert(descTypeCounts[i].type == mVkDescSetLayoutBind[i].descriptorType);
     }
 
     VkDescriptorPoolCreateInfo descriptorPoolInfo;
