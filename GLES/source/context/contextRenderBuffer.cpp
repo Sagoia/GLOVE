@@ -79,9 +79,9 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
         if(index && mResourceManager->RenderbufferExists(index)) {
 
             if( mWriteFBO != mSystemFBO &&
-               (index == mWriteFBO->GetColorAttachmentName()    ||
-                index == mWriteFBO->GetDepthAttachmentName()    ||
-                index == mWriteFBO->GetStencilAttachmentName()) &&
+               ((index == mWriteFBO->GetColorAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetColorAttachmentType())    ||
+                (index == mWriteFBO->GetDepthAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetDepthAttachmentType())    ||
+                (index == mWriteFBO->GetStencilAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetStencilAttachmentType())) &&
                 mWriteFBO->IsInDrawState()) {
 
                 if(index == mWriteFBO->GetColorAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetColorAttachmentType()) {
@@ -222,9 +222,9 @@ Context::RenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width
         return;
     }
 
-    if((activeRenderbufferId == mWriteFBO->GetColorAttachmentName()    ||
-        activeRenderbufferId == mWriteFBO->GetDepthAttachmentName()    ||
-        activeRenderbufferId == mWriteFBO->GetStencilAttachmentName()) &&
+    if(((activeRenderbufferId == mWriteFBO->GetColorAttachmentName()   && GL_RENDERBUFFER == mWriteFBO->GetColorAttachmentType())    ||
+        (activeRenderbufferId == mWriteFBO->GetDepthAttachmentName()   && GL_RENDERBUFFER == mWriteFBO->GetDepthAttachmentType())    ||
+        (activeRenderbufferId == mWriteFBO->GetStencilAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetStencilAttachmentType())) &&
         mWriteFBO->IsInDrawState()) {
         Finish();
     }
