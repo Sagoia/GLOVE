@@ -55,6 +55,7 @@ private:
     std::map<ESSL_VERSION, bool> 
                             mPrintReflection;
     bool                    mPrintConvertedShader;
+    bool                    mPrintSpv;
     bool                    mSaveBinaryToFiles;
     bool                    mSaveSourceToFiles;
     bool                    mSaveSpvTextToFile;
@@ -89,7 +90,8 @@ private:
     const char             *ConvertShader(uintptr_t program_ptr, shader_type_t shaderType, ESSL_VERSION version_in, ESSL_VERSION version_out, bool isYInverted);
 
 /// In/Out File Functions
-    void                    PrintReadableSPV(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
+    void                    PrintReadableSPV(shader_compiler_type_t type, ESSL_VERSION version);
+    void                    SaveReadableSPVToFiles(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
     void                    SaveBinaryToFiles(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version);
     void                    SaveShaderSourceToFile(uintptr_t program_ptr, bool processed, const char* source, shader_compiler_type_t type) const;
 
@@ -150,6 +152,7 @@ public:
 /// Enable Functions
     inline void              EnablePrintReflection(ESSL_VERSION version)      override { FUN_ENTRY(GL_LOG_TRACE); mPrintReflection[version]   = true; }
     inline void              EnablePrintConvertedShader(void)                 override { FUN_ENTRY(GL_LOG_TRACE); mPrintConvertedShader       = true; }
+    inline void              EnablePrintSpv(void)                             override { FUN_ENTRY(GL_LOG_TRACE); mPrintSpv                   = true; }
     inline void              EnableSaveBinaryToFiles(void)                    override { FUN_ENTRY(GL_LOG_TRACE); mSaveBinaryToFiles          = true; }
     inline void              EnableSaveSourceToFiles(void)                    override { FUN_ENTRY(GL_LOG_TRACE); mSaveSourceToFiles          = true; }
     inline void              EnableSaveSpvTextToFile(void)                    override { FUN_ENTRY(GL_LOG_TRACE); mSaveSpvTextToFile          = true; }

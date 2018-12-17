@@ -54,6 +54,7 @@ public:
 /// Enable Functions
     virtual void                EnablePrintReflection(ESSL_VERSION version) = 0;
     virtual void                EnablePrintConvertedShader(void) = 0;
+    virtual void                EnablePrintSpv(void) = 0;
 
     virtual void                EnableSaveBinaryToFiles(void) = 0;
     virtual void                EnableSaveSourceToFiles(void) = 0;

@@ -86,6 +86,7 @@
 #define GLOVE_DUMP_VULKAN_SHADER_REFLECTION             false
 #define GLOVE_DUMP_ORIGINAL_SHADER_SOURCE               false
 #define GLOVE_DUMP_PROCESSED_SHADER_SOURCE              false
+#define GLOVE_DUMP_SPIRV_SHADER_SOURCE                  false
 
 #define GLOVE_INVALID_OFFSET                            UINT32_MAX
 

@@ -34,7 +34,7 @@ TBuiltInResource GlslangShaderCompiler::mTBuiltInResource;
 
 GlslangShaderCompiler::GlslangShaderCompiler()
 : mProgramLinker(nullptr), mShaderConverter(nullptr), mShaderReflection(nullptr),
-  mPrintConvertedShader(false),
+  mPrintConvertedShader(false), mPrintSpv(false),
   mSaveBinaryToFiles(false), mSaveSourceToFiles(false), mSaveSpvTextToFile(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -197,8 +197,17 @@ GlslangShaderCompiler::LinkProgram(uintptr_t program_ptr, ESSL_VERSION version, 
     }
 
     if(mSaveSpvTextToFile) {
-        PrintReadableSPV(program_ptr, SHADER_COMPILER_VERTEX  , version);
-        PrintReadableSPV(program_ptr, SHADER_COMPILER_FRAGMENT, version);
+        SaveReadableSPVToFiles(program_ptr, SHADER_COMPILER_VERTEX  , version);
+        SaveReadableSPVToFiles(program_ptr, SHADER_COMPILER_FRAGMENT, version);
+    }
+
+    if(mPrintSpv) {
+        PrintReadableSPV(SHADER_COMPILER_VERTEX  , version);
+        PrintReadableSPV(SHADER_COMPILER_FRAGMENT, version);
+    }
+
+    if(mPrintReflection[version]) {
+        PrintReflection(version);
     }
 
     if(mPrintReflection[version]) {
@@ -231,7 +240,29 @@ GlslangShaderCompiler::ValidateProgram(ESSL_VERSION version)
 }
 
 void
-GlslangShaderCompiler::PrintReadableSPV(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version)
+GlslangShaderCompiler::PrintReadableSPV(shader_compiler_type_t type, ESSL_VERSION version)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    EShLanguage lang = (type == SHADER_COMPILER_VERTEX) ? EShLangVertex : EShLangFragment;
+
+    mProgramLinker->GenerateSPV(mSpv[type], lang, version);
+
+    if(!mSpv[type].empty()) {
+        if(type == SHADER_COMPILER_VERTEX) {
+            printf("\n\n------------- VERTEX SHADER SPIRV -------------\n\n");
+        } else if(type == SHADER_COMPILER_FRAGMENT) {
+            printf("\n\n------------ FRAGMENT SHADER SPIRV ------------\n\n");
+        }
+        stringstream out;
+        spv::Disassemble(out, mSpv[type]);
+        printf("%s", out.str().c_str());
+        printf("------------------------------------------------\n\n");
+    }
+}
+
+void
+GlslangShaderCompiler::SaveReadableSPVToFiles(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -249,6 +280,7 @@ GlslangShaderCompiler::PrintReadableSPV(uintptr_t program_ptr, shader_compiler_t
         out.close();
     }
 }
+
 
 void
 GlslangShaderCompiler::SaveBinaryToFiles(uintptr_t program_ptr, shader_compiler_type_t type, ESSL_VERSION version)

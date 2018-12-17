@@ -454,6 +454,10 @@ ShaderProgram::LinkProgram()
         mShaderCompiler->EnablePrintReflection(ESSL_VERSION_400);
     }
 
+    if(GLOVE_DUMP_SPIRV_SHADER_SOURCE) {
+        mShaderCompiler->EnablePrintSpv();
+    }
+
     ResetVulkanVertexInput();
 
     mShaderCompiler->PrepareReflection(ESSL_VERSION_100);
