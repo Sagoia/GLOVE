@@ -116,7 +116,7 @@ private:
 
 public:
     GlslangShaderCompiler();
-    ~GlslangShaderCompiler();
+    ~GlslangShaderCompiler() override;
 
 /// Linking Functions
     bool                     LinkProgram(uintptr_t program_ptr,
