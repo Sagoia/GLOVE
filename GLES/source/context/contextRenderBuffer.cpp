@@ -84,7 +84,7 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
                 index == mWriteFBO->GetStencilAttachmentName()) &&
                 mWriteFBO->IsInDrawState()) {
 
-                if(index == mWriteFBO->GetColorAttachmentName()) {
+                if(index == mWriteFBO->GetColorAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetColorAttachmentType()) {
                     mWriteFBO->SetStateDelete();
                 }
 
@@ -93,20 +93,20 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
 
             //Check if the renderbuffer is attached to the mWriteFBO
             Renderbuffer *rendbuff = mResourceManager->GetRenderbuffer(index);
-            if(index == mWriteFBO->GetColorAttachmentName()) {
+            if(index == mWriteFBO->GetColorAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetColorAttachmentType()) {
                 mWriteFBO->SetColorAttachment(-1,-1);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
                 rendbuff->Unbind();
             }
 
-            if(index == mWriteFBO->GetDepthAttachmentName()) {
+            if(index == mWriteFBO->GetDepthAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetDepthAttachmentType()) {
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
                 rendbuff->Unbind();
             }
 
-            if(index == mWriteFBO->GetStencilAttachmentName()) {
+            if(index == mWriteFBO->GetStencilAttachmentName() && GL_RENDERBUFFER == mWriteFBO->GetStencilAttachmentType()) {
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
                 rendbuff->Unbind();

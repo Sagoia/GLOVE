@@ -105,27 +105,27 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
         if (texture && mResourceManager->TextureExists(texture)) {
 
             if(mWriteFBO->IsInDrawState()) {
-                if(texture == mWriteFBO->GetColorAttachmentName()) {
+                if(texture == mWriteFBO->GetColorAttachmentName() && GL_TEXTURE == mWriteFBO->GetColorAttachmentType()) {
                     mWriteFBO->SetStateDelete();
                 }
                 Finish();
             }
 
             Texture *tex  = mResourceManager->GetTexture(texture);
-            if(texture == mWriteFBO->GetColorAttachmentName()) {
+            if(texture == mWriteFBO->GetColorAttachmentName() && GL_TEXTURE == mWriteFBO->GetColorAttachmentType()) {
                 mWriteFBO->SetColorAttachment(-1,-1);
                 mWriteFBO->SetColorAttachmentType(GL_NONE);
                 mWriteFBO->SetColorAttachmentName(0);
                 tex->Unbind();
             }
 
-            if(texture == mWriteFBO->GetDepthAttachmentName()) {
+            if(texture == mWriteFBO->GetDepthAttachmentName() && GL_TEXTURE == mWriteFBO->GetDepthAttachmentType()) {
                 mWriteFBO->SetDepthAttachmentType(GL_NONE);
                 mWriteFBO->SetDepthAttachmentName(0);
                 tex->Unbind();
             }
 
-            if(texture == mWriteFBO->GetStencilAttachmentName()) {
+            if(texture == mWriteFBO->GetStencilAttachmentName() && GL_TEXTURE == mWriteFBO->GetStencilAttachmentType()) {
                 mWriteFBO->SetStencilAttachmentType(GL_NONE);
                 mWriteFBO->SetStencilAttachmentName(0);
                 tex->Unbind();
