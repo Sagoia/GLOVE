@@ -46,7 +46,7 @@ private:
     void                 Release(void);
     bool                 IsManageableError(const char* errors);
     bool                 IsNotFullySupported(const char* source, const char* errors);
-
+    bool                 IsSamplerInBlockError(const char* errors);
 public:
     GlslangCompiler();
     ~GlslangCompiler();
