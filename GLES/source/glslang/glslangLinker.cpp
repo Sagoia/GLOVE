@@ -59,6 +59,7 @@ GlslangLinker::GenerateSPV(std::vector<unsigned int>& spv, EShLanguage language,
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    spv.clear();
     glslang::GlslangToSpv(*mProgramMap[version]->getIntermediate(language), spv);
 }
 
