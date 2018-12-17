@@ -31,7 +31,7 @@
 #include "resources/shaderReflection.h"
 #include "resources/shaderProgram.h"
 
-class GlslangShaderCompiler : public ShaderCompiler {
+class GlslangShaderCompiler final : public ShaderCompiler {
 private:
 
     typedef enum {
