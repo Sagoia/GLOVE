@@ -70,6 +70,8 @@ private:
     std::vector<GenericVertexAttribute>        mGenericVertexAttributes;
     std::vector<BufferObject*>                 mPurgeListBufferObject;
     std::vector<Texture*>                      mPurgeListTexture;
+    std::vector<Shader*>                       mPurgeListShaders;
+    std::vector<ShaderProgram*>                mPurgeListShaderPrograms;
     std::vector<Renderbuffer*>                 mPurgeListRenderbuffers;
 
 public:
@@ -120,8 +122,8 @@ public:
     void                       SetCacheManager(CacheManager *cacheManager);
 
 // Map Functions
-    inline uint32_t            PushShadingObject(ShadingNamespace_t obj)        { FUN_ENTRY(GL_LOG_TRACE); mShadingObjectPool[mShadingObjectCount] = obj; return mShadingObjectCount++; }
-    inline void                EraseShadingObject(GLuint index)                 { FUN_ENTRY(GL_LOG_TRACE); mShadingObjectPool.erase(index); }
+           uint32_t            PushShadingObject(const ShadingNamespace_t& obj);
+           void                EraseShadingObject(GLuint index);
 
     inline bool                TextureExists(GLuint index)                const { FUN_ENTRY(GL_LOG_TRACE); return mTextures.ObjectExists(index); }
     inline bool                BufferExists(GLuint index)                 const { FUN_ENTRY(GL_LOG_TRACE); return mBuffers.ObjectExists(index); }
@@ -129,10 +131,7 @@ public:
     inline bool                FramebufferExists(GLuint index)            const { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers.ObjectExists(index); }
     inline bool                ShadingObjectExists(GLuint index)          const { FUN_ENTRY(GL_LOG_TRACE); return mShadingObjectPool.find(index) != mShadingObjectPool.end(); }
 
-    inline GLboolean           IsShadingObject(GLuint index,
-                                             shadingNamespaceType_t type) const { FUN_ENTRY(GL_LOG_TRACE); if(!index || index >= mShadingObjectCount || !ShadingObjectExists(index)) { return GL_FALSE; }
-                                                                                                           ShadingNamespace_t shadId = mShadingObjectPool.find(index)->second;
-                                                                                                           return (shadId.arrayIndex && shadId.type == type) ? GL_TRUE : GL_FALSE;}
+           GLboolean           IsShadingObject(GLuint index, shadingNamespaceType_t type) const;
     bool                       IsTextureAttachedToFBO(const Texture *texture);
     uint32_t                   FindShaderID(const Shader *shader);
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
@@ -143,6 +142,8 @@ public:
 //PurgeList Functions
     void                       AddToPurgeList(BufferObject *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListBufferObject.push_back(object); }
     void                       AddToPurgeList(Texture *object)                  { FUN_ENTRY(GL_LOG_TRACE); mPurgeListTexture.push_back(object); }
+    void                       AddToPurgeList(Shader *object)                   { FUN_ENTRY(GL_LOG_TRACE); mPurgeListShaders.push_back(object); }
+    void                       AddToPurgeList(ShaderProgram *object)            { FUN_ENTRY(GL_LOG_TRACE); mPurgeListShaderPrograms.push_back(object); }
     void                       AddToPurgeList(Renderbuffer *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListRenderbuffers.push_back(object); }
     void                       CleanPurgeList();
     void                       FramebufferCacheAttachement(Texture *texture, GLuint index);

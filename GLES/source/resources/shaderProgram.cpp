@@ -30,7 +30,8 @@
 #include "context/context.h"
 
 ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
-: mGLContext(nullptr)
+: refObject(),
+  mGLContext(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -62,7 +63,6 @@ ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI:
 
     mUpdateDescriptorSets = false;
     mUpdateDescriptorData = false;
-    mMarkForDeletion = false;
     mLinked = false;
     mIsPrecompiled = false;
     mValidated = false;
@@ -164,13 +164,14 @@ ShaderProgram::GetInfoLogLength(void) const
 }
 
 Shader *
-ShaderProgram::IsShaderAttached(Shader *shader)
+ShaderProgram::IsShaderAttached(Shader *shader) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if((shader->GetShaderType() == SHADER_TYPE_VERTEX   && mShaders[0] == shader) ||
-       (shader->GetShaderType() == SHADER_TYPE_FRAGMENT && mShaders[1] == shader)) {
-        return (Shader *)shader;
+    if(shader &&
+      ((shader->GetShaderType() == SHADER_TYPE_VERTEX   && mShaders[0] == shader) ||
+       (shader->GetShaderType() == SHADER_TYPE_FRAGMENT && mShaders[1] == shader))) {
+        return shader;
     }
 
     return nullptr;
@@ -181,7 +182,7 @@ ShaderProgram::AttachShader(Shader *shader)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    shader->RefShader();
+    shader->Bind();
     mShaders[shader->GetShaderType() == SHADER_TYPE_VERTEX ? 0 : 1] = shader;
 }
 
@@ -200,11 +201,11 @@ ShaderProgram::DetachShader(Shader *shader)
         mShaders[1] = nullptr;
     }
 
-    shader->UnrefShader();
+    shader->Unbind();
 }
 
 void
-ShaderProgram::DetachAndDeleteShaders()
+ShaderProgram::DetachShaders()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -212,87 +213,20 @@ ShaderProgram::DetachAndDeleteShaders()
 
     shaderPtr = GetVertexShader();
     if(shaderPtr) {
-        DetachShader(shaderPtr);
-        if(shaderPtr->GetMarkForDeletion()) {
-            mGLContext->DeleteShader(shaderPtr);
-        }
+       DetachShader(shaderPtr);
     }
 
     shaderPtr = GetFragmentShader();
     if(shaderPtr) {
         DetachShader(shaderPtr);
-        if(shaderPtr->GetMarkForDeletion()) {
-            mGLContext->DeleteShader(shaderPtr);
-        }
-    }
-}
-
-void
-ShaderProgram::SetShaderModules(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    mStageCount = HasVertexShader() + HasFragmentShader();
-    assert(mStageCount == 0 || mStageCount == 1 || mStageCount == 2);
-
-    if(mStageCount == 1) {
-
-        Shader* shader = HasVertexShader() ? GetVertexShader() : GetFragmentShader();
-
-        if(mVkShaderModules[0] != VK_NULL_HANDLE) {
-            mCommandBufferManager->UnrefResouce(mVkShaderModules[0]);
-            mVkShaderModules[0] = VK_NULL_HANDLE;
-        }
-
-        mVkShaderModules[0] = shader->CreateVkShaderModule();
-
-        if(mVkShaderModules[0] != VK_NULL_HANDLE) {
-            mCommandBufferManager->RefResource(mVkShaderModules[0], vulkanAPI::RESOURCE_TYPE_SHADER);
-        }
-
-        mVkShaderStages[0]  = HasVertexShader() ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    } else if(mStageCount == 2) {
-
-        Shader* shader = GetVertexShader();
-
-        if(mVkShaderModules[0] != VK_NULL_HANDLE) {
-            mCommandBufferManager->UnrefResouce(mVkShaderModules[0]);
-            mVkShaderModules[0] = VK_NULL_HANDLE;
-        }
-
-        mVkShaderModules[0] = shader->CreateVkShaderModule();
-
-        if(mVkShaderModules[0] != VK_NULL_HANDLE) {
-            mCommandBufferManager->RefResource(mVkShaderModules[0], vulkanAPI::RESOURCE_TYPE_SHADER);
-        }
-
-        mShaderSPVsize[0]  = shader->GetSPV().size();
-        mShaderSPVdata[0]  = shader->GetSPV().data();
-        mVkShaderStages[0] = VK_SHADER_STAGE_VERTEX_BIT;
-
-        shader = GetFragmentShader();
-
-        if(mVkShaderModules[1] != VK_NULL_HANDLE) {
-            mCommandBufferManager->UnrefResouce(mVkShaderModules[1]);
-            mVkShaderModules[1] = VK_NULL_HANDLE;
-        }
-
-        mVkShaderModules[1] = shader->CreateVkShaderModule();
-
-        if(mVkShaderModules[1] != VK_NULL_HANDLE) {
-            mCommandBufferManager->RefResource(mVkShaderModules[1], vulkanAPI::RESOURCE_TYPE_SHADER);
-        }
-
-        mShaderSPVsize[1]  = shader->GetSPV().size();
-        mShaderSPVdata[1]  = shader->GetSPV().data();
-        mVkShaderStages[1] = VK_SHADER_STAGE_FRAGMENT_BIT;
     }
 }
 
 uint32_t
 ShaderProgram::SerializeShadersSpirv(void *binary)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     uint8_t *rawDataPtr = reinterpret_cast<uint8_t *>(binary);
     uint32_t *u32DataPtr = nullptr;
     uint32_t vsSpirvSize = 4 * mShaderSPVsize[0];
@@ -315,6 +249,8 @@ ShaderProgram::SerializeShadersSpirv(void *binary)
 uint32_t
 ShaderProgram::DeserializeShadersSpirv(const void *binary)
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     const uint8_t *rawDataPtr = reinterpret_cast<const uint8_t *>(binary);
     const uint32_t *u32DataPtr = nullptr;
     std::vector<uint32_t> &vsSpirvData = GetVertexShader()->GetSPV();
@@ -383,7 +319,7 @@ ShaderProgram::GetVkPipelineCache(void)
     return mPipelineCache->GetPipelineCache();
 }
 
-const string &
+const std::string&
 ShaderProgram::GetAttributeName(int index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -863,12 +799,12 @@ ShaderProgram::ReleaseVkObjects(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkPipelineLayout != VK_NULL_HANDLE) {
-        mCommandBufferManager->UnrefResouce(mVkPipelineLayout);
+        vkDestroyPipelineLayout(mVkContext->vkDevice, mVkPipelineLayout, nullptr);
         mVkPipelineLayout = VK_NULL_HANDLE;
     }
 
     if(mVkDescSetLayout != VK_NULL_HANDLE) {
-        mCommandBufferManager->UnrefResouce(mVkDescSetLayout);
+        vkDestroyDescriptorSetLayout(mVkContext->vkDevice, mVkDescSetLayout, nullptr);
         mVkDescSetLayout = VK_NULL_HANDLE;
     }
 
@@ -878,17 +814,50 @@ ShaderProgram::ReleaseVkObjects(void)
     }
 
     if(mVkDescPool != VK_NULL_HANDLE) {
-        mCommandBufferManager->UnrefResouce(mVkDescPool);
+        vkDestroyDescriptorPool(mVkContext->vkDevice, mVkDescPool, nullptr);
         mVkDescPool = VK_NULL_HANDLE;
     }
 
-    if(mVkShaderModules[0] != VK_NULL_HANDLE) {
-        mCommandBufferManager->UnrefResouce(mVkShaderModules[0]);
-        mVkShaderModules[0] = VK_NULL_HANDLE;
+    for(int32_t i = 0; i < MAX_SHADERS; ++i) {
+        mShaderSPVsize[i] = 0;
+        mShaderSPVdata[i] = nullptr;
+        mVkShaderModules[i] = VK_NULL_HANDLE;
+        mVkShaderStages[i] = VK_SHADER_STAGE_ALL;
     }
-    if(mVkShaderModules[1] != VK_NULL_HANDLE) {
-        mCommandBufferManager->UnrefResouce(mVkShaderModules[1]);
-        mVkShaderModules[1] = VK_NULL_HANDLE;
+
+    mPipelineCache->Release();
+}
+
+void
+ShaderProgram::SetShaderModules(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mStageCount = HasVertexShader() + HasFragmentShader();
+    assert(mStageCount == 0 || mStageCount == 1 || mStageCount == 2);
+
+    if(mStageCount == 1) {
+
+        Shader* shader = HasVertexShader() ? GetVertexShader() : GetFragmentShader();
+
+        mVkShaderModules[0] = shader->CreateVkShaderModule();
+        mVkShaderStages[0]  = HasVertexShader() ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    } else if(mStageCount == 2) {
+
+        Shader* shader = GetVertexShader();
+
+        mVkShaderModules[0] = shader->CreateVkShaderModule();
+        mShaderSPVsize[0]  = shader->GetSPV().size();
+        mShaderSPVdata[0]  = shader->GetSPV().data();
+        mVkShaderStages[0] = VK_SHADER_STAGE_VERTEX_BIT;
+
+        shader = GetFragmentShader();
+
+        mVkShaderModules[1] = shader->CreateVkShaderModule();
+        mShaderSPVsize[1]  = shader->GetSPV().size();
+        mShaderSPVdata[1]  = shader->GetSPV().data();
+        mVkShaderStages[1] = VK_SHADER_STAGE_FRAGMENT_BIT;
     }
 }
 
@@ -925,8 +894,6 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
     }
     assert(mVkDescSetLayout != VK_NULL_HANDLE);
 
-    mCommandBufferManager->RefResource(mVkDescSetLayout, vulkanAPI::RESOURCE_TYPE_DESC_SET_LAYOUT);
-
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
     memset(static_cast<void *>(&pipelineLayoutCreateInfo), 0, sizeof(pipelineLayoutCreateInfo));
     pipelineLayoutCreateInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -946,8 +913,6 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
         delete[] mVkDescSetLayoutBind;
         mVkDescSetLayoutBind = nullptr;
     }
-
-    mCommandBufferManager->RefResource(mVkPipelineLayout, vulkanAPI::RESOURCE_TYPE_PIPELINE_LAYOUT);
 
     return true;
 }
@@ -980,8 +945,6 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
         return false;
     }
     assert(mVkDescPool != VK_NULL_HANDLE);
-
-    mCommandBufferManager->RefResource(mVkDescPool, vulkanAPI::RESOURCE_TYPE_DESC_POOL);
 
     delete[] descTypeCounts;
 

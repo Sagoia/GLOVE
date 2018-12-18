@@ -30,10 +30,11 @@
 #include "genericVertexAttribute.h"
 #include "vulkan/pipelineCache.h"
 #include "vulkan/commandBufferManager.h"
+#include "refObject.h"
 
 class Context;
 
-class ShaderProgram {
+class ShaderProgram : public refObject {
 private:
     Context                                            *mGLContext;
     const vulkanAPI::vkContext_t                       *mVkContext;
@@ -60,7 +61,6 @@ private:
 
     bool                                                mUpdateDescriptorSets;
     bool                                                mUpdateDescriptorData;
-    bool                                                mMarkForDeletion;
     bool                                                mLinked;
     bool                                                mIsPrecompiled;
     bool                                                mValidated;
@@ -69,12 +69,13 @@ private:
     float                                               mMaxDepthRange;
 
     uint32_t                                            mStageCount;
-    size_t                                              mShaderSPVsize[2];
-    uint32_t                                           *mShaderSPVdata[2];
-    VkShaderModule                                      mVkShaderModules[2];
-    VkShaderStageFlagBits                               mVkShaderStages[2];
-    Shader                                             *mShaders[2];
-    int                                                 mStagesIDs[2];
+#define MAX_SHADERS 2
+    size_t                                              mShaderSPVsize[MAX_SHADERS];
+    uint32_t                                           *mShaderSPVdata[MAX_SHADERS];
+    VkShaderModule                                      mVkShaderModules[MAX_SHADERS];
+    VkShaderStageFlagBits                               mVkShaderStages[MAX_SHADERS];
+    Shader                                             *mShaders[MAX_SHADERS];
+    int                                                 mStagesIDs[MAX_SHADERS];
 
     ShaderCompiler                                     *mShaderCompiler;
     ShaderResourceInterface                             mShaderResourceInterface;
@@ -103,20 +104,20 @@ private:
 
 public:
     ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
-    ~ShaderProgram();
+    ~ShaderProgram() override;
 
     void                                                SetPipelineVertexInputStateInfo(void);
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
     void                                                PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
     bool                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, bool updatedVertexAttrib);
-    Shader                                             *IsShaderAttached(Shader *shader);
+    Shader                                             *IsShaderAttached(Shader *shader) const;
     void                                                AttachShader(Shader *shader);
     void                                                DetachShader(Shader *shader);
     int                                                 GetInfoLogLength(void) const;
     char                                               *GetInfoLog(void) const;
     bool                                                LinkProgram();
 
-    void                                                DetachAndDeleteShaders(void);
+    void                                                DetachShaders(void);
 
     void                                                Validate(void);
     bool                                                ValidateSamplers(void);
@@ -135,7 +136,7 @@ public:
     VkShaderModule                                      GetShaderModule(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[0]; }
     VkShaderModule                                      GetVertexShaderModule(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[0]; }
     VkShaderModule                                      GetFragmentShaderModule(void)               const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[1]; }
-    bool                                                GetMarkForDeletion(void)                    const   { FUN_ENTRY(GL_LOG_TRACE); return mMarkForDeletion; }
+
     Shader                                             *GetVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[0]; }
     Shader                                             *GetFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[1]; }
     size_t                                              GetActiveUniformMaxLen(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetActiveUniformMaxLen(); }
@@ -172,7 +173,6 @@ public:
     VkPipelineCache                                     GetVkPipelineCache(void);
     void                                                SetShaderModules(void);
 
-    void                                                MarkForDeletion(void)                               { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }
     bool                                                HasVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mShaders[0]; }
     bool                                                HasFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mShaders[1]; }
     bool                                                HasStages(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount; }

@@ -85,6 +85,35 @@ ResourceManager::CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManage
     mDefaultTextureCubeMap->InitState();
 }
 
+
+uint32_t
+ResourceManager::PushShadingObject(const ShadingNamespace_t& obj)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    mShadingObjectPool[mShadingObjectCount] = obj;
+    return mShadingObjectCount++;
+}
+
+void
+ResourceManager::EraseShadingObject(uint32_t id)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    mShadingObjectPool.erase(id);
+}
+
+GLboolean
+ResourceManager::IsShadingObject(GLuint index, shadingNamespaceType_t type) const
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if(!index || index >= mShadingObjectCount || !ShadingObjectExists(index)) {
+        return GL_FALSE;
+    }
+
+    ShadingNamespace_t shadId = mShadingObjectPool.find(index)->second;
+    return (shadId.arrayIndex && shadId.type == type) ? GL_TRUE : GL_FALSE;
+}
+
 uint32_t
 ResourceManager::FindShaderID(const Shader *shader)
 {
@@ -164,6 +193,31 @@ ResourceManager::CleanPurgeList()
         if ((*it)->GetRefCount() == 0) {
             delete *it;
             it = mPurgeListTexture.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    //Shader Programs
+    for (auto it = mPurgeListShaderPrograms.begin(); it != mPurgeListShaderPrograms.end();) {
+        ShaderProgram* shaderProgramPtr = *it;
+        if (shaderProgramPtr->FreeForDeletion()) {
+            shaderProgramPtr->DetachShaders();
+            uint32_t id = FindShaderProgramID(shaderProgramPtr);
+            EraseShadingObject(id);
+            DeallocateShaderProgram(shaderProgramPtr);
+            it = mPurgeListShaderPrograms.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    //Shaders
+    for (auto it = mPurgeListShaders.begin(); it != mPurgeListShaders.end();) {
+        Shader* shaderPtr = *it;
+        if (shaderPtr->FreeForDeletion()) {
+            uint32_t id = FindShaderID(shaderPtr);
+            EraseShadingObject(id);
+            DeallocateShader(shaderPtr);
+            it = mPurgeListShaders.erase(it);
         } else {
             ++it;
         }

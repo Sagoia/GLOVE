@@ -25,8 +25,9 @@
 #define __SHADER_H__
 
 #include "shaderCompiler.h"
+#include "refObject.h"
 
-class Shader {
+class Shader : public refObject {
 private:
     const vulkanAPI::vkContext_t *      mVkContext;
     VkShaderModule                      mVkShaderModule;
@@ -38,8 +39,6 @@ private:
     uint32_t                            mSourceLength;
     shader_type_t                       mShaderType;
     ESSL_VERSION                        mShaderVersion;
-    int                                 mRefCounter;
-    bool                                mMarkForDeletion;
     bool                                mCompiled;
 
     void                                FreeSources(void);
@@ -52,9 +51,6 @@ public:
     bool                                CompileShader(void);
     VkShaderModule                      CreateVkShaderModule(void);
 
-    void                                RefShader(void);
-    void                                UnrefShader(void);
-
 // Get Functions
     char *                              GetInfoLog(void)                        const;
     int                                 GetInfoLogLength(void)                  const;
@@ -62,16 +58,12 @@ public:
     int                                 GetShaderSourceLength(void)             const;
     shader_type_t                       GetShaderType(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderType; }
     vector<uint32_t> &                  GetSPV(void)                                    { FUN_ENTRY(GL_LOG_TRACE); return mSpv; }
-    int                                 GetRefCount(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mRefCounter; }
-    bool                                GetMarkForDeletion(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mMarkForDeletion; }
 
 // Set Functions
     void                                SetShaderSource(GLsizei count, const GLchar *const *string, const GLint *length);
-    void                                SetVkContext(const
-                                                    vulkanAPI::vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
+    void                                SetVkContext(const vulkanAPI::vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
     void                                SetShaderCompiler(ShaderCompiler* compiler)     { FUN_ENTRY(GL_LOG_TRACE); mShaderCompiler  = compiler; }
     void                                SetShaderType(shader_type_t type)               { FUN_ENTRY(GL_LOG_TRACE); mShaderType      = type; }
-    void                                MarkForDeletion(void)                           { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }
 
 // Is/Has Functions
     bool                                IsCompiled(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mCompiled; }

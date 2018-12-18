@@ -31,7 +31,7 @@
 
 Shader::Shader(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mShaderCompiler(nullptr), mSource(nullptr),
-  mSourceLength(0), mShaderType(SHADER_TYPE_INVALID), mShaderVersion(ESSL_VERSION_100), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
+  mSourceLength(0), mShaderType(SHADER_TYPE_INVALID), mShaderVersion(ESSL_VERSION_100), mCompiled(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -172,26 +172,6 @@ Shader::GetInfoLog(void) const
     return log;
 }
 
-void
-Shader::RefShader()
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    ++mRefCounter;
-}
-
-void
-Shader::UnrefShader()
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    assert(mRefCounter >= 0);
-
-    if(mRefCounter > 0) {
-        --mRefCounter;
-    }
-}
-
 bool
 Shader::CompileShader(void)
 {
@@ -208,6 +188,7 @@ Shader::DestroyVkShader(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
      if(mVkShaderModule != VK_NULL_HANDLE) {
+         vkDestroyShaderModule(mVkContext->vkDevice, mVkShaderModule, nullptr);
          mVkShaderModule = VK_NULL_HANDLE;
      }
 }
@@ -218,9 +199,6 @@ Shader::CreateVkShaderModule(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     assert(mShaderType == SHADER_TYPE_VERTEX || mShaderType == SHADER_TYPE_FRAGMENT);
-
-    if (mVkShaderModule != VK_NULL_HANDLE)
-        return mVkShaderModule;
 
     DestroyVkShader();
 
@@ -235,7 +213,7 @@ Shader::CreateVkShaderModule(void)
     moduleCreateInfo.codeSize = mSpv.size() * sizeof(uint32_t);
     moduleCreateInfo.pCode = mSpv.data();
 
-    if(vkCreateShaderModule(mVkContext->vkDevice, &moduleCreateInfo, 0, &mVkShaderModule)) {
+    if(vkCreateShaderModule(mVkContext->vkDevice, &moduleCreateInfo, nullptr, &mVkShaderModule)) {
         return VK_NULL_HANDLE;
     }
 

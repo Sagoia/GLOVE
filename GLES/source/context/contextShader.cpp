@@ -58,7 +58,7 @@ Context::CreateShader(GLenum type)
     shader->SetVkContext(mVkContext);
     shader->SetShaderCompiler(mShaderCompiler);
 
-    return mResourceManager->PushShadingObject((ShadingNamespace_t){SHADER_ID, res});
+    return mResourceManager->PushShadingObject({SHADER_ID, res});
 }
 
 void
@@ -70,23 +70,24 @@ Context::DeleteShader(GLuint shader)
         return;
     }
 
-    DeleteShader(GetShaderPtr(shader));
-}
-
-void
-Context::DeleteShader(Shader *shaderPtr)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
+    Shader *shaderPtr = GetShaderPtr(shader);
     if(!shaderPtr) {
         return;
     }
 
-    if(!shaderPtr->GetRefCount()) {
-        mResourceManager->EraseShadingObject(GetShaderId(shaderPtr));
+    shaderPtr->SetMarkForDeletion(true);
+
+    if(shaderPtr->FreeForDeletion()) {
+        // Flush in case the shader is part of the pipeline
+        // Optimization: perform this only when needed or defer deletion
+        if(mWriteFBO->IsInDrawState()) {
+            Flush();
+        }
+        mResourceManager->EraseShadingObject(shader);
         mResourceManager->DeallocateShader(shaderPtr);
     } else {
-        shaderPtr->MarkForDeletion();
+        ResourceManager* resourceManager = GetCurrentContext()->GetResourceManager();
+        resourceManager->AddToPurgeList(shaderPtr);
     }
 }
 

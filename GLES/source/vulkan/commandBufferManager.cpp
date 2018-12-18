@@ -67,13 +67,7 @@ CommandBufferManager::~CommandBufferManager()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    for(uint32_t i = 0; i < mReferencedResources.size(); ++i) {
-        mReferencedResources[i]->mRefCount = 0;
-    }
-
     FreeResources();
-
-    mReferencedResources.clear();
 
     if(mVkContext->vkDevice != VK_NULL_HANDLE ) {
 
@@ -161,38 +155,6 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
 void
 CommandBufferManager::FreeResources(void)
 {
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    for(std::vector<resourceBase_t *>::iterator it = mReferencedResources.begin(); it != mReferencedResources.end();) {
-        const resourceBase_t *resourceBase = *it;
-        if(!resourceBase->mRefCount) {
-            switch(resourceBase->mType) {
-            case RESOURCE_TYPE_SHADER: {
-                referencedResource_t<VkShaderModule> *resource = (referencedResource_t<VkShaderModule> *)resourceBase;
-                vkDestroyShaderModule(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
-                } break;
-            case RESOURCE_TYPE_PIPELINE_LAYOUT: {
-                referencedResource_t<VkPipelineLayout> *resource = (referencedResource_t<VkPipelineLayout> *)resourceBase;
-                vkDestroyPipelineLayout(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
-                } break;
-            case RESOURCE_TYPE_DESC_POOL: {
-                referencedResource_t<VkDescriptorPool> *resource = (referencedResource_t<VkDescriptorPool> *)resourceBase;
-                vkDestroyDescriptorPool(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
-                } break;
-            case RESOURCE_TYPE_DESC_SET_LAYOUT: {
-                referencedResource_t<VkDescriptorSetLayout> *resource = (referencedResource_t<VkDescriptorSetLayout> *)resourceBase;
-                vkDestroyDescriptorSetLayout(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
-                } break;
-            default: NOT_REACHED(); break;
-            }
-
-            delete *it;
-            it = mReferencedResources.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
     mSecondaryCmdBufferPool.UnbindAllBuffers();
 }
 
@@ -386,6 +348,7 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
     mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_SUBMITED_STATE;
 
     mLastSubmittedBuffer = mActiveCmdBuffer;
+
     mActiveCmdBuffer = (mActiveCmdBuffer + 1) % GLOVE_NUM_COMMAND_BUFFERS;
 
     mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_INITIAL_STATE;
@@ -403,11 +366,11 @@ CommandBufferManager::WaitLastSubmition(void)
         if(!mVkCommandBuffers.fence[mLastSubmittedBuffer].Wait(VK_TRUE, GLOVE_FENCE_WAIT_TIMEOUT))
             return false;
 
-        FreeResources();
-
         if(!mVkCommandBuffers.fence[mLastSubmittedBuffer].Reset()) {
             return false;
         }
+
+        FreeResources();
 
         mLastSubmittedBuffer = GLOVE_NO_BUFFER_TO_WAIT;
         return true;

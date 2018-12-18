@@ -106,17 +106,20 @@ Context::DeleteProgram(GLuint program)
         return;
     }
 
-    if(progPtr != mStateManager.GetActiveShaderProgram()) {
+    progPtr->SetMarkForDeletion(true);
 
+    if(progPtr->FreeForDeletion()) {
+        // Flush in case the shader is part of the pipeline
+        // Optimization: perform this only when needed or defer deletion
         if(mWriteFBO->IsInDrawState()) {
-            Finish();
+            Flush();
         }
-
-        progPtr->DetachAndDeleteShaders();
+        progPtr->DetachShaders();
         mResourceManager->EraseShadingObject(program);
         mResourceManager->DeallocateShaderProgram(progPtr);
     } else {
-        progPtr->MarkForDeletion();
+        ResourceManager* resourceManager = GetCurrentContext()->GetResourceManager();
+        resourceManager->AddToPurgeList(progPtr);
     }
 }
 
@@ -142,9 +145,13 @@ Context::DetachShader(GLuint program, GLuint shader)
 
     progPtr->DetachShader(shaderPtr);
 
-    if(!shaderPtr->GetRefCount() && shaderPtr->GetMarkForDeletion()) {
-        mResourceManager->EraseShadingObject(shader);
-        mResourceManager->DeallocateShader(shaderPtr);
+    if(shaderPtr->GetMarkForDeletion() && shaderPtr->FreeForDeletion()) {
+        // Flush in case the shader is part of the pipeline
+        // Optimization: perform this only when needed or defer deletion
+        if(mWriteFBO->IsInDrawState()) {
+            Flush();
+        }
+        mResourceManager->CleanPurgeList();
     }
 }
 
@@ -588,18 +595,16 @@ Context::SetPipelineProgramShaderStages(ShaderProgram *progPtr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!progPtr->HasStages() || progPtr->HasStagesUpdated(mPipeline->GetShaderStageIDsRef())) {
-
-        if(!progPtr->SetPipelineShaderStage(mPipeline->GetShaderStageCountRef(),
-                                            mPipeline->GetShaderStageIDsRef(),
-                                            mPipeline->GetShaderStages())) {
-            return false;
-        }
-
-        mPipeline->SetCache(progPtr->GetVkPipelineCache());
-        mPipeline->SetLayout(progPtr->GetVkPipelineLayout());
-        mPipeline->SetVertexInputState(progPtr->GetVkPipelineVertexInput());
+    uint32_t &pipelineShaderStageCount = mPipeline->GetShaderStageCountRef();
+    int32_t *pipelineShaderStagesIDs = mPipeline->GetShaderStageIDsRef();
+    VkPipelineShaderStageCreateInfo *pipelineShaderStages = mPipeline->GetShaderStages();
+    if(!progPtr->SetPipelineShaderStage(pipelineShaderStageCount, pipelineShaderStagesIDs, pipelineShaderStages)) {
+        return false;
     }
+
+    mPipeline->SetCache(progPtr->GetVkPipelineCache());
+    mPipeline->SetLayout(progPtr->GetVkPipelineLayout());
+    mPipeline->SetVertexInputState(progPtr->GetVkPipelineVertexInput());
 
     return true;
 }
@@ -1391,22 +1396,17 @@ Context::UseProgram(GLuint program)
         }
     }
 
-    if(mStateManager.GetActiveShaderProgram() && mStateManager.GetActiveShaderProgram()->GetMarkForDeletion()) {
-
-        if(mWriteFBO->IsInDrawState()) {
-            Finish();
-        }
-
-        mStateManager.GetActiveShaderProgram()->DetachAndDeleteShaders();
-        mResourceManager->EraseShadingObject(GetProgramId(mStateManager.GetActiveShaderProgram()));
-        mResourceManager->DeallocateShaderProgram(mStateManager.GetActiveShaderProgram());
+    ShaderProgram *curProgPtr = mStateManager.GetActiveShaderProgram();
+    if(curProgPtr) {
+        curProgPtr->Unbind();
     }
-
     mStateManager.GetActiveObjectsState()->SetActiveShaderProgram(progPtr);
     mPipeline->SetUpdatePipeline(true);
     if(progPtr) {
+        progPtr->Bind();
         progPtr->EnableUpdateOfDescriptorSets();
     }
+    mResourceManager->CleanPurgeList();
 }
 
 void

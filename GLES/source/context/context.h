@@ -121,7 +121,6 @@ public:
 
     static void             DestroyAPISurfaceData(const vulkanAPI::vkContext_t *vkContext, EGLSurfaceInterface *eglSurfaceInterface);
 
-    void                    DeleteShader(Shader *shaderPtr);
     void                    ReleaseSystemFBO(void);
 
 // Get Functions

@@ -41,6 +41,7 @@ public:
     int Bind();
     int Unbind();
     int GetRefCount()                             { FUN_ENTRY(GL_LOG_TRACE); return refCount; }
+    bool FreeForDeletion()                  const { FUN_ENTRY(GL_LOG_TRACE); return refCount == 0; }
     bool GetMarkForDeletion()                     { FUN_ENTRY(GL_LOG_TRACE); return markForDeletion; }
     void SetMarkForDeletion(bool flag)            { FUN_ENTRY(GL_LOG_TRACE); markForDeletion = flag;}
 };

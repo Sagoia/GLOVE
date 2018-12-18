@@ -38,36 +38,7 @@ typedef enum {
     CMD_BUFFER_SUBMITED_STATE
 } cmdBufferState_t;
 
-typedef enum {
-    RESOURCE_TYPE_SHADER = 0,
-    RESOURCE_TYPE_PIPELINE_LAYOUT,
-    RESOURCE_TYPE_DESC_POOL,
-    RESOURCE_TYPE_DESC_SET_LAYOUT,
-    RESOURCE_TYPE_DESC_SET,
-    RESOURCE_TYPE_LAST
-} resourceType_t;
-
-class resourceBase_t {
-public:
-
-    uint32_t                        mRefCount;
-    resourceType_t                  mType;
-
-    resourceBase_t(resourceType_t type) : mRefCount(1), mType(type)             { FUN_ENTRY(GL_LOG_TRACE); }
-    virtual ~resourceBase_t()                                                   { FUN_ENTRY(GL_LOG_TRACE); }
-};
-
-template<typename T>
-class referencedResource_t : public resourceBase_t {
-public:
-
-    T                               mResourcePtr;
-
-    referencedResource_t(T resourcePtr, resourceType_t type)
-    : resourceBase_t(type), mResourcePtr(resourcePtr)                           { FUN_ENTRY(GL_LOG_TRACE); }
-};
-
-class CommandBufferManager {
+class CommandBufferManager final {
 private:
 
     typedef struct State {
@@ -90,8 +61,6 @@ private:
     VkCommandBuffer                 mVkAuxCommandBuffer;
     VkFence                         mVkAuxFence;
     CommandBufferPool               mSecondaryCmdBufferPool;
-
-    std::vector<resourceBase_t *>   mReferencedResources;
 
     void FreeResources(void);
 
@@ -134,50 +103,6 @@ public:
 // Get Functions
     inline VkCommandBuffer GetActiveCommandBuffer(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mVkCommandBuffers.commandBuffer[mActiveCmdBuffer]; }
     inline VkCommandBuffer GetAuxCommandBuffer(void)                      const { FUN_ENTRY(GL_LOG_TRACE); return mVkAuxCommandBuffer; }
-
-// Resource Functions
-    template<typename T>
-    void RefResource(T resource, resourceType_t type)
-    {
-        FUN_ENTRY(GL_LOG_TRACE);
-
-        int index = LocateResource(resource);
-        if(index == -1) {
-            mReferencedResources.push_back(new referencedResource_t<T>(resource, type));
-        } else {
-            ++mReferencedResources[index]->mRefCount;
-        }
-    }
-
-    template<typename T>
-    void UnrefResouce(T resource)
-    {
-        FUN_ENTRY(GL_LOG_TRACE);
-
-        int index = LocateResource(resource);
-        if(index != -1) {
-            assert(mReferencedResources[index]->mRefCount);
-            --mReferencedResources[index]->mRefCount;
-        }
-    }
-
-    template<typename T>
-    int LocateResource(T resource)
-    {
-        FUN_ENTRY(GL_LOG_TRACE);
-
-        assert(resource);
-
-        for(uint32_t i = 0; i < mReferencedResources.size(); ++i) {
-            referencedResource_t<T> *res = (referencedResource_t<T> *)mReferencedResources[i];
-            assert(res);
-            if(res->mResourcePtr == resource) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
 };
 
 }
