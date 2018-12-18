@@ -43,7 +43,7 @@ private:
     uint32_t mCounter;                 /**< The id (key-value of the map)
                                           reserved during the creation of a new
                                           object. */
-    map<uint32_t, ELEMENT *> mObjects; /**< The templated map container (one
+    std::map<uint32_t, ELEMENT *> mObjects; /**< The templated map container (one
                                           for each different class that maps
                                           id to a specific object). */
 public:
@@ -63,7 +63,7 @@ public:
     */
     ~ObjectArray()
     {
-        typename map<uint32_t, ELEMENT *>::iterator it;
+        typename std::map<uint32_t, ELEMENT *>::iterator it;
         for(it = mObjects.begin(); it != mObjects.end(); it++) {
             delete it->second;
         }
@@ -86,7 +86,7 @@ public:
     */
     bool Deallocate(uint32_t index)
     {
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
         if(it != mObjects.end()) {
             delete it->second;
             mObjects.erase(it);
@@ -103,7 +103,7 @@ public:
     */
     bool RemoveFromList(uint32_t index)
     {
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
         if(it != mObjects.end()) {
             mObjects.erase(it);
             return true;
@@ -126,7 +126,7 @@ public:
         if(mCounter < index) {
             mCounter = index;
         }
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
         if(it != mObjects.end()) {
             return it->second;
         } else {
@@ -142,7 +142,7 @@ public:
      */
     bool ObjectExists(uint32_t index) const
     {
-        typename map<uint32_t, ELEMENT *>::const_iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::const_iterator it = mObjects.find(index);
         return it == mObjects.end() ? false : true;
     }
 
@@ -157,7 +157,7 @@ public:
      */
     uint32_t GetObjectId(const ELEMENT * element) const
     {
-        typename map<uint32_t, ELEMENT *>::const_iterator it;
+        typename std::map<uint32_t, ELEMENT *>::const_iterator it;
         for(it = mObjects.begin(); it != mObjects.end(); it++) {
             if(it->second == element) {
                 return it->first;
@@ -171,7 +171,7 @@ public:
      * @brief Returns the map container for a specific class.
      * @return The map container.
      */
-    map<uint32_t, ELEMENT *> *GetObjects(void)
+    std::map<uint32_t, ELEMENT *> *GetObjects(void)
     {
         return &mObjects;
     }
