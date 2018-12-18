@@ -47,7 +47,7 @@ Context::Context()
     mVkContext            = vulkanAPI::GetContext();
     mCommandBufferManager = new vulkanAPI::CommandBufferManager(mVkContext);
 
-    mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
+    mResourceManager = new ResourceManager(mVkContext);
     mShaderCompiler  = new GlslangShaderCompiler();
     mPipeline        = new vulkanAPI::Pipeline(mVkContext);
     mCacheManager    = new CacheManager(mVkContext);
@@ -68,7 +68,7 @@ Context::Context()
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsModeLineLoop     = false;
 
-    mScreenSpacePass = new ScreenSpacePass(this, mVkContext, mCommandBufferManager);
+    mScreenSpacePass = new ScreenSpacePass(this, mVkContext);
     mScreenSpacePass->SetCacheManager(mCacheManager);
     mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
 }
@@ -162,11 +162,11 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     VkImage *vkImages = static_cast<VkImage *>(eglSurfaceInterface->images);
-    Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
+    Framebuffer *fbo = new Framebuffer(mVkContext);
 
     // color images
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
-        Texture *tex = new Texture(mVkContext, mCommandBufferManager);
+        Texture *tex = new Texture(mVkContext);
 
         GLenum glformat = VkFormatToGlInternalformat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
 
@@ -212,7 +212,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
         return nullptr;
     }
 
-    Texture *tex = new Texture(mVkContext, mCommandBufferManager);
+    Texture *tex = new Texture(mVkContext);
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(depthStencilFormat);
     tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));

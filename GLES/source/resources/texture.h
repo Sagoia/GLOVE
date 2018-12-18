@@ -30,7 +30,6 @@
 #include "refObject.h"
 #include "vulkan/sampler.h"
 #include "vulkan/imageView.h"
-#include "vulkan/commandBufferManager.h"
 #include "utils/GlToVkConverter.h"
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
@@ -52,10 +51,7 @@ class Texture : public refObject {
     typedef map<uint32_t, State_t> StateMap_t;
 
 private:
-    const
-    vulkanAPI::vkContext_t *    mVkContext;
-
-    vulkanAPI::CommandBufferManager *mCommandBufferManager;
+    const vulkanAPI::vkContext_t *mVkContext;
 
     GLenum                      mFormat;
     GLenum                      mTarget;
@@ -90,7 +86,7 @@ private:
     void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
+    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr,
             const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     ~Texture();
 
@@ -148,14 +144,10 @@ public:
     inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
     inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
-    VkFormat                FindSupportedVkColorFormat(VkFormat format)           { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
+    VkFormat                FindSupportedVkColorFormat(VkFormat format)         { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
 
 // Set Functions
-    inline void             SetCommandBufferManager(
-                                vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
-
-    inline void             SetVkContext(const
-                                         vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
+    inline void             SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
                                                                                                            mMemory->SetContext(vkContext);
                                                                                                            mSampler->SetContext(vkContext);
                                                                                                            mImageView->SetContext(vkContext);

@@ -29,7 +29,6 @@
 #include "utils/cacheManager.h"
 #include "genericVertexAttribute.h"
 #include "vulkan/pipelineCache.h"
-#include "vulkan/commandBufferManager.h"
 #include "refObject.h"
 
 class Context;
@@ -38,7 +37,6 @@ class ShaderProgram : public refObject {
 private:
     Context                                            *mGLContext;
     const vulkanAPI::vkContext_t                       *mVkContext;
-    vulkanAPI::CommandBufferManager                    *mCommandBufferManager;
 
     VkDescriptorSetLayout                               mVkDescSetLayout;
     VkDescriptorSetLayoutBinding                       *mVkDescSetLayoutBind;
@@ -103,7 +101,7 @@ private:
     uint32_t                                            GetMaxIndex(BufferObject* ibo, uint32_t indexCount, size_t actualSize, VkDeviceSize offset);
 
 public:
-    ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
+    ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr);
     ~ShaderProgram() override;
 
     void                                                SetPipelineVertexInputStateInfo(void);
@@ -149,8 +147,6 @@ public:
     const VkBuffer                                     *GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
     VkBuffer                                            GetActiveIndexVkBuffer(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveIndexVkBuffer; }
 
-    void                                                SetCommandBufferManager(
-                                                        vulkanAPI::CommandBufferManager *cbManager)         { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
     void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext);}
     void                                                SetGlContext(Context *context)                      { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGLContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != nullptr); mShaderCompiler = shaderCompiler; }

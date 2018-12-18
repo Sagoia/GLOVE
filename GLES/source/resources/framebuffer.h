@@ -48,7 +48,6 @@ private:
 
     const
     vulkanAPI::vkContext_t *         mVkContext;
-    vulkanAPI::CommandBufferManager *mCommandBufferManager;
     ObjectArray<Texture>            *mTextureArray;
     ObjectArray<Renderbuffer>       *mRenderbufferArray;
 
@@ -83,7 +82,7 @@ private:
     size_t                          GetCurrentBufferIndex(void) const;
 
 public:
-    Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
+    Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr);
     ~Framebuffer();
 
 // Create Functions
@@ -161,8 +160,6 @@ public:
     inline void             SetEGLSurfaceInterface(const EGLSurfaceInterface_t* eglSurfaceInterface) { FUN_ENTRY(GL_LOG_TRACE); mEGLSurfaceInterface = eglSurfaceInterface; }
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
-    inline void             SetCommandBufferManager(
-                            vulkanAPI::CommandBufferManager     *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void             SetResources(
                             ObjectArray<Texture>            *texArray,
                             ObjectArray<Renderbuffer>       *rbArray)           { FUN_ENTRY(GL_LOG_TRACE); mTextureArray = texArray; mRenderbufferArray = rbArray; }

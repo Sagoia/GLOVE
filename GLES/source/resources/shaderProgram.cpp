@@ -29,15 +29,13 @@
 #include "shaderProgram.h"
 #include "context/context.h"
 
-ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
+ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext)
 : refObject(),
   mGLContext(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     mVkContext = vkContext;
-
-    mCommandBufferManager = cbManager;
 
     mShaders[0] = nullptr;
     mShaders[1] = nullptr;
@@ -1149,7 +1147,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         activeTexture->CopyPixelsToHost  (&srcRect, &dstRect, 0, 0, dstInternalFormat, static_cast<void *>(dstData));
 
                         // Create new Texture with this data 
-                        Texture *inverted_texture = new Texture(mVkContext, mCommandBufferManager);
+                        Texture *inverted_texture = new Texture(mVkContext);
                         inverted_texture->SetTarget(GL_TEXTURE_2D);
                         inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
                         inverted_texture->SetVkImageTiling();

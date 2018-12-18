@@ -60,7 +60,6 @@ Context::BindTexture(GLenum target, GLuint texture)
         tex = mResourceManager->GetTexture(texture);
         if(tex->GetTarget() == GL_INVALID_VALUE) {
             tex->SetVkContext(mVkContext);
-            tex->SetCommandBufferManager(mCommandBufferManager);
             tex->SetTarget(target);
             tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetVkImageTarget(target == GL_TEXTURE_2D ? vulkanAPI::Image::VK_IMAGE_TARGET_2D : vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);

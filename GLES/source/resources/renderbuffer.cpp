@@ -30,8 +30,8 @@
 #include "utils/glUtils.h"
 #include "vulkan/utils.h"
 
-Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext)
+: mVkContext(vkContext),
 mInternalFormat(GL_RGBA4), mTarget(GL_INVALID_VALUE), mTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -60,7 +60,7 @@ Renderbuffer::InitTexture(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
     
-    mTexture = new Texture(mVkContext, mCommandBufferManager);
+    mTexture = new Texture(mVkContext);
     mTexture->SetTarget(GL_TEXTURE_2D);
     mTexture->InitState();
 }

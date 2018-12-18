@@ -124,6 +124,7 @@ public:
     void                    ReleaseSystemFBO(void);
 
 // Get Functions
+    inline  vulkanAPI::CommandBufferManager *GetVkCommandBufferManager(void)      { FUN_ENTRY(GL_LOG_TRACE); return mCommandBufferManager; }
     inline  StateManager    *GetStateManager(void)                                { FUN_ENTRY(GL_LOG_TRACE); return &mStateManager; }
     inline  ResourceManager *GetResourceManager(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mResourceManager; }
     inline  bool            IsYInverted(void)                              const  { FUN_ENTRY(GL_LOG_TRACE); return mIsYInverted; }

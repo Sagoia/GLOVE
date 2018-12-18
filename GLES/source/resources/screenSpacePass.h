@@ -28,7 +28,6 @@
 #include "utils/glLogger.h"
 #include "bufferObject.h"
 #include "vulkan/context.h"
-#include "vulkan/commandBufferManager.h"
 #include "vulkan/renderPass.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/pipelineCache.h"
@@ -56,8 +55,7 @@ struct ShaderData {
 
     }
     void InitResources(class Context *GLContext, CacheManager* cacheManager,
-                       const vulkanAPI::vkContext_t *mVkContext,
-                       vulkanAPI::CommandBufferManager* commandBufferManager);
+                       const vulkanAPI::vkContext_t *mVkContext);
     bool Generate(const std::string& vertexSource, const std::string& fragmentSource);
     void Destroy(void);
 };
@@ -66,7 +64,6 @@ struct ShaderData {
 
     class Context                              *mGLContext;
     const vulkanAPI::vkContext_t               *mVkContext;
-    vulkanAPI::CommandBufferManager            *mCommandBufferManager;
     CacheManager*                               mCacheManager;
 
     // shader
@@ -113,7 +110,7 @@ struct ShaderData {
     bool                                        DestroyDescriptorSets();
 
 public:
-    ScreenSpacePass(class Context *GLContext, const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
+    ScreenSpacePass(class Context *GLContext, const vulkanAPI::vkContext_t *vkContext);
     ~ScreenSpacePass();
 
     bool                                        Initialize();

@@ -100,9 +100,8 @@ void set_read_write_surface(api_context_t api_context, EGLSurfaceInterface *eglR
     FUN_ENTRY(GL_LOG_DEBUG);
 
     Context *ctx = reinterpret_cast<Context *>(api_context);
-    ctx->SetReadWriteSurfaces(eglReadSurfaceInterface, eglWriteSurfaceInterface);
-
     SetCurrentContext(ctx);
+    ctx->SetReadWriteSurfaces(eglReadSurfaceInterface, eglWriteSurfaceInterface);
 }
 
 void delete_shared_surface_data(EGLSurfaceInterface *eglSurfaceInterface)

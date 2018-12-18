@@ -29,9 +29,10 @@
 #include "framebuffer.h"
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
+#include "context/context.h"
 
-Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext)
+: mVkContext(vkContext),
 mTarget(GL_INVALID_VALUE), mState(IDLE),
 mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr),
 mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID),
@@ -312,7 +313,7 @@ Framebuffer::CreateDepthStencilTexture(void)
             mDepthStencilTexture = nullptr;
         }
         
-        mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
+        mDepthStencilTexture = new Texture(mVkContext);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
         VkFormat vkformat = GlInternalFormatToVkFormat(
@@ -658,7 +659,11 @@ Framebuffer::CreateRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bo
 void
 Framebuffer::BeginVkRenderPass()
 {
-    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    assert(GetCurrentContext());
+    vulkanAPI::CommandBufferManager *commandBufferManager = GetCurrentContext()->GetVkCommandBufferManager();
+    VkCommandBuffer activeCmdBuffer = commandBufferManager->GetActiveCommandBuffer();
     size_t bufferIndex = GetCurrentBufferIndex();
     mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[bufferIndex]->GetFramebuffer(), true);
 }
@@ -668,7 +673,9 @@ Framebuffer::EndVkRenderPass(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
+    assert(GetCurrentContext());
+    vulkanAPI::CommandBufferManager *commandBufferManager = GetCurrentContext()->GetVkCommandBufferManager();
+    VkCommandBuffer activeCmdBuffer = commandBufferManager->GetActiveCommandBuffer();
     return mRenderPass->End(&activeCmdBuffer);
 }
 

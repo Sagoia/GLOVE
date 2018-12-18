@@ -35,8 +35,8 @@ struct UniformBufferObject_ScreenSpace {
     float color[4];
 };
 
-ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
-    mGLContext(GLContext), mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
+ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_t *vkContext):
+    mGLContext(GLContext), mVkContext(vkContext), mCacheManager(nullptr),
     mNumElements(0), mVertexBuffer(nullptr),
     mVertexVkBuffer(VK_NULL_HANDLE), mVertexVkBufferOffset(0),
     mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)),
@@ -144,8 +144,7 @@ ScreenSpacePass::ShaderData::Destroy()
 
 void
 ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cacheManager,
-                                           const vulkanAPI::vkContext_t* mVkContext,
-                                           vulkanAPI::CommandBufferManager* commandBufferManager)
+                                           const vulkanAPI::vkContext_t* mVkContext)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -157,11 +156,10 @@ ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cac
     fragShader = new Shader();
     fragShader->SetShaderCompiler(shaderCompiler);
     fragShader->SetVkContext(mVkContext);
-    shaderProgram = new ShaderProgram(mVkContext, nullptr);
+    shaderProgram = new ShaderProgram(mVkContext);
     shaderProgram->SetShaderCompiler(shaderCompiler);
     shaderProgram->SetCacheManager(cacheManager);
     shaderProgram->SetGlContext(GLContext);
-    shaderProgram->SetCommandBufferManager(commandBufferManager);
 }
 
 bool
@@ -223,7 +221,7 @@ void main() {\n\
 }\n\
 ";
 
-    mShaderData.InitResources(mGLContext, mCacheManager, mVkContext, mCommandBufferManager);
+    mShaderData.InitResources(mGLContext, mCacheManager, mVkContext);
     mShaderData.Generate(vertexSource100, fragmentSource100);
 
     if(!mShaderData.shaderProgram->SetPipelineShaderStage(mPipeline->GetShaderStageCountRef(), mPipeline->GetShaderStageIDsRef(), mPipeline->GetShaderStages())) {
@@ -334,7 +332,6 @@ void
 ScreenSpacePass::BindPipeline(const VkCommandBuffer *cmdBuffer) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
-
 
     mPipeline->Bind(cmdBuffer);
 }

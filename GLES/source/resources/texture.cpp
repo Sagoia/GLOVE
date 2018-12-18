@@ -30,14 +30,15 @@
 #include "texture.h"
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
+#include "context/context.h"
 
 #define NUMBER_OF_MIP_LEVELS(w, h)                      (std::floor(std::log2(std::max((w),(h)))) + 1)
 
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+Texture::Texture(const vulkanAPI::vkContext_t *vkContext, const VkFlags vkFlags)
+: mVkContext(vkContext),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
@@ -438,8 +439,10 @@ void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplev
                       oldImageLayout != VK_IMAGE_LAYOUT_PREINITIALIZED) ? oldImageLayout : VK_IMAGE_LAYOUT_GENERAL;
     VkImageLayout newImageLayout = copyToImage ? VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
-    mCommandBufferManager->BeginVkAuxCommandBuffer();
-    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
+    assert(GetCurrentContext());
+    vulkanAPI::CommandBufferManager *commandBufferManager = GetCurrentContext()->GetVkCommandBufferManager();
+    commandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = commandBufferManager->GetAuxCommandBuffer();
     {
         mImage->ModifyImageLayout(&activeCmdBuffer, newImageLayout);
         if(copyToImage) {
@@ -449,9 +452,9 @@ void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplev
         }
         mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
     }
-    mCommandBufferManager->EndVkAuxCommandBuffer();
-    mCommandBufferManager->SubmitVkAuxCommandBuffer();
-    mCommandBufferManager->WaitVkAuxCommandBuffer();
+    commandBufferManager->EndVkAuxCommandBuffer();
+    commandBufferManager->SubmitVkAuxCommandBuffer();
+    commandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
@@ -459,15 +462,17 @@ Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mCommandBufferManager->BeginVkAuxCommandBuffer();
-    VkCommandBuffer cmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
+    assert(GetCurrentContext());
+    vulkanAPI::CommandBufferManager *commandBufferManager = GetCurrentContext()->GetVkCommandBufferManager();
+    commandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer cmdBuffer = commandBufferManager->GetAuxCommandBuffer();
 
     mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
     mImage->ModifyImageLayout(&cmdBuffer, newImageLayout);
 
-    mCommandBufferManager->EndVkAuxCommandBuffer();
-    mCommandBufferManager->SubmitVkAuxCommandBuffer();
-    mCommandBufferManager->WaitVkAuxCommandBuffer();
+    commandBufferManager->EndVkAuxCommandBuffer();
+    commandBufferManager->SubmitVkAuxCommandBuffer();
+    commandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
@@ -542,8 +547,10 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
     imageBlit.dstOffsets[1].y               = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].y >> 1), 1.0));
     imageBlit.dstOffsets[1].z               = 1;
 
-    mCommandBufferManager->BeginVkAuxCommandBuffer();
-    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
+    assert(GetCurrentContext());
+    vulkanAPI::CommandBufferManager *commandBufferManager = GetCurrentContext()->GetVkCommandBufferManager();
+    commandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = commandBufferManager->GetAuxCommandBuffer();
     {
         VkFilter      filter         = hintMipmapMode == GL_FASTEST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
         VkImageLayout oldImageLayout = mImage->GetImageLayout();
@@ -570,9 +577,9 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
         mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
         mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
     }
-    mCommandBufferManager->EndVkAuxCommandBuffer();
-    mCommandBufferManager->SubmitVkAuxCommandBuffer();
-    mCommandBufferManager->WaitVkAuxCommandBuffer();
+    commandBufferManager->EndVkAuxCommandBuffer();
+    commandBufferManager->SubmitVkAuxCommandBuffer();
+    commandBufferManager->WaitVkAuxCommandBuffer();
 
     // TODO: Fill the 'State_t' with the rest mipLevels
 }

@@ -75,7 +75,7 @@ private:
     std::vector<Renderbuffer*>                 mPurgeListRenderbuffers;
 
 public:
-    ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
+    ResourceManager(const vulkanAPI::vkContext_t *vkContext);
     ~ResourceManager();
 
 // Allocate/Deallocate Functions
@@ -137,7 +137,7 @@ public:
     uint32_t                   FindShaderProgramID(const ShaderProgram *program);
 
     void                       UpdateFramebufferObjects(GLuint index, GLenum target);
-    void                       CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManager);
+    void                       CreateDefaultTextures(void);
 
 //PurgeList Functions
     void                       AddToPurgeList(BufferObject *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListBufferObject.push_back(object); }
