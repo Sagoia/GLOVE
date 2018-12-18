@@ -36,7 +36,7 @@ public:
     refObject();
 
 // Destructor
-    virtual ~refObject();
+    virtual ~refObject() = 0;
 
     int Bind();
     int Unbind();
