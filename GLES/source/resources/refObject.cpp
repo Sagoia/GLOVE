@@ -37,7 +37,7 @@ refObject::~refObject()
 int
 refObject::Bind()
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     //TODO: mutex lock
     refCount++;
@@ -47,7 +47,7 @@ refObject::Bind()
 int
 refObject::Unbind()
 {
-    FUN_ENTRY(GL_LOG_TRACE);
+    FUN_ENTRY(GL_LOG_DEBUG);
 
     //TODO: mutex lock
     refCount--;
