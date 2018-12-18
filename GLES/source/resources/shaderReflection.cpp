@@ -200,18 +200,18 @@ ShaderReflection::Print() const
         printf("location: %u\n", mReflectionData.mAttributeReflection[i].location);
     }
 
-    printf("\nGL_ACTIVE_UNIFORMS: %d\n", mReflectionData.mLiveUniforms);
-    for(uint32_t i = 0; i < mReflectionData.mLiveUniforms; ++i) {
-        printf("%s (0x%x)\n", mReflectionData.mUniformReflection[i].reflectionName, mReflectionData.mUniformReflection[i].glType);
-        printf("arraySize: %u, bufferOffset: %zu\n", mReflectionData.mUniformReflection[i].arraySize, mReflectionData.mUniformReflection[i].offset);
-        printf("location: %u, blockIndex: %u\n", mReflectionData.mUniformReflection[i].location, mReflectionData.mUniformReflection[i].blockIndex);
-    }
-
     printf("\nGL_ACTIVE_UNIFORM_BLOCKS: %d\n", mReflectionData.mLiveUniformBlocks);
     for(uint32_t i = 0; i < mReflectionData.mLiveUniformBlocks; ++i) {
         printf("%s , blockSize: %zu)\n", mReflectionData.mUniformBlockReflection[i].glslBlockName, mReflectionData.mUniformBlockReflection[i].blockSize);
         printf("blockStage: %u\n", mReflectionData.mUniformBlockReflection[i].blockStage);
         printf("binding: %u, isOpaque: %u\n", mReflectionData.mUniformBlockReflection[i].binding, mReflectionData.mUniformBlockReflection[i].isOpaque);
+    }
+
+    printf("\nGL_ACTIVE_UNIFORMS: %d\n", mReflectionData.mLiveUniforms);
+    for(uint32_t i = 0; i < mReflectionData.mLiveUniforms; ++i) {
+        printf("%s (0x%x)\n", mReflectionData.mUniformReflection[i].reflectionName, mReflectionData.mUniformReflection[i].glType);
+        printf("arraySize: %u, bufferOffset: %zu\n", mReflectionData.mUniformReflection[i].arraySize, mReflectionData.mUniformReflection[i].offset);
+        printf("location: %u, blockIndex: %u\n", mReflectionData.mUniformReflection[i].location, mReflectionData.mUniformReflection[i].blockIndex);
     }
 }
 
@@ -222,7 +222,7 @@ ShaderReflection::GetAttributeLocation(const char *name) const
 
     for(uint32_t i = 0; i < mReflectionData.mLiveAttributes; ++i) {
         if(!strcmp(mReflectionData.mAttributeReflection[i].name, name)) {
-                return mReflectionData.mAttributeReflection[i].location;
+            return mReflectionData.mAttributeReflection[i].location;
         }
     }
 
@@ -236,7 +236,7 @@ ShaderReflection::GetAttributeType(const char *name) const
 
     for(uint32_t i = 0; i < mReflectionData.mLiveAttributes; ++i) {
         if(!strcmp(mReflectionData.mAttributeReflection[i].name, name)) {
-                return mReflectionData.mAttributeReflection[i].type;
+            return mReflectionData.mAttributeReflection[i].type;
         }
     }
 

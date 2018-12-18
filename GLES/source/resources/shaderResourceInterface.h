@@ -33,41 +33,41 @@ class ShaderResourceInterface {
 public:
     struct attribute {
         string                      name;
-        GLenum                      glType;
+        GLenum                      type;
         uint32_t                    location;
 
-        attribute(string n, GLenum type, uint32_t loc)
+        attribute(string n, GLenum t, uint32_t l)
          : name(n),
-           glType(type),
-           location(loc)
+           type(t),
+           location(l)
         {
             FUN_ENTRY(GL_LOG_TRACE);
         }
     };
-    typedef struct attribute        attribute;
-    typedef vector<attribute>       attributeInterface;
+    typedef struct attribute                attribute;
+    typedef vector<attribute>               attributeInterface;
 
     struct uniform{
-        string                      reflectionName;
+        string                      name;
         uint32_t                    location;
-        uint32_t                    blockIndex;
+        uint32_t                    index;
         int32_t                     arraySize;
-        GLenum                      glType;
+        GLenum                      type;
         size_t                      offset;
 
-        uniform(string name, uint32_t loc, uint32_t bIndex, int32_t size, GLenum type, size_t offset)
-         : reflectionName(name),
-           location(loc),
-           blockIndex(bIndex),
-           arraySize(size),
-           glType(type),
-           offset(offset)
+        uniform(string n, uint32_t l, uint32_t i, int32_t a, GLenum t, size_t o)
+         : name(n),
+           location(l),
+           index(i),
+           arraySize(a),
+           type(t),
+           offset(o)
         {
             FUN_ENTRY(GL_LOG_TRACE);
         }
     };
     typedef struct uniform uniform;
-    typedef vector<uniform>         uniformInterface;
+    typedef vector<uniform>                 uniformInterface;
 
     struct uniformData {
         uint8_t                    *pClientData;
@@ -90,28 +90,28 @@ public:
             }
         }
     };
-    typedef struct uniformData uniformData;
-    typedef map<string, uniformData> uniformDataInterface;
+    typedef struct uniformData              uniformData;
+    typedef map<string, uniformData>        uniformDataInterface;
 
     struct uniformBlock {
-        string                      glslBlockName;
+        string                      name;
         uint32_t                    binding;
-        size_t                      blockSize;
-        shader_type_t               blockStage;
+        size_t                      memorySize;
+        shader_type_t               stage;
         bool                        isOpaque;
 
-        uniformBlock(string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
-         : glslBlockName(blockName),
-           binding(bind),
-           blockSize(bSize),
-           blockStage(shaderType),
-           isOpaque(opaque)
+        uniformBlock(string n, uint32_t b, size_t m, shader_type_t s, bool o)
+         : name(n),
+           binding(b),
+           memorySize(m),
+           stage(s),
+           isOpaque(o)
         {
             FUN_ENTRY(GL_LOG_TRACE);
         }
     };
-    typedef struct uniformBlock uniformBlock;
-    typedef vector<uniformBlock>    uniformBlockInterface;
+    typedef struct uniformBlock             uniformBlock;
+    typedef vector<uniformBlock>            uniformBlockInterface;
 
     struct uniformBlockData {
         UniformBufferObject *       pBufferObject;
@@ -132,87 +132,103 @@ public:
             }
         }
     };
-    typedef struct uniformBlockData uniformBlockData;
-    typedef map<string, uniformBlockData> uniformBlockDataInterface;
+    typedef struct uniformBlockData         uniformBlockData;
+    typedef map<string, uniformBlockData>   uniformBlockDataInterface;
 
-    typedef map<string, uint32_t>   attribsLayout_t;
+    typedef map<string, uint32_t>           attribsLayout_t;
 
 private:
-    uint32_t mLiveAttributes;
-    uint32_t mLiveUniforms;
-    uint32_t mLiveUniformBlocks;
+    uint32_t                                mLiveAttributes;
+    uint32_t                                mLiveUniforms;
+    uint32_t                                mLiveUniformBlocks;
 
-    size_t mActiveAttributeMaxLength;
-    size_t mActiveUniformMaxLength;
-    uint32_t mReflectionSize;
+    size_t                                  mActiveAttributeMaxLength;
+    size_t                                  mActiveUniformMaxLength;
+    uint32_t                                mReflectionSize;
 
-    ShaderReflection* mShaderReflection;
+    ShaderReflection*                       mShaderReflection;
 
-    attributeInterface mAttributeInterface;
+    attributeInterface                      mAttributeInterface;
 
-    uniformInterface mUniformInterface;
-    uniformDataInterface mUniformDataInterface;
+    uniformInterface                        mUniformInterface;
+    uniformDataInterface                    mUniformDataInterface;
 
-    uniformBlockInterface mUniformBlockInterface;
-    uniformBlockDataInterface mUniformBlockDataInterface;
+    uniformBlockInterface                   mUniformBlockInterface;
+    uniformBlockDataInterface               mUniformBlockDataInterface;
 
-    attribsLayout_t mCustomAttributesLayout;
-    CacheManager* mCacheManager;
+    attribsLayout_t                         mCustomAttributesLayout;
+    CacheManager*                           mCacheManager;
 
-    void CleanUp(void);
+    void                                    Reset(void);
 
 public:
     ShaderResourceInterface();
     ~ShaderResourceInterface();
 
-    inline uint32_t GetLiveAttributes(void)                                     const { FUN_ENTRY(GL_LOG_TRACE); return mLiveAttributes; }
-    inline uint32_t GetLiveUniforms(void)                                       const { FUN_ENTRY(GL_LOG_TRACE); return mLiveUniforms; }
-    inline uint32_t GetLiveUniformBlocks(void)                                  const { FUN_ENTRY(GL_LOG_TRACE); return mLiveUniformBlocks; }
+/// Get Functions
+    inline uint32_t                         GetLiveAttributes(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mLiveAttributes;    }
+    inline uint32_t                         GetLiveUniforms(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mLiveUniforms;      }
+    inline uint32_t                         GetLiveUniformBlocks(void)             const { FUN_ENTRY(GL_LOG_TRACE); return mLiveUniformBlocks; }
 
-    inline size_t GetActiveUniformMaxLen(void)                                  const { FUN_ENTRY(GL_LOG_TRACE); return mActiveUniformMaxLength; }
-    inline size_t GetActiveAttribMaxLen(void)                                   const { FUN_ENTRY(GL_LOG_TRACE); return mActiveAttributeMaxLength; }
+    inline size_t                           GetActiveAttribMaxLen(void)            const { FUN_ENTRY(GL_LOG_TRACE); return mActiveAttributeMaxLength;  }
+    inline size_t                           GetActiveUniformMaxLen(void)           const { FUN_ENTRY(GL_LOG_TRACE); return mActiveUniformMaxLength;    }
 
-    inline uint32_t GetReflectionSize(void)                                     const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionSize; }
 
-    int GetAttributeLocation(const char *name) const;
-    inline uint32_t GetAttributeLocation(uint32_t index)                        const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].location; }
-    inline GLenum GetAttributeType(uint32_t index)                              const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].glType; }
-    int GetAttributeType(int index) const;
-    const string & GetAttributeName(int index) const;
+    inline uint32_t                         GetReflectionSize(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionSize; }
 
-    inline int32_t GetUniformblockIndex(uint32_t index)                         const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].blockIndex; }
-    inline int32_t GetUniformArraySize(uint32_t index)                          const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].arraySize; }
-    inline GLenum GetUniformType(uint32_t index)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].glType; }
-    void GetUniformClientData(uint32_t location, size_t size, void *ptr) const;
-	  const uint8_t* GetUniformClientData(uint32_t index) const;
-	  UniformBufferObject * GetUniformBufferObject(uint32_t index) const;
-    int GetUniformLocation(const char *name) const;
+    const  string&                          GetAttributeName(int index)            const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].name; }
+    int                                     GetAttributeType(int index)            const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].type; }
+    int                                     GetAttributeLocation(const char *name) const;
+    inline uint32_t                         GetAttributeLocation(uint32_t index)   const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].location; }
+    inline GLenum                           GetAttributeType(uint32_t index)       const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].type; }
 
-    inline uint32_t GetUniformBlockBinding(uint32_t index)                      const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlockInterface[index].binding; }
-    inline shader_type_t GetUniformBlockBlockStage(uint32_t index)              const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlockInterface[index].blockStage; }
-    inline bool IsUniformBlockOpaque(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlockInterface[index].isOpaque; }
+    
+    inline int32_t                          GetUniformBlockIndex(uint32_t index)   const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].index;     }
+    inline int32_t                          GetUniformArraySize(uint32_t index)    const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].arraySize; }
+    inline GLenum                           GetUniformType(uint32_t index)         const { FUN_ENTRY(GL_LOG_TRACE); return mUniformInterface[index].type;      }
+           int                              GetUniformLocation(const char *name)   const;
+           void                             GetUniformClientData(uint32_t loc,
+                                                                 size_t size,
+                                                                 void *ptr)        const;
+	const  uint8_t                         *GetUniformClientData(uint32_t index)   const;
+	UniformBufferObject                    *GetUniformBufferObject(uint32_t index) const;
 
-    const ShaderResourceInterface::uniform * GetUniform(uint32_t index)         const { FUN_ENTRY(GL_LOG_TRACE); return index < mUniformInterface.size() ? mUniformInterface.data() + index : nullptr; }
-    const ShaderResourceInterface::uniform * GetUniformAtLocation(uint32_t location) const;
-    const ShaderResourceInterface::attribute * GetVertexAttribute(int index) const;
 
-    void SetActiveAttributeMaxLength(void);
-    void SetActiveUniformMaxLength(void);
+    inline uint32_t                         GetUniformBlockBinding(uint32_t index) const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlockInterface[index].binding; }
+    inline shader_type_t                    GetUniformBlockStage(uint32_t index)   const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlockInterface[index].stage; }
+    inline bool                             IsUniformBlockOpaque(uint32_t index)   const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlockInterface[index].isOpaque; }
 
-    inline void SetCustomAttribsLayout(const char *name, int index)                   { FUN_ENTRY(GL_LOG_TRACE); mCustomAttributesLayout[std::string(name)] = index; }
-    inline void SetReflectionSize(void)                                               { FUN_ENTRY(GL_LOG_TRACE); mReflectionSize = mShaderReflection->GetReflectionSize(); }
-    inline void SetCacheManager(CacheManager *cacheManager)                           { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
+    const uniform                          *GetUniformAtLocation(uint32_t loc)     const;
+    const uniform                          *GetUniform(uint32_t index)             const { FUN_ENTRY(GL_LOG_TRACE); return index < mUniformInterface.size() ? mUniformInterface.data() + index : nullptr; }
 
-    void SetUniformClientData(uint32_t location, size_t size, const void *ptr);
-    void SetSampler(uint32_t location, int count, const int *textureUnit);
+    const attribute                        *GetVertexAttribute(int index)          const { FUN_ENTRY(GL_LOG_TRACE); return &(*(mAttributeInterface.cbegin() + index)); }
 
-    void AllocateUniformClientData(void);
-	  bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
-    bool UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext, bool *allocatedNewBufferObject);
+/// Set Functions
+    inline void                             SetCacheManager(CacheManager *cacheManager)          { FUN_ENTRY(GL_LOG_TRACE); mCacheManager     = cacheManager; }
+    inline void                             SetReflection(ShaderReflection* reflection)          { FUN_ENTRY(GL_LOG_TRACE); mShaderReflection = reflection; };
+    inline void                             SetReflectionSize(void)                              { FUN_ENTRY(GL_LOG_TRACE); mReflectionSize   = mShaderReflection->GetReflectionSize(); }
+    inline void                             SetCustomAttribsLayout(const char *name, int index)  { FUN_ENTRY(GL_LOG_TRACE); mCustomAttributesLayout[std::string(name)] = index; }    
+    void                                    SetActiveAttributeMaxLength(void);
+    void                                    SetActiveUniformMaxLength(void);
 
-    void UpdateAttributeInterface(void);
-    void CreateInterface(void);
-    inline void SetReflection(ShaderReflection* reflection)                           { FUN_ENTRY(GL_LOG_TRACE); mShaderReflection = reflection; };
+    void                                    SetUniformClientData(uint32_t location,
+                                                                 size_t size,
+                                                                 const void *ptr);
+    void                                    SetUniformSampler(uint32_t location,
+                                                       int count,
+                                                       const int *textureUnit);
+
+/// Allocate Functions
+    void                                    CreateInterface(void);
+    void                                    AllocateUniformClientData(void);
+	bool                                    AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
+
+/// Update Functions    
+    bool                                    UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext,
+                                                                    bool *allocatedNewBufferObject);
+    void                                    UpdateAttributeInterface(void);
+
+
 };
 
 #endif // __SHADERRESOURCEINTERFACE_H__

@@ -71,7 +71,7 @@ private:
         uniformBlock mUniformBlockReflection[GLSLANG_MAX_UNIFORM_BLOCKS];
     } reflectionData;
 
-    reflectionData mReflectionData;
+    reflectionData   mReflectionData;
 
 public:
     ShaderReflection();

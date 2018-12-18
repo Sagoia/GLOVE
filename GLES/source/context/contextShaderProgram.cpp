@@ -239,7 +239,7 @@ Context::GetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei*
     }
 
     if(type) {
-        *type = attribute->glType;
+        *type = attribute->type;
     }
 
     if(size) {
@@ -265,7 +265,7 @@ Context::GetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei
 
     const ShaderResourceInterface::uniform *uniform = progPtr->GetUniform((uint32_t)index);
     assert(uniform);
-    GLint len = static_cast<GLint>(std::max(std::min((int)uniform->reflectionName.length(), bufsize-1), 0));
+    GLint len = static_cast<GLint>(std::max(std::min((int)uniform->name.length(), bufsize-1), 0));
 
     string index0Str = "";
     if(uniform->arraySize > 1) {
@@ -274,7 +274,7 @@ Context::GetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei
     }
 
     if(len) {
-        memcpy(static_cast<void *>(name), static_cast<const void *>((uniform->reflectionName + index0Str).c_str()), len);
+        memcpy(static_cast<void *>(name), static_cast<const void *>((uniform->name + index0Str).c_str()), len);
         name[len] = '\0';
     }
 
@@ -283,7 +283,7 @@ Context::GetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei
     }
 
     if(type) {
-        *type = uniform->glType;
+        *type = uniform->type;
     }
 
     if(size) {
@@ -431,7 +431,7 @@ Context::GetUniformiv(GLuint program, GLint location, GLint *params)
         return;
     }
 
-    size_t size = GlslTypeToSize(uniform->glType);
+    size_t size = GlslTypeToSize(uniform->type);
     progPtr->GetUniformData(location, size, static_cast<void *>(params));
 }
 
@@ -457,8 +457,8 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
         return;
     }
 
-    size_t size = GlslTypeToSize(uniform->glType);
-    switch(uniform->glType) {
+    size_t size = GlslTypeToSize(uniform->type);
+    switch(uniform->type) {
     case GL_FLOAT:
     case GL_FLOAT_VEC2:
     case GL_FLOAT_VEC3:
@@ -649,12 +649,12 @@ Context::Uniform1f(GLint location, GLfloat x)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT && uniform->glType != GL_BOOL)) {
+       (uniform->type != GL_FLOAT && uniform->type != GL_BOOL)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_FLOAT) {
+    if(uniform->type == GL_FLOAT) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(float), static_cast<void *>(&x));
     } else {
         glsl_bool_t bf = (bool)x;
@@ -683,7 +683,7 @@ Context::Uniform1fv(GLint location, GLsizei count, const GLfloat *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT && uniform->glType != GL_BOOL) ||
+       (uniform->type != GL_FLOAT && uniform->type != GL_BOOL) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -694,7 +694,7 @@ Context::Uniform1fv(GLint location, GLsizei count, const GLfloat *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_FLOAT) {
+    if(uniform->type == GL_FLOAT) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[count];
@@ -722,16 +722,16 @@ Context::Uniform1i(GLint location, GLint x)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_INT        && uniform->glType != GL_BOOL &&
-        uniform->glType != GL_SAMPLER_2D && uniform->glType != GL_SAMPLER_CUBE)
+       (uniform->type != GL_INT        && uniform->type != GL_BOOL &&
+        uniform->type != GL_SAMPLER_2D && uniform->type != GL_SAMPLER_CUBE)
       ) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_SAMPLER_2D || uniform->glType == GL_SAMPLER_CUBE) {
-        mStateManager.GetActiveShaderProgram()->SetSampler(location, 1, &x);
-    } else if(uniform->glType == GL_INT) {
+    if(uniform->type == GL_SAMPLER_2D || uniform->type == GL_SAMPLER_CUBE) {
+        mStateManager.GetActiveShaderProgram()->SetUniformSampler(location, 1, &x);
+    } else if(uniform->type == GL_INT) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, sizeof(int), &x);
     } else {
         glsl_bool_t bx = (bool)x;
@@ -760,8 +760,8 @@ Context::Uniform1iv(GLint location, GLsizei count, const GLint *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform ) ||
-       (uniform->glType != GL_INT && uniform->glType != GL_BOOL &&
-        uniform->glType != GL_SAMPLER_2D && uniform->glType != GL_SAMPLER_CUBE) ||
+       (uniform->type != GL_INT && uniform->type != GL_BOOL &&
+        uniform->type != GL_SAMPLER_2D && uniform->type != GL_SAMPLER_CUBE) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -772,9 +772,9 @@ Context::Uniform1iv(GLint location, GLsizei count, const GLint *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_SAMPLER_2D || uniform->glType == GL_SAMPLER_CUBE) {
-        mStateManager.GetActiveShaderProgram()->SetSampler(location, count, v);
-    } else if(uniform->glType == GL_INT) {
+    if(uniform->type == GL_SAMPLER_2D || uniform->type == GL_SAMPLER_CUBE) {
+        mStateManager.GetActiveShaderProgram()->SetUniformSampler(location, count, v);
+    } else if(uniform->type == GL_INT) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, count * sizeof(int), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[count];
@@ -802,12 +802,12 @@ Context::Uniform2f(GLint location, GLfloat x, GLfloat y)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_VEC2 && uniform->glType != GL_BOOL_VEC2)) {
+       (uniform->type != GL_FLOAT_VEC2 && uniform->type != GL_BOOL_VEC2)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_FLOAT_VEC2) {
+    if(uniform->type == GL_FLOAT_VEC2) {
         float v[2] = {x, y};
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(float), static_cast<void *>(v));
     } else {
@@ -837,7 +837,7 @@ Context::Uniform2fv(GLint location, GLsizei count, const GLfloat *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_VEC2 && uniform->glType != GL_BOOL_VEC2) ||
+       (uniform->type != GL_FLOAT_VEC2 && uniform->type != GL_BOOL_VEC2) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -848,7 +848,7 @@ Context::Uniform2fv(GLint location, GLsizei count, const GLfloat *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_FLOAT_VEC2) {
+    if(uniform->type == GL_FLOAT_VEC2) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[2 * count];
@@ -876,12 +876,12 @@ Context::Uniform2i(GLint location, GLint x, GLint y)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-        (uniform->glType != GL_INT_VEC2 && uniform->glType != GL_BOOL_VEC2)) {
+        (uniform->type != GL_INT_VEC2 && uniform->type != GL_BOOL_VEC2)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_INT_VEC2) {
+    if(uniform->type == GL_INT_VEC2) {
         int v[2] = {x, y};
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * sizeof(int), static_cast<void *>(v));
     } else {
@@ -911,7 +911,7 @@ Context::Uniform2iv(GLint location, GLsizei count, const GLint *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_INT_VEC2 && uniform->glType != GL_BOOL_VEC2) ||
+       (uniform->type != GL_INT_VEC2 && uniform->type != GL_BOOL_VEC2) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -922,9 +922,9 @@ Context::Uniform2iv(GLint location, GLsizei count, const GLint *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_INT_VEC2) {
+    if(uniform->type == GL_INT_VEC2) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 2 * count * sizeof(int), static_cast<const void *>(v));
-    } else if(uniform->glType == GL_BOOL_VEC2) {
+    } else if(uniform->type == GL_BOOL_VEC2) {
         glsl_bool_t *bv = new glsl_bool_t[2 * count];
         for(int i = 0; i < 2 * count; ++i) {
             bv[i] = (bool)v[i];
@@ -950,12 +950,12 @@ Context::Uniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_VEC3 && uniform->glType != GL_BOOL_VEC3)) {
+       (uniform->type != GL_FLOAT_VEC3 && uniform->type != GL_BOOL_VEC3)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_FLOAT_VEC3) {
+    if(uniform->type == GL_FLOAT_VEC3) {
         float v[3] = {x, y, z};
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(float), static_cast<void *>(v));
     } else {
@@ -985,7 +985,7 @@ Context::Uniform3fv(GLint location, GLsizei count, const GLfloat *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_VEC3 && uniform->glType != GL_BOOL_VEC3) ||
+       (uniform->type != GL_FLOAT_VEC3 && uniform->type != GL_BOOL_VEC3) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -996,7 +996,7 @@ Context::Uniform3fv(GLint location, GLsizei count, const GLfloat *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_FLOAT_VEC3) {
+    if(uniform->type == GL_FLOAT_VEC3) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[3 * count];
@@ -1024,12 +1024,12 @@ Context::Uniform3i(GLint location, GLint x, GLint y, GLint z)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_INT_VEC3 && uniform->glType != GL_BOOL_VEC3)) {
+       (uniform->type != GL_INT_VEC3 && uniform->type != GL_BOOL_VEC3)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_INT_VEC3) {
+    if(uniform->type == GL_INT_VEC3) {
         int v[3] = {x, y, z};
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * sizeof(int), static_cast<void *>(v));
     } else {
@@ -1059,7 +1059,7 @@ Context::Uniform3iv(GLint location, GLsizei count, const GLint *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_INT_VEC3 && uniform->glType != GL_BOOL_VEC3) ||
+       (uniform->type != GL_INT_VEC3 && uniform->type != GL_BOOL_VEC3) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -1070,7 +1070,7 @@ Context::Uniform3iv(GLint location, GLsizei count, const GLint *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_INT_VEC3) {
+    if(uniform->type == GL_INT_VEC3) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 3 * count * sizeof(int), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[3 * count];
@@ -1098,12 +1098,12 @@ Context::Uniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_VEC4 && uniform->glType != GL_BOOL_VEC4)) {
+       (uniform->type != GL_FLOAT_VEC4 && uniform->type != GL_BOOL_VEC4)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_FLOAT_VEC4) {
+    if(uniform->type == GL_FLOAT_VEC4) {
         float v[4] = {x, y, z, w};
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(float), static_cast<void *>(v));
     } else {
@@ -1133,7 +1133,7 @@ Context::Uniform4fv(GLint location, GLsizei count, const GLfloat *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_VEC4 && uniform->glType != GL_BOOL_VEC4) ||
+       (uniform->type != GL_FLOAT_VEC4 && uniform->type != GL_BOOL_VEC4) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -1144,7 +1144,7 @@ Context::Uniform4fv(GLint location, GLsizei count, const GLfloat *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_FLOAT_VEC4) {
+    if(uniform->type == GL_FLOAT_VEC4) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(float), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[4 * count];
@@ -1172,12 +1172,12 @@ Context::Uniform4i(GLint location, GLint x, GLint y, GLint z, GLint w)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_INT_VEC4 && uniform->glType != GL_BOOL_VEC4)) {
+       (uniform->type != GL_INT_VEC4 && uniform->type != GL_BOOL_VEC4)) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    if(uniform->glType == GL_INT_VEC4) {
+    if(uniform->type == GL_INT_VEC4) {
         int v[4] = {x, y, z, w};
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * sizeof(int), static_cast<void *>(v));
     } else {
@@ -1207,7 +1207,7 @@ Context::Uniform4iv(GLint location, GLsizei count, const GLint *v)
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_INT_VEC4 && uniform->glType != GL_BOOL_VEC4) ||
+       (uniform->type != GL_INT_VEC4 && uniform->type != GL_BOOL_VEC4) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -1218,7 +1218,7 @@ Context::Uniform4iv(GLint location, GLsizei count, const GLint *v)
         count = uniform->arraySize - (location - (GLint)uniform->location);
     }
 
-    if(uniform->glType == GL_INT_VEC4) {
+    if(uniform->type == GL_INT_VEC4) {
         mStateManager.GetActiveShaderProgram()->SetUniformData(location, 4 * count * sizeof(int), static_cast<const void *>(v));
     } else {
         glsl_bool_t *bv = new glsl_bool_t[4 * count];
@@ -1256,7 +1256,7 @@ Context::UniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, co
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_MAT2) ||
+       (uniform->type != GL_FLOAT_MAT2) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -1307,7 +1307,7 @@ Context::UniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, co
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_MAT3) ||
+       (uniform->type != GL_FLOAT_MAT3) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;
@@ -1357,7 +1357,7 @@ Context::UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, co
 
     const ShaderResourceInterface::uniform *uniform = mStateManager.GetActiveShaderProgram()->GetUniformAtLocation(location);
     if((!uniform) ||
-       (uniform->glType != GL_FLOAT_MAT4) ||
+       (uniform->type != GL_FLOAT_MAT4) ||
        (uniform->arraySize == 1 && count > 1)) {
         RecordError(GL_INVALID_OPERATION);
         return;

@@ -778,11 +778,11 @@ ShaderProgram::SetUniformData(uint32_t location, size_t size, const void *ptr)
 }
 
 void
-ShaderProgram::SetSampler(uint32_t location, int count, const int *textureUnit)
+ShaderProgram::SetUniformSampler(uint32_t location, int count, const int *textureUnit)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mShaderResourceInterface.SetSampler(location, count, textureUnit);
+    mShaderResourceInterface.SetUniformSampler(location, count, textureUnit);
     mUpdateDescriptorSets = true;
 }
 
@@ -876,8 +876,8 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
             mVkDescSetLayoutBind[i].binding = mShaderResourceInterface.GetUniformBlockBinding(i);
             mVkDescSetLayoutBind[i].descriptorType = mShaderResourceInterface.IsUniformBlockOpaque(i) ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             mVkDescSetLayoutBind[i].descriptorCount = 1;
-            mVkDescSetLayoutBind[i].stageFlags = mShaderResourceInterface.GetUniformBlockBlockStage(i) == (SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT) ? VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT :
-                                                 mShaderResourceInterface.GetUniformBlockBlockStage(i) == SHADER_TYPE_VERTEX ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
+            mVkDescSetLayoutBind[i].stageFlags = mShaderResourceInterface.GetUniformBlockStage(i) == (SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT) ? VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT :
+                                                 mShaderResourceInterface.GetUniformBlockStage(i) ==  SHADER_TYPE_VERTEX ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
             mVkDescSetLayoutBind[i].pImmutableSamplers = nullptr;
         }
     }
@@ -1188,7 +1188,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     textureDescriptors[samp].imageView   = activeTexture->GetVkImageView();
 
                     if(j == 0) {
-                        map_block_texDescriptor[mShaderResourceInterface.GetUniformblockIndex(i)] = samp;
+                        map_block_texDescriptor[mShaderResourceInterface.GetUniformBlockIndex(i)] = samp;
                     }
                     ++samp;
                 }
@@ -1197,11 +1197,9 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     }
     assert(samp == nSamplers);
 
-    //samp = 0;
     VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
     memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
-
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writes[i].pNext      = nullptr;
         writes[i].dstSet     = mVkDescSet;
@@ -1211,7 +1209,6 @@ ShaderProgram::UpdateSamplerDescriptors(void)
             writes[i].pImageInfo      = &textureDescriptors[map_block_texDescriptor[i]];
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             writes[i].descriptorCount = mShaderResourceInterface.GetUniformArraySize(i);
-            //samp += mShaderResourceInterface.GetUniformArraySize(i);
         } else {
             writes[i].descriptorCount = 1;
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

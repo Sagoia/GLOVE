@@ -153,7 +153,7 @@ public:
     void                                                SetCustomAttribsLayout(const char *name, int index) { FUN_ENTRY(GL_LOG_TRACE); mShaderResourceInterface.SetCustomAttribsLayout(name, index); }
     void                                                SetUniformData(uint32_t location, size_t size, const void *ptr);
     void                                                GetUniformData(uint32_t location, size_t size, void *ptr) const;
-    void                                                SetSampler(uint32_t location, int count, const int *textureUnit);
+    void                                                SetUniformSampler(uint32_t location, int count, const int *textureUnit);
     void                                                SetCacheManager(CacheManager *cacheManager);
     void                                                UpdateDescriptorSet(void);
     void                                                UpdateBuiltInUniformData(float minDepthRange, float maxDepthRange);
