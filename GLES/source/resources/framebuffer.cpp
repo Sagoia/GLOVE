@@ -409,7 +409,7 @@ Framebuffer::CheckForUpdatedResources()
 }
 
 void
-Framebuffer::CacheAttachedTexture(Texture *bTexture)
+Framebuffer::CacheAttachement(Texture *bTexture, GLuint index)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -425,7 +425,7 @@ Framebuffer::CacheAttachedTexture(Texture *bTexture)
 }
 
 void
-Framebuffer::CacheAttachedRenderbuffer(Renderbuffer *bRenderbuffer, GLuint index)
+Framebuffer::CacheAttachement(Renderbuffer *bRenderbuffer, GLuint index)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

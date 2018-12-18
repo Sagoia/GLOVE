@@ -131,7 +131,7 @@ Context::DeleteTextures(GLsizei n, const GLuint* textures)
                 tex->Unbind();
             }
 
-            mResourceManager->FramebufferCacheAttachedTexture(tex);
+            mResourceManager->FramebufferCacheAttachement(tex, texture);
             GLenum target = tex->GetTarget();
             for(int i = 0; i < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS && target != GL_INVALID_VALUE; ++i) {
                 if(mStateManager.GetActiveObjectsState()->EqualsActiveTexture(target, i, tex)) {

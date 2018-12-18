@@ -180,25 +180,25 @@ ResourceManager::CleanPurgeList()
 }
 
 void
-ResourceManager::FramebufferCacheAttachedTexture(Texture *texture)
+ResourceManager::FramebufferCacheAttachement(Texture *texture, GLuint index)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     for(typename map<uint32_t, Framebuffer *>::const_iterator it =
         mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
 
-        it->second->CacheAttachedTexture(texture);
+        it->second->CacheAttachement(texture, index);
     }
 }
 
 void
-ResourceManager::FramebufferCacheAttachedRenderbuffer(Renderbuffer *renderbuffer, GLuint index)
+ResourceManager::FramebufferCacheAttachement(Renderbuffer *renderbuffer, GLuint index)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     for(typename map<uint32_t, Framebuffer *>::const_iterator it =
         mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
 
-        it->second->CacheAttachedRenderbuffer(renderbuffer, index);
+        it->second->CacheAttachement(renderbuffer, index);
     }
 }

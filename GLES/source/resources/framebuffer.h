@@ -111,8 +111,8 @@ public:
     void                    CheckForUpdatedResources(void);
 
 //Attachment Reference Functions
-    void                    CacheAttachedTexture(Texture *bTexture);
-    void                    CacheAttachedRenderbuffer(Renderbuffer *bRenderbuffer, GLuint index);
+    void                    CacheAttachement(Texture *bTexture, GLuint index);
+    void                    CacheAttachement(Renderbuffer *bRenderbuffer, GLuint index);
     void                    CleanCachedAttachment(GLenum attachment);
     void                    UnrefAttachment(GLenum attachment);
     void                    RefAttachment(GLenum attachment);
@@ -156,7 +156,6 @@ public:
            Texture *        GetStencilAttachmentTexture(void)           const;
     inline GLint            GetBindToTexture(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mBindToTexture;                  }
     inline GLint            GetSurfaceType(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mSurfaceType;                    }
-    inline Renderbuffer *   GetRenderbuffer(GLuint index)               const   { FUN_ENTRY(GL_LOG_TRACE); return mRenderbufferArray->GetObject(index); }
 
 // Set Functions
     inline void             SetEGLSurfaceInterface(const EGLSurfaceInterface_t* eglSurfaceInterface) { FUN_ENTRY(GL_LOG_TRACE); mEGLSurfaceInterface = eglSurfaceInterface; }
