@@ -113,9 +113,9 @@ public:
 //Attachment Reference Functions
     void                    CacheAttachedTexture(Texture *bTexture);
     void                    CacheAttachedRenderbuffer(Renderbuffer *bRenderbuffer, GLuint index);
-    void                    CleanCachedAttachedTexturesRenderbuffers(GLenum attachment);
-    void                    UnrefTexturesRenderbuffers(GLenum attachment);
-    void                    RefTexturesRenderbuffers(GLenum attachment);
+    void                    CleanCachedAttachment(GLenum attachment);
+    void                    UnrefAttachment(GLenum attachment);
+    void                    RefAttachment(GLenum attachment);
 
 // Get Functions
            VkFramebuffer   *GetActiveVkFramebuffer() const;

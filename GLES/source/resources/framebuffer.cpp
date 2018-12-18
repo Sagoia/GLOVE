@@ -443,7 +443,7 @@ Framebuffer::CacheAttachedRenderbuffer(Renderbuffer *bRenderbuffer, GLuint index
 }
 
 void
-Framebuffer::CleanCachedAttachedTexturesRenderbuffers(GLenum attachment)
+Framebuffer::CleanCachedAttachment(GLenum attachment)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -497,7 +497,7 @@ Framebuffer::CleanCachedAttachedTexturesRenderbuffers(GLenum attachment)
 }
 
 void
-Framebuffer::UnrefTexturesRenderbuffers(GLenum attachment)
+Framebuffer::UnrefAttachment(GLenum attachment)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -563,7 +563,7 @@ Framebuffer::UnrefTexturesRenderbuffers(GLenum attachment)
 }
 
 void
-Framebuffer::RefTexturesRenderbuffers(GLenum attachment)
+Framebuffer::RefAttachment(GLenum attachment)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

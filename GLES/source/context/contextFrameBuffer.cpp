@@ -96,9 +96,9 @@ Context::DeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
             Framebuffer *fbo = mResourceManager->GetFramebuffer(fboindex);
 
             //Unbind the attached textures and renderbuffers
-            fbo->UnrefTexturesRenderbuffers(GL_COLOR_ATTACHMENT0);
-            fbo->UnrefTexturesRenderbuffers(GL_DEPTH_ATTACHMENT);
-            fbo->UnrefTexturesRenderbuffers(GL_STENCIL_ATTACHMENT);
+            fbo->UnrefAttachment(GL_COLOR_ATTACHMENT0);
+            fbo->UnrefAttachment(GL_DEPTH_ATTACHMENT);
+            fbo->UnrefAttachment(GL_STENCIL_ATTACHMENT);
 
             if(mWriteFBO == fbo) {
 
@@ -150,9 +150,9 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         Finish();
     }
 
-    mWriteFBO->UnrefTexturesRenderbuffers(attachment);
+    mWriteFBO->UnrefAttachment(attachment);
     //If there is a renderbuffer attached to this framebuffer that has been deleted
-    mWriteFBO->CleanCachedAttachedTexturesRenderbuffers(attachment);
+    mWriteFBO->CleanCachedAttachment(attachment);
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
@@ -172,7 +172,7 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         mWriteFBO->SetStencilAttachmentName(renderbuffer);
         break;
     }
-    mWriteFBO->RefTexturesRenderbuffers(attachment);
+    mWriteFBO->RefAttachment(attachment);
     mResourceManager->CleanPurgeList();
 }
 
@@ -222,9 +222,9 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         Finish();
     }
 
-    mWriteFBO->UnrefTexturesRenderbuffers(attachment);
+    mWriteFBO->UnrefAttachment(attachment);
     //If there is a texture attached to this framebuffer that has been deleted
-    mWriteFBO->CleanCachedAttachedTexturesRenderbuffers(attachment);
+    mWriteFBO->CleanCachedAttachment(attachment);
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
@@ -250,7 +250,7 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         mWriteFBO->SetStencilAttachmentLevel(0);
         break;
     }
-    mWriteFBO->RefTexturesRenderbuffers(attachment);
+    mWriteFBO->RefAttachment(attachment);
     mResourceManager->CleanPurgeList();
 }
 
