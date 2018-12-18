@@ -455,6 +455,7 @@ Context::Finish(void)
     mWriteFBO->SetStateIdle();
 
     mCacheManager->CleanUpCaches();
+    mResourceManager->CleanPurgeList();
 }
 
 bool
