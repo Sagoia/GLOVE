@@ -153,6 +153,7 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
     mWriteFBO->UnrefAttachment(attachment);
     //If there is a renderbuffer attached to this framebuffer that has been deleted
     mWriteFBO->CleanCachedAttachment(attachment);
+    mResourceManager->CleanPurgeList();
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
@@ -173,7 +174,6 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
         break;
     }
     mWriteFBO->RefAttachment(attachment);
-    mResourceManager->CleanPurgeList();
 }
 
 void
@@ -225,6 +225,7 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
     mWriteFBO->UnrefAttachment(attachment);
     //If there is a texture attached to this framebuffer that has been deleted
     mWriteFBO->CleanCachedAttachment(attachment);
+    mResourceManager->CleanPurgeList();
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
@@ -251,7 +252,6 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
         break;
     }
     mWriteFBO->RefAttachment(attachment);
-    mResourceManager->CleanPurgeList();
 }
 
 void
