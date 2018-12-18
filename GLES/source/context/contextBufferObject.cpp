@@ -38,17 +38,13 @@ Context::BindBuffer(GLenum target, GLuint buffer)
         bo = mResourceManager->GetBuffer(buffer);
         bo->SetTarget(target);
         bo->SetVkContext(mVkContext);
+        bo->Bind();
     }
 
     BufferObject * activeBufferObject = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(target);
 
-    if(activeBufferObject) {
-        if(mResourceManager->GetBufferID(activeBufferObject)) {
-            activeBufferObject->Unbind();
-        }
-    }
-    if(buffer) {
-        bo->Bind();
+    if(activeBufferObject && mResourceManager->GetBufferID(activeBufferObject)) {
+        activeBufferObject->Unbind();
     }
 
     mStateManager.GetActiveObjectsState()->SetActiveBufferObject(target, bo);

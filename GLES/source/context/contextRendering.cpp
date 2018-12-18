@@ -429,8 +429,6 @@ Context::Finish(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mResourceManager->CleanPurgeList();
-
     if(!Flush()) {
         return;
     }
@@ -438,6 +436,8 @@ Context::Finish(void)
     if(!mCommandBufferManager->WaitLastSubmition()) {
         return;
     }
+
+    mResourceManager->CleanPurgeList();
 
     if(!mWriteFBO->IsInDeleteState()) {
         if(mWriteFBO == mSystemFBO) {

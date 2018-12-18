@@ -145,8 +145,8 @@ public:
     void                       AddToPurgeList(Texture *object)                  { FUN_ENTRY(GL_LOG_TRACE); mPurgeListTexture.push_back(object); }
     void                       AddToPurgeList(Renderbuffer *object)             { FUN_ENTRY(GL_LOG_TRACE); mPurgeListRenderbuffers.push_back(object); }
     void                       CleanPurgeList();
-    void                       FramebufferCacheAttachedTexture(Texture *texture);
-    void                       FramebufferCacheAttachedRenderbuffer(Renderbuffer *renderbuffer, GLuint index);
+    void                       FramebufferCacheAttachement(Texture *texture, GLuint index);
+    void                       FramebufferCacheAttachement(Renderbuffer *renderbuffer, GLuint index);
 };
 
 #endif //__RESOURCEMANAGER_H__

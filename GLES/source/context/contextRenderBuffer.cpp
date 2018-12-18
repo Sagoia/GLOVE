@@ -34,15 +34,13 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
     }
 
     GLuint activeRenderbufferID = mStateManager.GetActiveObjectsState()->GetActiveRenderbufferObjectID();
-    Renderbuffer *activeRendbuff = mResourceManager->GetRenderbuffer(activeRenderbufferID);
     if(activeRenderbufferID) {
+        Renderbuffer *activeRendbuff = mResourceManager->GetRenderbuffer(activeRenderbufferID);
         activeRendbuff->Unbind();
     }
     if(renderbuffer) {
         mResourceManager->GetRenderbuffer(renderbuffer)->Bind();
-    }
-
-    if(!renderbuffer) {
+    } else {
         mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(0);
         return;
     }
@@ -116,7 +114,7 @@ Context::DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
                 rendbuff->Unbind();
                 mStateManager.GetActiveObjectsState()->SetActiveRenderbufferObjectID(0);
             }
-            mResourceManager->FramebufferCacheAttachedRenderbuffer(rendbuff, index);
+            mResourceManager->FramebufferCacheAttachement(rendbuff, index);
             mResourceManager->AddToPurgeList(rendbuff);
             mResourceManager->RemoveFromListRenderbuffer(index);
         }
