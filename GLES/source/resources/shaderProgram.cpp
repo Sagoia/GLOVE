@@ -30,8 +30,7 @@
 #include "context/context.h"
 
 ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext)
-: refObject(),
-  mGLContext(nullptr)
+: refObject()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -396,8 +395,11 @@ ShaderProgram::LinkProgram()
 
     mShaderCompiler->PrepareReflection(ESSL_VERSION_100);
     UpdateAttributeInterface();
-    mLinked = mShaderCompiler->PreprocessShader((uintptr_t)this, SHADER_TYPE_VERTEX  , ESSL_VERSION_100, ESSL_VERSION_400, mGLContext->IsYInverted()) &&
-              mShaderCompiler->PreprocessShader((uintptr_t)this, SHADER_TYPE_FRAGMENT, ESSL_VERSION_100, ESSL_VERSION_400, mGLContext->IsYInverted());
+
+    Context *context = GetCurrentContext();
+    assert(context);
+    mLinked = mShaderCompiler->PreprocessShader((uintptr_t)this, SHADER_TYPE_VERTEX  , ESSL_VERSION_100, ESSL_VERSION_400, context->IsYInverted()) &&
+              mShaderCompiler->PreprocessShader((uintptr_t)this, SHADER_TYPE_FRAGMENT, ESSL_VERSION_100, ESSL_VERSION_400, context->IsYInverted());
     if(!mLinked) {
         return false;
     }
@@ -520,7 +522,8 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
         }
     }
 
-    if(mGLContext->IsModeLineLoop()) {
+    assert(GetCurrentContext());
+    if(GetCurrentContext()->IsModeLineLoop()) {
         size_t sizeOne = type == GL_UNSIGNED_INT ? sizeof(GLuint) : sizeof(GLushort);
         uint8_t* srcData = new uint8_t[indexCount * sizeOne];
 
@@ -562,7 +565,8 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mGLContext->IsModeLineLoop()) {
+    assert(GetCurrentContext());
+    if(GetCurrentContext()->IsModeLineLoop()) {
         --vertCount;
     }
 
@@ -594,7 +598,7 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
             // If the primitives are rendered with GL_LINE_LOOP, which is not
             // supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
-            if(mGLContext->IsModeLineLoop() && !mActiveIndexVkBuffer) {
+            if(GetCurrentContext()->IsModeLineLoop() && !mActiveIndexVkBuffer) {
                 BufferObject* vboLineLoopUpdated = new VertexBufferObject(mVkContext);
 
                 size_t sizeOld = vbo->GetSize();
@@ -1034,8 +1038,9 @@ ShaderProgram::UpdateDescriptorSet(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    Context *context = GetCurrentContext();
+    assert(context);
     assert(mVkDescSet);
-    assert(mGLContext);
     assert(mVkContext);
 
     if(mShaderResourceInterface.GetLiveUniformBlocks() == 0) {
@@ -1060,9 +1065,9 @@ ShaderProgram::UpdateDescriptorSet(void)
                 const glsl_sampler_t textureUnit = *(glsl_sampler_t *)mShaderResourceInterface.GetUniformClientData(i);
 
                 /// Sampler might need an update
-                Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
+                Texture *activeTexture = context->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
                 mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
-                if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
+                if(context->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
                     mUpdateDescriptorSets = true;
                     break;
                 }
@@ -1089,6 +1094,9 @@ ShaderProgram::UpdateSamplerDescriptors(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    Context *context = GetCurrentContext();
+    assert(context);
+
     const uint32_t nLiveUniformBlocks = mShaderResourceInterface.GetLiveUniformBlocks();
     uint32_t nSamplers = 0;
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
@@ -1111,7 +1119,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     const glsl_sampler_t textureUnit = *(glsl_sampler_t *)mShaderResourceInterface.GetUniformClientData(i);
 
                     /// Sampler might need an update
-                    Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
+                    Texture *activeTexture = context->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
                     mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
                     // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
                     // when the sampler’s associated texture object is not complete.
@@ -1129,7 +1137,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                         }
                     }
-                    else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
+                    else if(context->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
 
                         // Get Inverted Data from FBO's Color Attachment Texture
                         GLenum dstInternalFormat = activeTexture->GetExplicitInternalFormat();

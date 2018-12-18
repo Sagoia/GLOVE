@@ -54,15 +54,13 @@ struct ShaderData {
     vertShader(nullptr), fragShader(nullptr){
 
     }
-    void InitResources(class Context *GLContext, CacheManager* cacheManager,
-                       const vulkanAPI::vkContext_t *mVkContext);
+    void InitResources(CacheManager* cacheManager, const vulkanAPI::vkContext_t *mVkContext);
     bool Generate(const std::string& vertexSource, const std::string& fragmentSource);
     void Destroy(void);
 };
 
 // ------------
 
-    class Context                              *mGLContext;
     const vulkanAPI::vkContext_t               *mVkContext;
     CacheManager*                               mCacheManager;
 
@@ -110,7 +108,7 @@ struct ShaderData {
     bool                                        DestroyDescriptorSets();
 
 public:
-    ScreenSpacePass(class Context *GLContext, const vulkanAPI::vkContext_t *vkContext);
+    ScreenSpacePass(const vulkanAPI::vkContext_t *vkContext);
     ~ScreenSpacePass();
 
     bool                                        Initialize();

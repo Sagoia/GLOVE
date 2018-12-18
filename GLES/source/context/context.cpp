@@ -68,7 +68,7 @@ Context::Context()
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsModeLineLoop     = false;
 
-    mScreenSpacePass = new ScreenSpacePass(this, mVkContext);
+    mScreenSpacePass = new ScreenSpacePass(mVkContext);
     mScreenSpacePass->SetCacheManager(mCacheManager);
     mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
 }

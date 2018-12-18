@@ -35,8 +35,8 @@ struct UniformBufferObject_ScreenSpace {
     float color[4];
 };
 
-ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_t *vkContext):
-    mGLContext(GLContext), mVkContext(vkContext), mCacheManager(nullptr),
+ScreenSpacePass::ScreenSpacePass(const vulkanAPI::vkContext_t *vkContext):
+    mVkContext(vkContext), mCacheManager(nullptr),
     mNumElements(0), mVertexBuffer(nullptr),
     mVertexVkBuffer(VK_NULL_HANDLE), mVertexVkBufferOffset(0),
     mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)),
@@ -143,8 +143,7 @@ ScreenSpacePass::ShaderData::Destroy()
 }
 
 void
-ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cacheManager,
-                                           const vulkanAPI::vkContext_t* mVkContext)
+ScreenSpacePass::ShaderData::InitResources(CacheManager* cacheManager, const vulkanAPI::vkContext_t* mVkContext)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -159,7 +158,6 @@ ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cac
     shaderProgram = new ShaderProgram(mVkContext);
     shaderProgram->SetShaderCompiler(shaderCompiler);
     shaderProgram->SetCacheManager(cacheManager);
-    shaderProgram->SetGlContext(GLContext);
 }
 
 bool
@@ -221,7 +219,7 @@ void main() {\n\
 }\n\
 ";
 
-    mShaderData.InitResources(mGLContext, mCacheManager, mVkContext);
+    mShaderData.InitResources(mCacheManager, mVkContext);
     mShaderData.Generate(vertexSource100, fragmentSource100);
 
     if(!mShaderData.shaderProgram->SetPipelineShaderStage(mPipeline->GetShaderStageCountRef(), mPipeline->GetShaderStageIDsRef(), mPipeline->GetShaderStages())) {

@@ -35,7 +35,6 @@ class Context;
 
 class ShaderProgram : public refObject {
 private:
-    Context                                            *mGLContext;
     const vulkanAPI::vkContext_t                       *mVkContext;
 
     VkDescriptorSetLayout                               mVkDescSetLayout;
@@ -148,7 +147,6 @@ public:
     VkBuffer                                            GetActiveIndexVkBuffer(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveIndexVkBuffer; }
 
     void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext);}
-    void                                                SetGlContext(Context *context)                      { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGLContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != nullptr); mShaderCompiler = shaderCompiler; }
     void                                                SetStagesIDs(uint32_t index, uint32_t id)           { FUN_ENTRY(GL_LOG_TRACE); mStagesIDs[index] = id; }
 
