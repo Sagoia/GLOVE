@@ -163,18 +163,17 @@ GLMember WalkAccess(const TType* TT, Location Loc, GLTypeMap& GM) {
 }
 
 
-std::string GetQualifier(const TQualifier& qualifier) {
+std::string GetQualifier(const TQualifier& qualifier, int index) {
     FUN_ENTRY(GL_LOG_TRACE);
 
     std::ostringstream OS;
-
     if (qualifier.hasLayout()) {
         TQualifier noXfbBuffer = qualifier;
         noXfbBuffer.layoutXfbBuffer = TQualifier::layoutXfbBufferEnd;
         if (noXfbBuffer.hasLayout()) {
             OS << "layout(";
             if (qualifier.hasBinding()) {
-                OS << "binding=" << std::to_string(qualifier.layoutBinding);
+                OS << "binding=" << std::to_string(qualifier.layoutBinding + index);
             }
             OS << ")";
         }
@@ -236,8 +235,8 @@ public:
         return MakeVarName(Key);
     }
 
-    std::string QualifierStr() const {
-        return GetQualifier(*Qual);
+    std::string QualifierStr(int index) const {
+        return GetQualifier(*Qual, index);
     }
 
     std::string SamplerType() const {
@@ -341,8 +340,9 @@ std::string SamplerPatch::Lit() const {
         return OS.str();
     }
 
+    int index = Var->isSampler() ? 0 : 1;
     // Generate uniform interface block definition.
-    OS << Var->QualifierStr() << " " << Var->SamplerType()
+    OS << Var->QualifierStr(index) << " " << Var->SamplerType()
         << " " << VName;
     // Add array declr.
     for (auto I : *Var) {

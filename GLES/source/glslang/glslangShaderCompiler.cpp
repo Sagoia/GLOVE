@@ -726,7 +726,12 @@ GlslangShaderCompiler::CreateUniforms(ESSL_VERSION version)
                                         prog->getUniformStages(i) == EShLangVertexMask ? SHADER_TYPE_VERTEX : SHADER_TYPE_FRAGMENT;
 
         /// Create Aggregate
-        aggregatePairList_t aggregatePairList = CreateAggregates(name);
+        aggregatePairList_t aggregatePairList;
+        if(type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE) {
+            aggregatePairList.push_back(make_pair(nullptr, -1));
+        } else {
+            aggregatePairList = CreateAggregates(name);
+        }
 
         mUniforms.emplace_back(name,                               /// reflectionName
                                type,                               /// type
