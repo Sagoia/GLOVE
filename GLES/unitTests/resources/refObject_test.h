@@ -19,12 +19,18 @@
 
 namespace Testing {
 
+class refObjectImpl : public refObject {
+public:
+    refObjectImpl() = default;
+    ~refObjectImpl() = default;
+};
+
 class refObjectTest : public :: testing :: Test {
 protected:
     void SetUp(void);
     void TearDown(void);
 
-    class refObject RefObject;
+    class refObjectImpl RefObject;
 };
 
 } //end of namespace
