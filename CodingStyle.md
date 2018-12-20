@@ -249,7 +249,7 @@ class BufferObject {
 ## FILE NAMES
 
 
-**Each class should be in a seperate source file unless it makes sense to group several smaller classes.**
+**Each class should be in a separate source file unless it makes sense to group several smaller classes.**
 ```
 class BufferObject;
 ```
