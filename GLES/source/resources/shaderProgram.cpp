@@ -886,12 +886,19 @@ ShaderProgram::ReleaseVkObjects(void)
         mVkDescSetLayout = VK_NULL_HANDLE;
     }
 
-    if(mVkDescSet != VK_NULL_HANDLE) {
-        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &mVkDescSet);
-        mVkDescSet = VK_NULL_HANDLE;
+    while (!mPendingDescSets.empty()) {
+        VkDescriptorSet descSet = mPendingDescSets.front();
+        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &descSet);
+        mPendingDescSets.pop();
     }
 
-    if(mVkDescPool != VK_NULL_HANDLE) {
+    while (!mUsingDescSets.empty()) {
+        VkDescriptorSet descSet = mUsingDescSets.front();
+        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &descSet);
+        mUsingDescSets.pop();
+    }
+
+    if (mVkDescPool != VK_NULL_HANDLE) {
         mCommandBufferManager->UnrefResouce(mVkDescPool);
         mVkDescPool = VK_NULL_HANDLE;
     }
@@ -988,7 +995,7 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
     descriptorPoolInfo.pNext = nullptr;
     descriptorPoolInfo.poolSizeCount = nLiveUniformBlocks;
     descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-    descriptorPoolInfo.maxSets = 1;
+    descriptorPoolInfo.maxSets = MAX_DESC_SET;
     descriptorPoolInfo.pPoolSizes = descTypeCounts;
 
     if(vkCreateDescriptorPool(mVkContext->vkDevice, &descriptorPoolInfo, 0, &mVkDescPool) != VK_SUCCESS) {
@@ -1027,6 +1034,41 @@ ShaderProgram::CreateDescriptorSet(void)
 }
 
 bool
+ShaderProgram::GetValidDescriptorSet(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mVkDescSet = VK_NULL_HANDLE;
+
+    if (mPendingDescSets.empty()) {
+        CreateDescriptorSet();
+    } else {
+        mVkDescSet = mPendingDescSets.front();
+        mPendingDescSets.pop();
+    }
+
+    if (mVkDescSet == VK_NULL_HANDLE) {
+        return false;
+    }
+
+    mUsingDescSets.push(mVkDescSet);
+    assert(mUsingDescSets.size() <= MAX_DESC_SET);
+
+    return true;
+}
+
+void
+ShaderProgram::MoveUsingDescriptorSetsToPending(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    while (!mUsingDescSets.empty()) {
+        mPendingDescSets.push(mUsingDescSets.front());
+        mUsingDescSets.pop();
+    }
+}
+
+bool
 ShaderProgram::AllocateVkDescriptoSet(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -1049,7 +1091,7 @@ ShaderProgram::AllocateVkDescriptoSet(void)
         return false;
     }
 
-    if(!CreateDescriptorSet()) {
+    if (!GetValidDescriptorSet()) {
         assert(0);
         return false;
     }
@@ -1256,7 +1298,6 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
     memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
-
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writes[i].pNext      = nullptr;
         writes[i].dstSet     = mVkDescSet;

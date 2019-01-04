@@ -133,6 +133,7 @@ public:
 
     void                       UpdateFramebufferObjects(GLuint index, GLenum target);
     void                       CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManager);
+    void                       ResetShaderProgramDescSetsState(void);
 
 };
 

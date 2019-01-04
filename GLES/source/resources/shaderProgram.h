@@ -30,11 +30,14 @@
 #include "genericVertexAttribute.h"
 #include "vulkan/pipelineCache.h"
 #include "vulkan/cbManager.h"
+#include <queue>
 
 class Context;
 
 class ShaderProgram {
 private:
+    const static uint32_t                               MAX_DESC_SET = 512;
+
     Context                                            *mGLContext;
     const vulkanAPI::vkContext_t                       *mVkContext;
     vulkanAPI::CommandBufferManager                    *mCommandBufferManager;
@@ -43,6 +46,8 @@ private:
     VkDescriptorSetLayoutBinding                       *mVkDescSetLayoutBind;
     VkDescriptorPool                                    mVkDescPool;
     VkDescriptorSet                                     mVkDescSet;
+    std::queue<VkDescriptorSet>                         mPendingDescSets;
+    std::queue<VkDescriptorSet>                         mUsingDescSets;
     VkPipelineLayout                                    mVkPipelineLayout;
 
     vulkanAPI::PipelineCache                           *mPipelineCache;
@@ -161,7 +166,9 @@ public:
     void                                                GetUniformData(uint32_t location, size_t size, void *ptr) const;
     void                                                SetSampler(uint32_t location, int count, const int *textureUnit);
     void                                                SetCacheManager(CacheManager *cacheManager);
+    bool                                                GetValidDescriptorSet(void);
     void                                                UpdateDescriptorSet(void);
+    void                                                MoveUsingDescriptorSetsToPending(void);
     void                                                UpdateBuiltInUniformData(float minDepthRange, float maxDepthRange);
 
     uint32_t                                            GetNumberOfActiveAttributes(void) const;

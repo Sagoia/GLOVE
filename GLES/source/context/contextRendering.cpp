@@ -304,6 +304,8 @@ Context::BindUniformDescriptors(VkCommandBuffer *CmdBuffer)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
+    mStateManager.GetActiveShaderProgram()->GetValidDescriptorSet();
+
     if(*mStateManager.GetActiveShaderProgram()->GetVkDescSet()) {
         mStateManager.GetActiveShaderProgram()->UpdateBuiltInUniformData(mStateManager.GetViewportTransformationState()->GetMinDepthRange(),
                                                                          mStateManager.GetViewportTransformationState()->GetMaxDepthRange());
@@ -422,11 +424,11 @@ Context::Finish(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if (!mCommandBufferManager->WaitLastSubmition()) {
+    if(!Flush()) {
         return;
     }
 
-    if(!Flush()) {
+    if (!mCommandBufferManager->WaitLastSubmition()) {
         return;
     }
 
@@ -444,6 +446,8 @@ Context::Finish(void)
         }
     }
     mWriteFBO->SetStateIdle();
+
+    mResourceManager->ResetShaderProgramDescSetsState();
 
     mCacheManager->CleanUpCaches();
 }
