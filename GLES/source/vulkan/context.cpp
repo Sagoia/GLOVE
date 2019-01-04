@@ -365,6 +365,9 @@ CreateVkDevice(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    VkPhysicalDeviceFeatures device_features = { VK_FALSE };
+    device_features.wideLines = VK_TRUE;
+
     float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;
     queueInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -384,7 +387,7 @@ CreateVkDevice(void)
     deviceInfo.ppEnabledLayerNames     = nullptr;
     deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
     deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
-    deviceInfo.pEnabledFeatures        = nullptr;
+    deviceInfo.pEnabledFeatures        = &device_features;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
     assert(!err);
@@ -543,7 +546,7 @@ bool CreateVkDebugReporter()
     VkDebugReportCallbackCreateInfoEXT debugReportInfo;
     memset(static_cast<void *>(&debugReportInfo), 0, sizeof(debugReportInfo));
     debugReportInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
     debugReportInfo.pfnCallback = DebugLayerCallback;
 
     VkResult err = _vkCreateDebugReportCallbackEXT(GloveVkContext.vkInstance, &debugReportInfo, nullptr, &(GloveVkContext.vkDebugReporter));
