@@ -31,6 +31,20 @@
 
 namespace vulkanAPI {
 
+std::map<uint64_t, Sampler::CachedData> Sampler::msSamples;
+
+uint64_t Sampler::HashSamplerCreateInfo(VkSamplerCreateInfo &info) {
+    const size_t size = sizeof(VkSamplerCreateInfo);
+    const uint8_t *bytes = (const uint8_t *)(&info);
+    uint64_t hash = 5381;
+    for (size_t i = 0; i < sizeof(VkSamplerCreateInfo); ++i) {
+        int32_t c = bytes[i];
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+
+    return hash;
+}
+
 Sampler::Sampler(const vkContext_t *vkContext)
 : mVkContext(vkContext),
   mVkSampler(VK_NULL_HANDLE),
@@ -62,7 +76,6 @@ Sampler::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkSampler != VK_NULL_HANDLE) {
-        vkDestroySampler(mVkContext->vkDevice, mVkSampler, nullptr);
         mVkSampler = VK_NULL_HANDLE;
     }
 
@@ -102,8 +115,18 @@ Sampler::Create()
     samplerInfo.borderColor             = mVkBorderColor;
     samplerInfo.unnormalizedCoordinates = mUnnormalizedCoordinates;
 
-    VkResult err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
-    assert(!err);
+    VkResult err = VK_SUCCESS;
+
+    uint64_t hash = HashSamplerCreateInfo(samplerInfo);
+    auto &sampler = msSamples.find(hash);
+
+    if (sampler != msSamples.end()) {
+        mVkSampler = sampler->second.sampler;
+    } else {
+        err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
+        assert(!err);
+        msSamples[hash] = { samplerInfo, mVkSampler};
+    }
 
     mUpdated = false;
 
