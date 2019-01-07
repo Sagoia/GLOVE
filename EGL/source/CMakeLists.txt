@@ -24,6 +24,36 @@ set(SOURCES
     utils/eglLogger.cpp
 )
 
+set(HEADERS
+    ${CMAKE_SOURCE_DIR}/EGL/include/rendering_api_interface.h
+    api/eglConfig.h
+    api/eglConfig_android.h
+    api/eglConfig_linux.h
+    api/eglContext.h
+    api/eglDisplay.h
+    api/eglFunctions.h
+    api/eglSurface.h
+    display/displayDriver.h
+    display/displayDriversContainer.h
+    thread/renderingThread.h
+    platform/platformFactory.h
+    platform/platformResources.h
+    platform/platformWindowInterface.h
+    platform/vulkan/vulkanWindowInterface.h
+    platform/vulkan/vulkanWSI.h
+    platform/vulkan/vulkanAPI.h
+    platform/vulkan/vulkanResources.h
+    platform/vulkan/WSIPlaneDisplay.h
+    platform/vulkan/WSIWindows.h
+    platform/vulkan/WSIXcb.h
+    rendering_api/rendering_api.h
+    utils/egl_defs.h
+    utils/eglLogger.h
+    utils/eglLoggerImpl.h
+    utils/eglUtils.h
+    utils/simpleLoggerImpl.h
+)
+
 # Sets the LIBS variable to contain the libraries that GLESv2 shared library
 # will need to be linked against to.
 set(LIBS
@@ -54,15 +84,17 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${Vulkan_INCLUDE_DIR}
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
-add_library(EGL SHARED ${SOURCES})
-
 if(WIN32)
+    add_library(EGL SHARED ${HEADERS} ${SOURCES})
+
     set_target_properties(EGL PROPERTIES PREFIX "lib"
                                          POSITION_INDEPENDENT_CODE ON
                                          LINK_FLAGS "/INCREMENTAL:NO"
                                          INSTALL_RPATH_USE_LINK_PATH TRUE
                                          INSTALL_RPATH "\$ORIGIN")
 else()
+    add_library(EGL SHARED ${SOURCES})
+
     set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
                                          LINK_FLAGS "-Wl,-Bsymbolic"
                                          INSTALL_RPATH_USE_LINK_PATH TRUE

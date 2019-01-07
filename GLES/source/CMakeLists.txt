@@ -6,7 +6,7 @@ set(SOURCES
     api/gl.cpp
     api/eglInterface.cpp
     context/context.cpp
-    context/contextBufferObject
+    context/contextBufferObject.cpp
     context/contextFrameBuffer.cpp
     context/contextRenderBuffer.cpp
     context/contextRendering.cpp
@@ -74,6 +74,67 @@ set(SOURCES
     vulkan/utils.cpp
 )
 
+set(HEADERS
+    api/glFunctions.h
+    context/context.h
+    glslang/glslang_utils.h
+    glslang/glslangCompiler.h
+    glslang/glslangLinker.h
+    glslang/glslangIoMapResolver.h
+    glslang/glslangShaderCompiler.h
+    glslang/shaderConverter.h
+    resources/attachment.h
+    resources/bufferObject.h
+    resources/framebuffer.h
+    resources/genericVertexAttribute.h
+    resources/resourceManager.h
+    resources/renderbuffer.h
+    resources/shader.h
+    resources/shaderCompiler.h
+    resources/shaderProgram.h
+    resources/shaderReflection.h
+    resources/shaderResourceInterface.h
+    resources/texture.h
+    resources/rect.h
+    resources/sampler.h
+    resources/screenSpacePass.h
+    state/stateManager.h
+    state/stateActiveObjects.h
+    state/stateInputAssembly.h
+    state/stateFragmentOperations.h
+    state/stateFramebufferOperations.h
+    state/statePixelStorage.h
+    state/stateRasterization.h
+    state/stateHintAspects.h
+    state/stateViewportTransformation.h
+    utils/arrays.hpp
+    utils/color.hpp
+    utils/globals.h
+    utils/glsl_types.h
+    utils/GlToVkConverter.h
+    utils/parser_helpers.h
+    utils/VkToGlConverter.h
+    utils/glLogger.h
+    utils/glLoggerImpl.h
+    utils/glUtils.h
+    utils/cacheManager.h
+    vulkan/cbManager.h
+    vulkan/commandBufferPool.h
+    vulkan/clearPass.h
+    vulkan/renderPass.h
+    vulkan/buffer.h
+    vulkan/memory.h
+    vulkan/sampler.h
+    vulkan/image.h
+    vulkan/imageView.h
+    vulkan/pipeline.h
+    vulkan/pipelineCache.h
+    vulkan/framebuffer.h
+    vulkan/fence.h
+    vulkan/context.h
+    vulkan/utils.h
+)
+
 # Where the .h files included in the source files can be found.
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include
@@ -100,7 +161,7 @@ if(WIN32)
         optimized ${GLSLANG_PATH}/lib/OSDependent.lib
     )
 
-    add_library(GLESv2 SHARED ${SOURCES})
+    add_library(GLESv2 SHARED ${HEADERS} ${SOURCES})
 
     set_target_properties(GLESv2 PROPERTIES PREFIX "lib"
                                             POSITION_INDEPENDENT_CODE ON
