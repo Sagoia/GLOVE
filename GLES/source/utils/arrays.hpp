@@ -107,7 +107,7 @@ public:
      * a new object is created. Consequently this method is the only way to
      * insert a new element in the map.
      */
-    ELEMENT *GetObject(uint32_t index)
+    ELEMENT *Object(uint32_t index)
     {
         if(mCounter < index) {
             mCounter = index;

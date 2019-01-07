@@ -98,9 +98,9 @@ Framebuffer::GetColorAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            tex = mTextureArray->Object(index);
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            tex = mRenderbufferArray->Object(index)->GetTexture();
         }
     }
 
@@ -122,9 +122,9 @@ Framebuffer::GetDepthAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            tex = mTextureArray->Object(index);
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            tex = mRenderbufferArray->Object(index)->GetTexture();
         }
     }
 
@@ -146,9 +146,9 @@ Framebuffer::GetStencilAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            tex = mTextureArray->Object(index);
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            tex = mRenderbufferArray->Object(index)->GetTexture();
         }
     }
 
