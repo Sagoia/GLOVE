@@ -92,6 +92,48 @@ CacheManager::CleanUpVkPipelineObjectCache()
 }
 
 void
+CacheManager::CleanUpImageViewCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkImageViewCache.empty()) {
+        for (auto imageView : mVkImageViewCache) {
+            vkDestroyImageView(mVkContext->vkDevice, imageView, nullptr);
+        }
+    }
+
+    mVkImageViewCache.clear();
+}
+
+void
+CacheManager::CleanUpImageCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkImageCache.empty()) {
+        for (auto image : mVkImageCache) {
+            vkDestroyImage(mVkContext->vkDevice, image, nullptr);
+        }
+    }
+
+    mVkImageCache.clear();
+}
+
+void
+CacheManager::CleanUpDeviceMemoryCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkDeviceMemoryCache.empty()) {
+        for (auto deviceMemory : mVkDeviceMemoryCache) {
+            vkFreeMemory(mVkContext->vkDevice, deviceMemory, nullptr);
+        }
+    }
+
+    mVkDeviceMemoryCache.clear();
+}
+
+void
 CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -124,12 +166,39 @@ CacheManager::CacheVkPipelineObject(VkPipeline pipeline)
 }
 
 void
+CacheManager::CacheVkImageView(VkImageView imageView)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVkImageViewCache.push_back(imageView);
+}
+
+void
+CacheManager::CacheVkImage(VkImage image)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVkImageCache.push_back(image);
+}
+
+void
+CacheManager::CacheDeviceMemory(VkDeviceMemory deviceMemory)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVkDeviceMemoryCache.push_back(deviceMemory);
+}
+
+void
 CacheManager::CleanUpCaches()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     CleanUpUBOCache();
     CleanUpVBOCache();
+    CleanUpImageViewCache();
+    CleanUpImageCache();
+    CleanUpDeviceMemoryCache();
     CleanUpTextureCache();
     CleanUpVkPipelineObjectCache();
 }

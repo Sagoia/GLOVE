@@ -30,6 +30,8 @@
 #define TEXTURE_2D_LAYERS         1
 #define TEXTURE_CUBE_MAP_LAYERS   6
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class Image {
@@ -66,9 +68,11 @@ private:
 
     bool                              mCopyStencil;
 
+    CacheManager *                    mCacheManager;
+
 public:
 // Constructor
-    Image(const vkContext_t *vkContext = nullptr);
+    Image(const vkContext_t *vkContext = nullptr, CacheManager *cacheManager = nullptr);
 
 // Destructor
     ~Image();
@@ -118,6 +122,8 @@ public:
     inline void                       SetWidth(uint32_t width)                  { FUN_ENTRY(GL_LOG_TRACE); mWidth         = width;     }
     inline void                       SetHeight(uint32_t height)                { FUN_ENTRY(GL_LOG_TRACE); mHeight        = height;    }
     inline void                       SetMipLevels(uint32_t levels)             { FUN_ENTRY(GL_LOG_TRACE); mMipLevels     = levels;    }
+
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager  = manager;   }
 
 // Find Functions
     VkFormat                          FindSupportedVkColorFormat(VkFormat format);

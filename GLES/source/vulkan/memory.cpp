@@ -29,11 +29,12 @@
  */
 
 #include "memory.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
-Memory::Memory(const vkContext_t *vkContext, VkFlags flags)
-: mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags)
+Memory::Memory(const vkContext_t *vkContext, VkFlags flags, CacheManager *cacheManager)
+: mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags), mCacheManager(cacheManager)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -51,7 +52,11 @@ Memory::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkMemory != VK_NULL_HANDLE) {
-        vkFreeMemory(mVkContext->vkDevice, mVkMemory, nullptr);
+        if (mCacheManager) {
+            mCacheManager->CacheDeviceMemory(mVkMemory);
+        } else {
+            vkFreeMemory(mVkContext->vkDevice, mVkMemory, nullptr);
+        }
         mVkMemory = VK_NULL_HANDLE;
     }
 }

@@ -30,14 +30,15 @@
 #include "texture.h"
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
+#include "utils/cacheManager.h"
 
 #define NUMBER_OF_MIP_LEVELS(w, h)                      (std::floor(std::log2(std::max((w),(h)))) + 1)
 
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, CacheManager *cacheManager, const VkFlags vkFlags)
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(cacheManager),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
@@ -45,9 +46,9 @@ mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mImage     = new vulkanAPI::Image(vkContext);
-    mImageView = new vulkanAPI::ImageView(vkContext);
-    mMemory    = new vulkanAPI::Memory(vkContext, vkFlags);
+    mImage     = new vulkanAPI::Image(vkContext, cacheManager);
+    mImageView = new vulkanAPI::ImageView(vkContext, cacheManager);
+    mMemory    = new vulkanAPI::Memory(vkContext, vkFlags, cacheManager);
     mSampler   = new vulkanAPI::Sampler(vkContext);
 }
 

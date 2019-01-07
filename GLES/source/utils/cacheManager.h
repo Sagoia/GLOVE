@@ -38,11 +38,17 @@ private:
     std::vector<BufferObject *>         mVBOCache;
     std::vector<Texture *>              mTextureCache;
     std::vector<VkPipeline>             mVkPipelineObjectCache;
+    std::vector<VkImageView>            mVkImageViewCache;
+    std::vector<VkImage>                mVkImageCache;
+    std::vector<VkDeviceMemory>         mVkDeviceMemoryCache;
 
     void                                CleanUpUBOCache();
     void                                CleanUpVBOCache();
     void                                CleanUpTextureCache();
     void                                CleanUpVkPipelineObjectCache();
+    void                                CleanUpImageViewCache();
+    void                                CleanUpImageCache();
+    void                                CleanUpDeviceMemoryCache();
 
 public:
      CacheManager(const vulkanAPI::vkContext_t *vkContext) : mVkContext(vkContext) { }
@@ -52,6 +58,10 @@ public:
     void                                CacheVBO(BufferObject *vbo);
     void                                CacheTexture(Texture *tex);
     void                                CacheVkPipelineObject(VkPipeline pipeline);
+    void                                CacheVkImageView(VkImageView imageView);
+    void                                CacheVkImage(VkImage image);
+    void                                CacheDeviceMemory(VkDeviceMemory deviceMemory);
+
     void                                CleanUpCaches();
 };
 

@@ -28,6 +28,8 @@
 #include "utils.h"
 #include "context.h"
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class Memory {
@@ -43,9 +45,11 @@ private:
     VkFlags                           mVkFlags;
     VkMemoryRequirements              mVkRequirements;
 
+    CacheManager *                    mCacheManager;
+
 public:
 // Constructor
-    Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
+    Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0, CacheManager *cacheManager = nullptr);
 
 // Destructor
     ~Memory();
@@ -71,6 +75,8 @@ public:
     void                              UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
 
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };
 
 }
