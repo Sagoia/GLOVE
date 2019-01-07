@@ -22,6 +22,8 @@
  */
 
 #include "cacheManager.h"
+#include "resources/bufferObject.h"
+#include "resources/texture.h"
 
 void
 CacheManager::CleanUpUBOCache(void)
@@ -187,6 +189,27 @@ CacheManager::CacheDeviceMemory(VkDeviceMemory deviceMemory)
     FUN_ENTRY(GL_LOG_TRACE);
 
     mVkDeviceMemoryCache.push_back(deviceMemory);
+}
+
+void
+CacheManager::CacheSampler(uint64_t hash, VkSampler sampler)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVkSamplerCache[hash] = sampler;
+}
+
+VkSampler
+CacheManager::GetSampler(uint64_t hash)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    std::map<uint64_t, VkSampler>::iterator it = mVkSamplerCache.find(hash);
+    if (it != mVkSamplerCache.end()) {
+        return it->second;
+    }
+
+    return VK_NULL_HANDLE;
 }
 
 void

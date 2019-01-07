@@ -38,4 +38,6 @@ bool                    VkFormatIsStencil(VkFormat format);
 bool                    VkFormatIsColor(VkFormat format);
 const char *            VkResultToString(VkResult res);
 
+uint64_t                HashSamplerInfo(VkSamplerCreateInfo &info);
+
 #endif // __VKUTILS_H__

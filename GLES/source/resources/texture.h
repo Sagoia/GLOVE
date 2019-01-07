@@ -159,6 +159,7 @@ public:
     inline void             SetCommandBufferManager(
                                 vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void             SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager;
+                                                                                                           mSampler->SetCacheManager(cacheManager);
                                                                                                            mImageView->SetCacheManager(cacheManager);
                                                                                                            mImage->SetCacheManager(cacheManager);
                                                                                                            mMemory->SetCacheManager(cacheManager); }

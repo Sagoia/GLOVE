@@ -26,20 +26,13 @@
 
 #include "context.h"
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class Sampler {
 
 private:
-    struct CachedData {
-        VkSamplerCreateInfo info;
-        VkSampler sampler;
-    };
-
-    static std::map<uint64_t, CachedData> msSamples;
-
-    static uint64_t HashSamplerCreateInfo(VkSamplerCreateInfo &info);
-
     const
     vkContext_t *                     mVkContext;
 
@@ -61,9 +54,12 @@ private:
     VkBool32                          mUnnormalizedCoordinates;
     VkBool32                          mUpdated;
 
+    uint64_t                          mHash;
+    CacheManager *                    mCacheManager;
+
 public:
 // Constructor
-    Sampler(const vkContext_t *vkContext = nullptr);
+    Sampler(const vkContext_t *vkContext = nullptr, CacheManager *cacheManager = nullptr);
 
 // Destructor
     ~Sampler();
@@ -79,6 +75,7 @@ public:
 
 // Set Functions
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext      = vkContext;                  }
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager   = manager;                    }
     inline void                       SetMinFilter(VkFilter filter)             { FUN_ENTRY(GL_LOG_TRACE); if (mVkMinFilter     != filter)  { mVkMinFilter    = filter; mUpdated = VK_TRUE; } }
     inline void                       SetMagFilter(VkFilter filter)             { FUN_ENTRY(GL_LOG_TRACE); if (mVkMagFilter     != filter)  { mVkMagFilter    = filter; mUpdated = VK_TRUE; } }
     inline void                       SetAddressModeU(VkSamplerAddressMode mode){ FUN_ENTRY(GL_LOG_TRACE); if (mVkAddressModeU  != mode)    { mVkAddressModeU = mode;   mUpdated = VK_TRUE; } }

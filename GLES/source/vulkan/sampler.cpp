@@ -28,24 +28,12 @@
  */
 
 #include "sampler.h"
+#include "utils.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
-std::map<uint64_t, Sampler::CachedData> Sampler::msSamples;
-
-uint64_t Sampler::HashSamplerCreateInfo(VkSamplerCreateInfo &info) {
-    const size_t size = sizeof(VkSamplerCreateInfo);
-    const uint8_t *bytes = (const uint8_t *)(&info);
-    uint64_t hash = 5381;
-    for (size_t i = 0; i < sizeof(VkSamplerCreateInfo); ++i) {
-        int32_t c = bytes[i];
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-    }
-
-    return hash;
-}
-
-Sampler::Sampler(const vkContext_t *vkContext)
+Sampler::Sampler(const vkContext_t *vkContext, CacheManager *cacheManager)
 : mVkContext(vkContext),
   mVkSampler(VK_NULL_HANDLE),
   mVkMinFilter(VK_FILTER_NEAREST), mVkMagFilter(VK_FILTER_LINEAR),
@@ -58,7 +46,8 @@ Sampler::Sampler(const vkContext_t *vkContext)
   mCompareEnabled(VK_FALSE), mVkCompareOp(VK_COMPARE_OP_NEVER),
   mVkBorderColor(VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE),
   mUnnormalizedCoordinates(VK_FALSE),
-  mUpdated(true)
+  mUpdated(true),
+  mHash(0), mCacheManager(cacheManager)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -76,6 +65,9 @@ Sampler::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkSampler != VK_NULL_HANDLE) {
+        if (!mCacheManager) {
+            vkDestroySampler(mVkContext->vkDevice, mVkSampler, nullptr);
+        }
         mVkSampler = VK_NULL_HANDLE;
     }
 
@@ -117,15 +109,18 @@ Sampler::Create()
 
     VkResult err = VK_SUCCESS;
 
-    uint64_t hash = HashSamplerCreateInfo(samplerInfo);
-    auto &sampler = msSamples.find(hash);
-
-    if (sampler != msSamples.end()) {
-        mVkSampler = sampler->second.sampler;
-    } else {
+    if (!mCacheManager) {
         err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
         assert(!err);
-        msSamples[hash] = { samplerInfo, mVkSampler};
+    } else {
+        mHash = HashSamplerInfo(samplerInfo);
+        mVkSampler = mCacheManager->GetSampler(mHash);
+
+        if (mVkSampler == VK_NULL_HANDLE) {
+            err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
+            assert(!err);
+        }
+        mCacheManager->CacheSampler(mHash, mVkSampler);
     }
 
     mUpdated = false;

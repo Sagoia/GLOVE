@@ -24,10 +24,17 @@
 #define __CACHEMANAGER_H__
 
 #include <vector>
+#include <map>
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
-#include "resources/bufferObject.h"
-#include "resources/texture.h"
+
+namespace vulkanAPI {
+    struct vkContext_t;
+}
+
+class UniformBufferObject;
+class BufferObject;
+class Texture;
 
 class CacheManager {
 private:
@@ -41,6 +48,8 @@ private:
     std::vector<VkImageView>            mVkImageViewCache;
     std::vector<VkImage>                mVkImageCache;
     std::vector<VkDeviceMemory>         mVkDeviceMemoryCache;
+
+    std::map<uint64_t, VkSampler>       mVkSamplerCache;
 
     void                                CleanUpUBOCache();
     void                                CleanUpVBOCache();
@@ -61,6 +70,9 @@ public:
     void                                CacheVkImageView(VkImageView imageView);
     void                                CacheVkImage(VkImage image);
     void                                CacheDeviceMemory(VkDeviceMemory deviceMemory);
+
+    void                                CacheSampler(uint64_t hash, VkSampler sampler);
+    VkSampler                           GetSampler(uint64_t hash);
 
     void                                CleanUpCaches();
 };

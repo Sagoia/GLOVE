@@ -216,3 +216,23 @@ VkResultToString(VkResult res)
 }
 
 #undef CASE_STR
+
+const static uint64_t HASH_START = 5381;
+
+static inline uint64_t
+HashBuffer(const uint8_t *bytes, size_t size, uint64_t hash)
+{
+    for (size_t i = 0; i < size; ++i) {
+        int32_t c = bytes[i];
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+
+    return hash;
+}
+
+uint64_t
+HashSamplerInfo(VkSamplerCreateInfo &info)
+{
+    return HashBuffer((const uint8_t *)(&info), sizeof(VkSamplerCreateInfo), HASH_START);
+}
+
