@@ -34,7 +34,7 @@
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
 
-class mCacheManager;
+class CacheManager;
 
 class Texture {
 
