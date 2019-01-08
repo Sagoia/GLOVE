@@ -29,6 +29,7 @@ set(HEADERS
     api/eglConfig.h
     api/eglConfig_android.h
     api/eglConfig_linux.h
+    api/eglConfig_windows.h
     api/eglContext.h
     api/eglDisplay.h
     api/eglFunctions.h
