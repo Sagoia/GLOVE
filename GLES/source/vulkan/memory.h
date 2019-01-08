@@ -49,7 +49,7 @@ private:
 
 public:
 // Constructor
-    Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0, CacheManager *cacheManager = nullptr);
+    Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
 
 // Destructor
     ~Memory();

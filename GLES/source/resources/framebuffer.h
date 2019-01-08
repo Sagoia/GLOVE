@@ -43,6 +43,8 @@ typedef enum {
     GLOVE_SURFACE_PBUFFER
 } glove_surface_type;
 
+class CacheManager;
+
 class Framebuffer {
 private:
     enum State {
@@ -54,10 +56,11 @@ private:
     };
 
     const
-    vulkanAPI::vkContext_t *         mVkContext;
+    vulkanAPI::vkContext_t          *mVkContext;
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
     ObjectArray<Texture>            *mTextureArray;
     ObjectArray<Renderbuffer>       *mRenderbufferArray;
+    CacheManager                    *mCacheManager;
 
     Rect                            mDims;
     GLenum                          mTarget;
@@ -149,12 +152,14 @@ public:
 
 // Set Functions
     inline void             SetVkContext(const
-                                         vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
+                                vulkanAPI::vkContext_t *vkContext)              { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
     inline void             SetCommandBufferManager(
-                            vulkanAPI::CommandBufferManager     *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
+                                vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void             SetResources(
-                            ObjectArray<Texture>            *texArray,
-                            ObjectArray<Renderbuffer>       *rbArray)           { FUN_ENTRY(GL_LOG_TRACE); mTextureArray = texArray; mRenderbufferArray = rbArray; }
+                                ObjectArray<Texture> *texArray,
+                                ObjectArray<Renderbuffer> *rbArray)             { FUN_ENTRY(GL_LOG_TRACE); mTextureArray = texArray; mRenderbufferArray = rbArray; }
+    inline void             SetCacheManager(
+                                CacheManager *cacheManager)                     { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; mRenderPass->SetCacheManager(cacheManager); }
 
     inline void             SetUpdated(void)                                    { FUN_ENTRY(GL_LOG_TRACE); mUpdated     = true;   }
     inline void             SetIsSystem(void)                                   { FUN_ENTRY(GL_LOG_TRACE); mIsSystem    = true;   }

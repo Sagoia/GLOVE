@@ -27,6 +27,7 @@
  */
 
 #include "pipeline.h"
+#include "utils.h"
 #include <algorithm>
 
 namespace vulkanAPI {
@@ -75,23 +76,11 @@ Pipeline::SetScissor(int32_t x, int32_t y, int32_t width, int32_t height)
 }
 
 void
-Pipeline::MoveToCache()
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    if(mVkPipeline != VK_NULL_HANDLE) {
-        mCacheManager->CacheVkPipelineObject(mVkPipeline);
-        mVkPipeline = VK_NULL_HANDLE;
-    }
-}
-
-void
 Pipeline::Release()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkPipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(mVkContext->vkDevice, mVkPipeline, nullptr);
         mVkPipeline = VK_NULL_HANDLE;
     }
 }
@@ -377,10 +366,18 @@ Pipeline::CreateGraphicsPipeline(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    MoveToCache();
+    Release();
 
-    VkResult err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, nullptr, &mVkPipeline);
-    assert(!err);
+    uint64_t hash = HashGraphicsPipelineInfo(mVkPipelineInfo);
+    mVkPipeline = mCacheManager->GetPipeline(mVkPipelineCache, hash);
+
+    VkResult err = VK_SUCCESS;
+    if (mVkPipeline == VK_NULL_HANDLE) {
+        err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, nullptr, &mVkPipeline);
+        assert(!err);
+
+        mCacheManager->CachePipeline(mVkPipelineCache, hash, mVkPipeline);
+    }
     
     mUpdateState.Pipeline = false;
 

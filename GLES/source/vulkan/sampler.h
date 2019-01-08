@@ -59,7 +59,7 @@ private:
 
 public:
 // Constructor
-    Sampler(const vkContext_t *vkContext = nullptr, CacheManager *cacheManager = nullptr);
+    Sampler(const vkContext_t *vkContext = nullptr);
 
 // Destructor
     ~Sampler();

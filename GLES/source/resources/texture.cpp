@@ -37,8 +37,8 @@
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, CacheManager *cacheManager, const VkFlags vkFlags)
-: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(cacheManager),
+Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
@@ -46,9 +46,9 @@ mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mImage     = new vulkanAPI::Image(vkContext, cacheManager);
-    mImageView = new vulkanAPI::ImageView(vkContext, cacheManager);
-    mMemory    = new vulkanAPI::Memory(vkContext, vkFlags, cacheManager);
+    mImage     = new vulkanAPI::Image(vkContext);
+    mImageView = new vulkanAPI::ImageView(vkContext);
+    mMemory    = new vulkanAPI::Memory(vkContext, vkFlags);
     mSampler   = new vulkanAPI::Sampler(vkContext);
 }
 

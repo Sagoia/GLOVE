@@ -29,9 +29,10 @@
 #include "framebuffer.h"
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
+#include "utils/cacheManager.h"
 
 Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mState(IDLE),
 mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr), mIsSystem(false), mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID)
 {

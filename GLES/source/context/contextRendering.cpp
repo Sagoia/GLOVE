@@ -449,7 +449,7 @@ Context::Finish(void)
 
     mResourceManager->ResetShaderProgramDescSetsState();
 
-    mCacheManager->CleanUpCaches();
+    mCacheManager->CleanUpFrameCaches();
 }
 
 bool

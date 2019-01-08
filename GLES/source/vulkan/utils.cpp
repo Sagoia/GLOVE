@@ -231,8 +231,146 @@ HashBuffer(const uint8_t *bytes, size_t size, uint64_t hash)
 }
 
 uint64_t
-HashSamplerInfo(VkSamplerCreateInfo &info)
+HashSamplerInfo(const VkSamplerCreateInfo &info)
 {
-    return HashBuffer((const uint8_t *)(&info), sizeof(VkSamplerCreateInfo), HASH_START);
+    const static size_t size = sizeof(VkSamplerCreateInfo) - offsetof(VkSamplerCreateInfo, flags);
+    return HashBuffer((const uint8_t *)(&info.flags), size, HASH_START);
+}
+
+uint64_t
+HashRenderPassInfo(const VkRenderPassCreateInfo &info)
+{
+    uint64_t hash = HASH_START;
+    hash = HashBuffer((const uint8_t *)(&info.flags), sizeof(info.flags), hash);
+
+    hash = HashBuffer((const uint8_t *)(&info.attachmentCount), sizeof(uint32_t), hash);
+    hash = HashBuffer((const uint8_t *)(info.pAttachments), info.attachmentCount * sizeof(VkAttachmentDescription), hash);
+
+    hash = HashBuffer((const uint8_t *)(&info.subpassCount), sizeof(uint32_t), hash);
+    for (uint32_t i = 0; i < info.subpassCount; ++i) {
+        const VkSubpassDescription &subpass = info.pSubpasses[i];
+        hash = HashBuffer((const uint8_t *)(&subpass.flags), sizeof(subpass.flags), hash);
+        hash = HashBuffer((const uint8_t *)(&subpass.pipelineBindPoint), sizeof(subpass.pipelineBindPoint), hash);
+
+        hash = HashBuffer((const uint8_t *)(&subpass.inputAttachmentCount), sizeof(uint32_t), hash);
+        hash = HashBuffer((const uint8_t *)(subpass.pInputAttachments), subpass.inputAttachmentCount * sizeof(VkAttachmentReference), hash);
+
+        hash = HashBuffer((const uint8_t *)(&subpass.colorAttachmentCount), sizeof(uint32_t), hash);
+        hash = HashBuffer((const uint8_t *)(subpass.pColorAttachments), subpass.colorAttachmentCount * sizeof(VkAttachmentReference), hash);
+        if (subpass.pResolveAttachments) {
+            hash = HashBuffer((const uint8_t *)(subpass.pResolveAttachments), subpass.colorAttachmentCount * sizeof(VkAttachmentReference), hash);
+        }
+        if (subpass.pDepthStencilAttachment) {
+            hash = HashBuffer((const uint8_t *)(subpass.pDepthStencilAttachment), sizeof(VkAttachmentReference), hash);
+        }
+
+        hash = HashBuffer((const uint8_t *)(&subpass.preserveAttachmentCount), sizeof(uint32_t), hash);
+        hash = HashBuffer((const uint8_t *)(subpass.pPreserveAttachments), subpass.preserveAttachmentCount * sizeof(uint32_t), hash);
+    }
+
+    hash = HashBuffer((const uint8_t *)(&info.dependencyCount), sizeof(uint32_t), hash);
+    hash = HashBuffer((const uint8_t *)(info.pDependencies), info.dependencyCount * sizeof(VkSubpassDependency), hash);
+
+    return hash;
+}
+
+uint64_t
+HashGraphicsPipelineInfo(const VkGraphicsPipelineCreateInfo &info)
+{
+    uint64_t hash = HASH_START;
+    hash = HashBuffer((const uint8_t *)(&info.flags), sizeof(info.flags), hash);
+
+    hash = HashBuffer((const uint8_t *)(&info.stageCount), sizeof(uint32_t), hash);
+    hash = HashBuffer((const uint8_t *)(info.pStages), info.stageCount * sizeof(VkPipelineShaderStageCreateInfo), hash);
+
+    const VkPipelineVertexInputStateCreateInfo &vertexInputState = *info.pVertexInputState;
+    hash = HashBuffer((const uint8_t *)(&vertexInputState.flags), sizeof(vertexInputState.flags), hash);
+    hash = HashBuffer((const uint8_t *)(&vertexInputState.vertexBindingDescriptionCount), sizeof(uint32_t), hash);
+    hash = HashBuffer((const uint8_t *)(vertexInputState.pVertexBindingDescriptions), vertexInputState.vertexBindingDescriptionCount * sizeof(VkVertexInputBindingDescription), hash);
+    hash = HashBuffer((const uint8_t *)(&vertexInputState.vertexAttributeDescriptionCount), sizeof(uint32_t), hash);
+    hash = HashBuffer((const uint8_t *)(vertexInputState.pVertexAttributeDescriptions), vertexInputState.vertexAttributeDescriptionCount * sizeof(VkVertexInputAttributeDescription), hash);
+
+    const static size_t InputAssemblyStateSize = sizeof(VkPipelineInputAssemblyStateCreateInfo) - offsetof(VkPipelineInputAssemblyStateCreateInfo, flags);
+    if (info.pInputAssemblyState) {
+        hash = HashBuffer((const uint8_t *)(&(info.pInputAssemblyState->flags)), InputAssemblyStateSize, hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pInputAssemblyState), sizeof(intptr_t), hash);
+    }
+
+    const static size_t TessellationStateSize = sizeof(VkPipelineTessellationStateCreateInfo) - offsetof(VkPipelineTessellationStateCreateInfo, flags);
+    if (info.pTessellationState) {
+        hash = HashBuffer((const uint8_t *)(&(info.pTessellationState->flags)), TessellationStateSize, hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pTessellationState), sizeof(intptr_t), hash);
+    }
+
+    if (info.pViewportState) {
+        const VkPipelineViewportStateCreateInfo &viewportState = *info.pViewportState;
+        hash = HashBuffer((const uint8_t *)(&viewportState.flags), sizeof(viewportState.flags), hash);
+        hash = HashBuffer((const uint8_t *)(&viewportState.viewportCount), sizeof(uint32_t), hash);
+        if (viewportState.pViewports) {
+            hash = HashBuffer((const uint8_t *)(viewportState.pViewports), viewportState.viewportCount * sizeof(VkViewport), hash);
+        } else {
+            hash = HashBuffer((const uint8_t *)(&viewportState.pViewports), sizeof(intptr_t), hash);
+        }
+        hash = HashBuffer((const uint8_t *)(&viewportState.scissorCount), sizeof(uint32_t), hash);
+        if (viewportState.pScissors) {
+            hash = HashBuffer((const uint8_t *)(viewportState.pScissors), viewportState.scissorCount * sizeof(VkRect2D), hash);
+        } else {
+            hash = HashBuffer((const uint8_t *)(&viewportState.pScissors), sizeof(intptr_t), hash);
+        }
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pViewportState), sizeof(intptr_t), hash);
+    }
+
+    const static size_t RasterizationStateSize = sizeof(VkPipelineRasterizationStateCreateInfo) - offsetof(VkPipelineRasterizationStateCreateInfo, flags);
+    if (info.pRasterizationState) {
+        hash = HashBuffer((const uint8_t *)(&(info.pRasterizationState->flags)), RasterizationStateSize, hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pRasterizationState), sizeof(intptr_t), hash);
+    }
+
+    const static size_t MultisampleStateSize = sizeof(VkPipelineMultisampleStateCreateInfo) - offsetof(VkPipelineMultisampleStateCreateInfo, flags);
+    if (info.pMultisampleState) {
+        hash = HashBuffer((const uint8_t *)(&(info.pMultisampleState->flags)), MultisampleStateSize, hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pMultisampleState), sizeof(intptr_t), hash);
+    }
+
+    const static size_t DepthStencilStateSize = sizeof(VkPipelineDepthStencilStateCreateInfo) - offsetof(VkPipelineDepthStencilStateCreateInfo, flags);
+    if (info.pDepthStencilState) {
+        hash = HashBuffer((const uint8_t *)(&(info.pDepthStencilState->flags)), DepthStencilStateSize, hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pDepthStencilState), sizeof(intptr_t), hash);
+    }
+
+    if (info.pColorBlendState) {
+        const VkPipelineColorBlendStateCreateInfo &colorBlendState = *info.pColorBlendState;
+        hash = HashBuffer((const uint8_t *)(&colorBlendState.flags), sizeof(colorBlendState.flags), hash);
+        hash = HashBuffer((const uint8_t *)(&colorBlendState.logicOpEnable), sizeof(colorBlendState.logicOpEnable), hash);
+        hash = HashBuffer((const uint8_t *)(&colorBlendState.logicOp), sizeof(colorBlendState.logicOp), hash);
+        hash = HashBuffer((const uint8_t *)(&colorBlendState.attachmentCount), sizeof(uint32_t), hash);
+        hash = HashBuffer((const uint8_t *)(colorBlendState.pAttachments), colorBlendState.attachmentCount * sizeof(VkPipelineColorBlendAttachmentState), hash);
+        hash = HashBuffer((const uint8_t *)(colorBlendState.blendConstants), 4 * sizeof(float), hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pColorBlendState), sizeof(intptr_t), hash);
+    }
+
+    if (info.pDynamicState) {
+        const VkPipelineDynamicStateCreateInfo &dynamicState = *info.pDynamicState;
+        hash = HashBuffer((const uint8_t *)(&dynamicState.flags), sizeof(dynamicState.flags), hash);
+        hash = HashBuffer((const uint8_t *)(&dynamicState.dynamicStateCount), sizeof(uint32_t), hash);
+        hash = HashBuffer((const uint8_t *)(dynamicState.pDynamicStates), dynamicState.dynamicStateCount * sizeof(VkDynamicState), hash);
+    } else {
+        hash = HashBuffer((const uint8_t *)(&info.pDynamicState), sizeof(intptr_t), hash);
+    }
+
+    hash = HashBuffer((const uint8_t *)(&info.layout), sizeof(info.layout), hash);
+    hash = HashBuffer((const uint8_t *)(&info.renderPass), sizeof(info.renderPass), hash);
+    hash = HashBuffer((const uint8_t *)(&info.subpass), sizeof(info.subpass), hash);
+    
+    // basePipelineHandle and basePipelineIndex is always 0
+
+    return hash;
 }
 

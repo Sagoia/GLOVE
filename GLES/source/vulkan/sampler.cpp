@@ -33,7 +33,7 @@
 
 namespace vulkanAPI {
 
-Sampler::Sampler(const vkContext_t *vkContext, CacheManager *cacheManager)
+Sampler::Sampler(const vkContext_t *vkContext)
 : mVkContext(vkContext),
   mVkSampler(VK_NULL_HANDLE),
   mVkMinFilter(VK_FILTER_NEAREST), mVkMagFilter(VK_FILTER_LINEAR),
@@ -47,7 +47,8 @@ Sampler::Sampler(const vkContext_t *vkContext, CacheManager *cacheManager)
   mVkBorderColor(VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE),
   mUnnormalizedCoordinates(VK_FALSE),
   mUpdated(true),
-  mHash(0), mCacheManager(cacheManager)
+  mHash(0), 
+  mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -119,8 +120,9 @@ Sampler::Create()
         if (mVkSampler == VK_NULL_HANDLE) {
             err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
             assert(!err);
+
+            mCacheManager->CacheSampler(mHash, mVkSampler);
         }
-        mCacheManager->CacheSampler(mHash, mVkSampler);
     }
 
     mUpdated = false;

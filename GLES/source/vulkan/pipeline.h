@@ -70,7 +70,6 @@ private:
     CacheManager                               *mCacheManager;
 
     bool                                        CreateGraphicsPipeline(void);
-    void                                        MoveToCache(void);
     void                                        Release(void);
     void                                        SetInfo(const VkRenderPass *renderpass);
 

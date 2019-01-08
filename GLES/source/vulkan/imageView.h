@@ -43,7 +43,7 @@ private:
 
 public:
 // Constructor
-    ImageView(const vkContext_t *vkContext = nullptr, CacheManager *cacheManager = nullptr);
+    ImageView(const vkContext_t *vkContext = nullptr);
 
 // Destructor
     ~ImageView();

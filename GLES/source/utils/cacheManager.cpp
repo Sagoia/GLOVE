@@ -77,23 +77,6 @@ CacheManager::CleanUpTextureCache()
 }
 
 void
-CacheManager::CleanUpVkPipelineObjectCache()
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    if(!mVkPipelineObjectCache.empty()) {
-        for(uint32_t i = 0; i < mVkPipelineObjectCache.size(); ++i) {
-            if(mVkPipelineObjectCache[i] != VK_NULL_HANDLE){
-                vkDestroyPipeline(mVkContext->vkDevice, mVkPipelineObjectCache[i], nullptr);
-                mVkPipelineObjectCache[i] = VK_NULL_HANDLE;
-            }
-        }
-
-        mVkPipelineObjectCache.clear();
-    }
-}
-
-void
 CacheManager::CleanUpImageViewCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -136,6 +119,51 @@ CacheManager::CleanUpDeviceMemoryCache()
 }
 
 void
+CacheManager::CleanUpSampleCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkSamplerCache.empty()) {
+        for (auto sampler : mVkSamplerCache) {
+            vkDestroySampler(mVkContext->vkDevice, sampler.second, nullptr);
+        }
+    }
+
+    mVkSamplerCache.clear();
+}
+
+void
+CacheManager::CleanUpRenderPassCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkRenderPassCache.empty()) {
+        for (auto renderPass : mVkRenderPassCache) {
+            vkDestroyRenderPass(mVkContext->vkDevice, renderPass.second, nullptr);
+        }
+    }
+
+    mVkRenderPassCache.clear();
+}
+
+void
+CacheManager::CleanUpPipelineCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkPipelineCache.empty()) {
+        for (auto pipelineMap : mVkPipelineCache) {
+            for (auto pipeline : pipelineMap.second) {
+                vkDestroyPipeline(mVkContext->vkDevice, pipeline.second, nullptr);
+            }
+            pipelineMap.second.clear();
+        }
+    }
+
+    mVkRenderPassCache.clear();
+}
+
+void
 CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -157,14 +185,6 @@ CacheManager::CacheTexture(Texture *tex)
     FUN_ENTRY(GL_LOG_TRACE);
 
     mTextureCache.push_back(tex);
-}
-
-void
-CacheManager::CacheVkPipelineObject(VkPipeline pipeline)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    mVkPipelineObjectCache.push_back(pipeline);
 }
 
 void
@@ -213,7 +233,52 @@ CacheManager::GetSampler(uint64_t hash)
 }
 
 void
-CacheManager::CleanUpCaches()
+CacheManager::CacheRenderPass(uint64_t hash, VkRenderPass renderPass)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVkRenderPassCache[hash] = renderPass;
+}
+
+VkRenderPass
+CacheManager::GetRenderPass(uint64_t hash)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    std::map<uint64_t, VkRenderPass>::iterator it = mVkRenderPassCache.find(hash);
+    if (it != mVkRenderPassCache.end()) {
+        return it->second;
+    }
+
+    return VK_NULL_HANDLE;
+}
+
+void
+CacheManager::CachePipeline(VkPipelineCache pipelineCache, uint64_t hash, VkPipeline pipeline)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVkPipelineCache[pipelineCache][hash] = pipeline;
+}
+
+VkPipeline
+CacheManager::GetPipeline(VkPipelineCache pipelineCache, uint64_t hash)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    PipelineMap::iterator it = mVkPipelineCache.find(pipelineCache);
+    if (it != mVkPipelineCache.end()) {
+        PipelineHashMap::iterator it2 = it->second.find(hash);
+        if (it2 != it->second.end()) {
+            return it2->second;
+        }
+    }
+
+    return VK_NULL_HANDLE;
+}
+
+void
+CacheManager::CleanUpFrameCaches()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -223,5 +288,16 @@ CacheManager::CleanUpCaches()
     CleanUpImageCache();
     CleanUpDeviceMemoryCache();
     CleanUpTextureCache();
-    CleanUpVkPipelineObjectCache();
 }
+
+void
+CacheManager::CleanUpCaches()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    CleanUpFrameCaches();
+    CleanUpSampleCache();
+    CleanUpRenderPassCache();
+    CleanUpPipelineCache();
+}
+

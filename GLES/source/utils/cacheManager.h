@@ -44,20 +44,27 @@ private:
     std::vector<UniformBufferObject *>  mUBOCache;
     std::vector<BufferObject *>         mVBOCache;
     std::vector<Texture *>              mTextureCache;
-    std::vector<VkPipeline>             mVkPipelineObjectCache;
     std::vector<VkImageView>            mVkImageViewCache;
     std::vector<VkImage>                mVkImageCache;
     std::vector<VkDeviceMemory>         mVkDeviceMemoryCache;
 
     std::map<uint64_t, VkSampler>       mVkSamplerCache;
+    std::map<uint64_t, VkRenderPass>    mVkRenderPassCache;
+
+    typedef std::map<uint64_t, VkPipeline> PipelineHashMap;
+    typedef std::map<VkPipelineCache, PipelineHashMap> PipelineMap;
+    PipelineMap                         mVkPipelineCache;
 
     void                                CleanUpUBOCache();
     void                                CleanUpVBOCache();
     void                                CleanUpTextureCache();
-    void                                CleanUpVkPipelineObjectCache();
     void                                CleanUpImageViewCache();
     void                                CleanUpImageCache();
     void                                CleanUpDeviceMemoryCache();
+
+    void                                CleanUpSampleCache();
+    void                                CleanUpRenderPassCache();
+    void                                CleanUpPipelineCache();
 
 public:
      CacheManager(const vulkanAPI::vkContext_t *vkContext) : mVkContext(vkContext) { }
@@ -66,7 +73,6 @@ public:
     void                                CacheUBO(UniformBufferObject *uniformBufferObject);
     void                                CacheVBO(BufferObject *vbo);
     void                                CacheTexture(Texture *tex);
-    void                                CacheVkPipelineObject(VkPipeline pipeline);
     void                                CacheVkImageView(VkImageView imageView);
     void                                CacheVkImage(VkImage image);
     void                                CacheDeviceMemory(VkDeviceMemory deviceMemory);
@@ -74,6 +80,13 @@ public:
     void                                CacheSampler(uint64_t hash, VkSampler sampler);
     VkSampler                           GetSampler(uint64_t hash);
 
+    void                                CacheRenderPass(uint64_t hash, VkRenderPass renderPass);
+    VkRenderPass                        GetRenderPass(uint64_t hash);
+
+    void                                CachePipeline(VkPipelineCache pipelineCache, uint64_t hash, VkPipeline pipeline);
+    VkPipeline                          GetPipeline(VkPipelineCache pipelineCache, uint64_t hash);
+
+    void                                CleanUpFrameCaches();
     void                                CleanUpCaches();
 };
 

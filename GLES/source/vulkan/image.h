@@ -72,7 +72,7 @@ private:
 
 public:
 // Constructor
-    Image(const vkContext_t *vkContext = nullptr, CacheManager *cacheManager = nullptr);
+    Image(const vkContext_t *vkContext = nullptr);
 
 // Destructor
     ~Image();

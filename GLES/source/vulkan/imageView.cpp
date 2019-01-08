@@ -35,8 +35,8 @@
 
 namespace vulkanAPI {
 
-ImageView::ImageView(const vkContext_t *vkContext, CacheManager *cacheManager)
-: mVkContext(vkContext), mVkImageView(VK_NULL_HANDLE), mCacheManager(cacheManager)
+ImageView::ImageView(const vkContext_t *vkContext)
+: mVkContext(vkContext), mVkImageView(VK_NULL_HANDLE), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }

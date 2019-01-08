@@ -26,6 +26,8 @@
 
 #include "context.h"
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class RenderPass {
@@ -50,6 +52,9 @@ private:
     VkBool32                mStencilWriteEnabled;
 
     VkBool32                mStarted;
+
+    uint64_t                mHash;
+    CacheManager *          mCacheManager;
 
 public:
 
@@ -81,6 +86,7 @@ public:
 
 // Set Functions
     inline void             SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext           = vkContext; }
+    inline void             SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mCacheManager        = cacheManager; }
     inline void             SetColorClearEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mColorClearEnabled   = enable;    }
     inline void             SetDepthClearEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mDepthClearEnabled   = enable;    }
     inline void             SetStencilClearEnabled(VkBool32 enable)             { FUN_ENTRY(GL_LOG_TRACE); mStencilClearEnabled = enable;    }

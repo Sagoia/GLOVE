@@ -41,6 +41,7 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
             fbo->SetVkContext(mVkContext);
             fbo->SetCommandBufferManager(mCommandBufferManager);
             fbo->SetResources(mResourceManager->GetTextureArray(), mResourceManager->GetRenderbufferArray());
+            fbo->SetCacheManager(mCacheManager);
         }
     }
 

@@ -95,7 +95,7 @@ private:
     void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr, CacheManager *cacheManager = nullptr,
+    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
             const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     ~Texture();
 

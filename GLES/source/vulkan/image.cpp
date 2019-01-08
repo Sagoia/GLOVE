@@ -34,14 +34,14 @@
 
 namespace vulkanAPI {
 
-Image::Image(const vkContext_t *vkContext, CacheManager *cacheManager)
+Image::Image(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkImage(VK_NULL_HANDLE), mVkFormat(VK_FORMAT_UNDEFINED), mVkImageType(VK_IMAGE_TYPE_2D),
 mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED),
 mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),
 mVkSampleCount(VK_SAMPLE_COUNT_1_BIT), mVkSharingMode(VK_SHARING_MODE_EXCLUSIVE),
 mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true),
 mCopyStencil(false),
-mCacheManager(cacheManager)
+mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }

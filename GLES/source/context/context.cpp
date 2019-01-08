@@ -168,6 +168,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     VkImage *vkImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
 
     Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
+    fbo->SetCacheManager(mCacheManager);
 
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext, mCommandBufferManager);
