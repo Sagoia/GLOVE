@@ -88,6 +88,14 @@ BufferObject::UpdateData(size_t size, size_t offset, const void *data)
 }
 
 void
+BufferObject::FlushData()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mMemory->FlushData();
+}
+
+void
 BufferObject::SetTarget(GLenum target)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

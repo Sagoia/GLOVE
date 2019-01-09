@@ -41,7 +41,11 @@ private:
     const
     vulkanAPI::vkContext_t *            mVkContext;
 
-    std::vector<UniformBufferObject *>  mUBOCache;
+    typedef std::vector<UniformBufferObject *> UBOList;
+    typedef std::map<VkDeviceSize, UBOList> UBOMap;
+    UBOList                             mUBOCache;
+    UBOMap                              mUBOs;
+
     std::vector<BufferObject *>         mVBOCache;
     std::vector<Texture *>              mTextureCache;
     std::vector<VkImageView>            mVkImageViewCache;
@@ -55,7 +59,9 @@ private:
     typedef std::map<VkPipelineCache, PipelineHashMap> PipelineMap;
     PipelineMap                         mVkPipelineCache;
 
-    void                                CleanUpUBOCache();
+    void                                UncacheUBOs();
+    void                                CleanUpUBOs();
+
     void                                CleanUpVBOCache();
     void                                CleanUpTextureCache();
     void                                CleanUpImageViewCache();
@@ -71,6 +77,8 @@ public:
     ~CacheManager() { }
 
     void                                CacheUBO(UniformBufferObject *uniformBufferObject);
+    UniformBufferObject *               GetUBO(VkDeviceSize size);
+
     void                                CacheVBO(BufferObject *vbo);
     void                                CacheTexture(Texture *tex);
     void                                CacheVkImageView(VkImageView imageView);

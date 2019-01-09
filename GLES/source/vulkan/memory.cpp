@@ -44,6 +44,10 @@ Memory::~Memory()
     FUN_ENTRY(GL_LOG_TRACE);
 
     Release();
+
+    if (mSrcData) {
+        delete[] mSrcData;
+    }
 }
 
 void
@@ -54,9 +58,6 @@ Memory::Release(void)
     if (mFromAlloctor) {
         if (mMemoryBlock.vkMemory != VK_NULL_HANDLE) {
             mVkContext->memoryAllocator->Deallocate(mMemoryBlock);
-        }
-        if (mSrcData) {
-            delete [] mSrcData;
         }
         return;
     }
@@ -81,7 +82,7 @@ Memory::GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const
             return false;
         }
 
-        memcpy(data, mSrcData, size);
+        memcpy(data, mSrcData + offset, size);
         return true;
     }
 
@@ -112,25 +113,24 @@ Memory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkDeviceMemory vkMemory = mVkMemory;
     if (mFromAlloctor) {
-        vkMemory = mMemoryBlock.vkMemory;
-        offset += mMemoryBlock.offset;
 
-        if (mSrcData) {
-            delete [] mSrcData;
+        if (mSrcData == nullptr) {
+            return false;
         }
-        mSrcData = new uint8_t[size];
+
         if (data) {
-            memcpy(mSrcData, data, size);
+            memcpy(mSrcData + offset, data, size);
         } else {
-            memset(mSrcData, 0x0, size);
+            memset(mSrcData + offset, 0x0, size);
         }
+
+        return true;
     }
 
     void *pData = nullptr;
 
-    VkResult err = vkMapMemory(mVkContext->vkDevice, vkMemory, offset, size ? size : mVkRequirements.size, mVkMemoryFlags, &pData);
+    VkResult err = vkMapMemory(mVkContext->vkDevice, mVkMemory, offset, size ? size : mVkRequirements.size, mVkMemoryFlags, &pData);
     assert(!err);
 
     if(data) {
@@ -139,9 +139,29 @@ Memory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
         memset(pData, 0x0, size);
     }
 
-    vkUnmapMemory(mVkContext->vkDevice, vkMemory);
+    vkUnmapMemory(mVkContext->vkDevice, mVkMemory);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
+}
+
+bool
+Memory::FlushData()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (mFromAlloctor) {
+        void *pData = nullptr;
+        VkResult err = vkMapMemory(mVkContext->vkDevice, mMemoryBlock.vkMemory, mMemoryBlock.offset, mVkRequirements.size, mVkMemoryFlags, &pData);
+        assert(!err);
+
+        memcpy(pData, mSrcData, mVkRequirements.size);
+
+        vkUnmapMemory(mVkContext->vkDevice, mMemoryBlock.vkMemory);
+
+        return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
+    }
+
+    return false;
 }
 
 bool
@@ -242,6 +262,10 @@ Memory::Create()
     VkResult err;
     err = GetMemoryTypeIndexFromProperties(&allocInfo.memoryTypeIndex);
     assert(!err);
+
+    if (mSrcData == nullptr) {
+        mSrcData = new uint8_t[mVkRequirements.size];
+    }
 
     if (mFromAlloctor) {
         mVkContext->memoryAllocator->Allocate(mVkRequirements.size, mVkRequirements.alignment, allocInfo.memoryTypeIndex, mMemoryBlock);

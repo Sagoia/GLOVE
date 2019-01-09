@@ -26,19 +26,35 @@
 #include "resources/texture.h"
 
 void
-CacheManager::CleanUpUBOCache(void)
+CacheManager::UncacheUBOs()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!mUBOCache.empty()) {
-        for(uint32_t i = 0; i < mUBOCache.size(); ++i) {
-            if(mUBOCache[i] != nullptr) {
-                delete mUBOCache[i];
-                mUBOCache[i] = nullptr;
-            }
+    if (!mUBOCache.empty()) {
+        for (auto ubo : mUBOCache) {
+            VkDeviceSize size = ubo->GetSize();
+            mUBOs[size].push_back(ubo);
         }
 
         mUBOCache.clear();
+    }
+}
+
+void
+CacheManager::CleanUpUBOs()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mUBOs.empty()) {
+        for (auto uboListPair : mUBOs) {
+            for (auto ubo : uboListPair.second) {
+                if (ubo != nullptr) {
+                    delete ubo;
+                }
+            }
+            uboListPair.second.clear();
+        }
+        mUBOs.clear();
     }
 }
 
@@ -85,9 +101,9 @@ CacheManager::CleanUpImageViewCache()
         for (auto imageView : mVkImageViewCache) {
             vkDestroyImageView(mVkContext->vkDevice, imageView, nullptr);
         }
-    }
 
-    mVkImageViewCache.clear();
+        mVkImageViewCache.clear();
+    }
 }
 
 void
@@ -99,9 +115,9 @@ CacheManager::CleanUpImageCache()
         for (auto image : mVkImageCache) {
             vkDestroyImage(mVkContext->vkDevice, image, nullptr);
         }
-    }
 
-    mVkImageCache.clear();
+        mVkImageCache.clear();
+    }
 }
 
 void
@@ -113,9 +129,9 @@ CacheManager::CleanUpDeviceMemoryCache()
         for (auto deviceMemory : mVkDeviceMemoryCache) {
             vkFreeMemory(mVkContext->vkDevice, deviceMemory, nullptr);
         }
-    }
 
-    mVkDeviceMemoryCache.clear();
+        mVkDeviceMemoryCache.clear();
+    }
 }
 
 void
@@ -127,9 +143,9 @@ CacheManager::CleanUpSampleCache()
         for (auto sampler : mVkSamplerCache) {
             vkDestroySampler(mVkContext->vkDevice, sampler.second, nullptr);
         }
-    }
 
-    mVkSamplerCache.clear();
+        mVkSamplerCache.clear();
+    }
 }
 
 void
@@ -141,9 +157,9 @@ CacheManager::CleanUpRenderPassCache()
         for (auto renderPass : mVkRenderPassCache) {
             vkDestroyRenderPass(mVkContext->vkDevice, renderPass.second, nullptr);
         }
-    }
 
-    mVkRenderPassCache.clear();
+        mVkRenderPassCache.clear();
+    }
 }
 
 void
@@ -158,9 +174,9 @@ CacheManager::CleanUpPipelineCache()
             }
             pipelineMap.second.clear();
         }
-    }
 
-    mVkRenderPassCache.clear();
+        mVkRenderPassCache.clear();
+    }
 }
 
 void
@@ -169,6 +185,24 @@ CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
     FUN_ENTRY(GL_LOG_TRACE);
 
     mUBOCache.push_back(uniformBufferObject);
+}
+
+UniformBufferObject * 
+CacheManager::GetUBO(VkDeviceSize size)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    UniformBufferObject *ubo = nullptr;
+
+    UBOMap::iterator it = mUBOs.find(size);
+    if (it != mUBOs.end()) {
+        if (it->second.size() > 0) {
+            ubo = it->second.back();
+            it->second.pop_back();
+        }
+    }
+
+    return ubo;
 }
 
 void
@@ -282,7 +316,8 @@ CacheManager::CleanUpFrameCaches()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    CleanUpUBOCache();
+    UncacheUBOs();
+
     CleanUpVBOCache();
     CleanUpImageViewCache();
     CleanUpImageCache();
@@ -296,6 +331,7 @@ CacheManager::CleanUpCaches()
     FUN_ENTRY(GL_LOG_TRACE);
 
     CleanUpFrameCaches();
+    CleanUpUBOs();
     CleanUpSampleCache();
     CleanUpRenderPassCache();
     CleanUpPipelineCache();

@@ -59,6 +59,7 @@ public:
 
 // Update Functions
     void                    UpdateData(size_t size, size_t offset, const void *data);
+    void                    FlushData();
 
 // Get Functions
     bool                    GetData(size_t size,

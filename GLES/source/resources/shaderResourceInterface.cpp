@@ -197,24 +197,34 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
             }
         }
 
+        bool flushData = false;
+
         if(blockDataDirty) {
+            flushData = true;
 
             size_t   srcsize = 0;
             uint8_t *srcData = nullptr;
 
-            if(itBlock->second.pBufferObject) {
-                mCacheManager->CacheUBO(itBlock->second.pBufferObject);
+            UniformBufferObject *bufferObject = itBlock->second.pBufferObject;
+            if(bufferObject) {
+                mCacheManager->CacheUBO(bufferObject);
 
                 // memcopy data
-                srcsize = itBlock->second.pBufferObject->GetSize();
+                srcsize = bufferObject->GetSize();
                 srcData = new uint8_t[srcsize];
-                itBlock->second.pBufferObject->GetData(srcsize, 0, srcData);
+                bufferObject->GetData(srcsize, 0, srcData);
 
                 *allocatedNewBufferObject = true;
             }
 
-            itBlock->second.pBufferObject = new UniformBufferObject(vkContext);
-            itBlock->second.pBufferObject->Allocate(uniBlock.blockSize, srcData);
+            bufferObject = mCacheManager->GetUBO(uniBlock.blockSize);
+            if (bufferObject) {
+                bufferObject->UpdateData(srcsize, 0, srcData);
+            } else {
+                bufferObject = new UniformBufferObject(vkContext);
+                bufferObject->Allocate(uniBlock.blockSize, srcData);
+            }
+            itBlock->second.pBufferObject = bufferObject;
 
             if(srcsize) {
                 delete[] srcData;
@@ -222,7 +232,12 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
         }
 
         for (auto &u : uniformInterfaceDirty) {
+            flushData = true;
             itBlock->second.pBufferObject->UpdateData(u.size, u.offset, u.data);
+        }
+
+        if (flushData) {
+            itBlock->second.pBufferObject->FlushData();
         }
 
         ++blockIndex;

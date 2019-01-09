@@ -78,6 +78,7 @@ public:
 // Set/Update Functions
     bool                              SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
     void                              UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
+    bool                              FlushData();
 
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
 
