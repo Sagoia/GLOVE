@@ -48,6 +48,7 @@ private:
 
     bool                              mFromAlloctor;
     MemoryBlock                       mMemoryBlock;
+    uint8_t *                         mSrcData;
 
     CacheManager *                    mCacheManager;
 

@@ -34,7 +34,7 @@
 namespace vulkanAPI {
 
 Memory::Memory(const vkContext_t *vkContext, VkFlags flags)
-: mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags), mFromAlloctor(false), mCacheManager(nullptr)
+: mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags), mFromAlloctor(false), mSrcData(nullptr), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -55,6 +55,9 @@ Memory::Release(void)
         if (mMemoryBlock.vkMemory != VK_NULL_HANDLE) {
             mVkContext->memoryAllocator->Deallocate(mMemoryBlock);
         }
+        if (mSrcData) {
+            delete [] mSrcData;
+        }
         return;
     }
 
@@ -73,20 +76,23 @@ Memory::GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkDeviceMemory vkMemory = mVkMemory;
     if (mFromAlloctor) {
-        vkMemory = mMemoryBlock.vkMemory;
-        offset += mMemoryBlock.offset;
+        if (!mSrcData) {
+            return false;
+        }
+
+        memcpy(data, mSrcData, size);
+        return true;
     }
 
     void *pData;
-    VkResult err = vkMapMemory(mVkContext->vkDevice, vkMemory, offset, size, mVkMemoryFlags, &pData);
+    VkResult err = vkMapMemory(mVkContext->vkDevice, mVkMemory, offset, size, mVkMemoryFlags, &pData);
     assert(!err);
 
     if(err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_MEMORY_MAP_FAILED)
     {
         memcpy(data, pData, size);
-        vkUnmapMemory(mVkContext->vkDevice, vkMemory);
+        vkUnmapMemory(mVkContext->vkDevice, mVkMemory);
 
         return true;
     }
@@ -110,6 +116,16 @@ Memory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
     if (mFromAlloctor) {
         vkMemory = mMemoryBlock.vkMemory;
         offset += mMemoryBlock.offset;
+
+        if (mSrcData) {
+            delete [] mSrcData;
+        }
+        mSrcData = new uint8_t[size];
+        if (data) {
+            memcpy(mSrcData, data, size);
+        } else {
+            memset(mSrcData, 0x0, size);
+        }
     }
 
     void *pData = nullptr;
