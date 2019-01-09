@@ -28,6 +28,7 @@
  */
 
 #include "context.h"
+#include "memoryAllocator.h"
 #include "cbManager.h"
 
 namespace vulkanAPI {
@@ -94,7 +95,7 @@ bool CreateVkDevice(void);
 bool CreateVkCommandPool(void);
 bool CreateVkSemaphores(void);
 void InitVkQueue(void);
-
+void CreateMemoryAllocator(void);
 #ifdef ENABLE_VK_DEBUG_REPORTER
 bool CreateVkDebugReporter(void);
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data);
@@ -440,6 +441,14 @@ InitVkQueue(void)
                      &GloveVkContext.vkQueue);
 }
 
+void
+CreateMemoryAllocator(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    GloveVkContext.memoryAllocator = new MemoryAllocator(GloveVkContext.vkDevice);
+}
+
 vkContext_t *
 GetContext()
 {
@@ -460,6 +469,7 @@ ResetContextResources()
     GloveVkContext.vkGraphicsQueueNodeIndex     = 0;
     GloveVkContext.vkDevice                     = VK_NULL_HANDLE;
     GloveVkContext.vkSyncItems                  = nullptr;
+    GloveVkContext.memoryAllocator              = nullptr;
     GloveVkContext.mIsMaintenanceExtSupported   = false;
     GloveVkContext.mInitialized                 = false;
     memset(static_cast<void*>(&GloveVkContext.vkDeviceMemoryProperties), 0,
@@ -490,6 +500,8 @@ InitContext()
 
     InitVkQueue();
 
+    CreateMemoryAllocator();
+
     GloveVkContext.mInitialized = true;
 
     return GloveVkContext.mInitialized;
@@ -502,6 +514,11 @@ TerminateContext()
 
     if(!GloveVkContext.mInitialized) {
         return;
+    }
+
+    if (GloveVkContext.memoryAllocator != nullptr) {
+        delete GloveVkContext.memoryAllocator;
+        GloveVkContext.memoryAllocator = nullptr;
     }
 
     if(GloveVkContext.vkSyncItems->vkAcquireSemaphore != VK_NULL_HANDLE) {

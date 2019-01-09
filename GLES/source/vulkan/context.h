@@ -38,6 +38,8 @@ using namespace std;
 
 namespace vulkanAPI {
 
+    class MemoryAllocator;
+
     typedef struct vkContext_t {
         vkContext_t() {
             vkInstance            = VK_NULL_HANDLE;
@@ -46,6 +48,7 @@ namespace vulkanAPI {
             vkGraphicsQueueNodeIndex = 0;
             vkDevice = VK_NULL_HANDLE;
             vkSyncItems             = nullptr;
+            memoryAllocator         = nullptr;
             mIsMaintenanceExtSupported = false;
             mInitialized            = false;
             memset(static_cast<void*>(&vkDeviceMemoryProperties), 0,
@@ -62,6 +65,7 @@ namespace vulkanAPI {
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
         vkSyncItems_t                                       *vkSyncItems;
+        MemoryAllocator                                     *memoryAllocator;
         bool                                                mIsMaintenanceExtSupported;
         bool                                                mInitialized;
     } vkContext_t;

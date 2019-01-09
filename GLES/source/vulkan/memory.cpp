@@ -34,7 +34,7 @@
 namespace vulkanAPI {
 
 Memory::Memory(const vkContext_t *vkContext, VkFlags flags)
-: mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags), mCacheManager(nullptr)
+: mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags), mFromAlloctor(false), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -51,6 +51,13 @@ Memory::Release(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if (mFromAlloctor) {
+        if (mMemoryBlock.vkMemory != VK_NULL_HANDLE) {
+            mVkContext->memoryAllocator->Deallocate(mMemoryBlock);
+        }
+        return;
+    }
+
     if(mVkMemory != VK_NULL_HANDLE) {
         if (mCacheManager) {
             mCacheManager->CacheDeviceMemory(mVkMemory);
@@ -66,14 +73,20 @@ Memory::GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    VkDeviceMemory vkMemory = mVkMemory;
+    if (mFromAlloctor) {
+        vkMemory = mMemoryBlock.vkMemory;
+        offset += mMemoryBlock.offset;
+    }
+
     void *pData;
-    VkResult err = vkMapMemory(mVkContext->vkDevice, mVkMemory, offset, size, mVkMemoryFlags, &pData);
+    VkResult err = vkMapMemory(mVkContext->vkDevice, vkMemory, offset, size, mVkMemoryFlags, &pData);
     assert(!err);
 
     if(err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_MEMORY_MAP_FAILED)
     {
         memcpy(data, pData, size);
-        vkUnmapMemory(mVkContext->vkDevice, mVkMemory);
+        vkUnmapMemory(mVkContext->vkDevice, vkMemory);
 
         return true;
     }
@@ -93,9 +106,15 @@ Memory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    VkDeviceMemory vkMemory = mVkMemory;
+    if (mFromAlloctor) {
+        vkMemory = mMemoryBlock.vkMemory;
+        offset += mMemoryBlock.offset;
+    }
+
     void *pData = nullptr;
 
-    VkResult err = vkMapMemory(mVkContext->vkDevice, mVkMemory, offset, size ? size : mVkRequirements.size, mVkMemoryFlags, &pData);
+    VkResult err = vkMapMemory(mVkContext->vkDevice, vkMemory, offset, size ? size : mVkRequirements.size, mVkMemoryFlags, &pData);
     assert(!err);
 
     if(data) {
@@ -104,7 +123,7 @@ Memory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
         memset(pData, 0x0, size);
     }
 
-    vkUnmapMemory(mVkContext->vkDevice, mVkMemory);
+    vkUnmapMemory(mVkContext->vkDevice, vkMemory);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
 }
@@ -171,7 +190,12 @@ Memory::BindBufferMemory(VkBuffer &buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkBindBufferMemory(mVkContext->vkDevice, buffer, mVkMemory, 0);
+    VkResult err = VK_SUCCESS;
+    if (mFromAlloctor) {
+        err = vkBindBufferMemory(mVkContext->vkDevice, buffer, mMemoryBlock.vkMemory, mMemoryBlock.offset);
+    } else {
+        err = vkBindBufferMemory(mVkContext->vkDevice, buffer, mVkMemory, 0);
+    }
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
@@ -202,8 +226,13 @@ Memory::Create()
     VkResult err;
     err = GetMemoryTypeIndexFromProperties(&allocInfo.memoryTypeIndex);
     assert(!err);
-    err = vkAllocateMemory(mVkContext->vkDevice, &allocInfo, nullptr, &mVkMemory);
-    assert(!err);
+
+    if (mFromAlloctor) {
+        mVkContext->memoryAllocator->Allocate(mVkRequirements.size, mVkRequirements.alignment, allocInfo.memoryTypeIndex, mMemoryBlock);
+    } else {
+        err = vkAllocateMemory(mVkContext->vkDevice, &allocInfo, nullptr, &mVkMemory);
+        assert(!err);
+    }
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_TOO_MANY_OBJECTS);
 }

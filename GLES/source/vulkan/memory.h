@@ -27,6 +27,7 @@
 #include <cmath>
 #include "utils.h"
 #include "context.h"
+#include "memoryAllocator.h"
 
 class CacheManager;
 
@@ -44,6 +45,9 @@ private:
     VkMemoryMapFlags                  mVkMemoryFlags;
     VkFlags                           mVkFlags;
     VkMemoryRequirements              mVkRequirements;
+
+    bool                              mFromAlloctor;
+    MemoryBlock                       mMemoryBlock;
 
     CacheManager *                    mCacheManager;
 
@@ -75,6 +79,8 @@ public:
     void                              UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
 
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+
+    inline void                       SetFromAllocator(bool fromAllocator)      { FUN_ENTRY(GL_LOG_TRACE); mFromAlloctor = fromAllocator; }
 
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };

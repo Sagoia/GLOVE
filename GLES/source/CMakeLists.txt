@@ -63,6 +63,7 @@ set(SOURCES
     vulkan/renderPass.cpp
     vulkan/buffer.cpp
     vulkan/memory.cpp
+    vulkan/memoryAllocator.cpp
     vulkan/sampler.cpp
     vulkan/image.cpp
     vulkan/imageView.cpp
@@ -124,6 +125,7 @@ set(HEADERS
     vulkan/renderPass.h
     vulkan/buffer.h
     vulkan/memory.h
+    vulkan/memoryAllocator.h
     vulkan/sampler.h
     vulkan/image.h
     vulkan/imageView.h
