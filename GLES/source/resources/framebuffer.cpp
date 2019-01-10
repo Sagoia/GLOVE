@@ -414,16 +414,13 @@ Framebuffer::CacheAttachement(Texture *bTexture, GLuint index)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(index == GetColorAttachmentName() && GL_TEXTURE == GetColorAttachmentType()) {
-        assert(!mCacheColorTexture);
+    if(index == GetColorAttachmentName() && GL_TEXTURE == GetColorAttachmentType() && !mCacheColorTexture) {
         mCacheColorTexture = bTexture;
     }
-    if(index == GetDepthAttachmentName() && GL_TEXTURE == GetDepthAttachmentType()) {
-        assert(!mCacheDepthTexture);
+    if(index == GetDepthAttachmentName() && GL_TEXTURE == GetDepthAttachmentType() && !mCacheDepthTexture) {
         mCacheDepthTexture = bTexture;
     }
-    if(index == GetStencilAttachmentName() && GL_TEXTURE == GetStencilAttachmentType()) {
-        assert(!mCacheStencilTexture);
+    if(index == GetStencilAttachmentName() && GL_TEXTURE == GetStencilAttachmentType() && !mCacheStencilTexture) {
         mCacheStencilTexture = bTexture;
     }
 }
@@ -433,18 +430,15 @@ Framebuffer::CacheAttachement(Renderbuffer *bRenderbuffer, GLuint index)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(index == GetColorAttachmentName() && GL_RENDERBUFFER == GetColorAttachmentType()) {
-        assert(!mCacheColorRenderbuffer);
+    if(index == GetColorAttachmentName() && GL_RENDERBUFFER == GetColorAttachmentType() && !mCacheColorRenderbuffer) {
         mCacheColorRenderbuffer = bRenderbuffer;
     }
 
-    if(index == GetColorAttachmentName() && GL_RENDERBUFFER == GetColorAttachmentType()) {
-        assert(!mCacheDepthRenderbuffer);
+    if(index == GetDepthAttachmentName() && GL_RENDERBUFFER == GetDepthAttachmentType() && !mCacheDepthRenderbuffer) {
         mCacheDepthRenderbuffer = bRenderbuffer;
     }
 
-    if(index == GetColorAttachmentName() && GL_RENDERBUFFER == GetColorAttachmentType()) {
-        assert(!mCacheStencilRenderbuffer);
+    if(index == GetStencilAttachmentName() && GL_RENDERBUFFER == GetStencilAttachmentType() && !mCacheStencilRenderbuffer) {
         mCacheStencilRenderbuffer = bRenderbuffer;
     }
 }
