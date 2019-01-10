@@ -35,7 +35,7 @@ namespace vulkanAPI {
 
 class Memory {
 
-private:
+protected:
 
     const
     vkContext_t *                     mVkContext;
@@ -46,10 +46,6 @@ private:
     VkFlags                           mVkFlags;
     VkMemoryRequirements              mVkRequirements;
 
-    bool                              mFromAlloctor;
-    MemoryBlock                       mMemoryBlock;
-    uint8_t *                         mSrcData;
-
     CacheManager *                    mCacheManager;
 
 public:
@@ -57,34 +53,65 @@ public:
     Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
 
 // Destructor
-    ~Memory();
+    virtual ~Memory();
 
 // Allocate Functions
-    bool                              Create(void);
+    virtual bool                      Create(void);
 
 // Release Functions
-    void                              Release(void);
+    virtual void                      Release(void);
 
 // Bind Functions
-    bool                              BindBufferMemory(VkBuffer &buffer);
-    bool                              BindImageMemory(VkImage &image);
+    virtual bool                      BindBufferMemory(VkBuffer &buffer);
+    virtual bool                      BindImageMemory(VkImage &image);
 
 // Get Functions
+    VkFlags                           GetFlags(void)                            { FUN_ENTRY(GL_LOG_DEBUG); return mVkFlags; }
     void                              GetImageMemoryRequirements(VkImage &image);
     bool                              GetBufferMemoryRequirements(VkBuffer &buffer);
-    bool                              GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
     VkResult                          GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
+    virtual bool                      GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
 
 // Set/Update Functions
-    bool                              SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
-    void                              UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
-    bool                              FlushData();
+    virtual bool                      SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
+    virtual void                      UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
+    virtual bool                      FlushData(void)                           { FUN_ENTRY(GL_LOG_DEBUG); return true; }
 
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
 
-    inline void                       SetFromAllocator(bool fromAllocator)      { FUN_ENTRY(GL_LOG_TRACE); mFromAlloctor = fromAllocator; }
-
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
+};
+
+class SmallMemory : public Memory {
+
+private:
+
+    MemoryBlock                       mMemoryBlock;
+    uint8_t *                         mSrcData;
+
+public:
+// Constructor
+    SmallMemory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
+
+// Destructor
+    virtual ~SmallMemory();
+
+// Allocate Functions
+    virtual bool                      Create(void);
+
+// Release Functions
+    virtual void                      Release(void);
+
+// Bind Functions
+    virtual bool                      BindBufferMemory(VkBuffer &buffer);
+
+// Get Functions
+    virtual bool                      GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
+
+// Set/Update Functions
+    virtual bool                      SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
+    virtual bool                      FlushData(void);
+
 };
 
 }

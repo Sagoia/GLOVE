@@ -31,8 +31,13 @@ MemoryAllocator::CreateChunk(VkDeviceSize size, uint32_t memoryTypeIndex)
     VkResult err = vkAllocateMemory(mVkDevice, &allocInfo, nullptr, &(chunk->vkMemory));
     assert(!err);
 
-    for (uint32_t i = 0; i < BLOCK_COUNT; ++i) {
-        chunk->freeBlocks.push(i * size);
+    if (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_TOO_MANY_OBJECTS) {
+        for (uint32_t i = 0; i < BLOCK_COUNT; ++i) {
+            chunk->freeBlocks.push(i * size);
+        }
+    } else {
+        delete chunk;
+        chunk = nullptr;
     }
 
     return chunk;
@@ -91,6 +96,7 @@ MemoryAllocator::Allocate(VkDeviceSize size, VkDeviceSize alignment, uint32_t me
     }
 
     block.chunkId = chunkId;
+    block.vkMemory = VK_NULL_HANDLE;
     for (auto chunk : chunkList->chunks) {
         if (chunk->freeBlocks.size() > 0) {
             FillBlock(block, *chunk);
@@ -100,8 +106,10 @@ MemoryAllocator::Allocate(VkDeviceSize size, VkDeviceSize alignment, uint32_t me
 
     if (block.vkMemory == VK_NULL_HANDLE) {
         Chunk *chunk = CreateChunk(size, memoryTypeIndex);
-        chunkList->chunks.push_back(chunk);
-        FillBlock(block, *chunk);
+        if (chunk) {
+            chunkList->chunks.push_back(chunk);
+            FillBlock(block, *chunk);
+        }
     }
 }
 

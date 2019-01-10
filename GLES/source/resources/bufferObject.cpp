@@ -122,6 +122,16 @@ BufferObject::SetTarget(GLenum target)
     mTarget = target;
 }
 
+UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext)
+: BufferObject(vkContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) 
+{ 
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    vulkanAPI::SmallMemory *memory = new vulkanAPI::SmallMemory(vkContext, mMemory->GetFlags());
+    delete mMemory;
+    mMemory = memory;
+}
+
 bool
 UniformBufferObject::Allocate(size_t size, const void *data)
 {
