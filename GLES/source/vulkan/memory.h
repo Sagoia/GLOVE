@@ -82,7 +82,7 @@ public:
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };
 
-class SmallMemory : public Memory {
+class UniformMemory : public Memory {
 
 private:
 
@@ -91,10 +91,10 @@ private:
 
 public:
 // Constructor
-    SmallMemory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
+    UniformMemory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
 
 // Destructor
-    virtual ~SmallMemory();
+    virtual ~UniformMemory();
 
 // Allocate Functions
     virtual bool                      Create(void);

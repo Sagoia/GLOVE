@@ -127,7 +127,7 @@ UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext
 { 
     FUN_ENTRY(GL_LOG_TRACE);
 
-    vulkanAPI::SmallMemory *memory = new vulkanAPI::SmallMemory(vkContext, mMemory->GetFlags());
+    vulkanAPI::UniformMemory *memory = new vulkanAPI::UniformMemory(vkContext, mMemory->GetFlags());
     delete mMemory;
     mMemory = memory;
 }

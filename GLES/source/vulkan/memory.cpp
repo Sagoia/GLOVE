@@ -208,13 +208,13 @@ Memory::BindImageMemory(VkImage &image)
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
 }
 
-SmallMemory::SmallMemory(const vkContext_t *vkContext, VkFlags flags)
+UniformMemory::UniformMemory(const vkContext_t *vkContext, VkFlags flags)
 : Memory(vkContext, flags), mSrcData(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
 
-SmallMemory::~SmallMemory()
+UniformMemory::~UniformMemory()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -224,7 +224,7 @@ SmallMemory::~SmallMemory()
 }
 
 bool
-SmallMemory::Create()
+UniformMemory::Create()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -249,7 +249,7 @@ SmallMemory::Create()
 }
 
 void
-SmallMemory::Release(void)
+UniformMemory::Release(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -259,7 +259,7 @@ SmallMemory::Release(void)
 }
 
 bool
-SmallMemory::BindBufferMemory(VkBuffer &buffer)
+UniformMemory::BindBufferMemory(VkBuffer &buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -270,7 +270,7 @@ SmallMemory::BindBufferMemory(VkBuffer &buffer)
 }
 
 bool
-SmallMemory::GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const
+UniformMemory::GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -283,7 +283,7 @@ SmallMemory::GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const
 }
 
 bool
-SmallMemory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
+UniformMemory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -302,7 +302,7 @@ SmallMemory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
 }
 
 bool
-SmallMemory::FlushData()
+UniformMemory::FlushData()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
