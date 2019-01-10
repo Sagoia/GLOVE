@@ -1404,7 +1404,6 @@ Context::UseProgram(GLuint program)
         progPtr->Bind();
         progPtr->EnableUpdateOfDescriptorSets();
     }
-    mResourceManager->CleanPurgeList();
 }
 
 void
