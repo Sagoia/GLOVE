@@ -56,7 +56,7 @@ Context::CreateShader(GLenum type)
     Shader *shader = mResourceManager->GetShader(res);
     shader->SetShaderType(type == GL_VERTEX_SHADER ? SHADER_TYPE_VERTEX : SHADER_TYPE_FRAGMENT);
     shader->SetVkContext(mVkContext);
-    shader->SetShaderCompiler(mShaderCompiler);
+    shader->SetSlangCompiler(new GlslangCompiler());
 
 #ifdef WIN32
     return mResourceManager->PushShadingObject({ SHADER_ID, res });
@@ -345,11 +345,11 @@ Context::CreateShaderCompiler(void)
     if(mShaderCompiler == nullptr) {
         mShaderCompiler = new GlslangShaderCompiler();
 
-        ObjectArray<Shader> *shaderArray = mResourceManager->GetShaderArray();
-        for(typename map<uint32_t, Shader *>::const_iterator it =
-        shaderArray->GetObjects()->begin(); it != shaderArray->GetObjects()->end(); it++) {
-            it->second->SetShaderCompiler(mShaderCompiler);
-        }
+        //ObjectArray<Shader> *shaderArray = mResourceManager->GetShaderArray();
+        //for(typename map<uint32_t, Shader *>::const_iterator it =
+        //shaderArray->GetObjects()->begin(); it != shaderArray->GetObjects()->end(); it++) {
+        //    it->second->SetShaderCompiler(mShaderCompiler);
+        //}
 
         ObjectArray<ShaderProgram> *shaderProgramArray = mResourceManager->GetShaderProgramArray();
         for(typename map<uint32_t, ShaderProgram *>::const_iterator it =

@@ -422,12 +422,8 @@ ShaderProgram::ValidateProgram(void)
         return false;
     }
 
-    // TODO: Reset shader compiler gently
-    const char *vsSource = vs->GetShaderSource();
-    mShaderCompiler->CompileVertexShader(&vsSource);
-
-    const char *fsSource = fs->GetShaderSource();
-    mShaderCompiler->CompileFragmentShader(&fsSource);
+    mShaderCompiler->SetVertexShaderCompiler(vs->GetSlangCompiler());
+    mShaderCompiler->SetFragmentShaderCompiler(fs->GetSlangCompiler());
 
     if(GLOVE_DUMP_INPUT_SHADER_REFLECTION) {
         mShaderCompiler->EnableDumpInputShaderReflection();

@@ -143,6 +143,11 @@ Context::DetachShader(GLuint program, GLuint shader)
     progPtr->DetachShader(shaderPtr);
 
     if(!shaderPtr->GetRefCount() && shaderPtr->GetMarkForDeletion()) {
+        SlangCompiler *compiler = shaderPtr->GetSlangCompiler();
+        if (compiler) {
+            delete compiler;
+        }
+
         mResourceManager->EraseShadingObject(shader);
         mResourceManager->DeallocateShader(shaderPtr);
     }

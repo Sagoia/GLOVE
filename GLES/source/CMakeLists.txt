@@ -95,6 +95,7 @@ set(HEADERS
     resources/shaderProgram.h
     resources/shaderReflection.h
     resources/shaderResourceInterface.h
+    resources/slangCompiler.h
     resources/texture.h
     resources/rect.h
     resources/sampler.h

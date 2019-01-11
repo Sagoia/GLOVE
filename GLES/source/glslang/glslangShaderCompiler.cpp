@@ -64,16 +64,6 @@ GlslangShaderCompiler::CleanUp()
         mSlangProgLinker = nullptr;
     }
 
-    if(mSlangVertCompiler) {
-        delete mSlangVertCompiler;
-        mSlangVertCompiler = nullptr;
-    }
-
-    if(mSlangFragCompiler) {
-        delete mSlangFragCompiler;
-        mSlangFragCompiler = nullptr;
-    }
-
     delete mShaderReflection;
 }
 
@@ -84,20 +74,13 @@ GlslangShaderCompiler::CompileVertexShader(const char* const* source)
 
     assert(mSlangInitialized);
 
-    if (mSlangProgLinker) {
-        delete mSlangProgLinker;
-        mSlangProgLinker = nullptr;
-    }
-
-    if(mSlangVertCompiler) {
-        delete mSlangVertCompiler;
-    }
-
     mVertSource = string(*source);
-    mSlangVertCompiler = new GlslangCompiler();
-    assert(mSlangVertCompiler);
 
-    return mSlangVertCompiler->CompileShader(source, &slangShaderResources, EShLangVertex);
+    if (mSlangVertCompiler) {
+        return mSlangVertCompiler->CompileShader(source, EShLangVertex);
+    }
+
+    return false;
 }
 
 bool
@@ -107,20 +90,13 @@ GlslangShaderCompiler::CompileFragmentShader(const char* const* source)
 
     assert(mSlangInitialized);
 
-    if (mSlangProgLinker) {
-        delete mSlangProgLinker;
-        mSlangProgLinker = nullptr;
-    }
-
-    if(mSlangFragCompiler) {
-        delete mSlangFragCompiler;
-    }
-
     mFragSource = string(*source);
-    mSlangFragCompiler = new GlslangCompiler();
-    assert(mSlangFragCompiler);
 
-    return mSlangFragCompiler->CompileShader(source, &slangShaderResources, EShLangFragment);
+    if (mSlangFragCompiler) {
+        return mSlangFragCompiler->CompileShader(source, EShLangFragment);
+    }
+
+    return false;
 }
 
 const char*
@@ -211,16 +187,18 @@ GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYI
         SaveShaderSourceToFile(&shaderProgram, false, mFragSource.c_str(), SHADER_TYPE_FRAGMENT);
     }
 
+    mVertSource = mSlangVertCompiler->GetSource();
     mVertSource400 = string(mVertSource);
     const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
-    result = mSlangVertCompiler->CompileShader400(&source, &slangShaderResources, EShLangVertex);
+    result = mSlangVertCompiler->CompileShader400(&source, EShLangVertex);
     if(!result) {
         return false;
     }
 
+    mFragSource = mSlangFragCompiler->GetSource();
     mFragSource400 = string(mFragSource);
     source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
-    result = mSlangFragCompiler->CompileShader400(&source, &slangShaderResources, EShLangFragment);
+    result = mSlangFragCompiler->CompileShader400(&source, EShLangFragment);
     if(!result) {
         return false;
     }
@@ -361,6 +339,8 @@ GlslangShaderCompiler::InitSlangShaderResources(void)
     slangShaderResources.maxVertexTextureImageUnits    = GLOVE_MAX_VERTEX_TEXTURE_IMAGE_UNITS;
     slangShaderResources.maxTextureUnits               = GLOVE_MAX_TEXTURE_IMAGE_UNITS;
     slangShaderResources.maxCombinedTextureImageUnits  = GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS;
+
+    GlslangCompiler::SetShaderResource(&slangShaderResources);
 }
 
 void

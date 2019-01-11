@@ -153,10 +153,10 @@ ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cac
     Destroy();
     shaderCompiler = new GlslangShaderCompiler();
     vertShader = new Shader();
-    vertShader->SetShaderCompiler(shaderCompiler);
+    vertShader->SetSlangCompiler(new GlslangCompiler());
     vertShader->SetVkContext(mVkContext);
     fragShader = new Shader();
-    fragShader->SetShaderCompiler(shaderCompiler);
+    fragShader->SetSlangCompiler(new GlslangCompiler());
     fragShader->SetVkContext(mVkContext);
     shaderProgram = new ShaderProgram(mVkContext, nullptr);
     shaderProgram->SetShaderCompiler(shaderCompiler);
