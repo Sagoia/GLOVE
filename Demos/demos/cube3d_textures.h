@@ -21,7 +21,11 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "geometry3d_textures.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "geometry3d_textures.bin"
 
-static const char* diffuse_textures [] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.tga" };
+#ifdef WIN32
+static const char* diffuse_textures[] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.dds" };
+#else
+static const char* diffuse_textures [] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.tga"};
+#endif
 static const char* material_titles  [] = { "OPAQUE", "TRANSPARENT" };
 static const char* projection_titles[] = { "ORTHOGRAPHIC", "PERSPECTIVE" };
 static const char* shading_titles   [] = { "COLOR_TEXTURES"};

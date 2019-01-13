@@ -53,6 +53,7 @@ bool InitGL()
                                       NULL                   , 0 ,
                                       diffuse_textures, 2);
 
+
 // Initialize Camera
     InitCamera    (&camera);
 

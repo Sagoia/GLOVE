@@ -11,7 +11,8 @@
  * Lesser General Public License for more details.
  */
 
-#include "tgaLoader.h"
+#include "texLoader.h"
+#include <stdint.h>
 
 int LoadTGA(Texture * texture, const char *filename)
 {
@@ -260,28 +261,190 @@ int LoadCompressedTGA(Texture * texture, const char *filename, FILE * fTGA)		// 
     return 1;																						// return success
 }
 
+const uint32_t DDS_ALPHAPIXELS = 0x00000001;
+const uint32_t DDSF_FOURCC = 0x00000004;
+
+// compressed texture types
+const uint32_t FOURCC_DXT1 = 0x31545844; //(MAKEFOURCC('D','X','T','1'))
+const uint32_t FOURCC_DXT3 = 0x33545844; //(MAKEFOURCC('D','X','T','3'))
+const uint32_t FOURCC_DXT5 = 0x35545844; //(MAKEFOURCC('D','X','T','5'))
+
+typedef struct {
+    uint32_t dwSize;
+    uint32_t dwFlags;
+    uint32_t dwFourCC;
+    uint32_t dwRGBBitCount;
+    uint32_t dwRBitMask;
+    uint32_t dwGBitMask;
+    uint32_t dwBBitMask;
+    uint32_t dwABitMask;
+} DDS_PIXELFORMAT;
+
+typedef struct {
+    uint32_t dwSize;
+    uint32_t dwFlags;
+    uint32_t dwHeight;
+    uint32_t dwWidth;
+    uint32_t dwPitchOrLinearSize;
+    uint32_t dwDepth;
+    uint32_t dwMipMapCount;
+    uint32_t dwReserved1[11];
+    DDS_PIXELFORMAT ddspf;
+    uint32_t dwCaps1;
+    uint32_t dwCaps2;
+    uint32_t dwReserved2[3];
+} DDS_HEADER;
+
+int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
+{
+    DDS_HEADER ddsh;
+    char filecode[4];
+    FILE *pFile;
+    //int factor;
+    //int bufferSize;
+
+    // Open the file
+    pFile = fopen(filename, "rb");
+    if (pFile == NULL)  {
+        printf("File %s open failed!\n", filename);
+        return 0;
+    }
+
+    // Verify the file is a true .dds file
+    fread(filecode, 1, 4, pFile);
+    if (strncmp(filecode, "DDS ", 4) != 0) {
+        printf("File %s doesn't appear to be a valid .dds file!\n", filename);
+        fclose(pFile);
+        return 0;
+    }
+
+    // Get the surface descriptor
+    fread(&ddsh, sizeof(ddsh), 1, pFile);
+    memset(image, 0, sizeof(DDSImage));
+
+    //
+    // This .dds loader supports the loading of compressed formats DXT1, DXT3 
+    // and DXT5.
+    //
+
+    if (!(ddsh.ddspf.dwFlags & DDSF_FOURCC)) {
+        printf("File %s doesn't appear to be a compressed .dds file!\n", filename);
+        fclose(pFile);
+        return 0;
+    }
+
+    if (ddsh.ddspf.dwFourCC == FOURCC_DXT1) {
+        // DXT1's compression ratio is 8:1
+        if (ddsh.ddspf.dwFlags & DDS_ALPHAPIXELS) {
+            image->format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+        } else {
+            image->format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+        }
+    } else if (ddsh.ddspf.dwFourCC == FOURCC_DXT3) {
+        // DXT3's compression ratio is 4:1
+        image->format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    } else if (ddsh.ddspf.dwFourCC == FOURCC_DXT5) {
+        // DXT5's compression ratio is 4:1
+        image->format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+    } else {
+        printf("File %s load failed: unsupported dds format! \n", filename);
+        return 0;
+    }
+
+    //
+    // How big will the buffer need to be to load all of the pixel data 
+    // including mip-maps?
+    //
+
+    if (ddsh.dwPitchOrLinearSize == 0) {
+        printf("dwLinearSize is 0! \n");
+    }
+
+    uint32_t width = ddsh.dwWidth;
+    uint32_t height = ddsh.dwHeight;
+    image->pixels = (GLubyte **)malloc(ddsh.dwMipMapCount * sizeof(GLubyte *));
+    uint32_t blockSize = (image->format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || image->format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
+    for (uint32_t i = 0; i < ddsh.dwMipMapCount; ++i) {
+        uint32_t size = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
+        image->pixels[i] = (GLubyte *)malloc(size * sizeof(GLubyte));
+        fread(image->pixels[i], 1, size, pFile);
+        width = width >> 1; if (width == 0) { width = 1; }
+        height = height >> 1; if (height == 0) { height = 1; }
+    }
+
+    // Close the file
+    fclose(pFile);
+
+    image->width = ddsh.dwWidth;
+    image->height = ddsh.dwHeight;
+    image->numMipMaps = ddsh.dwMipMapCount;
+
+    if (ddsh.ddspf.dwFourCC == FOURCC_DXT1) {
+        image->components = 3;
+    } else {
+        image->components = 4;
+    }
+
+    texture->imageData = NULL;
+    texture->bpp = image->components;
+    texture->width = image->width;
+    texture->height = image->height;
+    texture->type = image->format;
+
+    return 1;
+}
+
 Texture *LoadGLTexture(const char *filename)
 {
-   Texture *texture = (Texture *)malloc(sizeof(Texture));
-   if(!LoadTGA(texture, filename)) {
+    Texture *texture = (Texture *)malloc(sizeof(Texture));
+
+    const char *prefix = filename + strlen(filename) - 3;
+    if (!strcmp(prefix, "tga") || !strcmp(prefix, "TGA")) {
+        if(LoadTGA(texture, filename)) {
+            glGenTextures   (1, &texture->texID);
+            glBindTexture   (GL_TEXTURE_2D, texture->texID);
+            glTexImage2D    (GL_TEXTURE_2D, 0, texture->type, texture->width, texture->height, 0, texture->type, GL_UNSIGNED_BYTE, texture->imageData);
+            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            ASSERT_NO_GL_ERROR();
+            free(texture->imageData);
+            texture->imageData = NULL;
+            return texture;
+        }
+    } else if (!strcmp(prefix, "dds") || !strcmp(prefix, "DDS")) {
+        DDSImage ddsImage;
+        if (LoadDDS(texture, &ddsImage, filename)) {
+            glGenTextures(1, &texture->texID);
+            glBindTexture(GL_TEXTURE_2D, texture->texID);
+
+            GLsizei width = ddsImage.width;
+            GLsizei height = ddsImage.height;
+            GLsizei blockSize = (ddsImage.format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || ddsImage.format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
+            for (int i = 0; i < ddsImage.numMipMaps; ++i) {
+                GLsizei imageSize = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
+                glCompressedTexImage2D(GL_TEXTURE_2D, i, ddsImage.format, width, height, 0, imageSize, ddsImage.pixels[i]);
+                width = width >> 1; if (width == 0) { width = 1; }
+                height = height >> 1; if (height == 0) { height = 1; }
+            }
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            ASSERT_NO_GL_ERROR();
+
+            for (int i = 0; i < ddsImage.numMipMaps; ++i) {
+                free(ddsImage.pixels[i]);
+            }
+            return texture;
+        }
+    }
+
 #ifdef DEBUG_ASSET_MANAGEMENT
-            fprintf(stderr, "[tgaLoader.c] [LoadGLTexture()]: Error loading texture %s\n", filename);
+    fprintf(stderr, "[LoadGLTexture()]: Error loading texture %s\n", filename);
 #endif
-      assert(0);
-
-            return NULL;
-   }
-
-   glGenTextures	(1, &texture->texID);
-   glBindTexture	(GL_TEXTURE_2D, texture->texID);
-   glTexImage2D		(GL_TEXTURE_2D, 0, texture->type, texture->width, texture->height, 0, texture->type, GL_UNSIGNED_BYTE, texture->imageData);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-     free(texture->imageData);
-
-     ASSERT_NO_GL_ERROR();
-
-   return texture;
+    assert(0);
+    free(texture);
+    return NULL;
 }
