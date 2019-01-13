@@ -50,6 +50,12 @@ VkFormatToGlInternalformat(VkFormat format)
     case VK_FORMAT_X8_D24_UNORM_PACK32:     return GL_DEPTH_COMPONENT24_OES;
     case VK_FORMAT_D32_SFLOAT:              return GL_DEPTH_COMPONENT32_OES;
     case VK_FORMAT_S8_UINT:                 return GL_STENCIL_INDEX8;
+
+    case VK_FORMAT_BC1_RGB_UNORM_BLOCK:     return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+    case VK_FORMAT_BC1_RGBA_UNORM_BLOCK:    return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+    case VK_FORMAT_BC2_UNORM_BLOCK:         return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    case VK_FORMAT_BC3_UNORM_BLOCK:         return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
     case VK_FORMAT_UNDEFINED:
     default: { NOT_FOUND_ENUM(format);      return GL_INVALID_VALUE; }
     }

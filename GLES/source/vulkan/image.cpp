@@ -36,7 +36,7 @@ namespace vulkanAPI {
 
 Image::Image(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkImage(VK_NULL_HANDLE), mVkFormat(VK_FORMAT_UNDEFINED), mVkImageType(VK_IMAGE_TYPE_2D),
-mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED),
+mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED), mVkPipelineStage(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT),
 mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),
 mVkSampleCount(VK_SAMPLE_COUNT_1_BIT), mVkSharingMode(VK_SHARING_MODE_EXCLUSIVE),
 mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true),
@@ -67,6 +67,9 @@ Image::Release(void)
             vkDestroyImage(mVkContext->vkDevice, mVkImage, nullptr);
         }
         mVkImage = VK_NULL_HANDLE;
+
+        mVkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        mVkPipelineStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     }
 
     mWidth      = 0;
@@ -236,9 +239,9 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     FUN_ENTRY(GL_LOG_DEBUG);
 
     VkImageLayout oldImageLayout = mVkImageLayout;
+    VkPipelineStageFlags srcStages = mVkPipelineStage;
 
     // Put barrier on top
-    VkPipelineStageFlags srcStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     VkPipelineStageFlags destStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 
     VkImageMemoryBarrier imageMemoryBarrier;
@@ -268,14 +271,12 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
             // Image is a color attachment
             // Make sure any writes to the color buffer have been finished
             imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            srcStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
             break;
 
     case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
             // Image is a depth/stencil attachment
             // Make sure any writes to the depth/stencil buffer have been finished
             imageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-            srcStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
             break;
 
     case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
@@ -288,7 +289,6 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
             // Image is a transfer destination
             // Make sure any writes to the image have been finished
             imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            srcStages = VK_PIPELINE_STAGE_TRANSFER_BIT;
             break;
 
     case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
@@ -297,6 +297,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
             imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
             break;
 
+    case VK_IMAGE_LAYOUT_GENERAL:
     case VK_IMAGE_LAYOUT_UNDEFINED:
     default:
             // Image layout is undefined (or does not matter)
@@ -320,6 +321,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
         // Image will be used as a transfer source
         // Make sure any reads from and writes to the image have been finished
         imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        destStages = VK_PIPELINE_STAGE_TRANSFER_BIT;
         break;
 
     case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
@@ -339,10 +341,11 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
         // Image will be read in a shader (sampler, input attachment)
         // Make sure any writes to the image have been finished
-        if(imageMemoryBarrier.srcAccessMask == 0) {
-            imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-        }
+        //if(imageMemoryBarrier.srcAccessMask == 0) {
+        //    imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+        //}
         imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        destStages = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         break;
 
     case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
@@ -362,6 +365,7 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
     vkCmdPipelineBarrier(*activeCmdBuffer, srcStages, destStages, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
     mVkImageLayout = newImageLayout;
+    mVkPipelineStage = destStages;
 }
 
 VkFormat
@@ -373,15 +377,17 @@ Image::FindSupportedVkColorFormat(VkFormat format)
     VkFormatProperties formatDeviceProps;
     vkGetPhysicalDeviceFormatProperties(mVkContext->vkGpus[0], format, &formatDeviceProps);
 
+    VkFlags flags = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_TRANSFER_SRC_BIT | VK_FORMAT_FEATURE_TRANSFER_DST_BIT;
+
     switch(mVkImageTiling) {
     case VK_IMAGE_TILING_OPTIMAL:
-        if(formatDeviceProps.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) {
+        if(formatDeviceProps.optimalTilingFeatures & flags) {
             return format;
         }
         break;
 
     case VK_IMAGE_TILING_LINEAR:
-        if(formatDeviceProps.linearTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) {
+        if(formatDeviceProps.linearTilingFeatures & flags) {
             return format;
         }
         break;
@@ -390,6 +396,7 @@ Image::FindSupportedVkColorFormat(VkFormat format)
         NOT_REACHED();
         break;
     }
+
     return VK_FORMAT_R8G8B8A8_UNORM;
 }
 

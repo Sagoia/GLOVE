@@ -53,6 +53,7 @@ private:
     VkImageType                       mVkImageType;
     VkImageUsageFlagBits              mVkImageUsage;
     VkImageLayout                     mVkImageLayout;
+    VkPipelineStageFlags              mVkPipelineStage;
     VkImageTiling                     mVkImageTiling;
     VkImageSubresourceRange           mVkImageSubresourceRange;
     VkImageTarget                     mVkImageTarget;

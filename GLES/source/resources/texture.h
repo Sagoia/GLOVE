@@ -44,9 +44,10 @@ class Texture {
         GLenum                     format;
         GLenum                     type;
         void                       *data;
+        GLsizei                    size;
 
         State() : width(-1), height(-1), format(GL_INVALID_VALUE), type(GL_INVALID_VALUE),
-            data(nullptr) { FUN_ENTRY(GL_LOG_TRACE); }
+            data(nullptr), size(0){ FUN_ENTRY(GL_LOG_TRACE); }
         ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
     typedef State                  State_t;
@@ -103,6 +104,7 @@ public:
     bool                    Allocate();
     void                    SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum format, GLenum type, GLint unpackAlignment, const void *pixels);
     void                    SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData);
+    void                    SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *pixels);
     void                    GenerateMipmaps(GLenum hintMipmapMode);
 
 // Init Functions
@@ -123,6 +125,7 @@ public:
 
 // Copy Functions
      void                   CopyPixelsFromHost (ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData);
+     void                   CpoyCompressedPixelFromHost(Rect *srcRect, GLint miplevel, GLint layer, GLenum format, const void *srcData, GLsizei dataSize);
      void                   CopyPixelsToHost   (ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData);
      void                   SubmitCopyPixels   (const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum dstFormat, bool copyToImage);
      void                   InvertPixels       (void);
@@ -153,7 +156,7 @@ public:
     inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
     inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
-    VkFormat                FindSupportedVkColorFormat(VkFormat format)           { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
+    VkFormat                FindSupportedVkColorFormat(VkFormat format)         { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
 
 // Set Functions
     inline void             SetCommandBufferManager(
@@ -213,7 +216,7 @@ public:
                                                                                                                    mFormat != GL_RGBA            &&
                                                                                                                    mFormat != GL_LUMINANCE       &&
                                                                                                                    mFormat != GL_LUMINANCE_ALPHA &&
-                                                                                                                   mFormat != GL_BGRA8_EXT); }
+                                                                                                                   mFormat != GL_BGRA_EXT); }
            bool             IsNPOT(void);
            bool             IsNPOTAccessCompleted(void);
            bool             IsCompleted(void);

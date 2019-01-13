@@ -130,13 +130,13 @@ Texture::IsCompleted(void)
 
             state = &mState[layer][level];
 
-            if(state->format == GL_INVALID_VALUE ||
-               state->type   == GL_INVALID_VALUE ||
-               state->width  != static_cast<GLint>(std::max(floor(width  >> level), 1.0)) ||
-               state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+            if (!GlInternalFormatIsCompressed(state->format) &&
+                (state->format == GL_INVALID_VALUE || state->type == GL_INVALID_VALUE)) {
                 ++count;
-            }
-            else if(state->format != format || state->type != type) {
+            } else if (state->width != static_cast<GLint>(std::max(floor(width >> level), 1.0)) ||
+                state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+                ++count;
+            } else if(state->format != format || state->type != type) {
                 return false;
             }
         }
@@ -181,13 +181,13 @@ Texture::IsValid(void)
 
             state = &mState[layer][level];
 
-            if (state->format == GL_INVALID_VALUE ||
-                state->type == GL_INVALID_VALUE ||
-                state->width != static_cast<GLint>(std::max(floor(width >> level), 1.0)) ||
-                state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+            if (!GlInternalFormatIsCompressed(state->format) &&
+                (state->format == GL_INVALID_VALUE || state->type == GL_INVALID_VALUE)) {
                 break;
-            }
-            else if (state->format != format || state->type != type) {
+            } else if (state->width != static_cast<GLint>(std::max(floor(width >> level), 1.0)) ||
+                       state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+                break;
+            } else if (state->format != format || state->type != type) {
                 break;
             }
 
@@ -290,6 +290,8 @@ Texture::Allocate(void)
         return false;
     }
 
+    bool isCompressed = GlInternalFormatIsCompressed(mExplicitInternalFormat);
+
     // NOTE:: there is an implicit conversion of all textures to GL_RGBA
     // TODO:: this should definitely NOT be the case
     GLenum srcInternalFormat = mInternalFormat;
@@ -298,7 +300,13 @@ Texture::Allocate(void)
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
         for(GLint level = 0; level < mMipLevelsCount; ++level) {
             state = &mState[layer][level];
-            if(state->data) {
+            if(!state->data) {
+                continue;
+            }
+            if (isCompressed) {
+                Rect srcRect(0, 0, state->width, state->height);
+                CpoyCompressedPixelFromHost(&srcRect, level, layer, dstInternalFormat, state->data, state->size);
+            } else {
                 ImageRect srcRect(0, 0, state->width, state->height,
                                   GlInternalFormatTypeToNumElements(srcInternalFormat, state->type),
                                   GlTypeToElementSize(state->type),
@@ -307,7 +315,7 @@ Texture::Allocate(void)
                                   GlInternalFormatTypeToNumElements(dstInternalFormat, dstType),
                                   GlTypeToElementSize(dstType),
                                   Texture::GetDefaultInternalAlignment());
-                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, static_cast<void *>(state->data));
+                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, state->data);
             }
         }
     }
@@ -407,6 +415,33 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
     SetDataUpdated(true);
 }
 
+void
+Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *pixels)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mState[layer][level].width = width;
+    mState[layer][level].height = height;
+    mState[layer][level].format = internalformat;
+    mState[layer][level].type = GL_INVALID_VALUE;
+    mState[layer][level].size = size;
+
+    if (mState[layer][level].data) {
+        delete[](uint8_t *)mState[layer][level].data;
+        mState[layer][level].data = nullptr;
+    }
+
+    if (pixels) {
+        uint8_t *data = new uint8_t[size];
+        if (data) {
+            memcpy(data, pixels, size);
+            mState[layer][level].data = data;
+        }
+    }
+
+    mDirty = true;
+}
+
 void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -489,6 +524,16 @@ void Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint m
     }
     delete[] _writtenData;
  #endif
+}
+
+void
+Texture::CpoyCompressedPixelFromHost(Rect *srcRect, GLint miplevel, GLint layer, GLenum format, const void *srcData, GLsizei dataSize)
+{
+    BufferObject *tbo = new TransferSrcBufferObject(mVkContext);
+    tbo->Allocate(dataSize, srcData);
+
+    // use the global rect offsets for transfering the subpixels to Vulkan
+    SubmitCopyPixels(srcRect, tbo, miplevel, layer, format, true);
 }
 
 void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum srcFormat, bool copyToImage)

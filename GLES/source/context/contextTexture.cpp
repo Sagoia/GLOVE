@@ -56,7 +56,7 @@ Context::BindTexture(GLenum target, GLuint texture)
             tex->SetCommandBufferManager(mCommandBufferManager);
             tex->SetCacheManager(mCacheManager);
             tex->SetTarget(target);
-            tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+            tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetVkImageTarget(target == GL_TEXTURE_2D ? vulkanAPI::Image::VK_IMAGE_TARGET_2D : vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);
             tex->SetVkImageTiling();
 
@@ -656,8 +656,8 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
-    if(internalformat != GL_ALPHA     && internalformat != GL_RGB && internalformat != GL_RGBA &&
-       internalformat != GL_LUMINANCE && internalformat != GL_LUMINANCE_ALPHA) {
+    if(internalformat != GL_COMPRESSED_RGB_S3TC_DXT1_EXT && internalformat != GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+        && internalformat != GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && internalformat != GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
         RecordError(GL_INVALID_ENUM);
         return;
     }
@@ -679,11 +679,33 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
+    if ((internalformat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) && 
+        imageSize != (((width + 3) / 4) * ((height + 3) / 4) * 8)) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
+    if ((internalformat == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) &&
+        imageSize != (((width + 3) / 4) * ((height + 3) / 4) * 16)) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
     // TODO:
     //GL_INVALID_VALUE is generated if imageSize is not consistent with the format, dimensions, and contents of the specified compressed image data.
     //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
 
-    NOT_IMPLEMENTED();
+    // copy the buffer contents to the texture
+    Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
+    GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    activeTexture->SetCompressedState(width, height, level, layer, internalformat, imageSize, data);
+
+    if (activeTexture->IsCompleted()) {
+        // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlInternalFormatToVkFormat(internalformat));
+        activeTexture->SetVkFormat(vkformat);
+        activeTexture->Allocate();
+    }
 }
 
 void

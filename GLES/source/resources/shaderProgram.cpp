@@ -1214,6 +1214,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
                         if (activeTexture->IsValid()) {
                             activeTexture->Allocate();
+                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                         }
                         else {
                             uint8_t pixels[4] = {0,0,0,255};

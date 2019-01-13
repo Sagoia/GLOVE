@@ -44,13 +44,15 @@ Context::GetString(GLenum name)
                                   "OpenGL ES 2.0 Over Vulkan\0",
                                   "OpenGL ES 2.0\0",
                                   "OpenGL ES GLSL ES 1.00\0",
-                                  "GL_OES_get_program_binary GL_OES_rgb8_rgba8\0"};
+                                  "GL_OES_get_program_binary GL_OES_rgb8_rgba8 GL_EXT_texture_format_BGRA8888\0",
+                                  "\0"};
     switch(name) {
     case GL_VENDOR:                     return (const GLubyte *)strings[0];
     case GL_RENDERER:                   return (const GLubyte *)strings[1];
     case GL_VERSION:                    return (const GLubyte *)strings[2];
     case GL_SHADING_LANGUAGE_VERSION:   return (const GLubyte *)strings[3];
     case GL_EXTENSIONS:                 return (const GLubyte *)strings[4];
+    case GL_COMPRESSED_TEXTURE_FORMATS: return (const GLubyte *)strings[5];
     default:                            RecordError(GL_INVALID_ENUM); return nullptr; 
     }
 }

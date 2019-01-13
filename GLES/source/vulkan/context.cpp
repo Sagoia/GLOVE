@@ -368,6 +368,9 @@ CreateVkDevice(void)
 
     VkPhysicalDeviceFeatures device_features = { VK_FALSE };
     device_features.wideLines = VK_TRUE;
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+    device_features.textureCompressionBC = VK_TRUE;
+#endif
 
     float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;
