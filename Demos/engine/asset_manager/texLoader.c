@@ -295,6 +295,157 @@ typedef struct {
     uint32_t dwReserved2[3];
 } DDS_HEADER;
 
+typedef struct {
+    uint16_t col0;
+    uint16_t col1;
+    uint8_t row[4];
+} DXTColorBlock;
+
+typedef struct {
+    uint16_t row[4];
+} DXT3AlphaBlock;
+
+typedef struct {
+    uint8_t alpha0;
+    uint8_t alpha1;
+    uint8_t row[6];
+} DXT5AlphaBlock;
+
+static void swapUint8(uint8_t *a, uint8_t *b) 
+{
+    uint8_t temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+static void swapUint16(uint16_t *a, uint16_t *b)
+{
+    uint16_t temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+static void FlipBlocksDXTC1(DXTColorBlock *line, uint32_t numBlocks) {
+    DXTColorBlock *curblock = line;
+
+    for (uint32_t i = 0; i < numBlocks; i++) {
+        swapUint8(curblock->row + 0, curblock->row + 3);
+        swapUint8(curblock->row + 1, curblock->row + 2);
+
+        curblock++;
+    }
+}
+
+static void FlipBlocksDXTC3(DXTColorBlock *line, uint32_t numBlocks) {
+    DXTColorBlock *curblock = line;
+    DXT3AlphaBlock *alphablock;
+
+    for (uint32_t i = 0; i < numBlocks; i++) {
+        alphablock = (DXT3AlphaBlock*)curblock;
+
+        swapUint16(alphablock->row + 0, alphablock->row + 3);
+        swapUint16(alphablock->row + 1, alphablock->row + 2);
+
+        curblock++;
+
+        swapUint8(curblock->row + 0, curblock->row + 3);
+        swapUint8(curblock->row + 1, curblock->row + 2);
+
+        curblock++;
+    }
+}
+
+static void FlipDXTC5Alpha(DXT5AlphaBlock *block) {
+    uint8_t gBits[4][4];
+
+    const uint32_t mask = 0x00000007;          // bits = 00 00 01 11
+    uint32_t bits = 0;
+    memcpy(&bits, &block->row[0], sizeof(uint8_t) * 3);
+
+    gBits[0][0] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[0][1] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[0][2] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[0][3] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[1][0] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[1][1] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[1][2] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[1][3] = (uint8_t)(bits & mask);
+
+    bits = 0;
+    memcpy(&bits, &block->row[3], sizeof(uint8_t) * 3);
+
+    gBits[2][0] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[2][1] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[2][2] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[2][3] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[3][0] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[3][1] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[3][2] = (uint8_t)(bits & mask);
+    bits >>= 3;
+    gBits[3][3] = (uint8_t)(bits & mask);
+
+    uint32_t *pBits = ((uint32_t*) &(block->row[0]));
+
+    *pBits = *pBits | (gBits[3][0] << 0);
+    *pBits = *pBits | (gBits[3][1] << 3);
+    *pBits = *pBits | (gBits[3][2] << 6);
+    *pBits = *pBits | (gBits[3][3] << 9);
+
+    *pBits = *pBits | (gBits[2][0] << 12);
+    *pBits = *pBits | (gBits[2][1] << 15);
+    *pBits = *pBits | (gBits[2][2] << 18);
+    *pBits = *pBits | (gBits[2][3] << 21);
+
+    pBits = ((uint32_t*) &(block->row[3]));
+
+#ifdef MACOS
+    *pBits &= 0x000000ff;
+#else
+    *pBits &= 0xff000000;
+#endif
+
+    *pBits = *pBits | (gBits[1][0] << 0);
+    *pBits = *pBits | (gBits[1][1] << 3);
+    *pBits = *pBits | (gBits[1][2] << 6);
+    *pBits = *pBits | (gBits[1][3] << 9);
+
+    *pBits = *pBits | (gBits[0][0] << 12);
+    *pBits = *pBits | (gBits[0][1] << 15);
+    *pBits = *pBits | (gBits[0][2] << 18);
+    *pBits = *pBits | (gBits[0][3] << 21);
+}
+
+static void FlipBlocksDXTC5(DXTColorBlock *line, uint32_t numBlocks) {
+    DXTColorBlock *curblock = line;
+    DXT5AlphaBlock *alphablock;
+
+    for (uint32_t i = 0; i < numBlocks; i++) {
+        alphablock = (DXT5AlphaBlock*)curblock;
+
+        FlipDXTC5Alpha(alphablock);
+
+        curblock++;
+
+        swapUint8(curblock->row + 0, curblock->row + 3);
+        swapUint8(curblock->row + 1, curblock->row + 2);
+
+        curblock++;
+    }
+}
+
 int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
 {
     DDS_HEADER ddsh;
@@ -351,23 +502,58 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
         return 0;
     }
 
-    //
-    // How big will the buffer need to be to load all of the pixel data 
-    // including mip-maps?
-    //
-
     if (ddsh.dwPitchOrLinearSize == 0) {
         printf("dwLinearSize is 0! \n");
     }
 
     uint32_t width = ddsh.dwWidth;
     uint32_t height = ddsh.dwHeight;
-    image->pixels = (GLubyte **)malloc(ddsh.dwMipMapCount * sizeof(GLubyte *));
+    image->slices = (DDSImageSlice *)malloc(ddsh.dwMipMapCount * sizeof(DDSImageSlice));
     uint32_t blockSize = (image->format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || image->format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
     for (uint32_t i = 0; i < ddsh.dwMipMapCount; ++i) {
-        uint32_t size = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
-        image->pixels[i] = (GLubyte *)malloc(size * sizeof(GLubyte));
-        fread(image->pixels[i], 1, size, pFile);
+        uint32_t xblocks = (width + 3) / 4;
+        uint32_t yblocks = (height + 3) / 4;
+
+        uint32_t size = xblocks * yblocks * blockSize;
+        GLubyte *pixels = (GLubyte *)malloc(size * sizeof(GLubyte));
+        fread(pixels, 1, size, pFile);
+
+        // flip date
+        uint32_t lineSize = xblocks * blockSize;
+        uint8_t *tmp = (uint8_t *)malloc(lineSize * sizeof(uint8_t));
+        for (unsigned int j = 0; j < (yblocks >> 1); j++) {
+            DXTColorBlock *top = (DXTColorBlock*)(pixels + j * lineSize);
+            DXTColorBlock *bottom = (DXTColorBlock*)(pixels + (((yblocks - j) - 1) * lineSize));
+
+            switch (image->format)
+            {
+            case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+            case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+                FlipBlocksDXTC1(top, xblocks);
+                FlipBlocksDXTC1(bottom, xblocks);
+                break;
+            case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+                FlipBlocksDXTC3(top, xblocks);
+                FlipBlocksDXTC3(bottom, xblocks);
+                break;
+            case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+                FlipBlocksDXTC5(top, xblocks);
+                FlipBlocksDXTC5(bottom, xblocks);
+                break;
+            }
+
+            // swap
+            memcpy(tmp, bottom, lineSize);
+            memcpy(bottom, top, lineSize);
+            memcpy(top, tmp, lineSize);
+        }
+        free(tmp);
+
+        image->slices[i].width = width;
+        image->slices[i].height = height;
+        image->slices[i].pixels = pixels;
+        image->slices[i].size = size;
+
         width = width >> 1; if (width == 0) { width = 1; }
         height = height >> 1; if (height == 0) { height = 1; }
     }
@@ -375,8 +561,6 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
     // Close the file
     fclose(pFile);
 
-    image->width = ddsh.dwWidth;
-    image->height = ddsh.dwHeight;
     image->numMipMaps = ddsh.dwMipMapCount;
 
     if (ddsh.ddspf.dwFourCC == FOURCC_DXT1) {
@@ -387,8 +571,8 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
 
     texture->imageData = NULL;
     texture->bpp = image->components;
-    texture->width = image->width;
-    texture->height = image->height;
+    texture->width = ddsh.dwWidth;
+    texture->height = ddsh.dwHeight;
     texture->type = image->format;
 
     return 1;
@@ -418,15 +602,8 @@ Texture *LoadGLTexture(const char *filename)
         if (LoadDDS(texture, &ddsImage, filename)) {
             glGenTextures(1, &texture->texID);
             glBindTexture(GL_TEXTURE_2D, texture->texID);
-
-            GLsizei width = ddsImage.width;
-            GLsizei height = ddsImage.height;
-            GLsizei blockSize = (ddsImage.format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || ddsImage.format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
             for (int i = 0; i < ddsImage.numMipMaps; ++i) {
-                GLsizei imageSize = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
-                glCompressedTexImage2D(GL_TEXTURE_2D, i, ddsImage.format, width, height, 0, imageSize, ddsImage.pixels[i]);
-                width = width >> 1; if (width == 0) { width = 1; }
-                height = height >> 1; if (height == 0) { height = 1; }
+                glCompressedTexImage2D(GL_TEXTURE_2D, i, ddsImage.format, ddsImage.slices[i].width, ddsImage.slices[i].height, 0, ddsImage.slices[i].size, ddsImage.slices[i].pixels);
             }
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -435,8 +612,10 @@ Texture *LoadGLTexture(const char *filename)
             ASSERT_NO_GL_ERROR();
 
             for (int i = 0; i < ddsImage.numMipMaps; ++i) {
-                free(ddsImage.pixels[i]);
+                free(ddsImage.slices[i].pixels);
             }
+            free(ddsImage.slices);
+
             return texture;
         }
     }

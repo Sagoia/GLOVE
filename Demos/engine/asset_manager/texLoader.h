@@ -53,14 +53,20 @@ int         LoadUncompressedTGA    (Texture *, const char *, FILE *);          /
 int         LoadCompressedTGA      (Texture *, const char *, FILE *);          // Load a Compressed file
 int         LoadTGA                (Texture * texture, const char *filename);
 
+typedef struct
+{
+    GLsizei        width;
+    GLsizei        height;
+    GLubyte *      pixels;
+    GLsizei        size;
+} DDSImageSlice;
+
 typedef struct 
 {
-    GLsizei         width;
-    GLsizei         height;
     GLint           components;
     GLenum          format;
     int             numMipMaps;
-    GLubyte **      pixels;
+    DDSImageSlice*  slices;
 } DDSImage;
 
 int         LoadDDS                 (Texture * texture, DDSImage *image, const char *filename);
