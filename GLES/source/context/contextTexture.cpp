@@ -656,9 +656,15 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
-    if(internalformat != GL_COMPRESSED_RGB_S3TC_DXT1_EXT && internalformat != GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-        && internalformat != GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && internalformat != GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
-        RecordError(GL_INVALID_ENUM);
+    bool isFormatSupported = false;
+    for (auto format : mCompressedTextureFormats) {
+        if (format == internalformat) {
+            isFormatSupported = true;
+            break;
+        }
+    }
+    if(!isFormatSupported) {
+        RecordError(GL_INVALID_OPERATION);
         return;
     }
 
@@ -692,9 +698,6 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
-    // TODO:
-    //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
-
     // copy the buffer contents to the texture
     Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
     GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
@@ -718,9 +721,15 @@ Context::CompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
         return;
     }
 
-    if (format != GL_COMPRESSED_RGB_S3TC_DXT1_EXT && format != GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-        && format != GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && format != GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
-        RecordError(GL_INVALID_ENUM);
+    bool isFormatSupported = false;
+    for (auto format : mCompressedTextureFormats) {
+        if (format == format) {
+            isFormatSupported = true;
+            break;
+        }
+    }
+    if (!isFormatSupported) {
+        RecordError(GL_INVALID_OPERATION);
         return;
     }
 
@@ -764,9 +773,6 @@ Context::CompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
         RecordError(GL_INVALID_VALUE);
         return;
     }
-
-    // TODO:
-    //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
 
     GLsizei blockSize = 0;
     switch (format)
