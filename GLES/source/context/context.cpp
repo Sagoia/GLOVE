@@ -47,6 +47,8 @@ Context::Context()
     mVkContext            = vulkanAPI::GetContext();
     mCommandBufferManager = new vulkanAPI::CommandBufferManager(mVkContext);
 
+    InitExtensions();
+
     mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
     mShaderCompiler  = new GlslangShaderCompiler();
     mPipeline        = new vulkanAPI::Pipeline(mVkContext);
@@ -138,6 +140,20 @@ Context::InitializeDefaultTextures()
     for(int i = 0; i < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS; ++i) {
         mStateManager.GetActiveObjectsState()->SetActiveTexture(GL_TEXTURE_2D      , i, mResourceManager->GetDefaultTexture(GL_TEXTURE_2D));
         mStateManager.GetActiveObjectsState()->SetActiveTexture(GL_TEXTURE_CUBE_MAP, i, mResourceManager->GetDefaultTexture(GL_TEXTURE_CUBE_MAP));
+    }
+}
+
+void 
+Context::InitExtensions()
+{
+    mCompressedTextureFormats.clear();
+    mExtensions = "GL_OES_get_program_binary\nGL_OES_rgb8_rgba8\nGL_EXT_texture_format_BGRA8888\n";
+    if (mVkContext->vkDeviceFeatures.textureCompressionBC) { 
+        mExtensions += "GL_EXT_texture_compression_dxt1\nGL_EXT_texture_compression_s3tc\n";
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_S3TC_DXT1_EXT);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
     }
 }
 

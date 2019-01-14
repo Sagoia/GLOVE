@@ -366,11 +366,12 @@ CreateVkDevice(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkPhysicalDeviceFeatures device_features = { VK_FALSE };
-    device_features.wideLines = VK_TRUE;
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-    device_features.textureCompressionBC = VK_TRUE;
-#endif
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(GloveVkContext.vkGpus[0], &deviceFeatures);
+
+    VkPhysicalDeviceFeatures &vkDeviceFeatures = GloveVkContext.vkDeviceFeatures;
+    if (deviceFeatures.wideLines)               { vkDeviceFeatures.wideLines = VK_TRUE;}
+    if (deviceFeatures.textureCompressionBC)    { vkDeviceFeatures.textureCompressionBC = VK_TRUE; }
 
     float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;
@@ -391,7 +392,7 @@ CreateVkDevice(void)
     deviceInfo.ppEnabledLayerNames     = nullptr;
     deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
     deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
-    deviceInfo.pEnabledFeatures        = &device_features;
+    deviceInfo.pEnabledFeatures        = &vkDeviceFeatures;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
     assert(!err);

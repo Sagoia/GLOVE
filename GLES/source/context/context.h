@@ -78,6 +78,11 @@ private:
 
 // ------------
 
+    std::string                                 mExtensions;
+    vector<GLenum>                              mCompressedTextureFormats;
+
+// ------------
+
     Shader        *GetShaderPtr(GLuint shader);
     ShaderProgram *GetProgramPtr(GLuint program);
 
@@ -102,14 +107,15 @@ private:
     void SetCapability(GLenum cap, GLboolean enable);
 
     void InitializeDefaultTextures(void);
+    void InitExtensions(void);
 
     void SetClearRect(void);
     bool SetPipelineProgramShaderStages(ShaderProgram *progPtr);
     void SetSystemFramebuffer(Framebuffer *FBO);
 
 // Get Functions
-           uint32_t         GetProgramId(const ShaderProgram *progPtr)           { FUN_ENTRY(GL_LOG_TRACE); return (progPtr)   ? mResourceManager->FindShaderProgramID(progPtr) : 0; }
-           uint32_t         GetShaderId(const Shader *shaderPtr)                 { FUN_ENTRY(GL_LOG_TRACE); return (shaderPtr) ? mResourceManager->FindShaderID(shaderPtr)      : 0; }
+    uint32_t                GetProgramId(const ShaderProgram *progPtr)           { FUN_ENTRY(GL_LOG_TRACE); return (progPtr)   ? mResourceManager->FindShaderProgramID(progPtr) : 0; }
+    uint32_t                GetShaderId(const Shader *shaderPtr)                 { FUN_ENTRY(GL_LOG_TRACE); return (shaderPtr) ? mResourceManager->FindShaderID(shaderPtr)      : 0; }
 
 // Is/Has Functions
     inline bool             IsDrawModeTriangle(GLenum mode)                const { FUN_ENTRY(GL_LOG_TRACE); return (mode == GL_TRIANGLE_STRIP || mode  == GL_TRIANGLE_FAN || mode == GL_TRIANGLES); }

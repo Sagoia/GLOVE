@@ -53,6 +53,8 @@ namespace vulkanAPI {
             mInitialized            = false;
             memset(static_cast<void*>(&vkDeviceMemoryProperties), 0,
                    sizeof(VkPhysicalDeviceMemoryProperties));
+            memset(static_cast<void*>(&vkDeviceFeatures), 0,
+                   sizeof(VkPhysicalDeviceFeatures));
         }
 
         VkInstance                                          vkInstance;
@@ -64,6 +66,7 @@ namespace vulkanAPI {
         uint32_t                                            vkGraphicsQueueNodeIndex;
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
+        VkPhysicalDeviceFeatures                            vkDeviceFeatures;
         vkSyncItems_t                                       *vkSyncItems;
         MemoryAllocator                                     *memoryAllocator;
         bool                                                mIsMaintenanceExtSupported;
