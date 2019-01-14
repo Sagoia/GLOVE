@@ -416,7 +416,7 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
 }
 
 void
-Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *pixels)
+Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *imageData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -431,10 +431,10 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
         mState[layer][level].data = nullptr;
     }
 
-    if (pixels) {
+    if (imageData) {
         uint8_t *data = new uint8_t[size];
         if (data) {
-            memcpy(data, pixels, size);
+            memcpy(data, imageData, size);
             mState[layer][level].data = data;
         }
     }
@@ -442,7 +442,33 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
     mDirty = true;
 }
 
-void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData)
+void
+Texture::SetCompressedSubState(Rect *rect, GLsizei with, GLsizei height, GLint level, GLint layer, GLsizei blockSize, const void *imageData)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (mState[layer][level].data == nullptr) {
+        uint32_t size = with * height * blockSize;
+        mState[layer][level].data = new uint8_t[size];
+    }
+
+    if (imageData) {
+        uint8_t *srcData = (uint8_t *)imageData;
+        uint8_t *data = (uint8_t *)mState[layer][level].data;
+        GLsizei dataSize = mState[layer][level].size;
+        for (GLsizei i = 0; i < rect->height; ++i) {
+            uint32_t offset = (with * (rect->y + i) + rect->x) * blockSize;
+            uint32_t lineSize = rect->width * blockSize;
+            assert(offset + lineSize <= dataSize);
+            memcpy(data + offset, srcData + i * lineSize, lineSize);
+        }
+    }
+
+    SetDataUpdated(true);
+}
+
+void 
+Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -477,7 +503,8 @@ void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint mip
     delete[]  srcData;
 }
 
-void Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData)
+void 
+Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -536,7 +563,8 @@ Texture::CpoyCompressedPixelFromHost(Rect *srcRect, GLint miplevel, GLint layer,
     SubmitCopyPixels(srcRect, tbo, miplevel, layer, format, true);
 }
 
-void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum srcFormat, bool copyToImage)
+void 
+Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum srcFormat, bool copyToImage)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

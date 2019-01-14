@@ -679,20 +679,20 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
+    // check imageSize
     if ((internalformat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) && 
-        imageSize != (((width + 3) / 4) * ((height + 3) / 4) * 8)) {
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
         RecordError(GL_INVALID_VALUE);
         return;
     }
 
     if ((internalformat == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) &&
-        imageSize != (((width + 3) / 4) * ((height + 3) / 4) * 16)) {
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 16) {
         RecordError(GL_INVALID_VALUE);
         return;
     }
 
     // TODO:
-    //GL_INVALID_VALUE is generated if imageSize is not consistent with the format, dimensions, and contents of the specified compressed image data.
     //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
 
     // copy the buffer contents to the texture
@@ -718,8 +718,8 @@ Context::CompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
         return;
     }
 
-    if(format != GL_ALPHA     && format != GL_RGB && format != GL_RGBA &&
-       format != GL_LUMINANCE && format != GL_LUMINANCE_ALPHA) {
+    if (format != GL_COMPRESSED_RGB_S3TC_DXT1_EXT && format != GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+        && format != GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && format != GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
         RecordError(GL_INVALID_ENUM);
         return;
     }
@@ -731,21 +731,72 @@ Context::CompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
         return;
     }
 
-    Texture *tex = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
-    if(tex->GetWidth()  < (xoffset + width ) ||
-       tex->GetHeight() < (yoffset + height)) {
+    if (width == 0 || height == 0) {
+        return;
+    }
+
+    // TODO:: We could pass a default subtexture instead
+    if (data == nullptr) {
+        return;
+    }
+
+    Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
+    if(activeTexture->GetWidth() < (xoffset + width ) ||
+        activeTexture->GetHeight() < (yoffset + height)) {
         RecordError(GL_INVALID_VALUE);
         return;
     }
 
-    if(tex->GetFormat() != format) {
+    if(activeTexture->GetFormat() != format) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
+    // check imageSize
+    if ((format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) &&
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
+    if ((format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) &&
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 16) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
     // TODO:
-    //GL_INVALID_VALUE is generated if imageSize is not consistent with the format, dimensions, and contents of the specified compressed image data.
     //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
+
+    GLsizei blockSize = 0;
+    switch (format)
+    {
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+        blockSize = 8;
+        break;
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+        blockSize = 16;
+        break;
+    }
+    GLsizei xBlockOffset = (xoffset + 3) / 4;
+    GLsizei yBlockOffset = (yoffset + 3) / 4;
+    GLsizei xBlocks = ((activeTexture->GetWidth() >> level) + 3) / 4;
+    GLsizei yBlocks = ((activeTexture->GetHeight() >> level) + 3) / 4;
+    GLsizei xSubBlocks = (width + 3) / 4;
+    GLsizei ySubBlocks = (height + 3) / 4;
+
+    GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    Rect rect(xBlockOffset, yBlockOffset, xSubBlocks, ySubBlocks);
+    activeTexture->SetCompressedSubState(&rect, xBlocks, yBlocks, level, layer, blockSize, data);
+
+    if (activeTexture->IsCompleted()) {
+        // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlInternalFormatToVkFormat(format));
+        activeTexture->SetVkFormat(vkformat);
+        activeTexture->Allocate();
+    }
 
     NOT_IMPLEMENTED();
 }
