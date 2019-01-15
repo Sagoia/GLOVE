@@ -1087,11 +1087,6 @@ ShaderProgram::AllocateVkDescriptoSet(void)
         return false;
     }
 
-    if (!GetValidDescriptorSet()) {
-        assert(0);
-        return false;
-    }
-
     delete[] mVkDescSetLayoutBind;
     mVkDescSetLayoutBind = nullptr;
 
