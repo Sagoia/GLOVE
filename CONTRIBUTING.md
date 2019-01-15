@@ -10,7 +10,7 @@ This project and everyone participating in it is governed by the [GLOVE Code of 
 
 GLOVE is considered as work in progress, therefore some GL ES 2.0 features are still missing and bugs can emerge as well. By raising a bug report or requesting for a missing feature you are contributing to the development of GLOVE and this is the first step of participating in the community.
 
-Bug reports or missing features are filed in Github Issue tracker. If you are a Github beginner you can have a look in [Github Issues HowTo](https://help.github.com/articles/creating-an-issue/) so as to create a new issue.
+Bug reports or missing features are filed in GitHub Issue tracker. If you are a GitHub beginner you can have a look in [GitHub Issues HowTo](https://help.github.com/articles/creating-an-issue/) so as to create a new issue.
 
 GLOVE development team has already created a continuous integration framework used to check conformance with GL ES 2.0 spec, compatibility to various platforms, performance and stability. However, it's impossible to include all of testing or real life scenarios, therefore, reporting a bug found in your testing environment is more than welcome.
 
@@ -41,7 +41,7 @@ Please follow the instructions prompted by cla-assistant to sign the CLA. Once y
 
 ### Issue a Pull Request
 
-For any code change/ improvement to GLOVE, please submit a pull request! For Github begginers, there's a [GitHub Pull Request HowTo](https://help.github.com/articles/about-pull-requests/).
+For any code change/ improvement to GLOVE, please submit a pull request! For GitHub beginners, there's a [GitHub Pull Request HowTo](https://help.github.com/articles/about-pull-requests/).
 
 To create the Pull Request, please follow the below steps:
 
@@ -55,5 +55,5 @@ GLOVE team members will be assigned to review your pull requests. Once the pull 
 
 ## Coding Style
 
-All C++ code commited to GLOVE must adhere to [GLOVE Coding Style guide](CodingStyle.md).
+All C++ code committed to GLOVE must adhere to [GLOVE Coding Style guide](CodingStyle.md).
 
