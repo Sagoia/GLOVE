@@ -171,12 +171,12 @@ Framebuffer::AddColorAttachment(Texture *texture)
 }
 
 void
-Framebuffer::SetColorAttachment(int width, int height)
+Framebuffer::SetColorAttachment(int width, int height, Texture *texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mAttachmentColors.size() == 0) {
-        Attachment *att = new Attachment();
+        Attachment *att = new Attachment(texture);
         mAttachmentColors.push_back(att);
     }
 

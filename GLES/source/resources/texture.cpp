@@ -141,11 +141,11 @@ Texture::IsCompleted(void)
             }
         }
 
-        if(count)
+        if(count > 0 && count < levels - 1)
             return false;
     }
 
-    mMipLevelsCount = levels;
+    mMipLevelsCount = levels - count;
 
     mDirty = false;
 

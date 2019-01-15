@@ -51,7 +51,7 @@ private:
     VkImage                           mVkImage;
     VkFormat                          mVkFormat;
     VkImageType                       mVkImageType;
-    VkImageUsageFlagBits              mVkImageUsage;
+    VkImageUsageFlags                 mVkImageUsage;
     VkImageLayout                     mVkImageLayout;
     VkPipelineStageFlags              mVkPipelineStage;
     VkImageTiling                     mVkImageTiling;
@@ -103,6 +103,7 @@ public:
     inline VkImage &                  GetImage(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mVkImage;          }
     inline VkFormat                   GetFormat(void)                     const { FUN_ENTRY(GL_LOG_TRACE); return mVkFormat;         }
     inline VkImageTarget              GetImageTarget(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageTarget;    }
+    inline VkImageUsageFlags          GetImageUsage(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageUsage;     }
     inline VkImageLayout              GetImageLayout(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageLayout;    }
     inline VkBufferImageCopy *        GetBufferImageCopy(void)                  { FUN_ENTRY(GL_LOG_TRACE); return &mVkBufferImageCopy;      }
     inline VkImageSubresourceRange    GetImageSubresourceRange(void)      const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageSubresourceRange; }
@@ -115,7 +116,7 @@ public:
     inline void                       SetCopyStencil(bool copy)                 { FUN_ENTRY(GL_LOG_TRACE); mCopyStencil   = copy;      }
     inline void                       SetImage(VkImage image)                   { FUN_ENTRY(GL_LOG_TRACE); mVkImage       = image;
                                                                                                            mDelete        = false;     }
-    inline void                       SetImageUsage(VkImageUsageFlagBits usage) { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
+    inline void                       SetImageUsage(VkImageUsageFlags usage)    { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
            void                       SetImageTiling();
     inline void                       SetImageTiling(VkImageTiling tiling)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTiling = tiling;    }
     inline void                       SetImageTarget(VkImageTarget target)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTarget = target;    }

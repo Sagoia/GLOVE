@@ -155,6 +155,7 @@ public:
 
     inline VkSampler        GetVkSampler(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return mSampler->GetSampler(); }
     inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
+    inline VkFlags          GetVkImageUsage(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageUsage(); }
     inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
     VkFormat                FindSupportedVkColorFormat(VkFormat format)         { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
@@ -199,7 +200,7 @@ public:
     inline void             SetImageBufferCopyStencil(bool copy)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetCopyStencil(copy);   }
     inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
     inline void             SetVkImage(VkImage image)                           { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImage(image);        }
-    inline void             SetVkImageUsage(VkImageUsageFlagBits usage)         { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }
+    inline void             SetVkImageUsage(VkImageUsageFlags usage)            { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }
     inline void             SetVkImageLayout(VkImageLayout layout)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageLayout(layout); }
     inline void             SetVkImageTiling(VkImageTiling tiling)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling(tiling); }
     inline void             SetVkImageTiling(void)                              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
