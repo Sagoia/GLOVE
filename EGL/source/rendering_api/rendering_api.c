@@ -102,33 +102,7 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
         return RENDERING_API_LOAD_SUCCESS;
     }
 
-#ifndef WIN32
-    library_info->handle = dlopen(library_name, RTLD_NOW);
-    if(!library_info->handle) {
-        fprintf(stderr, "%s\n", dlerror());
-        return RENDERING_API_NOT_FOUND;
-    }
-
-    dlerror();
-
-    api_interface = (rendering_api_interface_t *) dlsym(library_info->handle, api_interface_name);
-
-    if(!api_interface->init_API_cb) {
-        dlclose(library_info->handle);
-        char* error = dlerror();
-        if(error)  {
-            fprintf(stderr, "%s\n", error);
-            return false;
-        }
-        return RENDERING_API_LOAD_ERROR;
-    }
-
-    error = dlerror();
-    if(error)  {
-        fprintf(stderr, "%s\n", error);
-        return RENDERING_API_NOT_FOUND;
-    }
-#else
+#ifdef WIN32
     EXTERN_C IMAGE_DOS_HEADER __ImageBase;
     CHAR DllPath[MAX_PATH] = { 0 };
     GetModuleFileName((HINSTANCE)&__ImageBase, DllPath, _countof(DllPath));
@@ -151,6 +125,32 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
     if (!api_interface || !api_interface->init_API_cb) {
         FreeLibrary(library_info->handle);
         return RENDERING_API_LOAD_ERROR;
+    }
+#else
+    library_info->handle = dlopen(library_name, RTLD_NOW);
+    if (!library_info->handle) {
+        fprintf(stderr, "%s\n", dlerror());
+        return RENDERING_API_NOT_FOUND;
+    }
+
+    dlerror();
+
+    api_interface = (rendering_api_interface_t *)dlsym(library_info->handle, api_interface_name);
+
+    if (!api_interface->init_API_cb) {
+        dlclose(library_info->handle);
+        char* error = dlerror();
+        if (error) {
+            fprintf(stderr, "%s\n", error);
+            return false;
+        }
+        return RENDERING_API_LOAD_ERROR;
+    }
+
+    error = dlerror();
+    if (error) {
+        fprintf(stderr, "%s\n", error);
+        return RENDERING_API_NOT_FOUND;
     }
 #endif
 
@@ -282,15 +282,15 @@ static bool rendering_terminate_api(rendering_api_interface_t *api_interface, re
         api_interface->terminate_API_cb();
     }
 
-#ifndef WIN32
+#ifdef WIN32
+    FreeLibrary(library_info->handle);
+#else
     dlclose(library_info->handle);
     char* error = dlerror();
-    if(error)  {
+    if (error) {
         fprintf(stderr, "%s\n", error);
         return false;
     }
-#else
-    FreeLibrary(library_info->handle);
 #endif
 
     library_info->loaded = false;
