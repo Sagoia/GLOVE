@@ -58,11 +58,7 @@ Context::CreateShader(GLenum type)
     shader->SetVkContext(mVkContext);
     shader->SetSlangCompiler(new GlslangCompiler());
 
-#ifdef WIN32
     return mResourceManager->PushShadingObject({ SHADER_ID, res });
-#else
-    return mResourceManager->PushShadingObject((ShadingNamespace_t){SHADER_ID, res});
-#endif // WIN32
 }
 
 void
