@@ -207,6 +207,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetVkImage(vkImages[i]);
         tex->CreateVkImageSubResourceRange();
         tex->CreateVkImageView();
+        tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         fbo->AddColorAttachment(tex);
         mSystemTextures.push_back(tex);
     }
@@ -246,7 +247,11 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
                   GlInternalFormatToGlType(glformat),
                   Texture::GetDefaultInternalAlignment(),
                   nullptr);
-    return tex->Allocate() ? tex : nullptr;
+    if (!tex->Allocate()) {
+        delete tex;
+        return nullptr;
+    }
+    return tex;
 }
 
 void
