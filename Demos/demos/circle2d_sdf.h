@@ -21,10 +21,6 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "circle2d_sdf.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "circle2d_sdf.bin"
 
- // Array size must greater than 0 while using MSVC
-#ifndef WIN32
-static const char* diffuse_textures [] = { };
-#endif
 static const char* shading_titles   [] = { "CIRCLE2D_SDF" };
 
 #endif // __CIRCLE2D_SDF_H_
