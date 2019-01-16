@@ -54,6 +54,7 @@ private:
 
     Rect                            mDims;
     GLenum                          mTarget;
+    uint32_t                        mWriteBufferIndex;
     State                           mState;
     bool                            mUpdated;
     bool                            mSizeUpdated;
@@ -65,14 +66,11 @@ private:
     Attachment*                     mAttachmentDepth;
     Attachment*                     mAttachmentStencil;
     Texture*                        mDepthStencilTexture;
+    bool                            mIsSystem;
     bool                            mBindToTexture;
     GLenum                          mSurfaceType;
 
-    bool                            mIsSystem;
-    const EGLSurfaceInterface      *mEGLSurfaceInterface;
-
     void                            Release(void);
-    size_t                          GetCurrentBufferIndex(void) const;
 
 public:
     Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
@@ -100,10 +98,10 @@ public:
     GLenum                  CheckStatus(void);
 
 // Update Functions
-    void                    CheckForUpdatedResources(void);
+    void                    IsUpdated(void);
 
 // Get Functions
-           VkFramebuffer   *GetActiveVkFramebuffer() const;
+    inline VkFramebuffer*   GetActiveVkFramebuffer()                    const   { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers[mWriteBufferIndex]->GetFramebuffer(); }
     inline State            GetState()                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mState; }
     inline Rect *           GetRect(void)                                       { FUN_ENTRY(GL_LOG_TRACE); return &mDims; }
     inline int              GetX(void)                                  const   { FUN_ENTRY(GL_LOG_TRACE); return mDims.x; }
@@ -143,7 +141,6 @@ public:
     inline GLint            GetSurfaceType(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mSurfaceType;                    }
 
 // Set Functions
-    inline void             SetEGLSurfaceInterface(const EGLSurfaceInterface_t* eglSurfaceInterface) { FUN_ENTRY(GL_LOG_TRACE); mEGLSurfaceInterface = eglSurfaceInterface; }
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
     inline void             SetCommandBufferManager(
@@ -180,10 +177,9 @@ public:
     inline void             SetStencilAttachmentLayer(GLenum layer)             { FUN_ENTRY(GL_LOG_TRACE); mAttachmentStencil->SetLayer(layer); }
 
     inline void             SetDepthStencilAttachmentTexture(Texture *texture)  { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = texture; }
+    inline void             SetWriteBufferIndex(uint32_t buffer)                { FUN_ENTRY(GL_LOG_TRACE); if(mAttachmentColors.size() > 1) {mWriteBufferIndex = buffer;} }
     inline void             SetBindToTexture(GLint bindToTexture)               { FUN_ENTRY(GL_LOG_TRACE); mBindToTexture = bindToTexture;      }
     inline void             SetSurfaceType(GLint surfacetype)                   { FUN_ENTRY(GL_LOG_TRACE); mSurfaceType = surfacetype;          }
-
-    inline bool             IsSizeUpdated(void)                           const { FUN_ENTRY(GL_LOG_TRACE); return mSizeUpdated; }
 
 // Is Functions
     inline bool             IsInIdleState(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return (mState == IDLE); }

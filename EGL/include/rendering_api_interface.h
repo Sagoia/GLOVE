@@ -32,8 +32,6 @@
 typedef struct EGLSurfaceInterface_t {
     void    *surface;
     void    *images;
-    uint64_t depthBuffer;
-    int32_t  contextRef;
     uint32_t imageCount;
     uint32_t nextImageIndex;
     uint32_t surfaceColorFormat;
@@ -52,9 +50,9 @@ typedef api_state_t (*init_API_cb_t)();
 typedef void (*terminate_API_cb_t)();
 typedef api_context_t (*create_context_cb_t)();
 typedef void (*set_read_write_surface_cb_t)(api_context_t api_context, EGLSurfaceInterface *eglReadSurfaceInterface, EGLSurfaceInterface *eglWriteSurfaceInterface);
-typedef void (*delete_shared_surface_data_cb_t)(EGLSurfaceInterface *eglSurfaceInterface);
 typedef void (*delete_context_cb_t)(api_context_t api_context);
 typedef void (*release_system_fbo_cb_t)(api_context_t api_context);
+typedef void (*set_next_image_index_cb_t)(api_context_t api_context, uint32_t index);
 typedef GLPROC (*get_proc_addr_cb_t)(const char* procname);
 typedef void (*flush_cb_t)(api_context_t api_context);
 typedef void (*finish_cb_t)(api_context_t api_context);
@@ -66,9 +64,9 @@ typedef struct rendering_api_interface {
     terminate_API_cb_t terminate_API_cb;
     create_context_cb_t create_context_cb;
     set_read_write_surface_cb_t set_read_write_surface_cb;
-    delete_shared_surface_data_cb_t delete_shared_surface_data_cb;
     delete_context_cb_t delete_context_cb;
     release_system_fbo_cb_t release_system_fbo_cb;
+    set_next_image_index_cb_t set_next_image_index_cb;
     get_proc_addr_cb_t get_proc_addr_cb;
     flush_cb_t flush_cb;
     finish_cb_t finish_cb;

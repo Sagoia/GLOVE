@@ -1,13 +1,5 @@
 message(STATUS "  Building GLESv2 Library")
 
-# Make sure CXX flags are in sync with libglslang.
-# By default, GLOVE does not add support to AMD or NV.
-# Further, ENABLE_OPT is also turned off by default.
-
-add_definitions(-DGLSLANG_OSINCLUDE_UNIX)
-add_definitions(-DENABLE_HLSL)
-add_definitions(-DENABLE_OPT=0)
-
 # Sets the SOURCES variable to contain all the source files needed by
 # GLESv2 shared lib to be built.
 set(SOURCES
@@ -36,7 +28,6 @@ set(SOURCES
     glslang/glslangIoMapResolver.cpp
     glslang/glslangShaderCompiler.cpp
     glslang/shaderConverter.cpp
-    glslang/FixSampler.cpp
     resources/attachment.cpp
     resources/bufferObject.cpp
     resources/framebuffer.cpp
@@ -66,9 +57,7 @@ set(SOURCES
     utils/glLogger.cpp
     utils/glUtils.cpp
     utils/cacheManager.cpp
-    utils/Twine.cpp
-    utils/Text.cpp
-    vulkan/commandBufferManager.cpp
+    vulkan/cbManager.cpp
     vulkan/commandBufferPool.cpp
     vulkan/clearPass.cpp
     vulkan/renderPass.cpp

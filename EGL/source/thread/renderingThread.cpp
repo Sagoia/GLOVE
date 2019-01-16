@@ -25,7 +25,6 @@
 #include "api/eglSurface.h"
 #include "display/displayDriver.h"
 #include "utils/eglLogger.h"
-#include "api/eglGlobalResourceManager.h"
 
 const char * const RenderingThread::EGLErrors[] = {   "EGL_SUCCESS",
                                                       "EGL_NOT_INITIALIZED",
@@ -99,7 +98,7 @@ RenderingThread::WaitClient(void)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    EGLContext_t *activeContext = GetCurrentContext();
+    EGLContext_t *activeContext = static_cast<EGLContext_t *>(GetCurrentContext());
     if (activeContext == nullptr) {
         return EGL_FALSE;
     }
@@ -120,18 +119,20 @@ RenderingThread::ReleaseThread(void)
 }
 
 void
-RenderingThread::SetCurrentContext(EGLenum renderingAPI, EGLContext_t* eglContext)
+RenderingThread::ResetCurrentContext(EGLContext_t* context)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    switch(renderingAPI) {
-        case EGL_OPENGL_ES_API: mGLESCurrentContext = eglContext; break;
-        case EGL_OPENVG_API:    mVGCurrentContext   = eglContext; break;
-        default:                break;
+    if(context == mGLESCurrentContext) {
+        mGLESCurrentContext = nullptr;
+    }
+
+    if(context == mVGCurrentContext) {
+        mVGCurrentContext = nullptr;
     }
 }
 
-EGLContext_t*
+EGLContext
 RenderingThread::GetCurrentContext(void)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
@@ -144,19 +145,14 @@ RenderingThread::GetCurrentContext(void)
 }
 
 void
-RenderingThread::UpdateCurrentContextResourcesRef(EGLContext_t *eglContext, bool incrementCounters)
+RenderingThread::SetCurrentContext(EGLContext_t* eglContext)
 {
-    if(eglContext == nullptr) {
-        return;
-    }
+    FUN_ENTRY(EGL_LOG_TRACE);
 
-    eglContext->UpdateRef(incrementCounters);
-
-    if(eglContext->GetDrawSurface()) {
-        eglContext->GetDrawSurface()->UpdateRef(incrementCounters);
-    }
-    if(eglContext->GetReadSurface()) {
-        eglContext->GetReadSurface()->UpdateRef(incrementCounters);
+    switch(mCurrentAPI) {
+        case EGL_OPENGL_ES_API: mGLESCurrentContext = eglContext; break;
+        case EGL_OPENVG_API:    mVGCurrentContext   = eglContext; break;
+        default:                break;
     }
 }
 
@@ -170,8 +166,8 @@ RenderingThread::GetCurrentSurface(EGLint readdraw)
         return EGL_NO_SURFACE;
     }
 
-    EGLContext_t *activeContext = GetCurrentContext();
-    if(activeContext == nullptr) {
+    EGLContext_t *activeContext = static_cast<EGLContext_t *>(GetCurrentContext());
+    if(!EGLContext_t::FindEGLContext(activeContext)) {
         return EGL_NO_SURFACE;
     }
 
@@ -184,7 +180,7 @@ RenderingThread::GetCurrentDisplay(void)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    EGLContext_t *activeContext = GetCurrentContext();
+    EGLContext_t *activeContext = static_cast<EGLContext_t *>(GetCurrentContext());
     if (activeContext == nullptr) {
         return EGL_NO_DISPLAY;
     }
@@ -193,7 +189,7 @@ RenderingThread::GetCurrentDisplay(void)
 }
 
 EGLContext
-RenderingThread::CreateContext(DisplayDriver* eglDriver, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list)
+RenderingThread::CreateContext(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLContext_t* eglShareContext, const EGLint *attrib_list)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
@@ -202,35 +198,35 @@ RenderingThread::CreateContext(DisplayDriver* eglDriver, EGLConfig_t* eglConfig,
         return EGL_NO_CONTEXT;
     }
 
-    return eglDriver->CreateContext(mCurrentAPI, eglConfig, attrib_list);
+    EGLContext_t *eglContext = new EGLContext_t(dpy, mCurrentAPI, eglConfig, attrib_list);
+    if(eglContext->Create() == EGL_FALSE) {
+        delete eglContext;
+        return EGL_NO_CONTEXT;
+    }
+
+    EGLContext_t::GetEGLContext(eglContext);
+
+    return eglContext;
 }
 
 EGLBoolean
-RenderingThread::DestroyContext(DisplayDriver* eglDriver, EGLContext_t* eglContext)
+RenderingThread::DestroyContext(EGLDisplay_t* dpy, EGLContext_t* eglContext)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    EGLBoolean result = EGL_FALSE;
-
-    EGLenum renderingAPI = eglContext->GetRenderingAPI();
-
-    // mark context for deletion
-    eglContext->MarkForDeletion();
-
-
-    // delete if not current to any thread
-    if(eglContext->FreeForDeletion()) {
-        result = eglDriver->DestroyContext(eglContext);
-
-        // reset the current context for the rendering API
-        SetCurrentContext(renderingAPI, nullptr);
+    if(eglContext->Destroy() == EGL_FALSE) {
+        return EGL_FALSE;
     }
 
-    return result;
+    EGLContext_t::RemoveEGLContext(eglContext);
+    ResetCurrentContext(eglContext);
+    delete eglContext;
+
+    return EGL_TRUE;
 }
 
 EGLBoolean
-RenderingThread::QueryContext(DisplayDriver* eglDriver, EGLContext_t* eglContext, EGLint attribute, EGLint *value)
+RenderingThread::QueryContext(EGLDisplay_t* dpy, EGLContext_t* eglContext, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
@@ -265,7 +261,7 @@ RenderingThread::ValidateCurrentContext(DisplayDriver* eglDriver, EGLSurface_t* 
         return EGL_FALSE;
     }
 
-    if(eglContext != EGL_NO_CONTEXT && eglDriver->CheckBadContext(eglContext) == EGL_FALSE) {
+    if(eglContext != EGL_NO_CONTEXT && EGLContext_t::FindEGLContext(eglContext) == EGL_FALSE) {
         currentThread.RecordError(EGL_BAD_CONTEXT);
         return EGL_FALSE;
     }
@@ -326,31 +322,16 @@ RenderingThread::MakeCurrent(DisplayDriver* eglDriver, EGLDisplay_t* dpy, EGLSur
     }
 
     // Flush commands when changing contexts of the same client API type
-    EGLContext_t* currentContext = GetCurrentContext();
+    EGLContext_t* currentContext = static_cast<EGLContext_t*>(GetCurrentContext());
     if(currentContext && currentContext != eglContext) {
         currentContext->Finish();
     }
-
-   UpdateCurrentContextResourcesRef(currentContext, false);
 
     if(eglContext && eglContext->MakeCurrent(dpy, eglDrawSurface, eglReadSurface) != EGL_TRUE) {
         return EGL_FALSE;
     }
 
-    // mark as not context the last context
-    if(currentContext != nullptr) {
-        currentContext->SetNotCurrent();
-    }
-
-    SetCurrentContext(mCurrentAPI, eglContext);
-
-    currentContext = GetCurrentContext();
-    UpdateCurrentContextResourcesRef(currentContext, true);
-
-    eglDriver->SetActiveContext(currentContext);
-
-    // clean any marked resources that may have been released after the current call to MakeCurrent
-    eglDriver->CleanMarkedResources();
+    SetCurrentContext(eglContext);
 
     return EGL_TRUE;
 }

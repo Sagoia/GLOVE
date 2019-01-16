@@ -5,13 +5,11 @@ message(STATUS "  Building EGL Library")
 set(SOURCES
     api/eglContext.cpp
     api/eglConfig.cpp
+    api/eglDisplay.cpp
     api/egl.cpp
     api/eglSurface.cpp
-    api/eglRefObject.cpp
-    api/eglGlobalResourceManager.cpp
     display/displayDriver.cpp
     display/displayDriversContainer.cpp
-    display/displayDriverResourceManager.cpp
     thread/renderingThread.cpp
     platform/platformFactory.cpp
     platform/vulkan/vulkanWindowInterface.cpp

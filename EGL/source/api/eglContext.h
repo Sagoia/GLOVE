@@ -27,11 +27,10 @@
 #include "EGL/egl.h"
 #include "rendering_api/rendering_api.h"
 #include "utils/eglLogger.h"
-#include "eglRefObject.h"
 #include "eglConfig.h"
 #include "vector"
 
-class EGLContext_t : public EGLRefObject {
+class EGLContext_t {
 private:
     api_context_t                mAPIContext;
     EGLenum                      mRenderingAPI;
@@ -43,7 +42,8 @@ private:
     struct EGLConfig_t          *mConfig;
     const EGLint                *mAttribList;
     EGLenum                      mClientVersion;
-    bool                         mIsCurrent;
+
+    static std::vector<class EGLContext_t*> globalEGLContextList;
 
     EGLBoolean                   GetAPIRenderableType();
     EGLBoolean                   ParseAttributeList(const EGLint* attrib_list);
@@ -53,26 +53,27 @@ public:
     EGLContext_t(class EGLDisplay_t * display, EGLenum rendering_api, EGLConfig_t* config, const EGLint *attribList);
     ~EGLContext_t();
 
+    static EGLBoolean            FindEGLContext(const EGLContext_t* eglContext);
+    static EGLBoolean            GetEGLContext(EGLContext_t* eglContext);
+    static EGLBoolean            RemoveEGLContext(const EGLContext_t* eglContext);
+    static EGLBoolean            CheckBadContext(const EGLContext_t* eglContext);
+
     EGLBoolean                   Create();
     EGLBoolean                   Destroy();
     EGLBoolean                   MakeCurrent(class EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
-    //void                         SetNextImageIndex(uint32_t index);
+    void                         SetNextImageIndex(uint32_t index);
     void                         Flush();
     void                         Finish();
     void                         BindToTexture(EGLint bind);
-    void                         ReleaseSurfaceResources();
-
-    inline void                  SetNotCurrent()                                { FUN_ENTRY(EGL_LOG_TRACE); mIsCurrent = false; }
+    void                         Release();
 
     inline EGLenum               GetRenderingAPI()                        const { FUN_ENTRY(EGL_LOG_TRACE); return mRenderingAPI; }
-    inline EGLDisplay_t         *GetDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
-    inline EGLSurface_t         *GetReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
-    inline EGLSurface_t         *GetDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
+    inline EGLDisplay            GetDisplay()                             const { FUN_ENTRY(EGL_LOG_TRACE); return mDisplay; }
+    inline EGLSurface            GetReadSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mReadSurface; }
+    inline EGLSurface            GetDrawSurface()                         const { FUN_ENTRY(EGL_LOG_TRACE); return mDrawSurface; }
     inline EGLint                GetConfigID()                            const { FUN_ENTRY(EGL_LOG_TRACE); return GetConfigKey(mConfig, EGL_CONFIG_ID); }
     inline EGLint                GetClientVersion()                       const { FUN_ENTRY(EGL_LOG_TRACE); return mClientVersion; }
            EGLint                GetRenderBuffer()                        const;
-    inline bool                  IsCurrent()                              const  { FUN_ENTRY(EGL_LOG_TRACE); return mIsCurrent; }
-
 };
 
 #endif // __EGL_CONTEXT_H__

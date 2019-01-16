@@ -28,12 +28,58 @@
 #include "thread/renderingThread.h"
 #include <algorithm>
 
-EGLContext_t::EGLContext_t(EGLDisplay_t* display, EGLenum rendering_api, EGLConfig_t *config, const EGLint *attribList):
-EGLRefObject(),
-mAPIContext(nullptr), mRenderingAPI(rendering_api), mAPIInterface(nullptr),
+std::vector<class EGLContext_t*> EGLContext_t::globalEGLContextList;
+
+EGLBoolean
+EGLContext_t::CheckBadContext(const EGLContext_t* eglContext)
+{
+    if(eglContext == nullptr) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+
+    const auto iter = std::find(globalEGLContextList.begin(), globalEGLContextList.end(), eglContext);
+    if(iter == globalEGLContextList.end()) {
+        currentThread.RecordError(EGL_BAD_CONTEXT);
+        return EGL_FALSE;
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+EGLContext_t::FindEGLContext(const EGLContext_t* eglContext)
+{
+    auto iter = std::find(globalEGLContextList.begin(), globalEGLContextList.end(), eglContext);
+    if(iter == globalEGLContextList.end()) {
+        return EGL_FALSE;
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+EGLContext_t::GetEGLContext(EGLContext_t* eglContext)
+{
+    if(FindEGLContext(eglContext) == EGL_FALSE) {
+        globalEGLContextList.push_back(eglContext);
+    }
+    return EGL_TRUE;
+}
+
+EGLBoolean
+EGLContext_t::RemoveEGLContext(const EGLContext_t* eglContext)
+{
+    auto iter = std::find(globalEGLContextList.begin(), globalEGLContextList.end(), eglContext);
+    if(iter == globalEGLContextList.end()) {
+        return EGL_FALSE;
+    }
+    globalEGLContextList.erase(iter);
+    return EGL_TRUE;
+}
+
+EGLContext_t::EGLContext_t(EGLDisplay_t* display, EGLenum rendering_api, EGLConfig_t *config, const EGLint *attribList)
+: mAPIContext(nullptr), mRenderingAPI(rendering_api), mAPIInterface(nullptr),
 mDisplay(display), mReadSurface(nullptr), mDrawSurface(nullptr),
-mConfig(config), mAttribList(attribList), mClientVersion(1),
-mIsCurrent(false)
+mConfig(config), mAttribList(attribList), mClientVersion(1)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
@@ -46,7 +92,7 @@ EGLContext_t::~EGLContext_t()
 }
 
 void
-EGLContext_t::ReleaseSurfaceResources()
+EGLContext_t::Release()
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
@@ -166,11 +212,19 @@ EGLContext_t::MakeCurrent(EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *r
         readSurfaceInterface = mReadSurface->GetEGLSurfaceInterface();
     }
 
-    mAPIInterface->set_read_write_surface_cb(mAPIContext, drawSurfaceInterface, readSurfaceInterface);
-
-    mIsCurrent = true;
+    if(mReadSurface || mDrawSurface) {
+        mAPIInterface->set_read_write_surface_cb(mAPIContext, drawSurfaceInterface, readSurfaceInterface);
+    }
 
     return EGL_TRUE;
+}
+
+void
+EGLContext_t::SetNextImageIndex(uint32_t index)
+{
+    FUN_ENTRY(EGL_LOG_TRACE);
+
+    mAPIInterface->set_next_image_index_cb(mAPIContext, index);
 }
 
 void
@@ -180,6 +234,7 @@ EGLContext_t::Flush()
 
     mAPIInterface->flush_cb(mAPIContext);
 }
+
 
 void
 EGLContext_t::Finish()

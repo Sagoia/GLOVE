@@ -60,7 +60,7 @@ private:
     FramebufferArray                           mFramebuffers;
     TextureArray                               mTextures;
 
-    uint32_t                                   mShadingObjectCount;
+    static uint32_t                            mShadingObjectCount;
     shadingPoolIDs_t                           mShadingObjectPool;
     ShaderArray                                mShaders;
     ShaderProgramArray                         mShaderPrograms;

@@ -12,7 +12,7 @@
  */
 
 /**
- *  @file       commandBufferManager.cpp
+ *  @file       cbManager.cpp
  *  @author     Think Silicon
  *  @date       25/07/2018
  *  @version    1.0
@@ -31,13 +31,15 @@
  *
  */
 
-#include "commandBufferManager.h"
+#include "cbManager.h"
 
 namespace vulkanAPI {
 
 #define GLOVE_NO_BUFFER_TO_WAIT                         0x7FFFFFFF
 #define GLOVE_NUM_COMMAND_BUFFERS                       2
 #define GLOVE_FENCE_WAIT_TIMEOUT                        UINT64_MAX
+
+CommandBufferManager *CommandBufferManager::mInstance = nullptr;
 
 CommandBufferManager::CommandBufferManager(const vkContext_t *context)
 : mVkContext(context)
@@ -123,6 +125,9 @@ void
 CommandBufferManager::Release(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
+
+    delete mInstance;
+    mInstance = nullptr;
 }
 
 VkCommandBuffer *

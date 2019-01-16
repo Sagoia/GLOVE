@@ -29,7 +29,7 @@
 #include "utils/cacheManager.h"
 #include "genericVertexAttribute.h"
 #include "vulkan/pipelineCache.h"
-#include "vulkan/commandBufferManager.h"
+#include "vulkan/cbManager.h"
 
 class Context;
 

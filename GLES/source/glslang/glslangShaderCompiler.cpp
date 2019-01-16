@@ -17,110 +17,11 @@
  *  @date       25/07/2018
  *  @version    1.0
  *
- *  @brief      Shaders compilation and linking module. It implements ShaderCompiler interface, using glslang
+ *  @brief      Shaders compilation and linking module. It implements ShaderCompiler interface, using glslang 
  *
  */
 
-#include <vector>
-
-#include "glslang/Include/intermediate.h"
-#include "glslang/MachineIndependent/localintermediate.h"
-
 #include "glslangShaderCompiler.h"
-#include "FixSampler.h"
-
-#include "utils/glLogger.h"
-
-namespace {
-
-using namespace glslang;
-
-struct ReportSamplerTraverser : public glslang::TIntermTraverser {
-    ReportSamplerTraverser(AccessChainList& ACL) :
-        glslang::TIntermTraverser(), Tracing(false), Chains(ACL), Chain() {}
-
-    bool visitBinary(TVisit, TIntermBinary*) override;
-
-    bool Tracing;
-    AccessChainList& Chains;
-    AccessChain Chain;
-};
-
-bool ReportSamplerTraverser::visitBinary(TVisit /* visit */, TIntermBinary* node) {
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    auto Op = node->getOp();
-
-    if (Op != EOpIndexDirectStruct && Op != EOpIndexDirect) {
-        assert(!Tracing);
-        return true;
-    }
-
-    // Either start tracing or in tracing
-    const auto& Loc = node->getLoc();   // symbol location
-    auto L = node->getLeft();
-    const auto& TT = L->getType();
-    auto I = node->getRight()->getAsConstantUnion()->getConstArray()[0].getIConst();
-    const TType* Ty = nullptr;
-    TSourceLoc TLoc {};
-
-    if (Op == EOpIndexDirectStruct) {
-        assert(TT.isStruct());
-        const auto& ST = *TT.getStruct();
-        Ty = ST[I].type;
-        TLoc = ST[I].loc;
-    } else {
-        if (TT.getBasicType() == EbtSampler) {
-            // It happens when there is a sampler array
-            Ty = &TT;
-        } else {
-            if (!Tracing) {
-                return true;
-            }
-            assert(TT.isArray());
-            assert(TT.isStruct());
-        }
-        // No way to get the location of the type
-    }
-
-
-    if (!Tracing) {
-        if (Ty->getBasicType() == EbtSampler) {
-            Chain.emplace_back(&TT, Op == EOpIndexDirect, I, TLoc.line,
-                TLoc.column, Loc.line, Loc.column);
-            Tracing = true;
-        }
-    } else {
-        // Always give the enclosing struct
-        Chain.emplace_back(&TT, Op == EOpIndexDirect, I, TLoc.line,
-                TLoc.column, Loc.line, Loc.column);
-        if (L->getAsSymbolNode()) {
-            Chains.push_back(Chain);
-            Chain.clear();
-            Tracing = false;
-        }
-    }
-
-    return true;
-}
-
-AccessChainList ReportSampler(const glslang::TIntermediate *TI)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    AccessChainList AC {};
-    if (!TI) {
-        return AC;
-    }
-    if (auto Root = TI->getTreeRoot()) {
-        ReportSamplerTraverser it {AC};
-        Root->traverse(&it);
-    }
-    return AC;
-}
-
-} // end of anon namespace
-
 
 bool GlslangShaderCompiler::mSlangInitialized = false;
 static TBuiltInResource slangShaderResources;
@@ -129,6 +30,7 @@ GlslangShaderCompiler::GlslangShaderCompiler()
 : mSlangVertCompiler(nullptr),
   mSlangFragCompiler(nullptr),
   mSlangProgLinker(nullptr),
+  mShaderConverter(nullptr),
   mShaderReflection(nullptr),
   mDumpVulkanShaderReflection(false),
   mDumpInputShaderReflection(false),
@@ -249,11 +151,11 @@ GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shade
         SaveShaderSourceToFile(&program, false, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource.c_str() : mFragSource.c_str(), shaderType);
     }
 
-    ShaderConverter SC {};
-    SC.Initialize(ShaderConverter::SHADER_CONVERSION_100_400, shaderType);
-    SC.SetSlangProgram(mSlangProgLinker->GetSlangProgram());
-    SC.SetIoMapResolver(mSlangProgLinker->GetIoMapResolver());
-    SC.Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection, isYInverted);
+    mShaderConverter = new ShaderConverter();
+    mShaderConverter->Initialize(ShaderConverter::SHADER_CONVERSION_100_400, shaderType);
+    mShaderConverter->SetSlangProgram(mSlangProgLinker->GetSlangProgram());
+    mShaderConverter->SetIoMapResolver(mSlangProgLinker->GetIoMapResolver());
+    mShaderConverter->Convert((shaderType == SHADER_TYPE_VERTEX) ? mVertSource400 : mFragSource400, GetUniformBlocks(), mShaderReflection, isYInverted);
     if(mSaveSourceToFiles) {
         SaveShaderSourceToFile(&program, true, (shaderType == SHADER_TYPE_VERTEX) ? mVertSource400.c_str() : mFragSource400.c_str(), shaderType);
     }
@@ -266,6 +168,8 @@ GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shade
             cout << mFragSource400 << "\n\n" << endl;
         }
     }
+
+    delete mShaderConverter;
 
     return (shaderType == SHADER_TYPE_VERTEX) ? mVertSource400.c_str() : mFragSource400.c_str();
 }
@@ -283,65 +187,13 @@ GlslangShaderCompiler::PrepareReflection(void)
 }
 
 bool
-GlslangShaderCompiler::ReCompileShader(GlslangCompiler* Compiler, ShaderProgram& shaderProgram, shader_type_t shaderType)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    const auto* IM = Compiler->GetSlangShader400()->getIntermediate();
-    // Capture sampler-in-block
-    AccessChainList samplers = ReportSampler(IM);
-    if (samplers.empty()) {
-        return false;
-    }
-
-    // Fix glslang at string level
-    std::string *Src = (shaderType == SHADER_TYPE_VERTEX) ? &mVertSource400 : &mFragSource400;
-    auto S = FixSamplers(samplers, *Src);
-    Src->clear();
-    *Src = std::move(S);
-
-    if (mDumpProcessedShaderSource) {
-        cout << "\n\nFINAL SOURCE:\n" << endl;
-        cout << *Src << "\n\n" << endl;
-    }
-
-    if (mSaveSourceToFiles) {
-        SaveShaderSourceToFile(&shaderProgram, true, Src->c_str(), shaderType);
-    }
-
-    EShMessages message = EShMsgVulkanRules | EShMsgSpvRules;
-    EShLanguage language = (shaderType == SHADER_TYPE_VERTEX ? EShLangVertex : EShLangFragment);
-    const char* source = Src->c_str();
-    return Compiler->CompileShader400(&source, &slangShaderResources, language, message);
-}
-
-bool
-GlslangShaderCompiler::CompileShader(ShaderProgram& shaderProgram, shader_type_t shaderType, bool isYInverted)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    const char* source = ConvertShader(shaderProgram, shaderType, isYInverted);
-    GlslangCompiler* Compiler = (shaderType == SHADER_TYPE_VERTEX ? mSlangVertCompiler : mSlangFragCompiler);
-
-    EShMessages message = EShMsgVulkanRules | EShMsgSpvRules | EShMsgCascadingErrors;
-    EShLanguage language = (shaderType == SHADER_TYPE_VERTEX ? EShLangVertex : EShLangFragment);
-    bool result = Compiler->CompileShader400(&source, &slangShaderResources, language, message);
-
-    if (!result) {
-        // If compile fails due to sampler-in-block, try to fix the glslang
-        // and give it a second chance.
-        return ReCompileShader(Compiler, shaderProgram, shaderType);
-    }
-
-    return true;
-}
-
-bool
 GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYInverted)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     assert(mSlangInitialized);
+
+    bool result;
 
     if(mSaveSourceToFiles) {
         SaveShaderSourceToFile(&shaderProgram, false, mVertSource.c_str(), SHADER_TYPE_VERTEX);
@@ -349,12 +201,19 @@ GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYI
     }
 
     mVertSource400 = string(mVertSource);
-    if (!CompileShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted)) {
+    const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
+    result = mSlangVertCompiler->CompileShader400(&source, &slangShaderResources, EShLangVertex);
+    if(!result) {
         return false;
     }
 
     mFragSource400 = string(mFragSource);
-    return CompileShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
+    source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
+    result = mSlangFragCompiler->CompileShader400(&source, &slangShaderResources, EShLangFragment);
+    if(!result) {
+        return false;
+    }
+    return result;
 }
 
 bool

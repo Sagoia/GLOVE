@@ -31,7 +31,6 @@
 
 using namespace std;
 
-void                    ReplaceAll(string& hays, const string& from, const string& to);
 bool                    IsChar(char c);
 bool                    IsWhiteSpace(char c);
 bool                    IsBuildInUniform(const string &source);

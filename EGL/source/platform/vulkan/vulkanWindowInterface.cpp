@@ -339,7 +339,6 @@ VulkanWindowInterface::DestroySurface(EGLSurface_t *surface)
     if(vkResources && vkResources->GetSurface() != VK_NULL_HANDLE) {
         mVkAPI->DestroyPlatformSurface(vkResources);
         vkResources->SetSurface(VK_NULL_HANDLE);
-        mGLES2Interface->delete_shared_surface_data_cb(surface->GetEGLSurfaceInterface());
     }
 }
 

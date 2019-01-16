@@ -28,9 +28,10 @@
 
 #include "resourceManager.h"
 
+uint32_t ResourceManager::mShadingObjectCount = 1;
+
 ResourceManager::ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
     mVkContext(vkContext),
-    mShadingObjectCount(1),
     mGenericVertexAttributes(GLOVE_MAX_VERTEX_ATTRIBS)
 {
     FUN_ENTRY(GL_LOG_TRACE);

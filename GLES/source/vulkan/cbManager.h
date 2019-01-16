@@ -12,7 +12,7 @@
  */
 
 /**
- *  @file       commandBufferManager.h
+ *  @file       cbManager.h
  *  @author     Think Silicon
  *  @date       25/07/2018
  *  @version    1.0
@@ -79,6 +79,7 @@ private:
         ~State() { FUN_ENTRY(GL_LOG_TRACE); }
     } State;
 
+    static CommandBufferManager    *mInstance;
     VkCommandPool                   mVkCmdPool;
     const vkContext_t              *mVkContext;
 

@@ -33,7 +33,6 @@
 #include "EGL/eglext.h"
 #include "platform/platformWindowInterface.h"
 #include "api/eglDisplay.h"
-#include "displayDriverResourceManager.h"
 #include <vector>
 
 #ifdef DEBUG_DEPTH
@@ -45,59 +44,56 @@ void setCallingThread(RenderingThread *thread);
 
 class DisplayDriver {
 private:
-    EGLDisplay_t                *mEGLDisplay;
     EGLContext_t                *mActiveContext;
     PlatformWindowInterface     *mWindowInterface;
-    DisplayDriverResourceManager mDisplayDriverResourceManager;
+    std::vector<EGLSurface_t*>   mSurfaceList;
+    std::vector<EGLConfig_t*>    mConfigList;
     bool                         mInitialized;
 
-    EGLImageKHR                  CreateImageNativeBufferAndroid(EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
+    void                         UpdateConfigMap(EGLConfig_t* config);
+    EGLImageKHR                  CreateImageNativeBufferAndroid(EGLDisplay_t* dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
     void                         CreateEGLSurfaceInterface(EGLSurface_t *eglSurface);
-    void                         UpdateSurface(EGLSurface_t *eglSurface);
+    void                         UpdateSurface(EGLDisplay_t* dpy, EGLSurface_t *eglSurface);
 
 public:
 
-    DisplayDriver(EGLDisplay_t *eglDisplay);
-    ~DisplayDriver(void);
+    DisplayDriver(void);
+    ~DisplayDriver(void)                                                        { FUN_ENTRY(EGL_LOG_TRACE); }
 
     inline void                  SetActiveContext(EGLContext ctx)               { FUN_ENTRY(EGL_LOG_TRACE); mActiveContext = static_cast<EGLContext_t *>(ctx); }
     inline bool                  Initialized()                            const { FUN_ENTRY(EGL_LOG_TRACE); return mInitialized; }
-    void                         CleanMarkedResources(void);
 
     // Error functions
     EGLBoolean                   CheckBadConfig(const EGLConfig_t *eglConfig) const;
     EGLBoolean                   CheckBadSurface(const EGLSurface_t *eglSurface) const;
-    EGLBoolean                   CheckBadContext(const EGLContext_t* eglContext) const;
     static EGLBoolean            CheckNonInitializedDisplay(const DisplayDriver* displayDriver);
 
     /// EGL API core functions
-    EGLBoolean                   Initialize(EGLint *major, EGLint *minor);
-    EGLBoolean                   Terminate(void);
-    EGLContext                   CreateContext(EGLenum rendering_api, EGLConfig_t *config, const EGLint *attribList);
-    EGLBoolean                   DestroyContext(EGLContext_t *eglContext);
-    EGLBoolean                   GetConfigs(EGLConfig *configs, EGLint config_size, EGLint *num_config);
-    EGLBoolean                   ChooseConfig(const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config);
-    EGLBoolean                   GetConfigAttrib(EGLConfig_t* eglConfig, EGLint attribute, EGLint *value);
-    EGLSurface                   CreateWindowSurface(EGLConfig_t* eglConfig, EGLNativeWindowType win, const EGLint *attrib_list);
-    EGLSurface                   CreatePbufferSurface(EGLConfig_t* eglConfig, const EGLint *attrib_list);
-    EGLSurface                   CreatePixmapSurface(EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list);
-    EGLBoolean                   DestroySurface(EGLSurface_t* eglSurface);
-    EGLBoolean                   QuerySurface(EGLSurface_t* eglSurface, EGLint attribute, EGLint *value);
-    EGLSurface                   CreatePbufferFromClientBuffer(EGLenum buftype, EGLClientBuffer buffer, EGLConfig_t* eglConfig, const EGLint *attrib_list);
-    EGLBoolean                   SurfaceAttrib(EGLSurface_t* eglSurface, EGLint attribute, EGLint value);
-    EGLBoolean                   BindTexImage(EGLSurface_t* eglSurface, EGLint buffer);
-    EGLBoolean                   ReleaseTexImage(EGLSurface_t* eglSurface, EGLint buffer);
-    EGLBoolean                   SwapInterval(EGLint interval);
-    EGLBoolean                   SwapBuffers(EGLSurface_t* eglSurface);
-    EGLBoolean                   CopyBuffers(EGLSurface_t* eglSurface, EGLNativePixmapType target);
+    EGLBoolean                   Initialize(EGLDisplay_t* dpy, EGLint *major, EGLint *minor);
+    EGLBoolean                   Terminate(EGLDisplay_t* dpy);
+    EGLBoolean                   GetConfigs(EGLDisplay_t* dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config);
+    EGLBoolean                   ChooseConfig(EGLDisplay_t* dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config);
+    EGLBoolean                   GetConfigAttrib(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLint attribute, EGLint *value);
+    EGLSurface                   CreateWindowSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativeWindowType win, const EGLint *attrib_list);
+    EGLSurface                   CreatePbufferSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, const EGLint *attrib_list);
+    EGLSurface                   CreatePixmapSurface(EGLDisplay_t* dpy, EGLConfig_t* eglConfig, EGLNativePixmapType pixmap, const EGLint *attrib_list);
+    EGLBoolean                   DestroySurface(EGLDisplay_t* dpy, EGLSurface_t* eglSurface);
+    EGLBoolean                   QuerySurface(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint attribute, EGLint *value);
+    EGLSurface                   CreatePbufferFromClientBuffer(EGLDisplay_t* dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig_t* eglConfig, const EGLint *attrib_list);
+    EGLBoolean                   SurfaceAttrib(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint attribute, EGLint value);
+    EGLBoolean                   BindTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint buffer);
+    EGLBoolean                   ReleaseTexImage(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLint buffer);
+    EGLBoolean                   SwapInterval(EGLDisplay_t* dpy, EGLint interval);
+    EGLBoolean                   SwapBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface);
+    EGLBoolean                   CopyBuffers(EGLDisplay_t* dpy, EGLSurface_t* eglSurface, EGLNativePixmapType target);
     const char*                  GetExtensions();
 
     /// EGL API extension functions
-    EGLImageKHR                  CreateImageKHR(EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
-    EGLBoolean                   DestroyImageKHR(EGLImageKHR image);
-    EGLSyncKHR                   CreateSyncKHR(EGLenum type, const EGLint *attrib_list);
-    EGLBoolean                   DestroySyncKHR(EGLSyncKHR sync);
-    EGLint                       ClientWaitSyncKHR(EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
+    EGLImageKHR                  CreateImageKHR(EGLDisplay_t* dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
+    EGLBoolean                   DestroyImageKHR(EGLDisplay_t* dpy, EGLImageKHR image);
+    EGLSyncKHR                   CreateSyncKHR(EGLDisplay_t* dpy, EGLenum type, const EGLint *attrib_list);
+    EGLBoolean                   DestroySyncKHR(EGLDisplay_t* dpy, EGLSyncKHR sync);
+    EGLint                       ClientWaitSyncKHR(EGLDisplay_t* dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
 };
 
 #endif // __DISPLAY_DRIVER_H__

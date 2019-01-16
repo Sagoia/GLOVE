@@ -12,66 +12,45 @@
  */
 
 /**
- *  @file       eglGlobalResourceManager.cpp
+ *  @file       eglDisplay.cpp
  *  @author     Think Silicon
- *  @date       07/12/2018
+ *  @date       04/10/2018
  *  @version    1.0
  *
- *  @brief      EGL Global Resources Manager. It handles EGL global resources
+ *  @brief      Container of EGL Displays. It manages resources related to EGLDisplay.
  *
  */
 
-#include "utils/egl_defs.h"
-#include "eglGlobalResourceManager.h"
+#include "eglDisplay.h"
 #include "thread/renderingThread.h"
 #include <algorithm>
 
-EGLGlobalResourceManager::EGLGlobalResourceManager()
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-}
-
-EGLGlobalResourceManager::~EGLGlobalResourceManager()
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-}
+EGLDisplay_t EGLDisplay_t::globalDisplayList[MAX_NUM_DISPLAYS];
 
 EGLDisplay_t*
-EGLGlobalResourceManager::FindDisplayByID(EGLNativeDisplayType display_id)
+EGLDisplay_t::GetDisplayByID(EGLNativeDisplayType display_id)
 {
-    FUN_ENTRY(DEBUG_DEPTH);
-
     EGLDisplay_t* dis = nullptr;
 
-    for(int32_t i = 0; i < MAX_NUM_DISPLAYS; ++i) {
-        dis = &mEGLDisplayList[i];
+   for(int32_t i = 0; i < MAX_NUM_DISPLAYS; ++i) {
+       dis = &globalDisplayList[i];
 
-        // return an already existing display
-        if(dis->created && dis->display_id == display_id) {
-            return dis;
-        }
+       // return an already existing display
+       if(dis->created && dis->display_id == display_id) {
+           return dis;
+       }
 
-        // return the same display handle for same display_ids
-        // as display handles are lifetime-valid
-        if(dis->display_id == display_id) {
-            break;
-        }
+       // return the same display handle for same display_ids
+       // as display handles are lifetime-valid
+       if(dis->display_id == display_id) {
+           break;
+       }
 
-        // return the next available id
-        if(dis->created == false && dis->display_id == nullptr) {
-            break;
-        }
-     }
-
-    return dis;
-}
-
-EGLDisplay_t*
-EGLGlobalResourceManager::GetDisplayByID(EGLNativeDisplayType display_id)
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-
-    EGLDisplay_t* dis = FindDisplayByID(display_id);
+       // return the next available id
+       if(dis->created == false && dis->display_id == nullptr) {
+           break;
+       }
+    }
 
    // create a new display if it does not exist
    EGLDisplay dpy = nullptr;
@@ -98,13 +77,13 @@ EGLGlobalResourceManager::GetDisplayByID(EGLNativeDisplayType display_id)
 }
 
 EGLDisplay_t*
-EGLGlobalResourceManager::FindDisplay(EGLDisplay display)
+EGLDisplay_t::FindDisplay(EGLDisplay display)
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
     EGLDisplay_t* dis = nullptr;
     for(int32_t i = 0; i < MAX_NUM_DISPLAYS; ++i) {
-        dis = &mEGLDisplayList[i];
+        dis = &globalDisplayList[i];
         // handle is the address of the element in the array
         if(dis->created == true && reinterpret_cast<eglDisplayHandle>(dis) == display) {
             return dis;
@@ -115,11 +94,9 @@ EGLGlobalResourceManager::FindDisplay(EGLDisplay display)
 }
 
 EGLBoolean
-EGLGlobalResourceManager::InitializeDisplay(EGLDisplay dpy, void* displayDriver)
+EGLDisplay_t::InitializeDisplay(EGLDisplay dpy, void* displayDriver)
 {
-    FUN_ENTRY(DEBUG_DEPTH);
-
-    EGLDisplay_t *eglDisplay = FindDisplay(dpy);
+    EGLDisplay_t *eglDisplay = EGLDisplay_t::FindDisplay(dpy);
     if(eglDisplay == nullptr) {
         return EGL_FALSE;
     }
@@ -136,12 +113,9 @@ EGLGlobalResourceManager::InitializeDisplay(EGLDisplay dpy, void* displayDriver)
     return EGL_TRUE;
 }
 
-void
-EGLGlobalResourceManager::TerminateDisplay(EGLDisplay display)
+void EGLDisplay_t::TerminateDisplay(EGLDisplay display)
 {
-    FUN_ENTRY(DEBUG_DEPTH);
-
-    EGLDisplay_t *eglDisplay = FindDisplay(display);
+    EGLDisplay_t *eglDisplay = EGLDisplay_t::FindDisplay(display);
     if(eglDisplay == nullptr) {
         return;
     }
@@ -157,10 +131,8 @@ EGLGlobalResourceManager::TerminateDisplay(EGLDisplay display)
 }
 
 EGLBoolean
-EGLGlobalResourceManager::CheckBadDisplay(const EGLDisplay_t* eglDisplay) const
+EGLDisplay_t::CheckBadDisplay(const EGLDisplay_t* eglDisplay)
 {
-    FUN_ENTRY(DEBUG_DEPTH);
-
     if(eglDisplay == nullptr) {
         currentThread.RecordError(EGL_BAD_DISPLAY);
         return EGL_FALSE;

@@ -104,8 +104,6 @@ ShaderConverter::Convert100To400(std::string& source, const uniformBlockMap_t &u
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    // Replace each tab with 4 spaces. It makes parsing result easy to use.
-    ReplaceAll(source, "\t", "    ");
     ProcessMacros(source);
     ProcessHeader(source, uniformBlockMap);
     ProcessUniforms(source, uniformBlockMap);
