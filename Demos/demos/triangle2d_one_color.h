@@ -21,7 +21,6 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "uniform_color.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "uniform_color.bin"
 
-static const char* diffuse_textures [] = {};
 static const char* shading_titles   [] = { "COLOR_UNIFORM" };
 
 #endif // __TRIANGLE2D_ONE_COLOR_H_

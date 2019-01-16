@@ -96,15 +96,15 @@ public:
     inline ShaderProgramArray *GetShaderProgramArray(void)                      { FUN_ENTRY(GL_LOG_TRACE); return &mShaderPrograms;}
     inline RenderbufferArray  *GetRenderbufferArray(void)                       { FUN_ENTRY(GL_LOG_TRACE); return &mRenderbuffers; }
 
-    inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.GetObject(index); }
+    inline Texture *           GetTexture(GLuint index)                         { FUN_ENTRY(GL_LOG_TRACE); return mTextures.Object(index); }
     inline Texture *           GetDefaultTexture(GLenum target)                 { FUN_ENTRY(GL_LOG_TRACE); return target == GL_TEXTURE_2D ? mDefaultTexture2D : mDefaultTextureCubeMap; }
-    inline Framebuffer *       GetFramebuffer(GLuint index)                     { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers.GetObject(index); }
-    inline Renderbuffer *      GetRenderbuffer(GLuint index)                    { FUN_ENTRY(GL_LOG_TRACE); return mRenderbuffers.GetObject(index); }
-    inline BufferObject *      GetBuffer(GLuint index)                          { FUN_ENTRY(GL_LOG_TRACE); return mBuffers.GetObject(index); }
+    inline Framebuffer *       GetFramebuffer(GLuint index)                     { FUN_ENTRY(GL_LOG_TRACE); return mFramebuffers.Object(index); }
+    inline Renderbuffer *      GetRenderbuffer(GLuint index)                    { FUN_ENTRY(GL_LOG_TRACE); return mRenderbuffers.Object(index); }
+    inline BufferObject *      GetBuffer(GLuint index)                          { FUN_ENTRY(GL_LOG_TRACE); return mBuffers.Object(index); }
     inline uint32_t            GetTextureID(const Texture *texture)             { FUN_ENTRY(GL_LOG_TRACE); return (texture == mDefaultTexture2D) || (texture == mDefaultTextureCubeMap) ? 0 : mTextures.GetObjectId(texture);}
     inline uint32_t            GetBufferID(const BufferObject *bo)              { FUN_ENTRY(GL_LOG_TRACE); return mBuffers.GetObjectId(bo); }
-    inline Shader *            GetShader(GLuint index)                          { FUN_ENTRY(GL_LOG_TRACE); return mShaders.GetObject(index); }
-    inline ShaderProgram *     GetShaderProgram(GLuint index)                   { FUN_ENTRY(GL_LOG_TRACE); return mShaderPrograms.GetObject(index); }
+    inline Shader *            GetShader(GLuint index)                          { FUN_ENTRY(GL_LOG_TRACE); return mShaders.Object(index); }
+    inline ShaderProgram *     GetShaderProgram(GLuint index)                   { FUN_ENTRY(GL_LOG_TRACE); return mShaderPrograms.Object(index); }
     inline uint32_t            GetShaderID(const Shader *shader)                { FUN_ENTRY(GL_LOG_TRACE); return mShaders.GetObjectId(shader); }
     inline uint32_t            GetShaderProgramID(const ShaderProgram *program) { FUN_ENTRY(GL_LOG_TRACE); return mShaderPrograms.GetObjectId(program); }
     inline uint32_t            GetShadingObjectCount(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mShadingObjectCount; }
@@ -133,6 +133,7 @@ public:
 
     void                       UpdateFramebufferObjects(GLuint index, GLenum target);
     void                       CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManager);
+    void                       ResetShaderProgramDescSetsState(void);
 
 };
 

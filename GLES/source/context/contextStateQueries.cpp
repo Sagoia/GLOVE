@@ -194,8 +194,8 @@ Context::GetIntegerv(GLenum pname, GLint* params)
                                                 params[1] = 1; break;
     case GL_ALIASED_POINT_SIZE_RANGE:           params[0] = 1;
                                                 params[1] = 1; break;
-    case GL_COMPRESSED_TEXTURE_FORMATS:         *params = 0; break;
-    case GL_NUM_COMPRESSED_TEXTURE_FORMATS:     *params = 0; break;
+    case GL_COMPRESSED_TEXTURE_FORMATS:         memcpy(params, mCompressedTextureFormats.data(), mCompressedTextureFormats.size() * sizeof(GLint)); break;
+    case GL_NUM_COMPRESSED_TEXTURE_FORMATS:     *params = mCompressedTextureFormats.size(); break;
     case GL_SAMPLES:                            *params = static_cast<GLint>(mStateManager.GetFragmentOperationsState()->GetSampleCoverageBits()); break;
     case GL_SAMPLE_BUFFERS:                     *params = mStateManager.GetFragmentOperationsState()->GetMultiSamplingEnabled(); break;
     case GL_SAMPLE_COVERAGE:                    *params = mStateManager.GetFragmentOperationsState()->GetSampleCoverageEnabled(); break;

@@ -104,6 +104,8 @@ public:
     GlslangShaderCompiler();
     ~GlslangShaderCompiler();
 
+    void SetVertexShaderCompiler(SlangCompiler *compiler)                     { FUN_ENTRY(GL_LOG_TRACE); mSlangVertCompiler = dynamic_cast<GlslangCompiler *>(compiler); }
+    void SetFragmentShaderCompiler(SlangCompiler *compiler)                   { FUN_ENTRY(GL_LOG_TRACE); mSlangFragCompiler = dynamic_cast<GlslangCompiler *>(compiler); }
     bool CompileVertexShader(const char* const* source) override;
     bool CompileFragmentShader(const char* const* source) override;
     const char* GetProgramInfoLog(void) override;

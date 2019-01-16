@@ -34,6 +34,8 @@
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
 
+class CacheManager;
+
 class Texture {
 
     struct State {
@@ -42,9 +44,10 @@ class Texture {
         GLenum                     format;
         GLenum                     type;
         void                       *data;
+        GLsizei                    size;
 
         State() : width(-1), height(-1), format(GL_INVALID_VALUE), type(GL_INVALID_VALUE),
-            data(nullptr) { FUN_ENTRY(GL_LOG_TRACE); }
+            data(nullptr), size(0){ FUN_ENTRY(GL_LOG_TRACE); }
         ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
     typedef State                  State_t;
@@ -55,6 +58,8 @@ private:
     vulkanAPI::vkContext_t *    mVkContext;
 
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
+
+    CacheManager *              mCacheManager;
 
     GLenum                      mFormat;
     GLenum                      mTarget;
@@ -78,6 +83,8 @@ private:
     Texture                    *mDepthStencilTexture;
     uint32_t                    mDepthStencilTextureRefCount;
 
+    bool                        mDirty;
+
     vulkanAPI::Image*           mImage;
     vulkanAPI::Memory*          mMemory;
     vulkanAPI::Sampler*         mSampler;
@@ -90,13 +97,15 @@ private:
 
 public:
     Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
-            const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     ~Texture();
 
 // Generate Functions
     bool                    Allocate();
     void                    SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum format, GLenum type, GLint unpackAlignment, const void *pixels);
     void                    SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData);
+    void                    SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *imageData);
+    void                    SetCompressedSubState(Rect *rect, GLsizei with, GLsizei height, GLint level, GLint layer, GLsizei blockSize, const void *imageData);
     void                    GenerateMipmaps(GLenum hintMipmapMode);
 
 // Init Functions
@@ -117,6 +126,7 @@ public:
 
 // Copy Functions
      void                   CopyPixelsFromHost (ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData);
+     void                   CpoyCompressedPixelFromHost(Rect *srcRect, GLint miplevel, GLint layer, GLenum format, const void *srcData, GLsizei dataSize);
      void                   CopyPixelsToHost   (ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData);
      void                   SubmitCopyPixels   (const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum dstFormat, bool copyToImage);
      void                   InvertPixels       (void);
@@ -145,14 +155,19 @@ public:
 
     inline VkSampler        GetVkSampler(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return mSampler->GetSampler(); }
     inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
+    inline VkFlags          GetVkImageUsage(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageUsage(); }
     inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
     inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
-    VkFormat                FindSupportedVkColorFormat(VkFormat format)           { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
+    VkFormat                FindSupportedVkColorFormat(VkFormat format)         { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
 
 // Set Functions
     inline void             SetCommandBufferManager(
                                 vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
-
+    inline void             SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager;
+                                                                                                           mSampler->SetCacheManager(cacheManager);
+                                                                                                           mImageView->SetCacheManager(cacheManager);
+                                                                                                           mImage->SetCacheManager(cacheManager);
+                                                                                                           mMemory->SetCacheManager(cacheManager); }
     inline void             SetVkContext(const
                                          vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
                                                                                                            mMemory->SetContext(vkContext);
@@ -185,7 +200,7 @@ public:
     inline void             SetImageBufferCopyStencil(bool copy)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetCopyStencil(copy);   }
     inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
     inline void             SetVkImage(VkImage image)                           { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImage(image);        }
-    inline void             SetVkImageUsage(VkImageUsageFlagBits usage)         { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }
+    inline void             SetVkImageUsage(VkImageUsageFlags usage)            { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }
     inline void             SetVkImageLayout(VkImageLayout layout)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageLayout(layout); }
     inline void             SetVkImageTiling(VkImageTiling tiling)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling(tiling); }
     inline void             SetVkImageTiling(void)                              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
@@ -203,10 +218,11 @@ public:
                                                                                                                    mFormat != GL_RGBA            &&
                                                                                                                    mFormat != GL_LUMINANCE       &&
                                                                                                                    mFormat != GL_LUMINANCE_ALPHA &&
-                                                                                                                   mFormat != GL_BGRA8_EXT); }
+                                                                                                                   mFormat != GL_BGRA_EXT); }
            bool             IsNPOT(void);
            bool             IsNPOTAccessCompleted(void);
            bool             IsCompleted(void);
+           bool             IsValid(void);
 };
 
 #endif // __TEXTURE_H__

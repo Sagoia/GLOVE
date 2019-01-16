@@ -26,6 +26,7 @@
 
 #include "shaderReflection.h"
 
+class SlangCompiler;
 class ShaderProgram;
 
 class ShaderCompiler {
@@ -34,6 +35,8 @@ public:
     ShaderCompiler() {}
     virtual ~ShaderCompiler() {}
 
+    virtual void SetVertexShaderCompiler(SlangCompiler *compiler) = 0;
+    virtual void SetFragmentShaderCompiler(SlangCompiler *compiler) = 0;
     virtual bool CompileVertexShader(const char* const* source) = 0;
     virtual bool CompileFragmentShader(const char* const* source) = 0;
     virtual const char* GetProgramInfoLog(void) = 0;

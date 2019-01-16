@@ -164,6 +164,9 @@ static const GLfloat cube_color_buffer_data [] = {
     0.0f,  0.0f,  1.0f,
 };
 
+// Array size must greater than 0 while using MSVC
+#ifndef WIN32
 static const GLuint  cube_index_buffer_data [] = {};
+#endif
 
 #endif // __CUBE_H_

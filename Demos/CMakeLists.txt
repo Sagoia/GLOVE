@@ -16,7 +16,11 @@ set(BINARY_PROG         "-DBINARY_PROG")
 set(WINDOW_SIZE         "-DWIDTH=600 -DHEIGHT=600")
 
 # Set c/cpp flag definitions for the compiler.
-set(C_REDUCE_ERRORS     "-Wno-unused-variable -Wno-unused-result")
+if(WIN32)
+    set(C_REDUCE_ERRORS     "")
+else()
+    set(C_REDUCE_ERRORS     "-Wno-unused-variable -Wno-unused-result")
+endif()
 set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} ${C_REDUCE_ERRORS} ${DEBUG} ${PROFILE} ${CONFIG} ${WINDOW_SIZE}")
 
 # Sets the libs variable to contain the libraries that the examples will
@@ -27,6 +31,13 @@ set(LIBS
     GLESv2
 )
 
+if(WIN32)
+    set(LIBS
+        EGL
+        GLESv2
+    )
+endif()
+
 if(USE_SURFACE STREQUAL "XCB")
     set(LIBS
         ${LIBS}
@@ -34,6 +45,7 @@ if(USE_SURFACE STREQUAL "XCB")
         X11-xcb
         xcb
     )
+elseif(USE_SURFACE STREQUAL "WINDOWS")
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/EGL/include

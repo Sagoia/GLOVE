@@ -26,6 +26,8 @@
 #include "platform/vulkan/vulkanResources.h"
 #ifdef VK_USE_PLATFORM_XCB_KHR
 #include "platform/vulkan/WSIXcb.h"
+#elif defined(VK_USE_PLATFORM_WIN32_KHR)
+#include "platform/vulkan/WSIWindows.h"
 #endif
 #include "platform/vulkan/WSIPlaneDisplay.h"
 
@@ -78,15 +80,13 @@ PlatformFactory::ChoosePlatform()
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
     platformFactory->SetPlatformType(PlatformFactory::WSI_XCB);
-    return;
-#endif
-
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
+#elif defined(VK_USE_PLATFORM_WIN32_KHR)
+    platformFactory->SetPlatformType(PlatformFactory::WSI_WINDOWS);
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
     platformFactory->SetPlatformType(PlatformFactory::WSI_ANDROID);
-    return;
-#endif
-
+#else
     platformFactory->SetPlatformType(PlatformFactory::WSI_PLANE_DISPLAY);
+#endif
 }
 
 PlatformWindowInterface *
@@ -102,6 +102,15 @@ PlatformFactory::GetWindowInterface()
         case WSI_XCB: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
             WSIXcb *vulkanWSI = new WSIXcb();
+            windowInterface->SetWSI(vulkanWSI);
+            return windowInterface;
+        }
+#endif
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+        case WSI_WINDOWS: {
+            VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
+            WSIWindows *vulkanWSI = new WSIWindows();
             windowInterface->SetWSI(vulkanWSI);
             return windowInterface;
         }
@@ -141,6 +150,7 @@ PlatformFactory::GetResources()
 
     switch(platformType) {
         case WSI_XCB:
+        case WSI_WINDOWS:
         case WSI_PLANE_DISPLAY:
             return new VulkanResources();
 

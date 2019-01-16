@@ -29,6 +29,8 @@
 #include "vulkan/buffer.h"
 #include "vulkan/memory.h"
 
+class CacheManager;
+
 class BufferObject {
 private:
     const
@@ -38,9 +40,8 @@ private:
     GLenum                  mTarget;
     bool                    mAllocated;
 
-    vulkanAPI::Memory*      mMemory;
-
 protected:
+    vulkanAPI::Memory*      mMemory;
     vulkanAPI::Buffer*      mBuffer;
 
 public:
@@ -58,6 +59,7 @@ public:
 
 // Update Functions
     void                    UpdateData(size_t size, size_t offset, const void *data);
+    void                    FlushData();
 
 // Get Functions
     bool                    GetData(size_t size,
@@ -107,7 +109,7 @@ class UniformBufferObject : public BufferObject
     void                    AllocateVkDescriptorBufferInfo(void);
 
 public:
-    explicit                UniformBufferObject(const vulkanAPI::vkContext_t *vkContext)      : BufferObject(vkContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                UniformBufferObject(const vulkanAPI::vkContext_t *vkContext);
 
     bool                    Allocate(size_t size, const void *data) override;
     VkDescriptorBufferInfo* GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }

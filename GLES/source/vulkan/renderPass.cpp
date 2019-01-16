@@ -30,6 +30,7 @@
 
 #include "renderPass.h"
 #include "utils.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
@@ -39,7 +40,8 @@ RenderPass::RenderPass(const vkContext_t *vkContext)
   mVkRenderPass(VK_NULL_HANDLE),
   mColorClearEnabled(false), mDepthClearEnabled(false), mStencilClearEnabled(false),
   mColorWriteEnabled(true), mDepthWriteEnabled(true), mStencilWriteEnabled(false),
-  mStarted(false)
+  mStarted(false),
+  mHash(0), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -59,7 +61,9 @@ RenderPass::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkRenderPass != VK_NULL_HANDLE) {
-        vkDestroyRenderPass(mVkContext->vkDevice, mVkRenderPass, nullptr);
+        if (!mCacheManager) {
+            vkDestroyRenderPass(mVkContext->vkDevice, mVkRenderPass, nullptr);
+        }
         mVkRenderPass = VK_NULL_HANDLE;
     }
 }
@@ -141,8 +145,22 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     info.dependencyCount  = 0;
     info.pDependencies    = nullptr;
 
-    VkResult err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
-    assert(!err);
+    VkResult err = VK_SUCCESS;
+
+    if (!mCacheManager) {
+        err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
+        assert(!err);
+    } else {
+        mHash = HashRenderPassInfo(info);
+        mVkRenderPass = mCacheManager->GetRenderPass(mHash);
+
+        if (mVkRenderPass == VK_NULL_HANDLE) {
+            err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
+            assert(!err);
+
+            mCacheManager->CacheRenderPass(mHash, mVkRenderPass);
+        }
+    }
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
 }

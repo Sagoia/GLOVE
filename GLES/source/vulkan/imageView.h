@@ -26,6 +26,8 @@
 
 #include "image.h"
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class ImageView {
@@ -36,6 +38,8 @@ private:
     vkContext_t *                     mVkContext;
 
     VkImageView                       mVkImageView;
+
+    CacheManager *                    mCacheManager;
 
 public:
 // Constructor
@@ -55,6 +59,8 @@ public:
 
 // Set Functions
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };
 
 }

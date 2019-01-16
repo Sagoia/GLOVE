@@ -47,6 +47,8 @@ Context::Context()
     mVkContext            = vulkanAPI::GetContext();
     mCommandBufferManager = new vulkanAPI::CommandBufferManager(mVkContext);
 
+    InitExtensions();
+
     mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
     mShaderCompiler  = new GlslangShaderCompiler();
     mPipeline        = new vulkanAPI::Pipeline(mVkContext);
@@ -141,6 +143,20 @@ Context::InitializeDefaultTextures()
     }
 }
 
+void 
+Context::InitExtensions()
+{
+    mCompressedTextureFormats.clear();
+    mExtensions = "GL_OES_get_program_binary\nGL_OES_rgb8_rgba8\nGL_EXT_texture_format_BGRA8888\n";
+    if (mVkContext->vkDeviceFeatures.textureCompressionBC) { 
+        mExtensions += "GL_EXT_texture_compression_dxt1\nGL_EXT_texture_compression_s3tc\n";
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_S3TC_DXT1_EXT);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
+    }
+}
+
 Framebuffer *
 Context::CreateFBOFromEGLSurface(EGLSurfaceInterface *eglSurfaceInterface)
 {
@@ -168,6 +184,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     VkImage *vkImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
 
     Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
+    fbo->SetCacheManager(mCacheManager);
 
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext, mCommandBufferManager);
@@ -190,6 +207,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetVkImage(vkImages[i]);
         tex->CreateVkImageSubResourceRange();
         tex->CreateVkImageView();
+        tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         fbo->AddColorAttachment(tex);
         mSystemTextures.push_back(tex);
     }
@@ -229,7 +247,11 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
                   GlInternalFormatToGlType(glformat),
                   Texture::GetDefaultInternalAlignment(),
                   nullptr);
-    return tex->Allocate() ? tex : nullptr;
+    if (!tex->Allocate()) {
+        delete tex;
+        return nullptr;
+    }
+    return tex;
 }
 
 void

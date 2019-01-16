@@ -6,7 +6,7 @@ set(SOURCES
     api/gl.cpp
     api/eglInterface.cpp
     context/context.cpp
-    context/contextBufferObject
+    context/contextBufferObject.cpp
     context/contextFrameBuffer.cpp
     context/contextRenderBuffer.cpp
     context/contextRendering.cpp
@@ -63,6 +63,7 @@ set(SOURCES
     vulkan/renderPass.cpp
     vulkan/buffer.cpp
     vulkan/memory.cpp
+    vulkan/memoryAllocator.cpp
     vulkan/sampler.cpp
     vulkan/image.cpp
     vulkan/imageView.cpp
@@ -74,17 +75,67 @@ set(SOURCES
     vulkan/utils.cpp
 )
 
-# Sets the LIBS variable to contain the libraries that our GLESv2 shared library
-# will need to be linked against to.
-set(LIBS
-    ${Vulkan_LIBRARY}
-    glslang
-    SPIRV
-    HLSL
-    OGLCompiler
-    OSDependent
-    pthread
-    m
+set(HEADERS
+    api/glFunctions.h
+    context/context.h
+    glslang/glslang_utils.h
+    glslang/glslangCompiler.h
+    glslang/glslangLinker.h
+    glslang/glslangIoMapResolver.h
+    glslang/glslangShaderCompiler.h
+    glslang/shaderConverter.h
+    resources/attachment.h
+    resources/bufferObject.h
+    resources/framebuffer.h
+    resources/genericVertexAttribute.h
+    resources/resourceManager.h
+    resources/renderbuffer.h
+    resources/shader.h
+    resources/shaderCompiler.h
+    resources/shaderProgram.h
+    resources/shaderReflection.h
+    resources/shaderResourceInterface.h
+    resources/slangCompiler.h
+    resources/texture.h
+    resources/rect.h
+    resources/sampler.h
+    resources/screenSpacePass.h
+    state/stateManager.h
+    state/stateActiveObjects.h
+    state/stateInputAssembly.h
+    state/stateFragmentOperations.h
+    state/stateFramebufferOperations.h
+    state/statePixelStorage.h
+    state/stateRasterization.h
+    state/stateHintAspects.h
+    state/stateViewportTransformation.h
+    utils/arrays.hpp
+    utils/color.hpp
+    utils/globals.h
+    utils/glsl_types.h
+    utils/GlToVkConverter.h
+    utils/parser_helpers.h
+    utils/VkToGlConverter.h
+    utils/glLogger.h
+    utils/glLoggerImpl.h
+    utils/glUtils.h
+    utils/cacheManager.h
+    vulkan/cbManager.h
+    vulkan/commandBufferPool.h
+    vulkan/clearPass.h
+    vulkan/renderPass.h
+    vulkan/buffer.h
+    vulkan/memory.h
+    vulkan/memoryAllocator.h
+    vulkan/sampler.h
+    vulkan/image.h
+    vulkan/imageView.h
+    vulkan/pipeline.h
+    vulkan/pipelineCache.h
+    vulkan/framebuffer.h
+    vulkan/fence.h
+    vulkan/context.h
+    vulkan/utils.h
 )
 
 # Where the .h files included in the source files can be found.
@@ -98,26 +149,73 @@ include_directories(${GLES_PATH}/source
 link_directories(${GLSLANG_PATH}/lib)
 
 # Ensure we re-link if our external libraries change.
-add_library(glslang STATIC IMPORTED)
-set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libglslang.a)
+if(WIN32)
+    set(LIBS
+        ${Vulkan_LIBRARY}
+        debug ${GLSLANG_PATH}/lib/glslangd.lib
+        optimized ${GLSLANG_PATH}/lib/glslang.lib
+        debug ${GLSLANG_PATH}/lib/SPIRVd.lib
+        optimized ${GLSLANG_PATH}/lib/SPIRV.lib
+        debug ${GLSLANG_PATH}/lib/HLSLd.lib
+        optimized ${GLSLANG_PATH}/lib/HLSL.lib
+        debug ${GLSLANG_PATH}/lib/OGLCompilerd.lib
+        optimized ${GLSLANG_PATH}/lib/OGLCompiler.lib
+        debug ${GLSLANG_PATH}/lib/OSDependentd.lib
+        optimized ${GLSLANG_PATH}/lib/OSDependent.lib
+    )
 
-add_library(SPIRV STATIC IMPORTED)
-set_target_properties(SPIRV PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libSPIRV.a)
+    add_library(GLESv2 SHARED ${HEADERS} ${SOURCES})
 
-add_library(HLSL STATIC IMPORTED)
-set_target_properties(HLSL PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libHLSL.a)
+    set_target_properties(GLESv2 PROPERTIES PREFIX "lib"
+                                            POSITION_INDEPENDENT_CODE ON
+                                            LINK_FLAGS "/INCREMENTAL:NO"
+                                            INSTALL_RPATH_USE_LINK_PATH TRUE
+                                            INSTALL_RPATH "\$ORIGIN")
 
-add_library(OGLCompiler STATIC IMPORTED)
-set_target_properties(OGLCompiler PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOGLCompiler.a)
+    target_link_libraries(GLESv2 ${LIBS})
 
-add_library(OSDependent STATIC IMPORTED)
-set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
+    install(TARGETS GLESv2 RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
-add_library(GLESv2 SHARED ${SOURCES})
-set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                        LINK_FLAGS "-Wl,-Bsymbolic"
-                                        INSTALL_RPATH_USE_LINK_PATH TRUE
-                                        INSTALL_RPATH "\$ORIGIN")
-target_link_libraries(GLESv2 ${LIBS})
+else()
+    # Sets the LIBS variable to contain the libraries that our GLESv2 shared library
+    # will need to be linked against to.
+    set(LIBS
+        ${Vulkan_LIBRARY}
+        glslang
+        SPIRV
+        HLSL
+        OGLCompiler
+        OSDependent
+        pthread
+        m
+    )
 
-install(TARGETS GLESv2 LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+    add_library(glslang STATIC IMPORTED)
+    set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libglslang.a)
+
+    add_library(SPIRV STATIC IMPORTED)
+    set_target_properties(SPIRV PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libSPIRV.a)
+
+    add_library(HLSL STATIC IMPORTED)
+    set_target_properties(HLSL PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libHLSL.a)
+
+    add_library(OGLCompiler STATIC IMPORTED)
+    set_target_properties(OGLCompiler PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOGLCompiler.a)
+
+    add_library(OSDependent STATIC IMPORTED)
+    set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
+
+    add_library(GLESv2 SHARED ${SOURCES})
+
+    set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                            LINK_FLAGS "-Wl,-Bsymbolic"
+                                            INSTALL_RPATH_USE_LINK_PATH TRUE
+                                            INSTALL_RPATH "\$ORIGIN")
+
+    target_link_libraries(GLESv2 ${LIBS})
+
+    install(TARGETS GLESv2 LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+
+endif()
+
+

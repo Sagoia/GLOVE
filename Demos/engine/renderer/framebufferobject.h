@@ -15,7 +15,7 @@
 #define __FRAMEBUFFEROBJECT_H_
 
 #include "../utilities/debug.h"
-#include "../asset_manager/tgaLoader.h"
+#include "../asset_manager/texLoader.h"
 
 typedef struct openGL_fbo_t
 {

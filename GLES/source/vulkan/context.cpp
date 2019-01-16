@@ -28,9 +28,34 @@
  */
 
 #include "context.h"
+#include "memoryAllocator.h"
 #include "cbManager.h"
 
 namespace vulkanAPI {
+
+#ifdef ENABLE_VK_DEBUG_REPORTER
+
+#define GLOVE_VK_VALIDATION_LAYERS                      true
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_XCB_SURFACE_EXTENSION_NAME };
+#elif defined (VK_USE_PLATFORM_ANDROID_KHR)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_ANDROID_SURFACE_EXTENSION_NAME };
+#elif defined (VK_USE_PLATFORM_WIN32_KHR)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
+#else // native
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+                                                                    VK_KHR_DISPLAY_EXTENSION_NAME };
+#endif
+
+#else
 
 #define GLOVE_VK_VALIDATION_LAYERS                      false
 
@@ -40,14 +65,21 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 #elif defined (VK_USE_PLATFORM_ANDROID_KHR)
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_ANDROID_SURFACE_EXTENSION_NAME};
+#elif defined (VK_USE_PLATFORM_WIN32_KHR)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
 #else // native
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_DISPLAY_EXTENSION_NAME};
 #endif
 
+#endif //ENABLE_VK_DEBUG_REPORTER
+
 static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 static const std::vector<const char*> usefulDeviceExtensions     = {"VK_KHR_maintenance1"};
+
+static const std::vector<const char*> validationLayerNames       = {"VK_LAYER_LUNARG_standard_validation"};
 
 static       char **enabledInstanceLayers           = nullptr;
 
@@ -63,6 +95,11 @@ bool CreateVkDevice(void);
 bool CreateVkCommandPool(void);
 bool CreateVkSemaphores(void);
 void InitVkQueue(void);
+void CreateMemoryAllocator(void);
+#ifdef ENABLE_VK_DEBUG_REPORTER
+bool CreateVkDebugReporter(void);
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data);
+#endif
 
 bool
 InitVkLayers(uint32_t* nLayers)
@@ -92,12 +129,23 @@ InitVkLayers(uint32_t* nLayers)
         enabledInstanceLayers = (char**)malloc(layerCount * sizeof(char*));
     }
 
-    *nLayers = layerCount;
-
-    for(uint32_t i = 0; i < layerCount; ++i) {
-        enabledInstanceLayers[i] = (char*)malloc(VK_MAX_EXTENSION_NAME_SIZE*sizeof(char));
-        strcpy(enabledInstanceLayers[i], vkLayerProperties[i].layerName);
+    uint32_t layers = 0;
+    for (uint32_t i = 0; i < layerCount; ++i) {
+        bool enable = false;
+        for (auto &layerName : validationLayerNames) {
+            if (!strcmp((const char *)layerName, vkLayerProperties[i].layerName)) {
+                enable = true;
+                break;
+            }
+        }
+        if (enable) {
+            enabledInstanceLayers[layers] = (char*)malloc(VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+            strcpy(enabledInstanceLayers[layers], vkLayerProperties[i].layerName);
+            ++layers;
+        }
     }
+
+    *nLayers = layers;
 
     if(vkLayerProperties) {
         free(vkLayerProperties);
@@ -318,6 +366,13 @@ CreateVkDevice(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(GloveVkContext.vkGpus[0], &deviceFeatures);
+
+    VkPhysicalDeviceFeatures &vkDeviceFeatures = GloveVkContext.vkDeviceFeatures;
+    if (deviceFeatures.wideLines)               { vkDeviceFeatures.wideLines = VK_TRUE;}
+    if (deviceFeatures.textureCompressionBC)    { vkDeviceFeatures.textureCompressionBC = VK_TRUE; }
+
     float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;
     queueInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -337,7 +392,7 @@ CreateVkDevice(void)
     deviceInfo.ppEnabledLayerNames     = nullptr;
     deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
     deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
-    deviceInfo.pEnabledFeatures        = nullptr;
+    deviceInfo.pEnabledFeatures        = &vkDeviceFeatures;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
     assert(!err);
@@ -390,6 +445,14 @@ InitVkQueue(void)
                      &GloveVkContext.vkQueue);
 }
 
+void
+CreateMemoryAllocator(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    GloveVkContext.memoryAllocator = new MemoryAllocator(GloveVkContext.vkDevice);
+}
+
 vkContext_t *
 GetContext()
 {
@@ -402,11 +465,15 @@ void
 ResetContextResources()
 {
     GloveVkContext.vkInstance                   = VK_NULL_HANDLE;
+#ifdef ENABLE_VK_DEBUG_REPORTER
+    GloveVkContext.vkDebugReporter              = VK_NULL_HANDLE;
+#endif
     GloveVkContext.vkGpus.clear();
     GloveVkContext.vkQueue                      = VK_NULL_HANDLE;
     GloveVkContext.vkGraphicsQueueNodeIndex     = 0;
     GloveVkContext.vkDevice                     = VK_NULL_HANDLE;
     GloveVkContext.vkSyncItems                  = nullptr;
+    GloveVkContext.memoryAllocator              = nullptr;
     GloveVkContext.mIsMaintenanceExtSupported   = false;
     GloveVkContext.mInitialized                 = false;
     memset(static_cast<void*>(&GloveVkContext.vkDeviceMemoryProperties), 0,
@@ -424,18 +491,20 @@ InitContext()
 
     ResetContextResources();
 
-    if( !CheckVkInstanceExtensions()  ||
-        !CreateVkInstance()           ||
-        !EnumerateVkGpus()            ||
-        !InitVkQueueFamilyIndex()     ||
-        !CheckVkDeviceExtensions()    ||
-        !CreateVkDevice()             ||
-        !CreateVkSemaphores()
-      ) {
-        assert(false);
-        return false;
-    }
+    if( !CheckVkInstanceExtensions() )  { assert(false); return false; }
+    if( !CreateVkInstance() )           { assert(false); return false; }
+#ifdef ENABLE_VK_DEBUG_REPORTER
+    if( !CreateVkDebugReporter() )      { assert(false); return false; }
+#endif
+    if( !EnumerateVkGpus() )            { assert(false); return false; }
+    if( !InitVkQueueFamilyIndex() )     { assert(false); return false; }
+    if( !CheckVkDeviceExtensions() )    { assert(false); return false; }
+    if( !CreateVkDevice() )             { assert(false); return false; }
+    if( !CreateVkSemaphores() )         { assert(false); return false; }
+
     InitVkQueue();
+
+    CreateMemoryAllocator();
 
     GloveVkContext.mInitialized = true;
 
@@ -451,6 +520,11 @@ TerminateContext()
         return;
     }
 
+    if (GloveVkContext.memoryAllocator != nullptr) {
+        delete GloveVkContext.memoryAllocator;
+        GloveVkContext.memoryAllocator = nullptr;
+    }
+
     if(GloveVkContext.vkSyncItems->vkAcquireSemaphore != VK_NULL_HANDLE) {
         vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkAcquireSemaphore, nullptr);
         GloveVkContext.vkSyncItems->vkAcquireSemaphore = VK_NULL_HANDLE;
@@ -460,6 +534,15 @@ TerminateContext()
         vkDestroySemaphore(GloveVkContext.vkDevice, GloveVkContext.vkSyncItems->vkDrawSemaphore, nullptr);
         GloveVkContext.vkSyncItems->vkDrawSemaphore = VK_NULL_HANDLE;
     }
+
+#ifdef ENABLE_VK_DEBUG_REPORTER
+    if(GloveVkContext.vkDebugReporter != VK_NULL_HANDLE) {
+        PFN_vkDestroyDebugReportCallbackEXT _vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkDestroyDebugReportCallbackEXT");
+        if (_vkDestroyDebugReportCallbackEXT) {
+            _vkDestroyDebugReportCallbackEXT(GloveVkContext.vkInstance, GloveVkContext.vkDebugReporter, nullptr);
+        }
+    }
+#endif
 
     if(GloveVkContext.vkDevice != VK_NULL_HANDLE ) {
         vkDeviceWaitIdle(GloveVkContext.vkDevice);
@@ -471,5 +554,34 @@ TerminateContext()
 
     ResetContextResources();
 }
+
+#ifdef ENABLE_VK_DEBUG_REPORTER
+
+bool CreateVkDebugReporter()
+{
+    PFN_vkCreateDebugReportCallbackEXT _vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkCreateDebugReportCallbackEXT");
+    if (!_vkCreateDebugReportCallbackEXT) {
+        return false;
+    }
+
+    VkDebugReportCallbackCreateInfoEXT debugReportInfo;
+    memset(static_cast<void *>(&debugReportInfo), 0, sizeof(debugReportInfo));
+    debugReportInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+    debugReportInfo.pfnCallback = DebugLayerCallback;
+
+    VkResult err = _vkCreateDebugReportCallbackEXT(GloveVkContext.vkInstance, &debugReportInfo, nullptr, &(GloveVkContext.vkDebugReporter));
+    assert(!err);
+
+    return (err == VK_SUCCESS);
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data)
+{
+    fprintf(stderr, "Vulkan validation layer log: %s \n", message);
+    return VK_FALSE;
+}
+
+#endif
 
 };

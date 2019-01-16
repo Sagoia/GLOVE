@@ -25,7 +25,9 @@
 #include "rendering_api.h"
 #include <string.h>
 #include <stdio.h>
+#ifndef WIN32
 #include <dlfcn.h>
+#endif
 #include <stdbool.h>
 
 /*
@@ -35,8 +37,13 @@ system's GLESv2.
 */
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     #define GLESv2_LIBRARY_NAME "libGLESv2_GLOVE.so"
+    #define GLESv2_INTERFACE_NAME "GLES2Interface"
+#elif defined(VK_USE_PLATFORM_WIN32_KHR)
+    #define GLESv2_LIBRARY_NAME "libGLESv2.dll"
+    #define GLESv2_INTERFACE_NAME "GetGLES2Interface"
 #else
     #define GLESv2_LIBRARY_NAME "libGLESv2.so"
+    #define GLESv2_INTERFACE_NAME "GLES2Interface"
 #endif //VK_USE_PLATFORM_ANDROID_KHR
 
 typedef struct rendering_api_library_info {
@@ -95,20 +102,45 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
         return RENDERING_API_LOAD_SUCCESS;
     }
 
+#ifdef WIN32
+    EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+    CHAR DllPath[MAX_PATH] = { 0 };
+    GetModuleFileName((HINSTANCE)&__ImageBase, DllPath, _countof(DllPath));
+    char *r = strrchr(DllPath, '\\');
+    strcpy(r + 1, library_name);
+    library_info->handle = LoadLibrary(DllPath);
+    if (!library_info->handle) {
+        library_info->handle = LoadLibrary(library_name);
+        if (!library_info->handle) {
+            fprintf(stderr, "0x%x\n", GetLastError());
+            return RENDERING_API_NOT_FOUND;
+        }
+    }
+
+    typedef rendering_api_interface_t * p_api_interface;
+    typedef p_api_interface(*func_get_api_interface)();
+    func_get_api_interface get_api_interface = (func_get_api_interface)GetProcAddress(library_info->handle, api_interface_name);
+    api_interface = get_api_interface();
+
+    if (!api_interface || !api_interface->init_API_cb) {
+        FreeLibrary(library_info->handle);
+        return RENDERING_API_LOAD_ERROR;
+    }
+#else
     library_info->handle = dlopen(library_name, RTLD_NOW);
-    if(!library_info->handle) {
+    if (!library_info->handle) {
         fprintf(stderr, "%s\n", dlerror());
         return RENDERING_API_NOT_FOUND;
     }
 
     dlerror();
 
-    api_interface = (rendering_api_interface_t *) dlsym(library_info->handle, api_interface_name);
+    api_interface = (rendering_api_interface_t *)dlsym(library_info->handle, api_interface_name);
 
-    if(!api_interface->init_API_cb) {
+    if (!api_interface->init_API_cb) {
         dlclose(library_info->handle);
         char* error = dlerror();
-        if(error)  {
+        if (error) {
             fprintf(stderr, "%s\n", error);
             return false;
         }
@@ -116,10 +148,11 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
     }
 
     error = dlerror();
-    if(error)  {
+    if (error) {
         fprintf(stderr, "%s\n", error);
         return RENDERING_API_NOT_FOUND;
     }
+#endif
 
     library_info->loaded = true;
     *api_interface_ret = api_interface;
@@ -167,7 +200,7 @@ rendering_api_return_e RENDERING_API_get_api_properties(EGLenum api, uint32_t cl
                 *library_info = &gles1_library_info;
             } else {
                 *api_library_name = GLESv2_LIBRARY_NAME;
-                *api_interface_name = "GLES2Interface";
+                *api_interface_name = GLESv2_INTERFACE_NAME;
                 *api_interface = gles2_interface;
                 *library_info = &gles2_library_info;
             }
@@ -249,12 +282,16 @@ static bool rendering_terminate_api(rendering_api_interface_t *api_interface, re
         api_interface->terminate_API_cb();
     }
 
+#ifdef WIN32
+    FreeLibrary(library_info->handle);
+#else
     dlclose(library_info->handle);
     char* error = dlerror();
-    if(error)  {
+    if (error) {
         fprintf(stderr, "%s\n", error);
         return false;
     }
+#endif
 
     library_info->loaded = false;
     library_info->initialized = false;

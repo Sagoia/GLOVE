@@ -34,7 +34,4 @@ static const GLfloat squad_uv_buffer_data   [] = {
     0.0f, 1.0f
 };
 
-static const GLfloat squad_color_buffer_data[] = {};
-static const GLuint  squad_index_buffer_data[] = {};
-
 #endif // __SCREENQUAD_H_

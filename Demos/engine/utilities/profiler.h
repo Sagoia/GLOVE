@@ -16,7 +16,9 @@
 
 #include "debug.h"
 #include "../../eglut/eglutint.h"
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 
 double GpuTimer(const char *title);
 void GpuViewer(void);

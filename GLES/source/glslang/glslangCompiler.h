@@ -26,14 +26,18 @@
 
 #include "utils/glLogger.h"
 #include "utils/parser_helpers.h"
+#include "resources/slangCompiler.h"
 #include "glslang/Include/ShHandle.h"
 #include "glslang/Public/ShaderLang.h"
 #include "SPIRV/GlslangToSpv.h"
 #include "SPIRV/doc.h"
 #include "SPIRV/disassemble.h"
 
-class GlslangCompiler {
+class GlslangCompiler : public SlangCompiler {
 private:
+    static TBuiltInResource * msSlangShaderResources;
+
+    string            mSource;
     glslang::TShader* mSlangShader;
     glslang::TShader* mSlangShader400;
 
@@ -42,12 +46,17 @@ private:
     bool IsNotFullySupported(const char* source, const char* errors);
 
 public:
-    GlslangCompiler();
-    ~GlslangCompiler();
+    static inline void  SetShaderResource(TBuiltInResource* resources)          { FUN_ENTRY(GL_LOG_TRACE); msSlangShaderResources = resources; }
 
-    bool CompileShader(const char* const* source, TBuiltInResource* resources, EShLanguage language);
-    bool CompileShader400(const char* const* source, TBuiltInResource* resources, EShLanguage language);
-    const char* GetInfoLog();
+    GlslangCompiler();
+    virtual ~GlslangCompiler();
+
+    bool CompileShader(const char* const* source, EShLanguage language);
+    bool CompileShader400(const char* const* source, EShLanguage language);
+    virtual bool CompileShader(const char* const* source, shader_type_t language)
+                                                                                { FUN_ENTRY(GL_LOG_TRACE) return CompileShader(source, language == SHADER_TYPE_VERTEX ? EShLangVertex : EShLangFragment); }
+    virtual const char* GetInfoLog();
+    virtual const char* GetSource()                                      const  { FUN_ENTRY(GL_LOG_TRACE); return mSource.c_str(); }
 
     glslang::TShader* GetSlangShader()                                   const  { FUN_ENTRY(GL_LOG_TRACE); return mSlangShader; }
     glslang::TShader* GetSlangShader400()                                const  { FUN_ENTRY(GL_LOG_TRACE); return mSlangShader400; }

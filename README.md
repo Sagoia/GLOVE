@@ -31,6 +31,7 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 | ES 2.0  | GeForce GTX 670                     | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB | success |
 | ES 2.0  | Mali-G71                            | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
 | ES 2.0  | Mali-G71                            | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
+| ES 2.0  | GTX 980                             | NVIDIA 416.94      | 1.1.82 | Windows 10    | Windows | success |
 
 # Software Design
 
@@ -46,6 +47,11 @@ GLOVE project is considered as work in progress, therefore contributions are mor
 
 To create your local git repository:
 
+Current repository:
+```
+git clone https://github.com/JulianAtGitHub/GLOVE.git
+```
+Original repository:
 ```
 git clone https://github.com/Think-Silicon/GLOVE.git
 ```
@@ -54,12 +60,15 @@ git clone https://github.com/Think-Silicon/GLOVE.git
 
 To install all required packages:
 
+Linux:
 ```
 sudo apt-get install git cmake extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev
 ```
-
 Optionally "mesa-vulkan-drivers" package is needed if no other Vulkan driver is available.
 The compiler minimum version that this project is built with, is GCC 4.9.3, although earlier versions may work.
+
+Windows:
+Install at least Visual Studio 2015 Community.
 
 ## External Repositories Dependencies
 
@@ -69,9 +78,15 @@ Google [googletest](https://github.com/google/googletest) repository is used for
 
 To get and build the above projects:
 
+Linux:
 ```
 ./update_external_sources.sh
 ```
+Windows:
+```
+python update_external_sources.py
+```
+
 # Building 
 
 View the [Building Instructions](BUILD.md) for detailed instructions on how to configure and build GLOVE on the supported platforms.

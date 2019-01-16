@@ -85,7 +85,6 @@ GlFormatToGlInternalFormat(GLenum format, GLenum type)
     case GL_DEPTH_COMPONENT32_OES:          return GL_DEPTH_COMPONENT32_OES;
     case GL_STENCIL_INDEX8:                 return GL_STENCIL_INDEX8;
     case GL_BGRA_EXT:
-    case GL_BGRA8_EXT:
         switch(type) {
         case GL_UNSIGNED_BYTE:              return GL_BGRA8_EXT;
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
@@ -129,6 +128,11 @@ GlFormatToGlInternalFormat(GLenum format, GLenum type)
         default: NOT_FOUND_ENUM(type);      return GL_INVALID_VALUE;
         }
 
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:   return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:  return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:  return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:  return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
     default: NOT_FOUND_ENUM(format);        return GL_INVALID_VALUE;
     }
 }
@@ -155,6 +159,10 @@ GlInternalFormatToGlType(GLenum internalformat)
     case GL_BGRA8_EXT :
     case GL_RGBA8_OES :                     return GL_UNSIGNED_BYTE;
     case GL_DEPTH24_STENCIL8_OES:           return GL_UNSIGNED_INT_24_8_OES;
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:  return GL_INVALID_VALUE;
     default: NOT_FOUND_ENUM(internalformat);return GL_INVALID_VALUE;
     }
 }
@@ -171,11 +179,15 @@ GlInternalFormatToGlFormat(GLenum internalFormat)
     case GL_RGB:
     case GL_RGB565:
     case GL_RGB8_OES:                         return GL_RGB;
-    case GL_BGRA8_EXT:                        return GL_BGRA8_EXT;
+    case GL_BGRA8_EXT:                        return GL_BGRA_EXT;
     case GL_RGBA:
     case GL_RGBA8_OES:
     case GL_RGBA4:
     case GL_RGB5_A1:                          return GL_RGBA;
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:     return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:    return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:    return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:    return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
     case GL_DEPTH_COMPONENT16:                return GL_DEPTH_COMPONENT16;
     case GL_DEPTH_COMPONENT24_OES:            return GL_DEPTH_COMPONENT24_OES;
     case GL_DEPTH_COMPONENT32_OES:            return GL_DEPTH_COMPONENT32_OES;
@@ -202,7 +214,6 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGB:                                return 3;
         case GL_RGBA8_OES:
         case GL_BGRA8_EXT:
-        case GL_BGRA_EXT:
         case GL_RGBA:                               return 4;
         default: { NOT_FOUND_ENUM(internalFormat);  return 1; }
         }
@@ -211,7 +222,6 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGBA4:
         case GL_RGBA8_OES:
         case GL_BGRA8_EXT:
-        case GL_BGRA_EXT:
         case GL_RGBA:                              return 1;
         default: { NOT_FOUND_ENUM(internalFormat); return 1; }
         }
@@ -220,7 +230,6 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
         case GL_RGB5_A1:
         case GL_RGBA8_OES:
         case GL_BGRA8_EXT:
-        case GL_BGRA_EXT:
         case GL_RGBA:                              return 1;
         default: { NOT_FOUND_ENUM(internalFormat); return 1; }
         }
@@ -317,7 +326,6 @@ GlFormatToStorageBits(GLenum format, GLint *r_, GLint *g_, GLint *b_, GLint *a_,
         break;
 
     case GL_RGBA:
-    case GL_BGRA8_EXT:
     case GL_RGBA8_OES:
     case GL_BGRA_EXT:
         r = 8;
@@ -441,7 +449,6 @@ GlFormatToStorageBits(GLenum format, GLfloat *r_, GLfloat *g_, GLfloat *b_, GLfl
         break;
 
     case GL_RGBA:
-    case GL_BGRA8_EXT:
     case GL_RGBA8_OES:
     case GL_BGRA_EXT:
         r = 8.0f;
@@ -563,7 +570,6 @@ GlFormatToStorageBits(GLenum format, GLboolean *r_, GLboolean *g_, GLboolean *b_
         break;
 
     case GL_RGBA:
-    case GL_BGRA8_EXT:
     case GL_RGBA8_OES:
     case GL_BGRA_EXT:
         r = GL_TRUE;
@@ -676,6 +682,20 @@ GlFormatIsColorRenderable(GLenum format)
     case GL_RGBA4:
     case GL_RGB5_A1:                    return true;
     default:                            return false;
+    }
+}
+
+bool
+GlInternalFormatIsCompressed(GLenum format)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    switch(format){
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:      return true;
+    default:                                    return false;
     }
 }
 

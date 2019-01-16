@@ -88,6 +88,14 @@ BufferObject::UpdateData(size_t size, size_t offset, const void *data)
 }
 
 void
+BufferObject::FlushData()
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mMemory->FlushData();
+}
+
+void
 BufferObject::SetTarget(GLenum target)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -112,6 +120,16 @@ BufferObject::SetTarget(GLenum target)
         mBuffer->SetFlags(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
     }
     mTarget = target;
+}
+
+UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext)
+: BufferObject(vkContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) 
+{ 
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    vulkanAPI::UniformMemory *memory = new vulkanAPI::UniformMemory(vkContext, mMemory->GetFlags());
+    delete mMemory;
+    mMemory = memory;
 }
 
 bool

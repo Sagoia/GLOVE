@@ -28,9 +28,10 @@
  */
 
 #include "shader.h"
+#include "slangCompiler.h"
 
 Shader::Shader(const vulkanAPI::vkContext_t *vkContext)
-: mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mShaderCompiler(nullptr), mSource(nullptr),
+: mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mSlangCompiler(nullptr), mSource(nullptr),
   mSourceLength(0), mShaderType(INVALID_SHADER), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -49,7 +50,11 @@ Shader::GetInfoLogLength(void) const
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    return mShaderCompiler->GetShaderInfoLog(mShaderType) ? (int)strlen(mShaderCompiler->GetShaderInfoLog(mShaderType)) : 0;
+    if (mSlangCompiler && mSlangCompiler->GetInfoLog()) {
+        return (int)strlen(mSlangCompiler->GetInfoLog());
+    }
+
+    return 0;
 }
 
 void
@@ -118,10 +123,6 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     mSource[currentLength] = '\0';
     delete[] sourceLengths;
 
-    if(GLOVE_SAVE_SHADER_SOURCES_TO_FILES) {
-        mShaderCompiler->EnableSaveSourceToFiles();
-    }
-
     if(GLOVE_DUMP_ORIGINAL_SHADER_SOURCE) {
         cout << "\n\nINPUT SOURCE:\n" << mSource << "\n\n";
     }
@@ -157,11 +158,11 @@ Shader::GetInfoLog(void) const
 
     char *log = nullptr;
 
-    if(mShaderCompiler) {
-        uint32_t len = strlen(mShaderCompiler->GetShaderInfoLog(mShaderType)) + 1;
+    if(mSlangCompiler) {
+        uint32_t len = strlen(mSlangCompiler->GetInfoLog()) + 1;
         log = new char[len];
 
-        memcpy(log, mShaderCompiler->GetShaderInfoLog(mShaderType), len);
+        memcpy(log, mSlangCompiler->GetInfoLog(), len);
 
         /// NULL terminate it
         if(log[len - 1] != '\0') {
@@ -200,11 +201,7 @@ Shader::CompileShader(void)
     assert(mSource);
     assert(mShaderType == SHADER_TYPE_VERTEX || mShaderType == SHADER_TYPE_FRAGMENT);
 
-    if(mShaderType == SHADER_TYPE_VERTEX) {
-        mCompiled = mShaderCompiler->CompileVertexShader(&mSource);
-    } else {
-        mCompiled = mShaderCompiler->CompileFragmentShader(&mSource);
-    }
+    mCompiled = mSlangCompiler->CompileShader(&mSource, mShaderType);
 
     return mCompiled;
 }

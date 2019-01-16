@@ -29,12 +29,6 @@ typedef struct openGL_program_t
 
 } openGL_program_t;
 
-void InitProgram(struct openGL_program_t *p)
-{
-    p->mLocationMVP   = -1;
-    p->mLocationPos   = -1;
-    p->mLocationUV    = -1;
-    p->mLocationColor = -1;
-}
+void InitProgram(struct openGL_program_t *p);
 
 #endif //__SHADERPROGRAM_H_

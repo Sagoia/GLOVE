@@ -30,6 +30,8 @@
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 #include "eglConfig_android.h"
+#elif defined (VK_USE_PLATFORM_WIN32_KHR)
+#include "eglConfig_windows.h"
 #else
 #include "eglConfig_linux.h"
 #endif

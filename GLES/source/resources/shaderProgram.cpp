@@ -28,6 +28,7 @@
 
 #include "shaderProgram.h"
 #include "context/context.h"
+#include <iterator>
 
 ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mGLContext(nullptr)
@@ -99,37 +100,40 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
 
     pipelineShaderStageCount = GetStageCount();
     if(pipelineShaderStageCount == 1) {
-        pipelineShaderStages[0].flags  = 0;
-        pipelineShaderStages[0].pNext  = nullptr;
-        pipelineShaderStages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        pipelineShaderStages[0].stage  = GetShaderStage();
-        pipelineShaderStages[0].module = GetShaderModule();
-        pipelineShaderStages[0].pName  = "main\0";
-        pipelineShaderStagesIDs[0]     = GetStagesIDs(0);
+        pipelineShaderStages[0].flags               = 0;
+        pipelineShaderStages[0].pNext               = nullptr;
+        pipelineShaderStages[0].sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        pipelineShaderStages[0].stage               = GetShaderStage();
+        pipelineShaderStages[0].module              = GetShaderModule();
+        pipelineShaderStages[0].pName               = "main\0";
+        pipelineShaderStages[0].pSpecializationInfo = nullptr;
+        pipelineShaderStagesIDs[0]                  = GetStagesIDs(0);
 
         if(GetShaderModule() == VK_NULL_HANDLE) {
             linked = false;
         }
     } else if (pipelineShaderStageCount == 2) {
-        pipelineShaderStages[0].flags  = 0;
-        pipelineShaderStages[0].pNext  = nullptr;
-        pipelineShaderStages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        pipelineShaderStages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
-        pipelineShaderStages[0].module = GetVertexShaderModule();
-        pipelineShaderStages[0].pName  = "main\0";
-        pipelineShaderStagesIDs[0]     = GetStagesIDs(0);
+        pipelineShaderStages[0].flags               = 0;
+        pipelineShaderStages[0].pNext               = nullptr;
+        pipelineShaderStages[0].sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        pipelineShaderStages[0].stage               = VK_SHADER_STAGE_VERTEX_BIT;
+        pipelineShaderStages[0].module              = GetVertexShaderModule();
+        pipelineShaderStages[0].pName               = "main\0";
+        pipelineShaderStages[0].pSpecializationInfo = nullptr;
+        pipelineShaderStagesIDs[0]                  = GetStagesIDs(0);
 
         if(GetVertexShaderModule() == VK_NULL_HANDLE) {
             linked = false;
         }
 
-        pipelineShaderStages[1].flags  = 0;
-        pipelineShaderStages[1].pNext  = nullptr;
-        pipelineShaderStages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        pipelineShaderStages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-        pipelineShaderStages[1].module = GetFragmentShaderModule();
-        pipelineShaderStages[1].pName  = "main\0";
-        pipelineShaderStagesIDs[1]     = GetStagesIDs(1);
+        pipelineShaderStages[1].flags               = 0;
+        pipelineShaderStages[1].pNext               = nullptr;
+        pipelineShaderStages[1].sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        pipelineShaderStages[1].stage               = VK_SHADER_STAGE_FRAGMENT_BIT;
+        pipelineShaderStages[1].module              = GetFragmentShaderModule();
+        pipelineShaderStages[1].pName               = "main\0";
+        pipelineShaderStages[1].pSpecializationInfo = nullptr;
+        pipelineShaderStagesIDs[1]                  = GetStagesIDs(1);
 
         if(GetFragmentShaderModule() == VK_NULL_HANDLE) {
             linked = false;
@@ -417,6 +421,9 @@ ShaderProgram::ValidateProgram(void)
        (!vs->IsCompiled() || !fs->IsCompiled())) {
         return false;
     }
+
+    mShaderCompiler->SetVertexShaderCompiler(vs->GetSlangCompiler());
+    mShaderCompiler->SetFragmentShaderCompiler(fs->GetSlangCompiler());
 
     if(GLOVE_DUMP_INPUT_SHADER_REFLECTION) {
         mShaderCompiler->EnableDumpInputShaderReflection();
@@ -875,12 +882,19 @@ ShaderProgram::ReleaseVkObjects(void)
         mVkDescSetLayout = VK_NULL_HANDLE;
     }
 
-    if(mVkDescSet != VK_NULL_HANDLE) {
-        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &mVkDescSet);
-        mVkDescSet = VK_NULL_HANDLE;
+    while (!mPendingDescSets.empty()) {
+        VkDescriptorSet descSet = mPendingDescSets.front();
+        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &descSet);
+        mPendingDescSets.pop();
     }
 
-    if(mVkDescPool != VK_NULL_HANDLE) {
+    while (!mUsingDescSets.empty()) {
+        VkDescriptorSet descSet = mUsingDescSets.front();
+        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &descSet);
+        mUsingDescSets.pop();
+    }
+
+    if (mVkDescPool != VK_NULL_HANDLE) {
         mCommandBufferManager->UnrefResouce(mVkDescPool);
         mVkDescPool = VK_NULL_HANDLE;
     }
@@ -977,7 +991,7 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
     descriptorPoolInfo.pNext = nullptr;
     descriptorPoolInfo.poolSizeCount = nLiveUniformBlocks;
     descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-    descriptorPoolInfo.maxSets = 1;
+    descriptorPoolInfo.maxSets = MAX_DESC_SET;
     descriptorPoolInfo.pPoolSizes = descTypeCounts;
 
     if(vkCreateDescriptorPool(mVkContext->vkDevice, &descriptorPoolInfo, 0, &mVkDescPool) != VK_SUCCESS) {
@@ -1016,6 +1030,41 @@ ShaderProgram::CreateDescriptorSet(void)
 }
 
 bool
+ShaderProgram::GetValidDescriptorSet(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mVkDescSet = VK_NULL_HANDLE;
+
+    if (mPendingDescSets.empty()) {
+        CreateDescriptorSet();
+    } else {
+        mVkDescSet = mPendingDescSets.front();
+        mPendingDescSets.pop();
+    }
+
+    if (mVkDescSet == VK_NULL_HANDLE) {
+        return false;
+    }
+
+    mUsingDescSets.push(mVkDescSet);
+    assert(mUsingDescSets.size() <= MAX_DESC_SET);
+
+    return true;
+}
+
+void
+ShaderProgram::MoveUsingDescriptorSetsToPending(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    while (!mUsingDescSets.empty()) {
+        mPendingDescSets.push(mUsingDescSets.front());
+        mUsingDescSets.pop();
+    }
+}
+
+bool
 ShaderProgram::AllocateVkDescriptoSet(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -1034,11 +1083,6 @@ ShaderProgram::AllocateVkDescriptoSet(void)
     }
 
     if(!CreateDescriptorPool(nLiveUniformBlocks)) {
-        assert(0);
-        return false;
-    }
-
-    if(!CreateDescriptorSet()) {
         assert(0);
         return false;
     }
@@ -1163,17 +1207,23 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
                     // when the sampler’s associated texture object is not complete.
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
-                        uint8_t pixels[4] = {0,0,0,255};
-                        for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
-                            for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
-                                activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
-                            }
-                        }
-
-                        if(activeTexture->IsCompleted()) {
-                            activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                        if (activeTexture->IsValid()) {
                             activeTexture->Allocate();
                             activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                        }
+                        else {
+                            uint8_t pixels[4] = {0,0,0,255};
+                            for(GLint layer = 0; layer < activeTexture->GetLayersCount(); ++layer) {
+                                for(GLint level = 0; level < activeTexture->GetMipLevelsCount(); ++level) {
+                                    activeTexture->SetState(1, 1, level, layer, GL_RGBA, GL_UNSIGNED_BYTE, Texture::GetDefaultInternalAlignment(), pixels);
+                                }
+                            }
+
+                            if(activeTexture->IsCompleted()) {
+                                activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                                activeTexture->Allocate();
+                                activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                            }
                         }
                     }
                     else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
@@ -1240,7 +1290,6 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
     memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
-
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writes[i].pNext      = nullptr;
         writes[i].dstSet     = mVkDescSet;

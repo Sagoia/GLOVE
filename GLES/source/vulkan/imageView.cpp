@@ -31,11 +31,12 @@
  */
 
 #include "imageView.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
 ImageView::ImageView(const vkContext_t *vkContext)
-: mVkContext(vkContext), mVkImageView(VK_NULL_HANDLE)
+: mVkContext(vkContext), mVkImageView(VK_NULL_HANDLE), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -53,7 +54,11 @@ ImageView::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkImageView != VK_NULL_HANDLE) {
-        vkDestroyImageView(mVkContext->vkDevice, mVkImageView, nullptr);
+        if (mCacheManager) {
+            mCacheManager->CacheVkImageView(mVkImageView);
+        } else {
+            vkDestroyImageView(mVkContext->vkDevice, mVkImageView, nullptr);
+        }
         mVkImageView = VK_NULL_HANDLE;
     }
 }

@@ -25,6 +25,7 @@
 #define __GLUTILS_H__
 
 #include <cstdio>
+#include <cstdint>
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
 
@@ -50,6 +51,7 @@ void                    GlFormatToStorageBits(GLenum format, GLboolean *r_, GLbo
 bool                    GlFormatIsDepthRenderable(GLenum format);
 bool                    GlFormatIsStencilRenderable(GLenum format);
 bool                    GlFormatIsColorRenderable(GLenum format);
+bool                    GlInternalFormatIsCompressed(GLenum format);
 uint32_t                OccupiedLocationsPerGlType(GLenum type);
 
 

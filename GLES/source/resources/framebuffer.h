@@ -30,11 +30,20 @@
 #include "vulkan/framebuffer.h"
 #include "utils/arrays.hpp"
 
+#ifdef WIN32
+    #ifdef DELETE
+        #undef DELETE
+    #endif
+#endif // WIN32
+
+
 typedef enum {
     GLOVE_SURFACE_INVALID,
     GLOVE_SURFACE_WINDOW,
     GLOVE_SURFACE_PBUFFER
 } glove_surface_type;
+
+class CacheManager;
 
 class Framebuffer {
 private:
@@ -47,10 +56,11 @@ private:
     };
 
     const
-    vulkanAPI::vkContext_t *         mVkContext;
+    vulkanAPI::vkContext_t          *mVkContext;
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
     ObjectArray<Texture>            *mTextureArray;
     ObjectArray<Renderbuffer>       *mRenderbufferArray;
+    CacheManager                    *mCacheManager;
 
     Rect                            mDims;
     GLenum                          mTarget;
@@ -142,12 +152,14 @@ public:
 
 // Set Functions
     inline void             SetVkContext(const
-                                         vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
+                                vulkanAPI::vkContext_t *vkContext)              { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
     inline void             SetCommandBufferManager(
-                            vulkanAPI::CommandBufferManager     *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
+                                vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void             SetResources(
-                            ObjectArray<Texture>            *texArray,
-                            ObjectArray<Renderbuffer>       *rbArray)           { FUN_ENTRY(GL_LOG_TRACE); mTextureArray = texArray; mRenderbufferArray = rbArray; }
+                                ObjectArray<Texture> *texArray,
+                                ObjectArray<Renderbuffer> *rbArray)             { FUN_ENTRY(GL_LOG_TRACE); mTextureArray = texArray; mRenderbufferArray = rbArray; }
+    inline void             SetCacheManager(
+                                CacheManager *cacheManager)                     { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; mRenderPass->SetCacheManager(cacheManager); }
 
     inline void             SetUpdated(void)                                    { FUN_ENTRY(GL_LOG_TRACE); mUpdated     = true;   }
     inline void             SetIsSystem(void)                                   { FUN_ENTRY(GL_LOG_TRACE); mIsSystem    = true;   }
@@ -160,7 +172,7 @@ public:
     inline void             SetWidth(int32_t width)                             { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int32_t height)                           { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }
 
-           void             SetColorAttachment(int width, int height);
+           void             SetColorAttachment(int width, int height, Texture *texture = nullptr);
     inline void             SetColorAttachmentType(GLenum type)                 { FUN_ENTRY(GL_LOG_TRACE); mAttachmentColors[0]->SetType(type);   }
     inline void             SetColorAttachmentName(uint32_t name)               { FUN_ENTRY(GL_LOG_TRACE); mAttachmentColors[0]->SetName(name);   }
     inline void             SetColorAttachmentLevel(GLint level)                { FUN_ENTRY(GL_LOG_TRACE); mAttachmentColors[0]->SetLevel(level); }

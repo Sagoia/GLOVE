@@ -57,6 +57,17 @@ rendering_api_interface_t GLES2Interface = {
     bind_to_texture
 };
 
+#ifdef WIN32
+extern "C" {
+
+EGLAPI rendering_api_interface_t * EGLAPIENTRY GetGLES2Interface(void)
+{
+    return &GLES2Interface;
+}
+
+}
+#endif
+
 static void FillInVkInterface(vulkanAPI::vkContext_t* vkContext)
 {
     vkInterface.vkInstance = vkContext->vkInstance;

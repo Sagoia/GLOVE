@@ -28,6 +28,8 @@
  */
 
 #include "sampler.h"
+#include "utils.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
@@ -44,7 +46,9 @@ Sampler::Sampler(const vkContext_t *vkContext)
   mCompareEnabled(VK_FALSE), mVkCompareOp(VK_COMPARE_OP_NEVER),
   mVkBorderColor(VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE),
   mUnnormalizedCoordinates(VK_FALSE),
-  mUpdated(true)
+  mUpdated(true),
+  mHash(0), 
+  mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -62,7 +66,9 @@ Sampler::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkSampler != VK_NULL_HANDLE) {
-        vkDestroySampler(mVkContext->vkDevice, mVkSampler, nullptr);
+        if (!mCacheManager) {
+            vkDestroySampler(mVkContext->vkDevice, mVkSampler, nullptr);
+        }
         mVkSampler = VK_NULL_HANDLE;
     }
 
@@ -102,8 +108,22 @@ Sampler::Create()
     samplerInfo.borderColor             = mVkBorderColor;
     samplerInfo.unnormalizedCoordinates = mUnnormalizedCoordinates;
 
-    VkResult err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
-    assert(!err);
+    VkResult err = VK_SUCCESS;
+
+    if (!mCacheManager) {
+        err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
+        assert(!err);
+    } else {
+        mHash = HashSamplerInfo(samplerInfo);
+        mVkSampler = mCacheManager->GetSampler(mHash);
+
+        if (mVkSampler == VK_NULL_HANDLE) {
+            err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
+            assert(!err);
+
+            mCacheManager->CacheSampler(mHash, mVkSampler);
+        }
+    }
 
     mUpdated = false;
 

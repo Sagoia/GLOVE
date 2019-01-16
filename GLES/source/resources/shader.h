@@ -26,11 +26,13 @@
 
 #include "shaderCompiler.h"
 
+class SlangCompiler;
+
 class Shader {
 private:
     const vulkanAPI::vkContext_t *      mVkContext;
     VkShaderModule                      mVkShaderModule;
-    ShaderCompiler *                    mShaderCompiler;
+    SlangCompiler *                     mSlangCompiler;
 
     char *                              mSource;
     vector<uint32_t>                    mSpv;
@@ -63,12 +65,13 @@ public:
     vector<uint32_t> &                  GetSPV(void)                                    { FUN_ENTRY(GL_LOG_TRACE); return mSpv; }
     int                                 GetRefCount(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mRefCounter; }
     bool                                GetMarkForDeletion(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mMarkForDeletion; }
+    SlangCompiler *                     GetSlangCompiler(void)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mSlangCompiler; }
 
 // Set Functions
     void                                SetShaderSource(GLsizei count, const GLchar *const *string, const GLint *length);
     void                                SetVkContext(const
                                                     vulkanAPI::vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
-    void                                SetShaderCompiler(ShaderCompiler* compiler)     { FUN_ENTRY(GL_LOG_TRACE); mShaderCompiler  = compiler; }
+    void                                SetSlangCompiler(SlangCompiler *compiler)       { FUN_ENTRY(GL_LOG_TRACE); mSlangCompiler   = compiler; }
     void                                SetShaderType(shader_type_t type)               { FUN_ENTRY(GL_LOG_TRACE); mShaderType      = type; }
     void                                MarkForDeletion(void)                           { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }
 

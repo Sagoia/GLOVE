@@ -37,7 +37,7 @@ TEST_F(ObjectArrayTest, CreateShaders)
     for(size_t i=1; i<11; i++) {
         ASSERT_EQ(i, ShaderArray.Allocate());
         ASSERT_FALSE(ShaderArray.ObjectExists(i));
-        ASSERT_NE(ZERO, ShaderArray.GetObjectId(ShaderArray.GetObject(i)));
+        ASSERT_NE(ZERO, ShaderArray.GetObjectId(ShaderArray.Object(i)));
         ASSERT_TRUE(ShaderArray.ObjectExists(i));
     }
 
@@ -51,7 +51,7 @@ TEST_F(ObjectArrayTest, DeleteShaders)
     for(size_t i=1; i<11; i++) {
         ASSERT_EQ(i, ShaderArray.Allocate());
         ASSERT_FALSE(ShaderArray.ObjectExists(i));
-        ASSERT_NE(ZERO, ShaderArray.GetObjectId(ShaderArray.GetObject(i)));
+        ASSERT_NE(ZERO, ShaderArray.GetObjectId(ShaderArray.Object(i)));
         ASSERT_TRUE(ShaderArray.ObjectExists(i));
     }
 

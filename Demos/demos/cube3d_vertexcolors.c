@@ -50,8 +50,8 @@ bool InitGL()
     InitMesh      (&mesh_cube, 3, 12, cube_vertex_buffer_data, sizeof(cube_vertex_buffer_data),
                                       cube_uv_buffer_data    , sizeof(cube_uv_buffer_data)    ,
                                       cube_color_buffer_data , sizeof(cube_color_buffer_data) ,
-                                      cube_index_buffer_data , sizeof(cube_index_buffer_data) ,
-                                      diffuse_textures, 0);
+                                      NULL                   , 0 ,
+                                      NULL                   , 0);
 
 // Initialize Camera
     InitCamera    (&camera);
@@ -94,7 +94,7 @@ bool InitGL()
     return true;
 }
 
-void DrawGL()
+void DrawGL(void)
 {
 // Set Viewport
     glViewport(0, 0, viewport.mWidth, viewport.mHeight);

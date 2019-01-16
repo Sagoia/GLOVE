@@ -142,7 +142,7 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
     }
 
     VkResult err;
-    VkCommandBuffer *commandBuffers = new VkCommandBuffer;
+    VkCommandBuffer *commandBuffers = new VkCommandBuffer[numOfBuffers];
 
     VkCommandBufferAllocateInfo cmdAllocInfo;
     cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -158,7 +158,9 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
         return nullptr;
     }
 
-    mSecondaryCmdBufferPool.AddBuffer(commandBuffers);
+    for (uint32_t i = 0; i < numOfBuffers; ++i) {
+        mSecondaryCmdBufferPool.AddBuffer(commandBuffers + i);
+    }
 
     return commandBuffers;
 }
@@ -418,7 +420,7 @@ CommandBufferManager::WaitLastSubmition(void)
         return true;
     }
 
-    return false;
+    return true;
 }
 
 bool

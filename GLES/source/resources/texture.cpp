@@ -30,6 +30,7 @@
 #include "texture.h"
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
+#include "utils/cacheManager.h"
 
 #define NUMBER_OF_MIP_LEVELS(w, h)                      (std::floor(std::log2(std::max((w),(h)))) + 1)
 
@@ -37,11 +38,11 @@
 int Texture::mDefaultInternalAlignment = 1;
 
 Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
-mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u)
+mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -106,6 +107,10 @@ Texture::IsCompleted(void)
         return false;
     }
 
+    if (!mDirty) {
+        return true;
+    }
+
     State_t *state = &mState[0][0];
     if(state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
         return false;
@@ -125,24 +130,79 @@ Texture::IsCompleted(void)
 
             state = &mState[layer][level];
 
-            if(state->format == GL_INVALID_VALUE ||
-               state->type   == GL_INVALID_VALUE ||
-               state->width  != static_cast<GLint>(std::max(floor(width  >> level), 1.0)) ||
-               state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+            if (!GlInternalFormatIsCompressed(state->format) &&
+                (state->format == GL_INVALID_VALUE || state->type == GL_INVALID_VALUE)) {
                 ++count;
-            }
-            else if(state->format != format || state->type != type) {
+            } else if (state->width != static_cast<GLint>(std::max(floor(width >> level), 1.0)) ||
+                state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+                ++count;
+            } else if(state->format != format || state->type != type) {
                 return false;
             }
         }
 
-        if(count && count != levels-1)
+        if(count > 0 && count < levels - 1)
             return false;
     }
 
-    mMipLevelsCount = !count ? levels : 1;
+    mMipLevelsCount = levels - count;
+
+    mDirty = false;
 
     return true;
+}
+
+bool
+Texture::IsValid(void)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (mState == nullptr) {
+        return false;
+    }
+
+    State_t *state = &mState[0][0];
+    if (state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
+        return false;
+    }
+
+    GLenum format = state->format;
+    GLenum type = state->type;
+    GLint  width = state->width;
+    GLint  height = state->height;
+    GLint  levels = NUMBER_OF_MIP_LEVELS(state->width, state->height);
+
+    GLint levelsCount = INT32_MAX;
+    GLint count = 0;
+    for (GLint layer = 0; layer < mLayersCount; ++layer) {
+        count = 0;
+
+        for (GLint level = 0; level < levels; ++level) {
+
+            state = &mState[layer][level];
+
+            if (!GlInternalFormatIsCompressed(state->format) &&
+                (state->format == GL_INVALID_VALUE || state->type == GL_INVALID_VALUE)) {
+                break;
+            } else if (state->width != static_cast<GLint>(std::max(floor(width >> level), 1.0)) ||
+                       state->height != static_cast<GLint>(std::max(floor(height >> level), 1.0))) {
+                break;
+            } else if (state->format != format || state->type != type) {
+                break;
+            }
+
+            ++count;
+        }
+
+        levelsCount = std::min(levelsCount, count);
+
+    }
+
+    mMipLevelsCount = levelsCount;
+
+    mDirty = false;
+
+    return mMipLevelsCount > 0;
 }
 
 void
@@ -220,12 +280,17 @@ Texture::Allocate(void)
     SetType  (state->type);
     SetInternalFormat(GlFormatToGlInternalFormat(state->format, state->type));
 
+    if (mImage->GetFormat() == VK_FORMAT_UNDEFINED) {
+        SetVkFormat(FindSupportedVkColorFormat(GlColorFormatToVkColorFormat(state->format, state->type)));
+    }
     mExplicitInternalFormat = VkFormatToGlInternalformat(mImage->GetFormat());
     mExplicitType           = GlInternalFormatToGlType(mExplicitInternalFormat);
 
     if(!CreateVkTexture()) {
         return false;
     }
+
+    bool isCompressed = GlInternalFormatIsCompressed(mExplicitInternalFormat);
 
     // NOTE:: there is an implicit conversion of all textures to GL_RGBA
     // TODO:: this should definitely NOT be the case
@@ -235,7 +300,13 @@ Texture::Allocate(void)
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
         for(GLint level = 0; level < mMipLevelsCount; ++level) {
             state = &mState[layer][level];
-            if(state->data) {
+            if(!state->data) {
+                continue;
+            }
+            if (isCompressed) {
+                Rect srcRect(0, 0, state->width, state->height);
+                CpoyCompressedPixelFromHost(&srcRect, level, layer, dstInternalFormat, state->data, state->size);
+            } else {
                 ImageRect srcRect(0, 0, state->width, state->height,
                                   GlInternalFormatTypeToNumElements(srcInternalFormat, state->type),
                                   GlTypeToElementSize(state->type),
@@ -244,7 +315,7 @@ Texture::Allocate(void)
                                   GlInternalFormatTypeToNumElements(dstInternalFormat, dstType),
                                   GlTypeToElementSize(dstType),
                                   Texture::GetDefaultInternalAlignment());
-                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, static_cast<void *>(state->data));
+                CopyPixelsFromHost(&srcRect, &dstRect, level, layer, srcInternalFormat, state->data);
             }
         }
     }
@@ -287,6 +358,8 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
                       &srcRect, pixels,
                       &dstRect, data);
     }
+
+    mDirty = true;
 }
 
 void
@@ -342,7 +415,60 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
     SetDataUpdated(true);
 }
 
-void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData)
+void
+Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *imageData)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    mState[layer][level].width = width;
+    mState[layer][level].height = height;
+    mState[layer][level].format = internalformat;
+    mState[layer][level].type = GL_INVALID_VALUE;
+    mState[layer][level].size = size;
+
+    if (mState[layer][level].data) {
+        delete[](uint8_t *)mState[layer][level].data;
+        mState[layer][level].data = nullptr;
+    }
+
+    if (imageData) {
+        uint8_t *data = new uint8_t[size];
+        if (data) {
+            memcpy(data, imageData, size);
+            mState[layer][level].data = data;
+        }
+    }
+
+    mDirty = true;
+}
+
+void
+Texture::SetCompressedSubState(Rect *rect, GLsizei with, GLsizei height, GLint level, GLint layer, GLsizei blockSize, const void *imageData)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (mState[layer][level].data == nullptr) {
+        uint32_t size = with * height * blockSize;
+        mState[layer][level].data = new uint8_t[size];
+    }
+
+    if (imageData) {
+        uint8_t *srcData = (uint8_t *)imageData;
+        uint8_t *data = (uint8_t *)mState[layer][level].data;
+        GLsizei dataSize = mState[layer][level].size;
+        for (GLsizei i = 0; i < rect->height; ++i) {
+            uint32_t offset = (with * (rect->y + i) + rect->x) * blockSize;
+            uint32_t lineSize = rect->width * blockSize;
+            assert(offset + lineSize <= dataSize);
+            memcpy(data + offset, srcData + i * lineSize, lineSize);
+        }
+    }
+
+    SetDataUpdated(true);
+}
+
+void 
+Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum dstFormat, void *dstData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -377,7 +503,8 @@ void Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint mip
     delete[]  srcData;
 }
 
-void Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData)
+void 
+Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -426,7 +553,18 @@ void Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint m
  #endif
 }
 
-void Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum srcFormat, bool copyToImage)
+void
+Texture::CpoyCompressedPixelFromHost(Rect *srcRect, GLint miplevel, GLint layer, GLenum format, const void *srcData, GLsizei dataSize)
+{
+    BufferObject *tbo = new TransferSrcBufferObject(mVkContext);
+    tbo->Allocate(dataSize, srcData);
+
+    // use the global rect offsets for transfering the subpixels to Vulkan
+    SubmitCopyPixels(srcRect, tbo, miplevel, layer, format, true);
+}
+
+void 
+Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, GLint layer, GLenum srcFormat, bool copyToImage)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -458,6 +596,10 @@ void
 Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (newImageLayout == mImage->GetImageLayout()) {
+        return;
+    }
 
     mCommandBufferManager->BeginVkAuxCommandBuffer();
     VkCommandBuffer cmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
@@ -506,7 +648,7 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     const size_t     baseLevel  = 0;
     const size_t     baseSize   = dstRect.GetRectBufferSize();
-          uint8_t   *basePixels[mLayersCount];
+          uint8_t  **basePixels = new uint8_t*[mLayersCount];
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
         basePixels[layer] = new uint8_t[baseSize];
         CopyPixelsToHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);
@@ -522,6 +664,8 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
         CopyPixelsFromHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);
         delete[] basePixels[layer];
     }
+
+    delete [] basePixels;
 
     // Blit LoD Level '0' to rest layers
     VkImageBlit imageBlit;

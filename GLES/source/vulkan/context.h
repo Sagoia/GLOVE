@@ -30,9 +30,15 @@
 #include "vulkan/vulkan.h"
 #include "rendering_api_interface.h"
 
+#if defined(DEBUG) || defined(_DEBUG)
+#define ENABLE_VK_DEBUG_REPORTER
+#endif
+
 using namespace std;
 
 namespace vulkanAPI {
+
+    class MemoryAllocator;
 
     typedef struct vkContext_t {
         vkContext_t() {
@@ -42,19 +48,27 @@ namespace vulkanAPI {
             vkGraphicsQueueNodeIndex = 0;
             vkDevice = VK_NULL_HANDLE;
             vkSyncItems             = nullptr;
+            memoryAllocator         = nullptr;
             mIsMaintenanceExtSupported = false;
             mInitialized            = false;
             memset(static_cast<void*>(&vkDeviceMemoryProperties), 0,
                    sizeof(VkPhysicalDeviceMemoryProperties));
+            memset(static_cast<void*>(&vkDeviceFeatures), 0,
+                   sizeof(VkPhysicalDeviceFeatures));
         }
 
         VkInstance                                          vkInstance;
+#ifdef ENABLE_VK_DEBUG_REPORTER
+        VkDebugReportCallbackEXT                            vkDebugReporter;
+#endif
         vector<VkPhysicalDevice>                            vkGpus;
         VkQueue                                             vkQueue;
         uint32_t                                            vkGraphicsQueueNodeIndex;
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
+        VkPhysicalDeviceFeatures                            vkDeviceFeatures;
         vkSyncItems_t                                       *vkSyncItems;
+        MemoryAllocator                                     *memoryAllocator;
         bool                                                mIsMaintenanceExtSupported;
         bool                                                mInitialized;
     } vkContext_t;

@@ -33,6 +33,7 @@ public:
     enum PlatformType {
         UNKNOWN_PLATFORM,
         WSI_XCB,
+        WSI_WINDOWS,
         WSI_ANDROID,
         WSI_PLANE_DISPLAY
     };

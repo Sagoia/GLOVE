@@ -48,10 +48,10 @@ bool InitGL()
 
 // Initialize Mesh
     InitMesh      (&mesh_triangle, 2, 1,  triangle_vertex_buffer_data , sizeof(triangle_vertex_buffer_data) ,
-                                          triangle_uv_buffer_data     , sizeof(triangle_uv_buffer_data)     ,
-                                          triangle_color_buffer_data  , sizeof(triangle_color_buffer_data)  ,
-                                          triangle_index_buffer_data  , sizeof(triangle_index_buffer_data)  ,
-                                          diffuse_textures, 0);
+                                          NULL                        , 0 ,
+                                          NULL                        , 0 ,
+                                          NULL                        , 0 ,
+                                          NULL                        , 0);
 
 // Initialize Camera
     InitCamera    (&camera);
@@ -90,7 +90,8 @@ bool InitGL()
     return true;
 }
 
-void DrawGL()
+// Add void to param list to remove warning C4113 from MSVC
+void DrawGL(void)
 {
 // Set Viewport
     glViewport(0, 0, viewport.mWidth, viewport.mHeight);

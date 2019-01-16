@@ -24,6 +24,8 @@
 #include "glslangCompiler.h"
 #include "utils/glLogger.h"
 
+TBuiltInResource * GlslangCompiler::msSlangShaderResources = nullptr;
+
 GlslangCompiler::GlslangCompiler()
 : mSlangShader(nullptr), mSlangShader400(nullptr)
 {
@@ -73,9 +75,13 @@ GlslangCompiler::IsNotFullySupported(const char* source, const char* errors)
 }
 
 bool
-GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* resources, EShLanguage language)
+GlslangCompiler::CompileShader(const char* const* source, EShLanguage language)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    TBuiltInResource* resources = msSlangShaderResources;
+
+    mSource = string(*source);
 
     CleanUpShader(mSlangShader);
 
@@ -99,9 +105,11 @@ GlslangCompiler::CompileShader(const char* const* source, TBuiltInResource* reso
 }
 
 bool
-GlslangCompiler::CompileShader400(const char* const* source, TBuiltInResource* resources, EShLanguage language)
+GlslangCompiler::CompileShader400(const char* const* source, EShLanguage language)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    TBuiltInResource* resources = msSlangShaderResources;
 
     CleanUpShader(mSlangShader400);
 

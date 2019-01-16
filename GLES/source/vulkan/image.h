@@ -30,6 +30,8 @@
 #define TEXTURE_2D_LAYERS         1
 #define TEXTURE_CUBE_MAP_LAYERS   6
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class Image {
@@ -49,8 +51,9 @@ private:
     VkImage                           mVkImage;
     VkFormat                          mVkFormat;
     VkImageType                       mVkImageType;
-    VkImageUsageFlagBits              mVkImageUsage;
+    VkImageUsageFlags                 mVkImageUsage;
     VkImageLayout                     mVkImageLayout;
+    VkPipelineStageFlags              mVkPipelineStage;
     VkImageTiling                     mVkImageTiling;
     VkImageSubresourceRange           mVkImageSubresourceRange;
     VkImageTarget                     mVkImageTarget;
@@ -65,6 +68,8 @@ private:
     VkBool32                          mDelete;
 
     bool                              mCopyStencil;
+
+    CacheManager *                    mCacheManager;
 
 public:
 // Constructor
@@ -98,6 +103,7 @@ public:
     inline VkImage &                  GetImage(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mVkImage;          }
     inline VkFormat                   GetFormat(void)                     const { FUN_ENTRY(GL_LOG_TRACE); return mVkFormat;         }
     inline VkImageTarget              GetImageTarget(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageTarget;    }
+    inline VkImageUsageFlags          GetImageUsage(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageUsage;     }
     inline VkImageLayout              GetImageLayout(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageLayout;    }
     inline VkBufferImageCopy *        GetBufferImageCopy(void)                  { FUN_ENTRY(GL_LOG_TRACE); return &mVkBufferImageCopy;      }
     inline VkImageSubresourceRange    GetImageSubresourceRange(void)      const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageSubresourceRange; }
@@ -110,7 +116,7 @@ public:
     inline void                       SetCopyStencil(bool copy)                 { FUN_ENTRY(GL_LOG_TRACE); mCopyStencil   = copy;      }
     inline void                       SetImage(VkImage image)                   { FUN_ENTRY(GL_LOG_TRACE); mVkImage       = image;
                                                                                                            mDelete        = false;     }
-    inline void                       SetImageUsage(VkImageUsageFlagBits usage) { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
+    inline void                       SetImageUsage(VkImageUsageFlags usage)    { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
            void                       SetImageTiling();
     inline void                       SetImageTiling(VkImageTiling tiling)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTiling = tiling;    }
     inline void                       SetImageTarget(VkImageTarget target)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTarget = target;    }
@@ -118,6 +124,8 @@ public:
     inline void                       SetWidth(uint32_t width)                  { FUN_ENTRY(GL_LOG_TRACE); mWidth         = width;     }
     inline void                       SetHeight(uint32_t height)                { FUN_ENTRY(GL_LOG_TRACE); mHeight        = height;    }
     inline void                       SetMipLevels(uint32_t levels)             { FUN_ENTRY(GL_LOG_TRACE); mMipLevels     = levels;    }
+
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager  = manager;   }
 
 // Find Functions
     VkFormat                          FindSupportedVkColorFormat(VkFormat format);

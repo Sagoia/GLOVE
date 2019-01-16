@@ -54,8 +54,9 @@ Context::BindTexture(GLenum target, GLuint texture)
         if(tex->GetTarget() == GL_INVALID_VALUE) {
             tex->SetVkContext(mVkContext);
             tex->SetCommandBufferManager(mCommandBufferManager);
+            tex->SetCacheManager(mCacheManager);
             tex->SetTarget(target);
-            tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+            tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetVkImageTarget(target == GL_TEXTURE_2D ? vulkanAPI::Image::VK_IMAGE_TARGET_2D : vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);
             tex->SetVkImageTiling();
 
@@ -331,7 +332,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if(format != GL_ALPHA     && format != GL_RGB && format != GL_RGBA &&
+    if(format != GL_ALPHA     && format != GL_RGB && format != GL_RGBA && format != GL_BGRA_EXT &&
        format != GL_LUMINANCE && format != GL_LUMINANCE_ALPHA) {
         RecordError(GL_INVALID_ENUM);
         return;
@@ -348,7 +349,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if(internalformat != GL_ALPHA     && internalformat != GL_RGB && internalformat != GL_RGBA &&
+    if(internalformat != GL_ALPHA     && internalformat != GL_RGB && internalformat != GL_RGBA && internalformat != GL_BGRA_EXT &&
        internalformat != GL_LUMINANCE && internalformat != GL_LUMINANCE_ALPHA) {
         RecordError(GL_INVALID_VALUE);
         return;
@@ -372,7 +373,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
         return;
     }
 
-    if((type == GL_UNSIGNED_BYTE && format != GL_RGBA && format != GL_RGB &&
+    if((type == GL_UNSIGNED_BYTE && format != GL_RGBA && format != GL_RGB && format != GL_BGRA_EXT &&
         format != GL_LUMINANCE_ALPHA && format != GL_LUMINANCE && format != GL_ALPHA) ||
         (type == GL_UNSIGNED_SHORT_5_6_5                                          && format != GL_RGB) ||
         ((type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1) && format != GL_RGBA)) {
@@ -382,10 +383,6 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
 
     if(!width || !height) {
         return;
-    }
-
-    if(mWriteFBO->IsInDrawState()) {
-        Finish();
     }
 
     // copy the buffer contents to the texture
@@ -451,10 +448,6 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
     // TODO:: We could pass a default subtexture instead
     if(pixels == nullptr) {
         return;
-    }
-
-    if(mWriteFBO->IsInDrawState()) {
-        Finish();
     }
 
     if(mWriteFBO != mSystemFBO && GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
@@ -524,10 +517,6 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     if(mWriteFBO != mSystemFBO && mWriteFBO->CheckStatus() != GL_FRAMEBUFFER_COMPLETE) {
         RecordError(GL_INVALID_FRAMEBUFFER_OPERATION);
         return;
-    }
-
-    if(mWriteFBO->IsInDrawState()) {
-        Finish();
     }
 
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
@@ -609,10 +598,6 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
         return;
     }
 
-    if(mWriteFBO->IsInDrawState()) {
-        Finish();
-    }
-
     Texture *fbTexture = mWriteFBO->GetColorAttachmentTexture();
     if(fbTexture == nullptr) {
         return;
@@ -671,9 +656,15 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
-    if(internalformat != GL_ALPHA     && internalformat != GL_RGB && internalformat != GL_RGBA &&
-       internalformat != GL_LUMINANCE && internalformat != GL_LUMINANCE_ALPHA) {
-        RecordError(GL_INVALID_ENUM);
+    bool isFormatSupported = false;
+    for (auto format : mCompressedTextureFormats) {
+        if (format == internalformat) {
+            isFormatSupported = true;
+            break;
+        }
+    }
+    if(!isFormatSupported) {
+        RecordError(GL_INVALID_OPERATION);
         return;
     }
 
@@ -694,11 +685,30 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
-    // TODO:
-    //GL_INVALID_VALUE is generated if imageSize is not consistent with the format, dimensions, and contents of the specified compressed image data.
-    //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
+    // check imageSize
+    if ((internalformat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) && 
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
 
-    NOT_IMPLEMENTED();
+    if ((internalformat == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) &&
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 16) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
+    // copy the buffer contents to the texture
+    Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
+    GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    activeTexture->SetCompressedState(width, height, level, layer, internalformat, imageSize, data);
+
+    if (activeTexture->IsCompleted()) {
+        // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlInternalFormatToVkFormat(internalformat));
+        activeTexture->SetVkFormat(vkformat);
+        activeTexture->Allocate();
+    }
 }
 
 void
@@ -711,9 +721,15 @@ Context::CompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
         return;
     }
 
-    if(format != GL_ALPHA     && format != GL_RGB && format != GL_RGBA &&
-       format != GL_LUMINANCE && format != GL_LUMINANCE_ALPHA) {
-        RecordError(GL_INVALID_ENUM);
+    bool isFormatSupported = false;
+    for (auto format : mCompressedTextureFormats) {
+        if (format == format) {
+            isFormatSupported = true;
+            break;
+        }
+    }
+    if (!isFormatSupported) {
+        RecordError(GL_INVALID_OPERATION);
         return;
     }
 
@@ -724,21 +740,69 @@ Context::CompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
         return;
     }
 
-    Texture *tex = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
-    if(tex->GetWidth()  < (xoffset + width ) ||
-       tex->GetHeight() < (yoffset + height)) {
+    if (width == 0 || height == 0) {
+        return;
+    }
+
+    // TODO:: We could pass a default subtexture instead
+    if (data == nullptr) {
+        return;
+    }
+
+    Texture *activeTexture = mStateManager.GetActiveObjectsState()->GetActiveTexture(target);
+    if(activeTexture->GetWidth() < (xoffset + width ) ||
+        activeTexture->GetHeight() < (yoffset + height)) {
         RecordError(GL_INVALID_VALUE);
         return;
     }
 
-    if(tex->GetFormat() != format) {
+    if(activeTexture->GetFormat() != format) {
         RecordError(GL_INVALID_OPERATION);
         return;
     }
 
-    // TODO:
-    //GL_INVALID_VALUE is generated if imageSize is not consistent with the format, dimensions, and contents of the specified compressed image data.
-    //GL_INVALID_OPERATION is generated if parameter combinations are not supported by the specific compressed internal format as specified in the specific texture compression extension.
+    // check imageSize
+    if ((format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) &&
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
+    if ((format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) &&
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 16) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+
+    GLsizei blockSize = 0;
+    switch (format)
+    {
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+        blockSize = 8;
+        break;
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+        blockSize = 16;
+        break;
+    }
+    GLsizei xBlockOffset = (xoffset + 3) / 4;
+    GLsizei yBlockOffset = (yoffset + 3) / 4;
+    GLsizei xBlocks = ((activeTexture->GetWidth() >> level) + 3) / 4;
+    GLsizei yBlocks = ((activeTexture->GetHeight() >> level) + 3) / 4;
+    GLsizei xSubBlocks = (width + 3) / 4;
+    GLsizei ySubBlocks = (height + 3) / 4;
+
+    GLint layer = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    Rect rect(xBlockOffset, yBlockOffset, xSubBlocks, ySubBlocks);
+    activeTexture->SetCompressedSubState(&rect, xBlocks, yBlocks, level, layer, blockSize, data);
+
+    if (activeTexture->IsCompleted()) {
+        // pass contents to the driver
+        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlInternalFormatToVkFormat(format));
+        activeTexture->SetVkFormat(vkformat);
+        activeTexture->Allocate();
+    }
 
     NOT_IMPLEMENTED();
 }

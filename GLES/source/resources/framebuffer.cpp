@@ -29,9 +29,10 @@
 #include "framebuffer.h"
 #include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
+#include "utils/cacheManager.h"
 
 Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mState(IDLE),
 mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr), mIsSystem(false), mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID)
 {
@@ -98,9 +99,9 @@ Framebuffer::GetColorAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            tex = mTextureArray->Object(index);
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            tex = mRenderbufferArray->Object(index)->GetTexture();
         }
     }
 
@@ -122,9 +123,9 @@ Framebuffer::GetDepthAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            tex = mTextureArray->Object(index);
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            tex = mRenderbufferArray->Object(index)->GetTexture();
         }
     }
 
@@ -146,9 +147,9 @@ Framebuffer::GetStencilAttachmentTexture(void) const
 
     if(index) {
         if(type == GL_TEXTURE) {
-            tex = mTextureArray->GetObject(index);
+            tex = mTextureArray->Object(index);
         } else if(type == GL_RENDERBUFFER) {
-            tex = mRenderbufferArray->GetObject(index)->GetTexture();
+            tex = mRenderbufferArray->Object(index)->GetTexture();
         }
     }
 
@@ -170,12 +171,12 @@ Framebuffer::AddColorAttachment(Texture *texture)
 }
 
 void
-Framebuffer::SetColorAttachment(int width, int height)
+Framebuffer::SetColorAttachment(int width, int height, Texture *texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mAttachmentColors.size() == 0) {
-        Attachment *att = new Attachment();
+        Attachment *att = new Attachment(texture);
         mAttachmentColors.push_back(att);
     }
 
@@ -418,6 +419,8 @@ Framebuffer::CreateRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bo
 void
 Framebuffer::BeginVkRenderPass()
 {
+    FUN_ENTRY(GL_LOG_DEBUG);
+
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     mRenderPass->Begin(&activeCmdBuffer, mFramebuffers[mWriteBufferIndex]->GetFramebuffer(), true);
 }

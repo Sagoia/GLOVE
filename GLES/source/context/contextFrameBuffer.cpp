@@ -41,6 +41,9 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
             fbo->SetVkContext(mVkContext);
             fbo->SetCommandBufferManager(mCommandBufferManager);
             fbo->SetResources(mResourceManager->GetTextureArray(), mResourceManager->GetRenderbufferArray());
+            fbo->SetCacheManager(mCacheManager);
+            fbo->SetWidth(mSystemFBO->GetWidth());
+            fbo->SetHeight(mSystemFBO->GetHeight());
         }
     }
 
@@ -146,9 +149,17 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
+        if (renderbuffer) {
+            Texture *tex = mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture();
+            if (!(tex->GetVkImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+                tex->SetVkImageUsage(tex->GetVkImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+                tex->Allocate();
+            }
+            tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        }
         int width  = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetWidth()  : -1;
         int height = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetHeight() : -1;
-        mWriteFBO->SetColorAttachment(width, height);
+        mWriteFBO->SetColorAttachment(width, height, renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture() : nullptr);
         mWriteFBO->SetColorAttachmentType(renderbuffer ? GL_RENDERBUFFER : GL_NONE);
         mWriteFBO->SetColorAttachmentName(renderbuffer);
         mPipeline->SetUpdateViewportState(true);
@@ -212,7 +223,15 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
 
     switch(attachment) {
     case GL_COLOR_ATTACHMENT0: {
-        int width  = texture ? mResourceManager->GetTexture(texture)->GetWidth()  : -1;
+        if (texture) {
+            Texture *tex = mResourceManager->GetTexture(texture);
+            if (!(tex->GetVkImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+                tex->SetVkImageUsage(tex->GetVkImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+                tex->Allocate();
+            }
+            tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        }
+        int width = texture ? mResourceManager->GetTexture(texture)->GetWidth() : -1;
         int height = texture ? mResourceManager->GetTexture(texture)->GetHeight() : -1;
         mWriteFBO->SetColorAttachment(width, height);
         mWriteFBO->SetColorAttachmentType(texture ? GL_TEXTURE : GL_NONE);

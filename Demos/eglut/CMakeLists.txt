@@ -15,8 +15,18 @@ elseif(USE_SURFACE STREQUAL "XCB")
         ${EGLUT_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/eglut_x11.c
     )
+elseif(USE_SURFACE STREQUAL "WINDOWS")
+    set(EGLUT_SOURCES
+        ${EGLUT_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_windows.c
+    )
 elseif(USE_SURFACE STREQUAL "ANDROID")
 
 endif()
 
-add_library(EGLUT SHARED ${EGLUT_SOURCES})
+if(WIN32)
+    add_library(EGLUT STATIC ${EGLUT_SOURCES})
+    target_link_libraries(EGLUT ${LIBS})
+else()
+    add_library(EGLUT SHARED ${EGLUT_SOURCES})
+endif()
