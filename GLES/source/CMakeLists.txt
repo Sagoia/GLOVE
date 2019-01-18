@@ -205,7 +205,11 @@ else()
     add_library(OSDependent STATIC IMPORTED)
     set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
 
-    add_library(GLESv2 SHARED ${SOURCES})
+    if(IOS)
+        add_library(GLESv2 STATIC ${HEADERS} ${SOURCES})
+    else()
+        add_library(GLESv2 SHARED ${SOURCES})
+    endif()
 
     set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
                                             LINK_FLAGS "-Wl,-Bsymbolic"
@@ -214,7 +218,11 @@ else()
 
     target_link_libraries(GLESv2 ${LIBS})
 
-    install(TARGETS GLESv2 LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+    if(IOS)
+        install(TARGETS GLESv2 ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+    else()
+        install(TARGETS GLESv2 LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+    endif()
 
 endif()
 

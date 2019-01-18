@@ -32,6 +32,8 @@
 #include "eglConfig_android.h"
 #elif defined (VK_USE_PLATFORM_WIN32_KHR)
 #include "eglConfig_windows.h"
+#elif defined (VK_USE_PLATFORM_IOS_MVK)
+#include "eglConfig_ios.h"
 #else
 #include "eglConfig_linux.h"
 #endif

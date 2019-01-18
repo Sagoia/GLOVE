@@ -28,12 +28,12 @@
 #include "platform/vulkan/WSIXcb.h"
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
 #include "platform/vulkan/WSIWindows.h"
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+#include "platform/vulkan/WSIIOS.h"
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+#include "platform/vulkan/WSIAndroid.h"
 #endif
 #include "platform/vulkan/WSIPlaneDisplay.h"
-
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-#include "platform/vulkan/WSIAndroid.h"
-#endif // VK_USE_PLATFORM_ANDROID_KHR
 
 PlatformFactory *PlatformFactory::mInstance = nullptr;
 
@@ -82,6 +82,8 @@ PlatformFactory::ChoosePlatform()
     platformFactory->SetPlatformType(PlatformFactory::WSI_XCB);
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
     platformFactory->SetPlatformType(PlatformFactory::WSI_WINDOWS);
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+    platformFactory->SetPlatformType(PlatformFactory::WSI_IOS);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
     platformFactory->SetPlatformType(PlatformFactory::WSI_ANDROID);
 #else
@@ -115,13 +117,15 @@ PlatformFactory::GetWindowInterface()
             return windowInterface;
         }
 #endif
-
-        case WSI_PLANE_DISPLAY: {
+            
+#ifdef VK_USE_PLATFORM_IOS_MVK
+        case WSI_IOS: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
-            WSIPlaneDisplay *vulkanWSI = new WSIPlaneDisplay();
+            WSIIOS *vulkanWSI = new WSIIOS();
             windowInterface->SetWSI(vulkanWSI);
             return windowInterface;
         }
+#endif
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
         case WSI_ANDROID: {
@@ -131,6 +135,13 @@ PlatformFactory::GetWindowInterface()
             return windowInterface;
         }
 #endif
+
+        case WSI_PLANE_DISPLAY: {
+            VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
+            WSIPlaneDisplay *vulkanWSI = new WSIPlaneDisplay();
+            windowInterface->SetWSI(vulkanWSI);
+            return windowInterface;
+        }
 
         case UNKNOWN_PLATFORM:
         default:
@@ -151,6 +162,7 @@ PlatformFactory::GetResources()
     switch(platformType) {
         case WSI_XCB:
         case WSI_WINDOWS:
+        case WSI_IOS:
         case WSI_PLANE_DISPLAY:
             return new VulkanResources();
 

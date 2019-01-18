@@ -75,7 +75,7 @@ typedef struct rendering_api_interface {
 
 extern rendering_api_interface_t GLES2Interface;
 
-#ifdef WIN32
+#if defined(VK_USE_PLATFORM_WIN32_KHR) || defined(VK_USE_PLATFORM_IOS_MVK)
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -46,7 +46,7 @@ struct EGLDisplay_t {
     void* displayDriver;
     bool created;
     EGLDisplay_t():
-        display_id(nullptr), display(nullptr),
+        display_id(NULL), display(nullptr),
         displayDriver(nullptr), created(false)
     { }
 

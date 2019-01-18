@@ -16,6 +16,7 @@ set(SOURCES
     platform/vulkan/vulkanWSI.cpp
     platform/vulkan/vulkanAPI.cpp
     platform/vulkan/vulkanResources.cpp
+    platform/vulkan/WSIIOS.mm
     platform/vulkan/WSIPlaneDisplay.cpp
     platform/vulkan/WSIWindows.cpp
     platform/vulkan/WSIXcb.cpp
@@ -28,6 +29,7 @@ set(HEADERS
     ${CMAKE_SOURCE_DIR}/EGL/include/rendering_api_interface.h
     api/eglConfig.h
     api/eglConfig_android.h
+    api/eglConfig_ios.h
     api/eglConfig_linux.h
     api/eglConfig_windows.h
     api/eglContext.h
@@ -44,6 +46,7 @@ set(HEADERS
     platform/vulkan/vulkanWSI.h
     platform/vulkan/vulkanAPI.h
     platform/vulkan/vulkanResources.h
+    platform/vulkan/WSIIOS.h
     platform/vulkan/WSIPlaneDisplay.h
     platform/vulkan/WSIWindows.h
     platform/vulkan/WSIXcb.h
@@ -94,7 +97,11 @@ if(WIN32)
                                          INSTALL_RPATH_USE_LINK_PATH TRUE
                                          INSTALL_RPATH "\$ORIGIN")
 else()
-    add_library(EGL SHARED ${SOURCES})
+    if(IOS)
+        add_library(EGL STATIC ${HEADERS} ${SOURCES})
+    else()
+        add_library(EGL SHARED ${SOURCES})
+    endif()
 
     set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
                                          LINK_FLAGS "-Wl,-Bsymbolic"
@@ -108,6 +115,8 @@ target_link_libraries(EGL ${LIBS})
 
 if(WIN32)
     install(TARGETS EGL RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+elseif(IOS)
+    install(TARGETS EGL ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 else()
     install(TARGETS EGL LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 endif()

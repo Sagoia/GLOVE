@@ -57,7 +57,7 @@ rendering_api_interface_t GLES2Interface = {
     bind_to_texture
 };
 
-#ifdef WIN32
+#if defined(VK_USE_PLATFORM_WIN32_KHR) || defined(VK_USE_PLATFORM_IOS_MVK)
 extern "C" {
 
 EGLAPI rendering_api_interface_t * EGLAPIENTRY GetGLES2Interface(void)

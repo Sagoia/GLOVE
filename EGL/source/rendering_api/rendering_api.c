@@ -25,7 +25,7 @@
 #include "rendering_api.h"
 #include <string.h>
 #include <stdio.h>
-#ifndef WIN32
+#ifndef VK_USE_PLATFORM_WIN32_KHR
 #include <dlfcn.h>
 #endif
 #include <stdbool.h>
@@ -41,6 +41,9 @@ system's GLESv2.
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
     #define GLESv2_LIBRARY_NAME "libGLESv2.dll"
     #define GLESv2_INTERFACE_NAME "GetGLES2Interface"
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+    #define GLESv2_LIBRARY_NAME NULL
+    #define GLESv2_INTERFACE_NAME NULL
 #else
     #define GLESv2_LIBRARY_NAME "libGLESv2.so"
     #define GLESv2_INTERFACE_NAME "GLES2Interface"
@@ -95,14 +98,13 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
                                                               rendering_api_library_info_t *library_info)
 {
     rendering_api_interface_t *api_interface = NULL;
-    char *error = NULL;
 
     if(true == library_info->loaded) {
         library_info->refCount++;
         return RENDERING_API_LOAD_SUCCESS;
     }
 
-#ifdef WIN32
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
     EXTERN_C IMAGE_DOS_HEADER __ImageBase;
     CHAR DllPath[MAX_PATH] = { 0 };
     GetModuleFileName((HINSTANCE)&__ImageBase, DllPath, _countof(DllPath));
@@ -126,6 +128,12 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
         FreeLibrary(library_info->handle);
         return RENDERING_API_LOAD_ERROR;
     }
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+    library_info->handle = NULL;
+    api_interface = GetGLES2Interface();
+    if (!api_interface) {
+        return RENDERING_API_LOAD_ERROR;
+    }
 #else
     library_info->handle = dlopen(library_name, RTLD_NOW);
     if (!library_info->handle) {
@@ -147,7 +155,7 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
         return RENDERING_API_LOAD_ERROR;
     }
 
-    error = dlerror();
+    char *error = dlerror();
     if (error) {
         fprintf(stderr, "%s\n", error);
         return RENDERING_API_NOT_FOUND;
@@ -282,8 +290,10 @@ static bool rendering_terminate_api(rendering_api_interface_t *api_interface, re
         api_interface->terminate_API_cb();
     }
 
-#ifdef WIN32
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
     FreeLibrary(library_info->handle);
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+    library_info->handle = NULL;
 #else
     dlclose(library_info->handle);
     char* error = dlerror();

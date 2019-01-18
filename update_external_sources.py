@@ -48,8 +48,17 @@ def Build(proj):
     if os.path.exists(BUILD_FOLDER) == False:
         os.mkdir(BUILD_FOLDER)
     os.chdir(projPath + os.path.sep + BUILD_FOLDER)
-    print check_output(["cmake", "..", "-G", "Visual Studio 14 2015 Win64", "-DCMAKE_INSTALL_PREFIX=" + install_prefix])
-    os.system("cmake --build . --config Release --target install")
+
+    if sys.platform == "win32" :
+        check_output(["cmake", "..", "-G", "Visual Studio 14 2015 Win64", "-DCMAKE_INSTALL_PREFIX=" + install_prefix])
+        os.system("cmake --build . --config Release --target install")
+    elif sys.platform == "darwin" :
+        print check_output(["cmake", "..", "-G", "Xcode", "-DCMAKE_INSTALL_PREFIX=" + install_prefix, "-DENABLE_GLSLANG_BINARIES=OFF", "-DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake", "-DIOS_PLATFORM=OS64"])
+        os.system("cmake --build . --config Debug --target install")
+    else :
+        print sys.platform + " not supported!"
+        return
+
     os.chdir(BASEDIR)
 
 os.chdir(BASEDIR)

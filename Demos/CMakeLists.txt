@@ -31,7 +31,7 @@ set(LIBS
     GLESv2
 )
 
-if(WIN32)
+if(WIN32 OR IOS)
     set(LIBS
         EGL
         GLESv2
@@ -45,7 +45,6 @@ if(USE_SURFACE STREQUAL "XCB")
         X11-xcb
         xcb
     )
-elseif(USE_SURFACE STREQUAL "WINDOWS")
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/EGL/include

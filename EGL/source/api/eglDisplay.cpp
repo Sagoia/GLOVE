@@ -47,25 +47,27 @@ EGLDisplay_t::GetDisplayByID(EGLNativeDisplayType display_id)
        }
 
        // return the next available id
-       if(dis->created == false && dis->display_id == nullptr) {
+       if(dis->created == false && !dis->display_id) {
            break;
        }
     }
 
    // create a new display if it does not exist
    EGLDisplay dpy = nullptr;
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-   if (display_id == EGL_DEFAULT_DISPLAY) {
-       dpy = (EGLDisplay)1;
-   }
-#endif
-
-#ifdef VK_USE_PLATFORM_XCB_KHR
+#if defined(VK_USE_PLATFORM_XCB_KHR)
    if(display_id == EGL_DEFAULT_DISPLAY) {
        dpy = nullptr;
    } else {
        dpy = display_id;
    }
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+    if (display_id == EGL_DEFAULT_DISPLAY) {
+        dpy = (EGLDisplay)1;
+    }
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+    if (display_id == EGL_DEFAULT_DISPLAY) {
+        dpy = (EGLDisplay)1;
+    }
 #else
    dpy = display_id;
 #endif
