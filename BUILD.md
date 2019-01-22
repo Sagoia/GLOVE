@@ -80,3 +80,23 @@ GLOVE building can be configured according to the options listed in the followin
 | -t \| --trace-build | _OFF_ | _Enable logs_ |
 
 The above process builds GLOVE for Android and generates an apk to be later installed on the Android device. See the installation process [here](Demos/README_demos.md).
+
+# Building GLOVE for iOS
+
+The building process has been tested on macOS Mojave.
+
+```
+cd /PATH/TO/GLOVE/ROOT
+mkdir -p Build
+cd Build
+cmake .. -G Xcode \
+        -DCMAKE_INSTALL_PREFIX=../Bin \
+        -DENABLE_GLSLANG_BINARIES=OFF \
+        -DCMAKE_TOOLCHAIN_FILE=../ios.toolchain.cmake \
+        -DIOS_PLATFORM=OS64 \
+        -DVULKAN_LIBRARY=/PATH/TO/libMoltenVK.a \
+        -DVULKAN_INCLUDE_PATH=/PATH/TO/MoltenVK/include \
+        -DUSE_SURFACE=IOS 
+```
+
+GLOVE.xcodeproj is generated in GLOVE_ROOT/Build.

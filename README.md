@@ -31,7 +31,8 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 | ES 2.0  | GeForce GTX 670                     | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB | success |
 | ES 2.0  | Mali-G71                            | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
 | ES 2.0  | Mali-G71                            | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
-| ES 2.0  | GTX 980                             | NVIDIA 416.94      | 1.1.82 | Windows 10    | Windows | success |
+| ES 2.0  | GeForce GTX 980                     | NVIDIA 416.94      | 1.1.82 | Windows 10    | Windows | success |
+| ES 2.0  | Apple A11 Bionic                    | MoltenVK 1.0.31    | 1.1.92 | iOS 12.1      | Darwin  | success |
 
 # Software Design
 
@@ -68,7 +69,12 @@ Optionally "mesa-vulkan-drivers" package is needed if no other Vulkan driver is 
 The compiler minimum version that this project is built with, is GCC 4.9.3, although earlier versions may work.
 
 Windows:
+
 Install at least Visual Studio 2015 Community.
+
+iOS:
+
+Download and extract Vulkan SDK for iOS and macOS from https://vulkan.lunarg.com/sdk/home
 
 ## External Repositories Dependencies
 
@@ -82,7 +88,7 @@ Linux:
 ```
 ./update_external_sources.sh
 ```
-Windows:
+Windows & iOS:
 ```
 python update_external_sources.py
 ```
