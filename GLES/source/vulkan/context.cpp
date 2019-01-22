@@ -84,7 +84,7 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 
 static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-static const std::vector<const char*> usefulDeviceExtensions     = {"VK_KHR_maintenance1"};
+static const const char* usefulDeviceExtensions                  = "VK_KHR_maintenance1";
 
 static const std::vector<const char*> validationLayerNames       = {"VK_LAYER_LUNARG_standard_validation"};
 
@@ -245,11 +245,9 @@ CheckVkDeviceExtensions(void)
 
     GetContext()->mIsMaintenanceExtSupported = false;
     for(uint32_t i = 0; i < extensionCount; ++i) {
-        for(uint32_t j = 0; j < usefulDeviceExtensions.size(); ++j) {
-            if(!strcmp(usefulDeviceExtensions[j], vkExtensionProperties[i].extensionName)) {
-                GetContext()->mIsMaintenanceExtSupported = true;
-                break;
-            }
+        if(!strcmp(usefulDeviceExtensions, vkExtensionProperties[i].extensionName)) {
+            GetContext()->mIsMaintenanceExtSupported = true;
+            break;
         }
     }
 
@@ -389,6 +387,11 @@ CreateVkDevice(void)
     queueInfo.pQueuePriorities = queue_priorities;
     queueInfo.queueFamilyIndex = GloveVkContext.vkGraphicsQueueNodeIndex;
 
+    std::vector<const char*> deviceExtensions = requiredDeviceExtensions;
+    if (GetContext()->mIsMaintenanceExtSupported) {
+        deviceExtensions.push_back(usefulDeviceExtensions);
+    }
+
     VkDeviceCreateInfo deviceInfo;
     deviceInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceInfo.pNext                   = nullptr;
@@ -397,8 +400,8 @@ CreateVkDevice(void)
     deviceInfo.pQueueCreateInfos       = &queueInfo;
     deviceInfo.enabledLayerCount       = 0;
     deviceInfo.ppEnabledLayerNames     = nullptr;
-    deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
-    deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
+    deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size());
+    deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
     deviceInfo.pEnabledFeatures        = &vkDeviceFeatures;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
