@@ -25,7 +25,11 @@
 #include "../asset_manager/shaderManager.h"
 
 #define ESC_KEY            27
+#ifdef VK_USE_PLATFORM_IOS_MVK
+#define SOURCES_PATH
+#else
 #define SOURCES_PATH       "../"
+#endif
 #define SHADERS_PATH       "assets/shaders/"
 #define TEXTURES_PATH      "assets/textures/"
 #define EXECUTABLE_NAME(name) ( (strchr(name, '/')) ? (strchr(name, '/') + 1) : (name) )

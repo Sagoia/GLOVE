@@ -34,6 +34,11 @@
 #define ENABLE_VK_DEBUG_REPORTER
 #endif
 
+// MoltenVK not support VK_EXT_debug_report
+#ifdef VK_USE_PLATFORM_IOS_MVK
+#undef ENABLE_VK_DEBUG_REPORTER
+#endif
+
 using namespace std;
 
 namespace vulkanAPI {

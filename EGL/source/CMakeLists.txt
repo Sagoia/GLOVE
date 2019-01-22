@@ -99,14 +99,21 @@ if(WIN32)
 else()
     if(IOS)
         add_library(EGL STATIC ${HEADERS} ${SOURCES})
+        set_target_properties(EGL PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                             XCODE_ATTRIBUTE_VALID_ARCHS "arm64"
+                                             POSITION_INDEPENDENT_CODE ON
+                                             LINK_FLAGS "-Wl,-Bsymbolic"
+                                             INSTALL_RPATH_USE_LINK_PATH TRUE
+                                             INSTALL_RPATH "\$ORIGIN")
     else()
         add_library(EGL SHARED ${SOURCES})
+        set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                             LINK_FLAGS "-Wl,-Bsymbolic"
+                                             INSTALL_RPATH_USE_LINK_PATH TRUE
+                                             INSTALL_RPATH "\$ORIGIN")
     endif()
 
-    set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                         LINK_FLAGS "-Wl,-Bsymbolic"
-                                         INSTALL_RPATH_USE_LINK_PATH TRUE
-                                         INSTALL_RPATH "\$ORIGIN")
+
 endif()
 
 

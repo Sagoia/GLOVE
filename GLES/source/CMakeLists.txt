@@ -207,14 +207,21 @@ else()
 
     if(IOS)
         add_library(GLESv2 STATIC ${HEADERS} ${SOURCES})
+        set_target_properties(GLESv2 PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                                XCODE_ATTRIBUTE_VALID_ARCHS "arm64"
+                                                POSITION_INDEPENDENT_CODE ON
+                                                LINK_FLAGS "-Wl,-Bsymbolic"
+                                                INSTALL_RPATH_USE_LINK_PATH TRUE
+                                                INSTALL_RPATH "\$ORIGIN")
     else()
         add_library(GLESv2 SHARED ${SOURCES})
+        set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                                LINK_FLAGS "-Wl,-Bsymbolic"
+                                                INSTALL_RPATH_USE_LINK_PATH TRUE
+                                                INSTALL_RPATH "\$ORIGIN")
     endif()
 
-    set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                            LINK_FLAGS "-Wl,-Bsymbolic"
-                                            INSTALL_RPATH_USE_LINK_PATH TRUE
-                                            INSTALL_RPATH "\$ORIGIN")
+
 
     target_link_libraries(GLESv2 ${LIBS})
 

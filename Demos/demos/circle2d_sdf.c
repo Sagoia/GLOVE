@@ -163,7 +163,11 @@ void KeyboardGL(unsigned char key)
    }
 }
 
+#ifdef VK_USE_PLATFORM_IOS_MVK
+int ios_main(int argc, const char **argv)
+#else
 int main(int argc, char **argv)
+#endif
 {
     win_name = EXECUTABLE_NAME(argv[0]);
 
@@ -180,7 +184,9 @@ int main(int argc, char **argv)
 
     if(InitGL())
       eglutMainLoop();
+#ifndef VK_USE_PLATFORM_IOS_MVK
     DestroyGL      ();
+#endif
 
     return 0;
 }

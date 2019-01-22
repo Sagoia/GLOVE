@@ -62,7 +62,7 @@ EGLDisplay_t::GetDisplayByID(EGLNativeDisplayType display_id)
    }
 #elif defined(VK_USE_PLATFORM_IOS_MVK)
     if (display_id == EGL_DEFAULT_DISPLAY) {
-        dpy = (EGLDisplay)1;
+        dpy = (EGLDisplay)0;
     }
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
     if (display_id == EGL_DEFAULT_DISPLAY) {

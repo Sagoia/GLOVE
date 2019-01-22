@@ -14,13 +14,34 @@ set(GRAPHICS_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/utilities/profiler.c
 )
 
+set(GRAPHICS_ENGINE_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager/shaderManager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager/texLoader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/glcore/abstract.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/glcore/common.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer/framebufferobject.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendering.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer/shaderprogram.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer/shading.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer/viewport.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/scenegraph/camera.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/scenegraph/mesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/utilities/debug.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/utilities/linmath.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/utilities/profiler.h
+)
+
 if(WIN32 OR IOS)
     set(LIBS
         ${LIBS}
         EGLUT
     )
-    add_library(GRAPHICS_ENGINE STATIC ${GRAPHICS_ENGINE_SOURCES})
+    add_library(GRAPHICS_ENGINE STATIC ${GRAPHICS_ENGINE_HEADERS} ${GRAPHICS_ENGINE_SOURCES})
     target_link_libraries(GRAPHICS_ENGINE ${LIBS})
+    if (IOS)
+        set_target_properties(GRAPHICS_ENGINE PROPERTIES  XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                                          XCODE_ATTRIBUTE_VALID_ARCHS "arm64")
+    endif()
 else()
     add_library(GRAPHICS_ENGINE SHARED ${GRAPHICS_ENGINE_SOURCES})
 endif()

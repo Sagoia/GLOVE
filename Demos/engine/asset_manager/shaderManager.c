@@ -14,6 +14,11 @@
 #include "shaderManager.h"
 #include <stdint.h>
 
+#ifdef VK_USE_PLATFORM_IOS_MVK
+extern FILE *ios_fopen(const char *filename, const char *mode);
+#define fopen ios_fopen
+#endif
+
 bool
 LoadSource(const char *filename, char **shaderSource, int *length)
 {

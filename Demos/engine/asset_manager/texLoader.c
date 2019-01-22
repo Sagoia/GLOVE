@@ -14,6 +14,11 @@
 #include "texLoader.h"
 #include <stdint.h>
 
+#ifdef VK_USE_PLATFORM_IOS_MVK
+extern FILE *ios_fopen(const char *filename, const char *mode);
+#define fopen ios_fopen
+#endif
+
 int LoadTGA(Texture * texture, const char *filename)
 {
     FILE * fTGA;												// File pointer to texture file

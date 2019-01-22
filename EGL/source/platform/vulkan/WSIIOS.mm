@@ -45,7 +45,7 @@ WSIIOS::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t *
         UIView *view = (__bridge UIView *)win;
         CGFloat frameScale = view.contentScaleFactor;
         CGSize frameSize = view.frame.size;
-
+        frameScale = 1.0;
         surface->SetWidth(frameSize.width * frameScale);
         surface->SetHeight(frameSize.height * frameScale);
     }

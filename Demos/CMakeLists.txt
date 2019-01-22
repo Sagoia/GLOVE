@@ -13,7 +13,11 @@ set(CONFIG              "-DKILL_APP_PERIOD=10 -DINFO_DISPLAY")
 # Use it to load a Precomplied Shader Program (Binary Format)
 set(BINARY_PROG         "-DBINARY_PROG")
 # Set the Window Size
-set(WINDOW_SIZE         "-DWIDTH=600 -DHEIGHT=600")
+if(IOS)
+    set(WINDOW_SIZE         "-DWIDTH=568 -DHEIGHT=320")
+else()
+    set(WINDOW_SIZE         "-DWIDTH=600 -DHEIGHT=600")
+endif()
 
 # Set c/cpp flag definitions for the compiler.
 if(WIN32)
@@ -38,7 +42,7 @@ if(WIN32 OR IOS)
     )
 endif()
 
-if(USE_SURFACE STREQUAL "XCB")
+if(${USE_SURFACE} STREQUAL XCB)
     set(LIBS
         ${LIBS}
         X11

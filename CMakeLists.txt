@@ -103,6 +103,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_USE_PLATFORM_IOS_MVK")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
 # Recurse into the the following subdirectories. This does not actually cause

@@ -21,8 +21,10 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "geometry3d_textures.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "geometry3d_textures.bin"
 
-#ifdef WIN32
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
 static const char* diffuse_textures[] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.dds" };
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+static const char* diffuse_textures [] = { "assets/textures/tsi_256x256.tga", "assets/textures/vulkan_512x512.tga"};
 #else
 static const char* diffuse_textures [] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.tga"};
 #endif
