@@ -54,7 +54,7 @@ def Build(proj):
         os.system("cmake --build . --config Release --target install")
     elif sys.platform == "darwin" :
         print check_output(["cmake", "..", "-G", "Xcode", "-DCMAKE_INSTALL_PREFIX=" + install_prefix, "-DENABLE_GLSLANG_BINARIES=OFF", "-DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake", "-DIOS_PLATFORM=OS64"])
-        os.system("cmake --build . --config Debug --target install")
+        os.system("cmake --build . --config Release --target install")
     else :
         print sys.platform + " not supported!"
         return
