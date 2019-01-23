@@ -86,13 +86,13 @@ Pipeline::Release()
 }
 
 void
-Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth)
+Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth, bool ignoreYInvert)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     viewportW = std::min(viewportW, fboWidth);
     viewportH = std::min(viewportH, fboHeight);
-    if(mVkContext->mIsMaintenanceExtSupported) {
+    if(mVkContext->mIsMaintenanceExtSupported && !ignoreYInvert) {
         viewportY = fboHeight - viewportY;
         viewportH = -viewportH;
     }

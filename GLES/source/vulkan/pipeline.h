@@ -176,7 +176,7 @@ public:
           void CreateMultisampleState(VkBool32 alphaToOneEnable, VkBool32 alphaToCoverageEnable, VkSampleCountFlagBits rasterizationSamples, VkBool32 sampleShadingEnable, float minSampleShading);
 
 // Compute Functions
-          void ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth);
+          void ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth, bool ignoreYInvert);
           void ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH);
 
 // Bind Functions
