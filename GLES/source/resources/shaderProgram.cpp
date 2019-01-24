@@ -1227,7 +1227,50 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         }
                     }
                     else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
-                        activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                        if (mVkContext->mIsMaintenanceExtSupported) {
+                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                        } else {
+                            // Get Inverted Data from FBO's Color Attachment Texture
+                            GLenum dstInternalFormat = activeTexture->GetExplicitInternalFormat();
+                            ImageRect srcRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
+                                GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
+                                GlTypeToElementSize(activeTexture->GetExplicitType()),
+                                Texture::GetDefaultInternalAlignment());
+                            ImageRect dstRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
+                                GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
+                                GlTypeToElementSize(activeTexture->GetExplicitType()),
+                                Texture::GetDefaultInternalAlignment());
+
+                            uint8_t* dstData = new uint8_t[dstRect.GetRectBufferSize()];
+                            srcRect.y = activeTexture->GetInvertedYOrigin(&srcRect);
+                            activeTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, dstInternalFormat, static_cast<void *>(dstData));
+
+                            // Create new Texture with this data 
+                            Texture *inverted_texture = new Texture(mVkContext, mCommandBufferManager);
+                            inverted_texture->SetTarget(GL_TEXTURE_2D);
+                            inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+                            inverted_texture->SetVkImageTiling();
+                            inverted_texture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
+                            inverted_texture->InitState();
+
+                            inverted_texture->SetVkFormat(activeTexture->GetVkFormat());
+                            inverted_texture->SetState(activeTexture->GetWidth(), activeTexture->GetHeight(),
+                                0, 0,
+                                GlInternalFormatToGlFormat(dstInternalFormat),
+                                GlInternalFormatToGlType(dstInternalFormat),
+                                Texture::GetDefaultInternalAlignment(),
+                                dstData);
+
+                            if (inverted_texture->IsCompleted()) {
+                                inverted_texture->Allocate();
+                                inverted_texture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                                mCacheManager->CacheTexture(inverted_texture);
+                            }
+
+                            activeTexture = inverted_texture;
+
+                            delete[] dstData;
+                        }
                     }
 
                     activeTexture->CreateVkSampler();
