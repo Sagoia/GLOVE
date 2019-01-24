@@ -60,9 +60,9 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
 
     mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(framebuffer);
     if (mVkContext->mIsMaintenanceExtSupported) {
+        mPipeline->SetYInverted(mWriteFBO != mSystemFBO);
         GLenum frontFace = mStateManager.GetRasterizationState()->GetFrontFace();
-        GLenum backFace = (frontFace == GL_CCW ? GL_CW : GL_CCW);
-        mPipeline->SetRasterizationFrontFace(GlFrontFaceToVkFrontFace(mWriteFBO == mSystemFBO ? frontFace : backFace));
+        mPipeline->SetRasterizationFrontFace(GlFrontFaceToVkFrontFace(frontFace));
     }
     mPipeline->SetUpdatePipeline(true);
     mPipeline->SetUpdateViewportState(true);

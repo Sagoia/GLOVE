@@ -187,7 +187,7 @@ Context::UpdateViewportState(vulkanAPI::Pipeline* pipeline)
         pipeline->ComputeViewport(mWriteFBO->GetWidth(), mWriteFBO->GetHeight(),
                                   viewportRect.x, viewportRect.y,
                                   viewportRect.width, viewportRect.height,
-                                  stateViewportTransformation->GetMinDepthRange(), stateViewportTransformation->GetMaxDepthRange(), mWriteFBO != mSystemFBO);
+                                  stateViewportTransformation->GetMinDepthRange(), stateViewportTransformation->GetMaxDepthRange());
 
         Rect scissorRect = stateFragmentOperations->GetScissorTestEnabled() ?
                     stateFragmentOperations->GetScissorRect() : viewportRect;

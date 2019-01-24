@@ -67,6 +67,7 @@ private:
     VkBool32                                    Viewport;
     }                                           mUpdateState;
 
+    bool                                        mYInverted;
     CacheManager                               *mCacheManager;
 
     bool                                        CreateGraphicsPipeline(void);
@@ -102,7 +103,7 @@ public:
     inline void SetRasterizationPolygonMode(VkPolygonMode mode)                 { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.polygonMode = mode; mUpdateState.Pipeline = true;}
     inline void SetRasterizationCullMode(VkBool32 enable,
                                          VkCullModeFlagBits mode)               { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.cullMode  = enable ? mode : VK_CULL_MODE_NONE; mUpdateState.Pipeline = true;}
-    inline void SetRasterizationFrontFace(VkFrontFace face)                     { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.frontFace = face; mUpdateState.Pipeline = true;}
+    inline void SetRasterizationFrontFace(VkFrontFace face)                     { FUN_ENTRY(GL_LOG_TRACE); face = !mYInverted ? face : (face == VK_FRONT_FACE_CLOCKWISE ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE); mVkPipelineRasterizationState.frontFace = face; mUpdateState.Pipeline = true; }
 
     inline void SetRasterizationDepthBiasEnable(VkBool32 enable)                { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.depthBiasEnable         = enable; mUpdateState.Pipeline = true;}
     inline void SetRasterizationDepthBiasConstantFactor(float factor)           { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineRasterizationState.depthBiasConstantFactor = factor; mUpdateState.Pipeline = true;}
@@ -153,6 +154,7 @@ public:
     inline void SetLayout(VkPipelineLayout layout)                              { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineLayout           = layout; }
     inline void SetVertexInputState(
                             VkPipelineVertexInputStateCreateInfo *vertexInput)  { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineVertexInputState = vertexInput; }
+    inline void SetYInverted(bool yInverted)                                    { FUN_ENTRY(GL_LOG_TRACE); mYInverted = yInverted; }
     inline void SetCacheManager(CacheManager *cacheManager)                     { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = cacheManager; }
            void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
            void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height);
@@ -176,7 +178,7 @@ public:
           void CreateMultisampleState(VkBool32 alphaToOneEnable, VkBool32 alphaToCoverageEnable, VkSampleCountFlagBits rasterizationSamples, VkBool32 sampleShadingEnable, float minSampleShading);
 
 // Compute Functions
-          void ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth, bool ignoreYInvert);
+          void ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewportY, int viewportW, int viewportH, float minDepth, float maxDepth);
           void ComputeScissor(int fboWidth, int fboHeight, int scissorX, int scissorY, int scissorW, int scissorH);
 
 // Bind Functions
