@@ -35,7 +35,7 @@ namespace vulkanAPI {
 Pipeline::Pipeline(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkPipeline(VK_NULL_HANDLE), mVkPipelineLayout(VK_NULL_HANDLE),
   mVkPipelineCache(VK_NULL_HANDLE), mVkPipelineVertexInputState(VK_NULL_HANDLE),
-  mVkPipelineShaderStageCount(0), mCacheManager(nullptr)
+  mVkPipelineShaderStageCount(0), mYInverted(false), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -92,7 +92,7 @@ Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewpo
 
     viewportW = std::min(viewportW, fboWidth);
     viewportH = std::min(viewportH, fboHeight);
-    if(mVkContext->mIsMaintenanceExtSupported) {
+    if(mVkContext->mIsMaintenanceExtSupported && !mYInverted) {
         viewportY = fboHeight - viewportY;
         viewportH = -viewportH;
     }
