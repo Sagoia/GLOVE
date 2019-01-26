@@ -32,7 +32,7 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 | ES 2.0  | Mali-G71                            | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
 | ES 2.0  | Mali-G71                            | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
 | ES 2.0  | GeForce GTX 980                     | NVIDIA 416.94      | 1.1.82 | Windows 10    | Windows | success |
-| ES 2.0  | Apple A11 Bionic                    | MoltenVK 1.0.31    | 1.1.92 | iOS 12.1      | Darwin  | success |
+| ES 2.0  | Apple A11 Bionic                    | MoltenVK 1.0.27    | 1.1.92 | iOS 12.1      | Darwin  | success |
 
 # Software Design
 
