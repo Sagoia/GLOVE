@@ -90,7 +90,7 @@ extern void ios_draw_cb(void);
 }
 
 - (void)startRun {
-    uint32_t fps = 30;
+    uint32_t fps = 60;
     _displayLink = [CADisplayLink displayLinkWithTarget: self selector: @selector(renderLoop)];
     [_displayLink setFrameInterval: 60 / fps];
     [_displayLink addToRunLoop: NSRunLoop.currentRunLoop forMode: NSDefaultRunLoopMode];
