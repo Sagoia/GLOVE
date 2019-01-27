@@ -305,7 +305,7 @@ Texture::Allocate(void)
             }
             if (isCompressed) {
                 Rect srcRect(0, 0, state->width, state->height);
-                CpoyCompressedPixelFromHost(&srcRect, level, layer, dstInternalFormat, state->data, state->size);
+                CpoyCompressedPixelFromHost(&srcRect, level, layer, srcInternalFormat, state->data, state->size);
             } else {
                 ImageRect srcRect(0, 0, state->width, state->height,
                                   GlInternalFormatTypeToNumElements(srcInternalFormat, state->type),
@@ -440,31 +440,6 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
     }
 
     mDirty = true;
-}
-
-void
-Texture::SetCompressedSubState(Rect *rect, GLsizei with, GLsizei height, GLint level, GLint layer, GLsizei blockSize, const void *imageData)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    if (mState[layer][level].data == nullptr) {
-        uint32_t size = with * height * blockSize;
-        mState[layer][level].data = new uint8_t[size];
-    }
-
-    if (imageData) {
-        uint8_t *srcData = (uint8_t *)imageData;
-        uint8_t *data = (uint8_t *)mState[layer][level].data;
-        GLsizei dataSize = mState[layer][level].size;
-        for (GLsizei i = 0; i < rect->height; ++i) {
-            uint32_t offset = (with * (rect->y + i) + rect->x) * blockSize;
-            uint32_t lineSize = rect->width * blockSize;
-            assert(offset + lineSize <= dataSize);
-            memcpy(data + offset, srcData + i * lineSize, lineSize);
-        }
-    }
-
-    SetDataUpdated(true);
 }
 
 void 
