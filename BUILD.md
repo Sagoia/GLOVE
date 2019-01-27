@@ -85,6 +85,8 @@ The above process builds GLOVE for Android and generates an apk to be later inst
 
 The building process has been tested on macOS Mojave.
 
+Build MoltenVK [here](External/MoltenVK/README.md)
+
 ```
 cd /PATH/TO/GLOVE/ROOT
 mkdir -p Build
