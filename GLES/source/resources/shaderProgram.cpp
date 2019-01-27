@@ -1248,7 +1248,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             // Create new Texture with this data 
                             Texture *inverted_texture = new Texture(mVkContext, mCommandBufferManager);
                             inverted_texture->SetTarget(GL_TEXTURE_2D);
-                            inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+                            inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_TRANSFER_DST_BIT));
                             inverted_texture->SetVkImageTiling();
                             inverted_texture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
                             inverted_texture->InitState();

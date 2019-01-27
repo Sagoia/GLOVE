@@ -72,7 +72,7 @@ ResourceManager::CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManage
     mDefaultTexture2D = new Texture(mVkContext, cbManager);
     mDefaultTexture2D->SetTarget(GL_TEXTURE_2D);
     mDefaultTexture2D->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
-    mDefaultTexture2D->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+    mDefaultTexture2D->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
     mDefaultTexture2D->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
     mDefaultTexture2D->SetVkImageTiling();
     mDefaultTexture2D->InitState();
@@ -80,7 +80,7 @@ ResourceManager::CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManage
     mDefaultTextureCubeMap = new Texture(mVkContext, cbManager);
     mDefaultTextureCubeMap->SetTarget(GL_TEXTURE_CUBE_MAP);
     mDefaultTextureCubeMap->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
-    mDefaultTextureCubeMap->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+    mDefaultTextureCubeMap->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
     mDefaultTextureCubeMap->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_CUBE);
     mDefaultTextureCubeMap->SetVkImageTiling();
     mDefaultTextureCubeMap->InitState();
