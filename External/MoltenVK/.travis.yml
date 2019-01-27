@@ -1,0 +1,19 @@
+language: objective-c 
+
+# macOS and Xcode Version
+osx_image: xcode10
+
+# Build dependencies
+install:
+  - brew install python3
+  - ./fetchDependencies -v
+
+# Cache built deps
+cache:
+  directories:
+    - External
+
+script:
+  - xcodebuild -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package"
+  - xcodebuild -workspace Demos/Demos.xcworkspace -scheme "Cube-macOS"
+
