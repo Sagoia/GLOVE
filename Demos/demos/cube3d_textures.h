@@ -24,7 +24,7 @@
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 static const char* diffuse_textures[] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.dds" };
 #elif defined(VK_USE_PLATFORM_IOS_MVK)
-static const char* diffuse_textures [] = { "assets/textures/tsi_256x256.tga", "assets/textures/vulkan_512x512.tga"};
+static const char* diffuse_textures [] = { "assets/textures/tsi_256x256.tga", "assets/textures/vulkan_512x512.pvr"};
 #else
 static const char* diffuse_textures [] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.tga"};
 #endif

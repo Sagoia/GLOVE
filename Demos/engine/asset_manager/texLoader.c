@@ -12,12 +12,15 @@
  */
 
 #include "texLoader.h"
-#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef VK_USE_PLATFORM_IOS_MVK
 extern FILE *ios_fopen(const char *filename, const char *mode);
 #define fopen ios_fopen
 #endif
+
+static TGAHeader tgaheader;                        // TGA header
+static TGA tga;                                    // TGA image data
 
 int LoadTGA(Texture * texture, const char *filename)
 {
@@ -274,48 +277,6 @@ const uint32_t FOURCC_DXT1 = 0x31545844; //(MAKEFOURCC('D','X','T','1'))
 const uint32_t FOURCC_DXT3 = 0x33545844; //(MAKEFOURCC('D','X','T','3'))
 const uint32_t FOURCC_DXT5 = 0x35545844; //(MAKEFOURCC('D','X','T','5'))
 
-typedef struct {
-    uint32_t dwSize;
-    uint32_t dwFlags;
-    uint32_t dwFourCC;
-    uint32_t dwRGBBitCount;
-    uint32_t dwRBitMask;
-    uint32_t dwGBitMask;
-    uint32_t dwBBitMask;
-    uint32_t dwABitMask;
-} DDS_PIXELFORMAT;
-
-typedef struct {
-    uint32_t dwSize;
-    uint32_t dwFlags;
-    uint32_t dwHeight;
-    uint32_t dwWidth;
-    uint32_t dwPitchOrLinearSize;
-    uint32_t dwDepth;
-    uint32_t dwMipMapCount;
-    uint32_t dwReserved1[11];
-    DDS_PIXELFORMAT ddspf;
-    uint32_t dwCaps1;
-    uint32_t dwCaps2;
-    uint32_t dwReserved2[3];
-} DDS_HEADER;
-
-typedef struct {
-    uint16_t col0;
-    uint16_t col1;
-    uint8_t row[4];
-} DXTColorBlock;
-
-typedef struct {
-    uint16_t row[4];
-} DXT3AlphaBlock;
-
-typedef struct {
-    uint8_t alpha0;
-    uint8_t alpha1;
-    uint8_t row[6];
-} DXT5AlphaBlock;
-
 static void swapUint8(uint8_t *a, uint8_t *b) 
 {
     uint8_t temp = *a;
@@ -451,16 +412,13 @@ static void FlipBlocksDXTC5(DXTColorBlock *line, uint32_t numBlocks) {
     }
 }
 
-int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
+int LoadDXTC(Texture * texture, ImageData *image, const char *filename)
 {
     DDS_HEADER ddsh;
     char filecode[4];
-    FILE *pFile;
-    //int factor;
-    //int bufferSize;
 
     // Open the file
-    pFile = fopen(filename, "rb");
+    FILE *pFile = fopen(filename, "rb");
     if (pFile == NULL)  {
         printf("File %s open failed!\n", filename);
         return 0;
@@ -476,7 +434,7 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
 
     // Get the surface descriptor
     fread(&ddsh, sizeof(ddsh), 1, pFile);
-    memset(image, 0, sizeof(DDSImage));
+    memset(image, 0, sizeof(ImageData));
 
     //
     // This .dds loader supports the loading of compressed formats DXT1, DXT3 
@@ -504,6 +462,7 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
         image->format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
     } else {
         printf("File %s load failed: unsupported dds format! \n", filename);
+        fclose(pFile);
         return 0;
     }
 
@@ -513,7 +472,7 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
 
     uint32_t width = ddsh.dwWidth;
     uint32_t height = ddsh.dwHeight;
-    image->slices = (DDSImageSlice *)malloc(ddsh.dwMipMapCount * sizeof(DDSImageSlice));
+    image->slices = (ImageSlice *)malloc(ddsh.dwMipMapCount * sizeof(ImageSlice));
     uint32_t blockSize = (image->format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || image->format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
     for (uint32_t i = 0; i < ddsh.dwMipMapCount; ++i) {
         uint32_t xblocks = (width + 3) / 4;
@@ -583,6 +542,288 @@ int LoadDDS(Texture * texture, DDSImage *image, const char *filename)
     return 1;
 }
 
+const uint32_t PVRLegacyMagic   = 0x21525650;
+const uint32_t PVRv3Magic       = 0x03525650;
+
+const uint32_t PVRLegacyPixelFormatPVRTC2 = 0x18;
+const uint32_t PVRLegacyPixelFormatPVRTC4 = 0x19;
+
+const uint32_t PVRv3PixelFormatPVRTC_2BPP_RGB  = 0x0;
+const uint32_t PVRv3PixelFormatPVRTC_2BPP_RGBA = 0x1;
+const uint32_t PVRv3PixelFormatPVRTC_4BPP_RGB  = 0x2;
+const uint32_t PVRv3PixelFormatPVRTC_4BPP_RGBA = 0x3;
+
+static uint32_t SwapInt32LittleToHost(uint32_t arg)
+{
+    return arg;
+}
+
+static uint64_t SwapInt64LittleToHost(uint64_t arg)
+{
+    return arg;
+}
+
+static int IsPVRv2Container(void *data, size_t size)
+{
+    if (size < sizeof(PVRv2Header)) {
+        return 0;
+    }
+    
+    PVRv2Header *header = (PVRv2Header *)data;
+    uint32_t fileMagic = SwapInt32LittleToHost(header->pvrTag);
+    return (fileMagic == PVRLegacyMagic);
+}
+
+static int IsPVRv3Container(void *data, size_t size)
+{
+    if (size < sizeof(PVRv3Header)) {
+        return 0;
+    }
+    
+    PVRv3Header *header = (PVRv3Header *)data;
+    uint32_t fileMagic = SwapInt32LittleToHost(header->version);
+    return (fileMagic == PVRv3Magic);
+}
+
+static int LoadPVRv2Image(ImageData *data, void *fileData, size_t fileSize)
+{
+    PVRv2Header *header = (PVRv2Header *)fileData;
+    
+    uint32_t flags = SwapInt32LittleToHost(header->flags);
+    uint32_t format = flags & 0xFF;
+    uint32_t mipCount = SwapInt32LittleToHost(header->mipmapCount);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    bool     hasAlpha = ((flags & 0x8000) > 0);
+    uint32_t componentCount = hasAlpha ? 4 : 3;
+    bool     colorSpaceIsLinear = true;
+    
+    if (format != PVRLegacyPixelFormatPVRTC2 && format != PVRLegacyPixelFormatPVRTC4) {
+        printf("LoadPVRv2Image: unsupported pvr format 0x%x! \n", format);
+        return 0;
+    }
+
+    if (mipCount == 0) {
+        mipCount = 1;
+    }
+    ImageSlice *slices = malloc(mipCount * sizeof(ImageSlice));
+
+    width = SwapInt32LittleToHost(header->width);
+    height = SwapInt32LittleToHost(header->height);
+    
+    uint32_t dataLength = SwapInt32LittleToHost(header->dataLength);
+    
+    uint8_t *bytes = ((uint8_t *)fileData) + sizeof(PVRv2Header);
+    
+    // PVRLegacyPixelFormatPVRTC4
+    uint32_t blockWidth = 4;
+    uint32_t blockHeight = 4;
+    uint32_t bitsPerPixel = 4;
+    if (format == PVRLegacyPixelFormatPVRTC2) {
+        blockWidth = 8;
+        blockHeight = 4;
+        bitsPerPixel = 2;
+    }
+    uint32_t blockSize = blockWidth * blockHeight;
+
+    uint32_t dataOffset = 0;
+    uint32_t levelWidth = width;
+    uint32_t levelHeight = height;
+    uint32_t index = 0;
+    while (dataOffset < dataLength) {
+        uint32_t widthInBlocks = levelWidth / blockWidth;
+        uint32_t heightInBlocks = levelHeight / blockHeight;
+        
+        if (widthInBlocks < 2) {
+            widthInBlocks = 2;
+        }
+        if (heightInBlocks < 2) {
+            heightInBlocks = 2;
+        }
+        
+        uint32_t mipSize = widthInBlocks * heightInBlocks * ((blockSize * bitsPerPixel) / 8);
+        uint8_t *levelData = (uint8_t *)malloc(mipSize * sizeof(uint8_t));
+        memcpy(levelData, bytes + dataOffset, mipSize);
+        
+        slices[index].width = levelWidth;
+        slices[index].height = levelHeight;
+        slices[index].pixels = levelData;
+        slices[index].size = mipSize;
+        
+        levelWidth = levelWidth / 2;
+        levelHeight = levelHeight / 2;
+        
+        if (levelWidth < 1) {
+            levelWidth = 1;
+        }
+        if (levelHeight < 1) {
+            levelHeight = 1;
+        }
+        
+        dataOffset += mipSize;
+        ++ index;
+    }
+    
+    data->components = componentCount;
+    data->numMipMaps = mipCount;
+    data->slices = slices;
+    if (bitsPerPixel == 2) {
+        if (componentCount == 3) {
+            data->format = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+        } else if (componentCount == 4) {
+            data->format = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+        }
+    } else if (bitsPerPixel == 4) {
+        if (componentCount == 3) {
+            data->format = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+        } else if (componentCount == 4) {
+            data->format = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+        }
+    }
+    
+    return 1;
+}
+
+static int LoadPVRv3Image(ImageData *data, void *fileData, size_t fileSize)
+{
+    PVRv3Header *header = (PVRv3Header *)fileData;
+    
+    uint32_t width = SwapInt32LittleToHost(header->width);
+    uint32_t height = SwapInt32LittleToHost(header->height);
+    uint32_t format = SwapInt64LittleToHost(header->pixelFormat) & 0xffffffff;
+    uint32_t mipCount = SwapInt32LittleToHost(header->mipmapCount);
+    uint32_t metadataLength = SwapInt32LittleToHost(header->metadataLength);
+    bool     colorSpaceIsLinear = (SwapInt32LittleToHost(header->colorSpace) == 0);
+    
+    if (format != PVRv3PixelFormatPVRTC_2BPP_RGB &&
+        format != PVRv3PixelFormatPVRTC_2BPP_RGBA &&
+        format != PVRv3PixelFormatPVRTC_4BPP_RGB &&
+        format != PVRv3PixelFormatPVRTC_4BPP_RGBA) {
+        printf("LoadPVRv3Image: unsupported pvr format 0x%x! \n", format);
+        return 0;
+    }
+    
+    if (mipCount == 0) {
+        mipCount = 1;
+    }
+    ImageSlice *slices = malloc(mipCount * sizeof(ImageSlice));
+
+    uint32_t dataLength = (uint32_t)(fileSize - (sizeof(PVRv3Header) + metadataLength));
+    
+    uint8_t *bytes = ((uint8_t *)fileData) + sizeof(PVRv3Header) + metadataLength;
+    
+    // PVRv3PixelFormatPVRTC_4BPP_RGB or PVRv3PixelFormatPVRTC_4BPP_RGBA
+    uint32_t blockWidth = 4;
+    uint32_t blockHeight = 4;
+    uint32_t bitsPerPixel = 4;
+    if (format == PVRv3PixelFormatPVRTC_2BPP_RGB || format == PVRv3PixelFormatPVRTC_2BPP_RGBA) {
+        blockWidth = 8;
+        blockHeight = 4;
+        bitsPerPixel = 2;
+    }
+
+    uint32_t blockSize = blockWidth * blockHeight;
+    
+    uint32_t dataOffset = 0;
+    uint32_t levelWidth = width;
+    uint32_t levelHeight = height;
+    uint32_t index = 0;
+    while (dataOffset < dataLength) {
+        uint32_t widthInBlocks = levelWidth / blockWidth;
+        uint32_t heightInBlocks = levelHeight / blockHeight;
+        
+        uint32_t mipSize = widthInBlocks * heightInBlocks * ((blockSize * bitsPerPixel) / 8);
+        
+        if (mipSize < 32) {
+            mipSize = 32;
+        }
+        
+        uint8_t *levelData = (uint8_t *)malloc(mipSize * sizeof(uint8_t));
+        memcpy(levelData, bytes + dataOffset, mipSize);
+        
+        slices[index].width = levelWidth;
+        slices[index].height = levelHeight;
+        slices[index].pixels = levelData;
+        slices[index].size = mipSize;
+        
+        levelWidth = levelWidth / 2;
+        levelHeight = levelHeight / 2;
+        
+        if (levelWidth < 1) {
+            levelWidth = 1;
+        }
+        if (levelHeight < 1) {
+            levelHeight = 1;
+        }
+        
+        dataOffset += mipSize;
+        ++ index;
+    }
+    
+    uint32_t componentCount = ((format == PVRv3PixelFormatPVRTC_2BPP_RGB) ||
+                               (format == PVRv3PixelFormatPVRTC_4BPP_RGB)) ? 3 : 4;
+
+    data->components = componentCount;
+    data->numMipMaps = mipCount;
+    data->slices = slices;
+    if (bitsPerPixel == 2) {
+        if (componentCount == 3) {
+            data->format = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+        } else if (componentCount == 4) {
+            data->format = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+        }
+    } else if (bitsPerPixel == 4) {
+        if (componentCount == 3) {
+            data->format = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+        } else if (componentCount == 4) {
+            data->format = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+        }
+    }
+    
+    return 1;
+}
+
+int LoadPVRTC (Texture * texture, ImageData *image, const char *filename)
+{
+    void *fileData = NULL;
+    FILE *pFile = fopen(filename, "rb");
+    if (pFile == NULL)  {
+        printf("File %s open failed!\n", filename);
+        return 0;
+    }
+    
+    fseek(pFile, 0, SEEK_END);
+    size_t fileSize = ftell(pFile);
+    fseek(pFile, 0, SEEK_SET);
+    
+    fileData = malloc(fileSize * sizeof(uint8_t));
+    fread(fileData, sizeof(uint8_t), fileSize, pFile);
+    
+    fclose(pFile);
+    pFile = NULL;
+    
+    int32_t loadRet = 0;
+    if (IsPVRv2Container(fileData, fileSize)) {
+        loadRet = LoadPVRv2Image(image, fileData, fileSize);
+    } else if (IsPVRv3Container(fileData, fileSize)) {
+        loadRet = LoadPVRv3Image(image, fileData, fileSize);
+    } else {
+        printf("File %s load failed: unsupported pvr format! \n", filename);
+    }
+    
+    if (loadRet) {
+        texture->imageData = NULL;
+        texture->bpp = image->components;
+        texture->width = image->slices[0].width;
+        texture->height = image->slices[0].height;
+        texture->type = image->format;
+    }
+    
+    free(fileData);
+    return loadRet;
+    
+}
+
 Texture *LoadGLTexture(const char *filename)
 {
     Texture *texture = (Texture *)malloc(sizeof(Texture));
@@ -603,8 +844,8 @@ Texture *LoadGLTexture(const char *filename)
             return texture;
         }
     } else if (!strcmp(prefix, "dds") || !strcmp(prefix, "DDS")) {
-        DDSImage ddsImage;
-        if (LoadDDS(texture, &ddsImage, filename)) {
+        ImageData ddsImage;
+        if (LoadDXTC(texture, &ddsImage, filename)) {
             glGenTextures(1, &texture->texID);
             glBindTexture(GL_TEXTURE_2D, texture->texID);
             for (int i = 0; i < ddsImage.numMipMaps; ++i) {
@@ -621,6 +862,28 @@ Texture *LoadGLTexture(const char *filename)
             }
             free(ddsImage.slices);
 
+            return texture;
+        }
+    } else if (!strcmp(prefix, "pvr") || !strcmp(prefix, "PVR")) {
+        ImageData pvrImage;
+        if (LoadPVRTC(texture, &pvrImage, filename)) {
+            glGenTextures(1, &texture->texID);
+            glBindTexture(GL_TEXTURE_2D, texture->texID);
+            for (int i = 0; i < pvrImage.numMipMaps; ++i) {
+                glCompressedTexImage2D(GL_TEXTURE_2D, i, pvrImage.format, pvrImage.slices[i].width, pvrImage.slices[i].height, 0, pvrImage.slices[i].size, pvrImage.slices[i].pixels);
+                break;
+            }
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            ASSERT_NO_GL_ERROR();
+            
+            for (int i = 0; i < pvrImage.numMipMaps; ++i) {
+                free(pvrImage.slices[i].pixels);
+            }
+            free(pvrImage.slices);
+            
             return texture;
         }
     }
