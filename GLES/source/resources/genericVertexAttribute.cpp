@@ -129,7 +129,7 @@ GenericVertexAttribute::UpdateGenericValueVBO(bool& updatedVBO)
     vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
     SetNumElements(4);
     SetType(GL_FLOAT);
-    SetStride(0);
+    SetStride(mElements * GlAttribTypeToElementSize(mType));
     SetCurrentVbo(vbo);
     SetInternalVBOStatus(true);
     updatedVBO = true;
