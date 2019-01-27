@@ -70,11 +70,12 @@ The compiler minimum version that this project is built with, is GCC 4.9.3, alth
 
 Windows:
 
-Install at least Visual Studio 2015 Community.
+Install Visual Studio 2015 Community or higher version.
+Download and install Vulkan SDK from https://vulkan.lunarg.com/sdk/home
 
 iOS:
 
-Download and extract Vulkan SDK for iOS and macOS from https://vulkan.lunarg.com/sdk/home
+Install XCode 9 or higher version.
 
 ## External Repositories Dependencies
 
