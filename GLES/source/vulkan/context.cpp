@@ -84,7 +84,8 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 
 static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-static const const char* usefulDeviceExtensions                  = "VK_KHR_maintenance1";
+static const std::vector<const char*> usefulDeviceExtensions     = {VK_KHR_MAINTENANCE1_EXTENSION_NAME,
+                                                                    VK_IMG_FORMAT_PVRTC_EXTENSION_NAME};
 
 static const std::vector<const char*> validationLayerNames       = {"VK_LAYER_LUNARG_standard_validation"};
 
@@ -206,6 +207,8 @@ CheckVkInstanceExtensions(void)
         }
     }
 
+    GloveVkContext.enabledInstanceExtensions = requiredInstanceExtensions;
+    
     return true;
 }
 
@@ -237,6 +240,7 @@ CheckVkDeviceExtensions(void)
     for(uint32_t i = 0; i < extensionCount; ++i) {
         for(uint32_t j = 0; j < requiredDeviceExtensions.size(); ++j) {
             if(!strcmp(requiredDeviceExtensions[j], vkExtensionProperties[i].extensionName)) {
+                GloveVkContext.enabledDeviceExtensions.push_back(requiredDeviceExtensions[j]);
                 requiredExtensionsAvailable[j] = true;
                 break;
             }
@@ -245,9 +249,14 @@ CheckVkDeviceExtensions(void)
 
     GetContext()->mIsMaintenanceExtSupported = false;
     for(uint32_t i = 0; i < extensionCount; ++i) {
-        if(!strcmp(usefulDeviceExtensions, vkExtensionProperties[i].extensionName)) {
-            GetContext()->mIsMaintenanceExtSupported = true;
-            break;
+        for(uint32_t j = 0; j < usefulDeviceExtensions.size(); ++j) {
+            if(!strcmp(usefulDeviceExtensions[j], vkExtensionProperties[i].extensionName)) {
+                GloveVkContext.enabledDeviceExtensions.push_back(usefulDeviceExtensions[j]);
+                if (!strcmp(usefulDeviceExtensions[j], VK_KHR_MAINTENANCE1_EXTENSION_NAME)) {
+                    GetContext()->mIsMaintenanceExtSupported = true;
+                }
+                break;
+            }
         }
     }
 
@@ -296,8 +305,8 @@ CreateVkInstance(void)
     instanceInfo.pApplicationInfo         = &applicationInfo;
     instanceInfo.enabledLayerCount        = enabledLayerCount;
     instanceInfo.ppEnabledLayerNames      = enabledInstanceLayers;
-    instanceInfo.enabledExtensionCount    = static_cast<uint32_t>(requiredInstanceExtensions.size());
-    instanceInfo.ppEnabledExtensionNames  = requiredInstanceExtensions.data();
+    instanceInfo.enabledExtensionCount    = static_cast<uint32_t>(GloveVkContext.enabledInstanceExtensions.size());
+    instanceInfo.ppEnabledExtensionNames  = GloveVkContext.enabledInstanceExtensions.data();
 
     VkResult err = vkCreateInstance(&instanceInfo, nullptr, &GloveVkContext.vkInstance);
     assert(!err);
@@ -387,11 +396,6 @@ CreateVkDevice(void)
     queueInfo.pQueuePriorities = queue_priorities;
     queueInfo.queueFamilyIndex = GloveVkContext.vkGraphicsQueueNodeIndex;
 
-    std::vector<const char*> deviceExtensions = requiredDeviceExtensions;
-    if (GetContext()->mIsMaintenanceExtSupported) {
-        deviceExtensions.push_back(usefulDeviceExtensions);
-    }
-
     VkDeviceCreateInfo deviceInfo;
     deviceInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceInfo.pNext                   = nullptr;
@@ -400,8 +404,8 @@ CreateVkDevice(void)
     deviceInfo.pQueueCreateInfos       = &queueInfo;
     deviceInfo.enabledLayerCount       = 0;
     deviceInfo.ppEnabledLayerNames     = nullptr;
-    deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size());
-    deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
+    deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(GloveVkContext.enabledDeviceExtensions.size());
+    deviceInfo.ppEnabledExtensionNames = GloveVkContext.enabledDeviceExtensions.data();
     deviceInfo.pEnabledFeatures        = &vkDeviceFeatures;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
@@ -486,6 +490,8 @@ ResetContextResources()
     GloveVkContext.memoryAllocator              = nullptr;
     GloveVkContext.mIsMaintenanceExtSupported   = false;
     GloveVkContext.mInitialized                 = false;
+    GloveVkContext.enabledInstanceExtensions.clear();
+    GloveVkContext.enabledDeviceExtensions.clear();
     memset(static_cast<void*>(&GloveVkContext.vkDeviceMemoryProperties), 0,
            sizeof(VkPhysicalDeviceMemoryProperties));
 }
@@ -565,9 +571,38 @@ TerminateContext()
     ResetContextResources();
 }
 
+static bool
+ExtensionEnabled(const char *name, std::vector<const char*> &extensionList)
+{
+    if (!name) {
+        return false;
+    }
+    
+    for (auto ext : extensionList) {
+        if (!strcmp(ext, name)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+    
+bool
+InstanceExtensionEnabled(const char *name)
+{
+    return ExtensionEnabled(name, GloveVkContext.enabledInstanceExtensions);
+}
+
+bool
+DeviceExtensionEnabled(const char *name)
+{
+    return ExtensionEnabled(name, GloveVkContext.enabledDeviceExtensions);
+}
+
 #ifdef ENABLE_VK_DEBUG_REPORTER
 
-bool CreateVkDebugReporter()
+bool
+CreateVkDebugReporter()
 {
     PFN_vkCreateDebugReportCallbackEXT _vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkCreateDebugReportCallbackEXT");
     if (!_vkCreateDebugReportCallbackEXT) {

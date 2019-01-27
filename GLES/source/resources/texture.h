@@ -105,7 +105,6 @@ public:
     void                    SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum format, GLenum type, GLint unpackAlignment, const void *pixels);
     void                    SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData);
     void                    SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *imageData);
-    void                    SetCompressedSubState(Rect *rect, GLsizei with, GLsizei height, GLint level, GLint layer, GLsizei blockSize, const void *imageData);
     void                    GenerateMipmaps(GLenum hintMipmapMode);
 
 // Init Functions

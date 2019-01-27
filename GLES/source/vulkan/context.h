@@ -47,15 +47,16 @@ namespace vulkanAPI {
 
     typedef struct vkContext_t {
         vkContext_t() {
-            vkInstance            = VK_NULL_HANDLE;
-            vkQueue               = VK_NULL_HANDLE;
-            mInitialized          = false;
-            vkGraphicsQueueNodeIndex = 0;
-            vkDevice = VK_NULL_HANDLE;
-            vkSyncItems             = nullptr;
-            memoryAllocator         = nullptr;
-            mIsMaintenanceExtSupported = false;
-            mInitialized            = false;
+            vkInstance                  = VK_NULL_HANDLE;
+            vkQueue                     = VK_NULL_HANDLE;
+            mInitialized                = false;
+            vkGraphicsQueueNodeIndex    = 0;
+            vkDevice                    = VK_NULL_HANDLE;
+            vkSyncItems                 = nullptr;
+            memoryAllocator             = nullptr;
+            mIsMaintenanceExtSupported  = false;
+            mInitialized                = false;
+            
             memset(static_cast<void*>(&vkDeviceMemoryProperties), 0,
                    sizeof(VkPhysicalDeviceMemoryProperties));
             memset(static_cast<void*>(&vkDeviceFeatures), 0,
@@ -73,6 +74,8 @@ namespace vulkanAPI {
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
         VkPhysicalDeviceFeatures                            vkDeviceFeatures;
         vkSyncItems_t                                       *vkSyncItems;
+        vector<const char*>                                 enabledInstanceExtensions;
+        vector<const char*>                                 enabledDeviceExtensions;
         MemoryAllocator                                     *memoryAllocator;
         bool                                                mIsMaintenanceExtSupported;
         bool                                                mInitialized;
@@ -82,6 +85,8 @@ namespace vulkanAPI {
     bool                              InitContext();
     void                              TerminateContext();
     void                              ClearContextResources();
+    bool                              InstanceExtensionEnabled(const char *name);
+    bool                              DeviceExtensionEnabled(const char *name);
 
     template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 };

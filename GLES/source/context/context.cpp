@@ -147,13 +147,20 @@ void
 Context::InitExtensions()
 {
     mCompressedTextureFormats.clear();
-    mExtensions = "GL_OES_get_program_binary\nGL_OES_rgb8_rgba8\nGL_EXT_texture_format_BGRA8888\n";
+    mExtensions = "GL_OES_get_program_binary GL_OES_rgb8_rgba8 GL_EXT_texture_format_BGRA8888";
     if (mVkContext->vkDeviceFeatures.textureCompressionBC) { 
-        mExtensions += "GL_EXT_texture_compression_dxt1\nGL_EXT_texture_compression_s3tc\n";
+        mExtensions += " GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_s3tc";
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_S3TC_DXT1_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
+    }
+    if (vulkanAPI::DeviceExtensionEnabled(VK_IMG_FORMAT_PVRTC_EXTENSION_NAME)) {
+        mExtensions += " GL_IMG_texture_compression_pvrtc";
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG);
+        mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG);
     }
 }
 

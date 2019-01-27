@@ -336,6 +336,11 @@ GlInternalFormatToVkFormat(GLenum internalformat)
     case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:    return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
     case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:    return VK_FORMAT_BC2_UNORM_BLOCK;
     case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:    return VK_FORMAT_BC3_UNORM_BLOCK;
+    
+    case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+    case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG: return VK_FORMAT_PVRTC1_4BPP_UNORM_BLOCK_IMG;
+    case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+    case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG: return VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG;
 
     default: { NOT_FOUND_ENUM(internalformat);return VK_FORMAT_UNDEFINED; }
     }
@@ -375,6 +380,10 @@ VkFormat GlColorFormatToVkColorFormat(GLenum format, GLenum type)
                 case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:      return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
                 case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:      return VK_FORMAT_BC2_UNORM_BLOCK;
                 case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:      return VK_FORMAT_BC3_UNORM_BLOCK;
+                case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+                case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:   return VK_FORMAT_PVRTC1_4BPP_UNORM_BLOCK_IMG;
+                case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+                case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:   return VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG;
                 default:                                    return VK_FORMAT_R8G8B8A8_UNORM;
             }
         }
