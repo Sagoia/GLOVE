@@ -708,6 +708,7 @@ void MVKCmdBufferImageCopy::encode(MVKCommandEncoder* cmdEncoder) {
 #if MVK_IOS
 		if (mvkMTLPixelFormatIsPVRTCFormat(mtlPixFmt)) {
 			blitOptions |= MTLBlitOptionRowLinearPVRTC;
+            bytesPerRow = 0;
 		}
 #endif
 
