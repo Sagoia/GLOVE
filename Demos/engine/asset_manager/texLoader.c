@@ -547,6 +547,7 @@ const uint32_t PVRv3Magic       = 0x03525650;
 
 const uint32_t PVRLegacyPixelFormatPVRTC2 = 0x18;
 const uint32_t PVRLegacyPixelFormatPVRTC4 = 0x19;
+const uint32_t PVRLegacyPixelFormatETC1   = 0x36;
 
 const uint32_t PVRv3PixelFormatPVRTC_2BPP_RGB  = 0x0;
 const uint32_t PVRv3PixelFormatPVRTC_2BPP_RGBA = 0x1;
@@ -598,7 +599,7 @@ static int LoadPVRv2Image(ImageData *data, void *fileData, size_t fileSize)
     uint32_t componentCount = hasAlpha ? 4 : 3;
     bool     colorSpaceIsLinear = true;
     
-    if (format != PVRLegacyPixelFormatPVRTC2 && format != PVRLegacyPixelFormatPVRTC4) {
+    if (format != PVRLegacyPixelFormatPVRTC2 && format != PVRLegacyPixelFormatPVRTC4 && format != PVRLegacyPixelFormatETC1) {
         printf("LoadPVRv2Image: unsupported pvr format 0x%x! \n", format);
         return 0;
     }
@@ -615,7 +616,7 @@ static int LoadPVRv2Image(ImageData *data, void *fileData, size_t fileSize)
     
     uint8_t *bytes = ((uint8_t *)fileData) + sizeof(PVRv2Header);
     
-    // PVRLegacyPixelFormatPVRTC4
+    // PVRLegacyPixelFormatPVRTC4 or PVRLegacyPixelFormatETC1
     uint32_t blockWidth = 4;
     uint32_t blockHeight = 4;
     uint32_t bitsPerPixel = 4;
@@ -679,6 +680,9 @@ static int LoadPVRv2Image(ImageData *data, void *fileData, size_t fileSize)
         } else if (componentCount == 4) {
             data->format = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
         }
+    }
+    if (format == PVRLegacyPixelFormatETC1) {
+        data->format = GL_ETC1_RGB8_OES;
     }
     
     return 1;
