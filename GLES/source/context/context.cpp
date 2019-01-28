@@ -155,6 +155,10 @@ Context::InitExtensions()
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
     }
+    if (mVkContext->vkDeviceFeatures.textureCompressionETC2) {
+        mExtensions += " GL_OES_compressed_ETC1_RGB8_texture";
+        mCompressedTextureFormats.push_back(GL_ETC1_RGB8_OES);
+    }
     if (vulkanAPI::DeviceExtensionEnabled(VK_IMG_FORMAT_PVRTC_EXTENSION_NAME)) {
         mExtensions += " GL_IMG_texture_compression_pvrtc";
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG);

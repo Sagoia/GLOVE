@@ -386,6 +386,7 @@ CreateVkDevice(void)
     VkPhysicalDeviceFeatures &vkDeviceFeatures = GloveVkContext.vkDeviceFeatures;
     if (deviceFeatures.wideLines)               { vkDeviceFeatures.wideLines = VK_TRUE;}
     if (deviceFeatures.textureCompressionBC)    { vkDeviceFeatures.textureCompressionBC = VK_TRUE; }
+    if (deviceFeatures.textureCompressionETC2)  { vkDeviceFeatures.textureCompressionETC2 = VK_TRUE; }
 
     float queue_priorities[1] = {0.0};
     VkDeviceQueueCreateInfo queueInfo;

@@ -698,6 +698,12 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
     
+    if (internalformat == GL_ETC1_RGB8_OES  &&
+        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
+        RecordError(GL_INVALID_VALUE);
+        return;
+    }
+    
     if ((internalformat == GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG || internalformat == GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG) &&
         imageSize != ((std::max(width, 16) * std::max(height, 8) * 2 + 7) / 8)) {
         RecordError(GL_INVALID_VALUE);
