@@ -656,18 +656,6 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
         return;
     }
 
-    bool isFormatSupported = false;
-    for (auto format : mCompressedTextureFormats) {
-        if (format == internalformat) {
-            isFormatSupported = true;
-            break;
-        }
-    }
-    if(!isFormatSupported) {
-        RecordError(GL_INVALID_OPERATION);
-        return;
-    }
-
     if(level < 0 || border || (width < 0 || height < 0) ||
        ((width > GLOVE_MAX_TEXTURE_SIZE || height > GLOVE_MAX_TEXTURE_SIZE) && target == GL_TEXTURE_2D) ||
        ((width > GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE || height > GLOVE_MAX_CUBE_MAP_TEXTURE_SIZE) && target != GL_TEXTURE_2D)) {
@@ -686,33 +674,38 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
     }
 
     // check imageSize
-    if ((internalformat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) && 
-        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
-        RecordError(GL_INVALID_VALUE);
-        return;
-    }
-
-    if ((internalformat == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || internalformat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) &&
-        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 16) {
-        RecordError(GL_INVALID_VALUE);
-        return;
-    }
-    
-    if (internalformat == GL_ETC1_RGB8_OES  &&
-        imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
-        RecordError(GL_INVALID_VALUE);
-        return;
-    }
-    
-    if ((internalformat == GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG || internalformat == GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG) &&
-        imageSize != ((std::max(width, 16) * std::max(height, 8) * 2 + 7) / 8)) {
-        RecordError(GL_INVALID_VALUE);
-        return;
-    }
-    
-    if ((internalformat == GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG || internalformat == GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG) &&
-        imageSize != ((std::max(width, 8) * std::max(height, 8) * 4 + 7) / 8)) {
-        RecordError(GL_INVALID_VALUE);
+    switch (internalformat) {
+    case GL_ETC1_RGB8_OES:
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+        if (imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 8) {
+            RecordError(GL_INVALID_VALUE);
+            return;
+        }
+        break;
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+        if (imageSize != ((width + 3) / 4) * ((height + 3) / 4) * 16) {
+            RecordError(GL_INVALID_VALUE);
+            return;
+        }
+        break;
+    case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+    case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+        if (imageSize != ((std::max(width, 16) * std::max(height, 8) * 2 + 7) / 8)) {
+            RecordError(GL_INVALID_VALUE);
+            return;
+        }
+        break;
+    case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+    case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+        if (imageSize != ((std::max(width, 8) * std::max(height, 8) * 4 + 7) / 8)) {
+            RecordError(GL_INVALID_VALUE);
+            return;
+        }
+        break;
+    default:
+        RecordError(GL_INVALID_OPERATION);
         return;
     }
 
