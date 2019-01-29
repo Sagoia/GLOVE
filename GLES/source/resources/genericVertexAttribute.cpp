@@ -126,8 +126,8 @@ GenericVertexAttribute::UpdateGenericValueVBO(bool& updatedVBO)
     BufferObject *vbo = new VertexBufferObject(mVkContext);
     GLfloat genericValue[4];
     GetGenericValue(genericValue);
-    vbo->Allocate(4 * sizeof(float), static_cast<const void *>(genericValue));
-    SetNumElements(4);
+    vbo->Allocate(mElements * sizeof(float), static_cast<const void *>(genericValue));
+    //SetNumElements(4);
     SetType(GL_FLOAT);
     SetStride(mElements * GlAttribTypeToElementSize(mType));
     SetCurrentVbo(vbo);
