@@ -32,10 +32,15 @@
 
 ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mGLContext(nullptr)
+, mGenericVertexAttributes(GLOVE_MAX_VERTEX_ATTRIBS)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     mVkContext = vkContext;
+
+    for (auto& gva : mGenericVertexAttributes) {
+        gva.SetVkContext(vkContext);
+    }
 
     mCommandBufferManager = cbManager;
 
@@ -89,6 +94,11 @@ ShaderProgram::~ShaderProgram()
         delete mExplicitIbo;
         mExplicitIbo = nullptr;
     }
+
+    for (auto& gva : mGenericVertexAttributes) {
+        gva.Release();
+    }
+    mGenericVertexAttributes.clear();
 }
 
 bool
@@ -865,6 +875,9 @@ ShaderProgram::SetCacheManager(CacheManager *cacheManager)
 
     mCacheManager = cacheManager;
     mShaderResourceInterface.SetCacheManager(cacheManager);
+    for (auto& gva : mGenericVertexAttributes) {
+        gva.SetCacheManager(cacheManager);
+    }
 }
 
 void

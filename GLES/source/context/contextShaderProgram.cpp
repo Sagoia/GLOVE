@@ -628,7 +628,7 @@ Context::LinkProgram(GLuint program)
 
     mPipeline->SetUpdatePipeline(progPtr->IsLinked());
     if(SetPipelineProgramShaderStages(progPtr)) {
-        progPtr->PrepareVertexAttribBufferObjects(0, 0, mResourceManager->GetGenericVertexAttributes(), true);
+        progPtr->PrepareVertexAttribBufferObjects(0, 0, progPtr->GetGenericVertexAttributes(), true);
         mPipeline->Create(mSystemFBO->GetVkRenderPass());
         // rebuild the pipeline next time
         mPipeline->SetUpdatePipeline(true);

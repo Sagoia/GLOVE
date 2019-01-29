@@ -60,6 +60,8 @@ private:
     uint32_t                                            mActiveVertexVkBuffersCount;
     VkBuffer                                            mActiveVertexVkBuffers[GLOVE_MAX_VERTEX_ATTRIBS];
 
+    std::vector<GenericVertexAttribute>                 mGenericVertexAttributes;
+
     BufferObject                                       *mExplicitIbo;
     VkBuffer                                            mActiveIndexVkBuffer;
 
@@ -153,10 +155,12 @@ public:
     uint32_t                                            GetActiveVertexVkBuffersCount(void)         const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffersCount; }
     const VkBuffer                                     *GetActiveVertexVkBuffers(void)              const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveVertexVkBuffers; }
     VkBuffer                                            GetActiveIndexVkBuffer(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mActiveIndexVkBuffer; }
+    inline std::vector<GenericVertexAttribute>&         GetGenericVertexAttributes(void)                    { FUN_ENTRY(GL_LOG_TRACE); return mGenericVertexAttributes; }
+    inline GenericVertexAttribute*                      GetGenericVertexAttribute(size_t index)             { FUN_ENTRY(GL_LOG_TRACE); return &mGenericVertexAttributes[index]; }
 
     void                                                SetCommandBufferManager(
                                                         vulkanAPI::CommandBufferManager *cbManager)         { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
-    void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext);}
+    void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext); for (auto& gva : mGenericVertexAttributes) { gva.SetVkContext(vkContext); } }
     void                                                SetGlContext(Context *context)                      { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGLContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != nullptr); mShaderCompiler = shaderCompiler; }
     void                                                SetStagesIDs(uint32_t index, uint32_t id)           { FUN_ENTRY(GL_LOG_TRACE); mStagesIDs[index] = id; }

@@ -33,7 +33,12 @@ Context::GetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
         return;
     }
 
-    const GenericVertexAttribute* gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
+    const GenericVertexAttribute* gVertexAttrib = prog->GetGenericVertexAttribute(index);
 
     switch(pname) {
     case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLfloat>(gVertexAttrib->IsEnabled());     break;
@@ -60,7 +65,12 @@ Context::GetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
         return;
     }
 
-    const GenericVertexAttribute* gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
+    const GenericVertexAttribute* gVertexAttrib = prog->GetGenericVertexAttribute(index);
 
     switch(pname) {
     case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = static_cast<GLint>(gVertexAttrib->IsEnabled());          break;
@@ -92,7 +102,12 @@ Context::GetVertexAttribPointerv(GLuint index, GLenum pname, void **pointer)
         return;
     }
 
-    *pointer = reinterpret_cast<void *>(mResourceManager->GetGenericVertexAttribute(index)->GetPointer());
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
+    *pointer = reinterpret_cast<void *>(prog->GetGenericVertexAttribute(index)->GetPointer());
 }
 
 void
@@ -105,8 +120,13 @@ Context::VertexAttrib1f(GLuint index, GLfloat x)
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {x, 0.0f, 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -120,8 +140,13 @@ Context::VertexAttrib1fv(GLuint index, const GLfloat* values)
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {values[0], 0.0f, 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -135,8 +160,13 @@ Context::VertexAttrib2f(GLuint index, GLfloat x, GLfloat y)
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {x, y, 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -150,8 +180,13 @@ Context::VertexAttrib2fv(GLuint index, const GLfloat* values)
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {values[0], values[1], 0.0f, 1.0f};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -165,8 +200,13 @@ Context::VertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z)
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {x, y, z, 1.0f};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -180,8 +220,13 @@ Context::VertexAttrib3fv(GLuint index, const GLfloat* values)
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {values[0], values[1], values[2], 1.0f};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -195,8 +240,13 @@ Context::VertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     GLfloat vals[4] = {x, y, z, w};
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(vals);
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(vals);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -210,7 +260,12 @@ Context::VertexAttrib4fv(GLuint index, const GLfloat* values)
         return;
     }
 
-    mResourceManager->GetGenericVertexAttribute(index)->SetGenericValue(values);
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
+    prog->GetGenericVertexAttribute(index)->SetGenericValue(values);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }
 
@@ -224,7 +279,12 @@ Context::EnableVertexAttribArray(GLuint index)
         return;
     }
 
-    GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
+    GenericVertexAttribute *gVertexAttrib = prog->GetGenericVertexAttribute(index);
 
     if(!gVertexAttrib->IsEnabled()) {
         gVertexAttrib->SetEnabled(true);
@@ -242,7 +302,12 @@ Context::DisableVertexAttribArray(GLuint index)
         return;
     }
 
-    GenericVertexAttribute *gVertexAttrib = mResourceManager->GetGenericVertexAttribute(index);
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
+    GenericVertexAttribute *gVertexAttrib = prog->GetGenericVertexAttribute(index);
 
     if(gVertexAttrib->IsEnabled()) {
         gVertexAttrib->SetEnabled(false);
@@ -265,8 +330,13 @@ Context::VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean no
         return;
     }
 
+    ShaderProgram *prog = mStateManager.GetActiveShaderProgram();
+    if (!prog) {
+        return;
+    }
+
     BufferObject* attachedVBO = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER);
     bool requiresInternalVBO = attachedVBO == nullptr;
-    mResourceManager->GetGenericVertexAttribute(index)->Set(size, type, normalized, stride, ptr, attachedVBO, requiresInternalVBO);
+    prog->GetGenericVertexAttribute(index)->Set(size, type, normalized, stride, ptr, attachedVBO, requiresInternalVBO);
     mPipeline->SetUpdateVertexAttribVBOs(true);
 }

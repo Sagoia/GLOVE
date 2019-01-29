@@ -31,16 +31,11 @@
 uint32_t ResourceManager::mShadingObjectCount = 1;
 
 ResourceManager::ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
-    mVkContext(vkContext),
-    mGenericVertexAttributes(GLOVE_MAX_VERTEX_ATTRIBS)
+    mVkContext(vkContext)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     CreateDefaultTextures(cbManager);
-
-    for(auto& gva : mGenericVertexAttributes) {
-        gva.SetVkContext(vkContext);
-    }
 }
 
 ResourceManager::~ResourceManager()
@@ -49,19 +44,12 @@ ResourceManager::~ResourceManager()
 
     delete mDefaultTexture2D;
     delete mDefaultTextureCubeMap;
-
-    for(auto& gva : mGenericVertexAttributes) {
-        gva.Release();
-    }
-    mGenericVertexAttributes.clear();
 }
 
 void
 ResourceManager::SetCacheManager(CacheManager *cacheManager)
 {
-    for(auto& gva : mGenericVertexAttributes) {
-        gva.SetCacheManager(cacheManager);
-    }
+
 }
 
 void
