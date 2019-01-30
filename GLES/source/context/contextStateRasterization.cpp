@@ -63,6 +63,10 @@ Context::LineWidth(GLfloat width)
         RecordError(GL_INVALID_VALUE);
         return;
     }
+    
+    if(mVkContext->vkDeviceFeatures.wideLines == VK_FALSE) {
+        return;
+    }
 
     mStateManager.GetRasterizationState()->SetLineWidth(width);
 }
