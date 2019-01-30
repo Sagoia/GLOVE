@@ -111,7 +111,7 @@ ShaderResourceInterface::AllocateUniformClientData(void)
         memset(static_cast<void *>(clientData), 0, clientDataSize);
 
         mUniformDataInterface.insert(make_pair(uni.reflectionName, uniformData()));
-        map<std::string, uniformData>::iterator it = mUniformDataInterface.find(uni.reflectionName);
+        auto it = mUniformDataInterface.find(uni.reflectionName);
         assert(it != mUniformDataInterface.end());
         it->second.pClientData = clientData;
     }
@@ -127,7 +127,7 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
             assert(uniBlock.blockSize);
 
             mUniformBlockDataInterface.insert(make_pair(uniBlock.glslBlockName, uniformBlockData()));
-            map<std::string, uniformBlockData>::iterator it = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
+            auto it = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
             assert(it != mUniformBlockDataInterface.end());
 
             it->second.pBufferObject = new UniformBufferObject(vkContext);
@@ -143,7 +143,7 @@ ShaderResourceInterface::GetUniformBufferObject(uint32_t index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    map<std::string, uniformBlockData>::const_iterator itBlock = mUniformBlockDataInterface.find(mUniformBlockInterface[index].glslBlockName);
+    auto itBlock = mUniformBlockDataInterface.find(mUniformBlockInterface[index].glslBlockName);
     return itBlock->second.pBufferObject;
 }
 
@@ -155,18 +155,12 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
     uint32_t blockIndex=0;
     bool     blockDataDirty;
 
-    struct uniformDirty {
-        size_t       offset;
-        size_t       size;
-        const void * data;
-    };
-
     for(auto &uniBlock : mUniformBlockInterface) {
 
-        map<std::string, uniformBlockData>::iterator itBlock = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
+        auto itBlock = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
 
         blockDataDirty = false;
-        std::vector<struct uniformDirty> uniformInterfaceDirty;
+        mUniformInterfaceDirty.Clear();
         for(auto &uniform : mUniformInterface) {
 
             // if does not belong to Block
@@ -174,7 +168,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 continue;
             }
 
-            map<std::string, uniformData>::iterator itUniform = mUniformDataInterface.find(uniform.reflectionName);
+            auto itUniform = mUniformDataInterface.find(uniform.reflectionName);
 
             // check if is updated
             if(!itUniform->second.clientDataDirty) {
@@ -189,11 +183,11 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
 
             // compute uniform size
             for (size_t i = 0; i < (size_t)uniform.arraySize; i++) {
-                struct uniformDirty newUniformDirty;
-                newUniformDirty.size   = GlslTypeToSize(uniform.glType);
-                newUniformDirty.offset = uniform.offset + i*GlslTypeToAllignment(uniform.glType);
-                newUniformDirty.data   = static_cast<const void *>(itUniform->second.pClientData + i*newUniformDirty.size);
-                uniformInterfaceDirty.push_back(newUniformDirty);
+                size_t size = GlslTypeToSize(uniform.glType);
+                uniformDirty *dirtyData = mUniformInterfaceDirty.Allocate();
+                dirtyData->size = size;
+                dirtyData->offset = uniform.offset + i*GlslTypeToAllignment(uniform.glType);
+                dirtyData->data = static_cast<const void *>(itUniform->second.pClientData + i*size);
             }
         }
 
@@ -230,8 +224,9 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 delete[] srcData;
             }
         }
-
-        for (auto &u : uniformInterfaceDirty) {
+        
+        for (uint32_t i = 0; i < mUniformInterfaceDirty.Size(); ++i) {
+            auto &u = mUniformInterfaceDirty[i];
             flushData = true;
             itBlock->second.pBufferObject->UpdateData(u.size, u.offset, u.data);
         }
@@ -312,7 +307,7 @@ ShaderResourceInterface::SetUniformClientData(uint32_t location, size_t size, co
     size_t arrayOffset = (location - uniform->location) * GlslTypeToSize(uniform->glType);
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
-    map<std::string, uniformData>::iterator it = mUniformDataInterface.find(uniform->reflectionName);
+    auto it = mUniformDataInterface.find(uniform->reflectionName);
     memcpy(static_cast<void *>(it->second.pClientData + arrayOffset), ptr, size);
     it->second.clientDataDirty = true;
 }
@@ -327,7 +322,7 @@ ShaderResourceInterface::SetSampler(uint32_t location, int count, const int *tex
                (*textureUnit >= 0 && *textureUnit < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 
         const ShaderResourceInterface::uniform *uniformSampler = GetUniformAtLocation(location);
-        map<std::string, uniformData>::iterator it = mUniformDataInterface.find(uniformSampler->reflectionName);
+        auto it = mUniformDataInterface.find(uniformSampler->reflectionName);
 
         assert(uniformSampler->location <= location);
         size_t arrayOffset = (location - uniformSampler->location) * GlslTypeToSize(uniformSampler->glType);
@@ -349,7 +344,7 @@ ShaderResourceInterface::GetUniformClientData(uint32_t index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    map<std::string, uniformData>::const_iterator it = mUniformDataInterface.find(mUniformInterface[index].reflectionName);
+    auto it = mUniformDataInterface.find(mUniformInterface[index].reflectionName);
     return it->second.pClientData;
 }
 
@@ -365,7 +360,7 @@ ShaderResourceInterface::GetUniformClientData(uint32_t location, size_t size, vo
     size_t arrayOffset = (location - uniform->location) * GlslTypeToSize(uniform->glType);
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
-    map<std::string, uniformData>::const_iterator it = mUniformDataInterface.find(uniform->reflectionName);
+    auto it = mUniformDataInterface.find(uniform->reflectionName);
     memcpy(ptr, static_cast<const void *>(it->second.pClientData + arrayOffset), size);
 }
 
