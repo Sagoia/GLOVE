@@ -217,6 +217,8 @@ UniformMemory::UniformMemory(const vkContext_t *vkContext, VkFlags flags)
 UniformMemory::~UniformMemory()
 {
     FUN_ENTRY(GL_LOG_TRACE);
+    
+    Release();
 
     if (mSrcData) {
         delete[] mSrcData;

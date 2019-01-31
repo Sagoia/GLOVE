@@ -121,6 +121,20 @@ CacheManager::CleanUpImageCache()
 }
 
 void
+CacheManager::CleanUpBufferCache()
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    if (!mVkBufferCache.empty()) {
+        for (auto buffer : mVkBufferCache) {
+            vkDestroyBuffer(mVkContext->vkDevice, buffer, nullptr);
+        }
+
+        mVkBufferCache.clear();
+    }
+}
+
+void
 CacheManager::CleanUpDeviceMemoryCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -238,6 +252,14 @@ CacheManager::CacheVkImage(VkImage image)
 }
 
 void
+CacheManager::CacheVkBuffer(VkBuffer buffer)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+    
+    mVkBufferCache.push_back(buffer);
+}
+
+void
 CacheManager::CacheDeviceMemory(VkDeviceMemory deviceMemory)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -321,6 +343,7 @@ CacheManager::CleanUpFrameCaches()
     CleanUpVBOCache();
     CleanUpImageViewCache();
     CleanUpImageCache();
+    CleanUpBufferCache();
     CleanUpDeviceMemoryCache();
     CleanUpTextureCache();
 }

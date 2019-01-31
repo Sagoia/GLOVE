@@ -38,6 +38,7 @@ Context::BindBuffer(GLenum target, GLuint buffer)
         bo = mResourceManager->GetBuffer(buffer);
         bo->SetTarget(target);
         bo->SetVkContext(mVkContext);
+        bo->SetCacheManager(mCacheManager);
     }
     mStateManager.GetActiveObjectsState()->SetActiveBufferObject(target, bo);
 
@@ -127,10 +128,6 @@ Context::DeleteBuffers(GLsizei n, const GLuint* buffers)
 
     if(buffers == nullptr) {
         return;
-    }
-
-    if(mWriteFBO->IsInDrawState()) {
-        Finish();
     }
 
     while(n-- != 0) {

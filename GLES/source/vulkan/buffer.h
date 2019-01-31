@@ -26,6 +26,8 @@
 
 #include "context.h"
 
+class CacheManager;
+
 namespace vulkanAPI {
 
 class Buffer {
@@ -40,6 +42,8 @@ private:
     VkBufferUsageFlags                mVkBufferUsageFlags;
     VkDeviceSize                      mVkSize;
     VkDeviceSize                      mVkOffset;
+    
+    CacheManager                     *mCacheManager;
 
 public:
 // Constructor
@@ -65,6 +69,7 @@ public:
     inline void                       SetSize(VkDeviceSize size)                { FUN_ENTRY(GL_LOG_TRACE); mVkSize             = size;      }
     inline void                       SetFlags(VkBufferUsageFlags flags)        { FUN_ENTRY(GL_LOG_TRACE); mVkBufferUsageFlags = flags;     }
     inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext          = vkContext; }
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager       = manager; }
 };
 
 }

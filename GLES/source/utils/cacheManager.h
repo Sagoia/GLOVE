@@ -50,6 +50,7 @@ private:
     std::vector<Texture *>              mTextureCache;
     std::vector<VkImageView>            mVkImageViewCache;
     std::vector<VkImage>                mVkImageCache;
+    std::vector<VkBuffer>               mVkBufferCache;
     std::vector<VkDeviceMemory>         mVkDeviceMemoryCache;
 
     std::map<uint64_t, VkSampler>       mVkSamplerCache;
@@ -66,6 +67,7 @@ private:
     void                                CleanUpTextureCache();
     void                                CleanUpImageViewCache();
     void                                CleanUpImageCache();
+    void                                CleanUpBufferCache();
     void                                CleanUpDeviceMemoryCache();
 
     void                                CleanUpSampleCache();
@@ -83,6 +85,7 @@ public:
     void                                CacheTexture(Texture *tex);
     void                                CacheVkImageView(VkImageView imageView);
     void                                CacheVkImage(VkImage image);
+    void                                CacheVkBuffer(VkBuffer buffer);
     void                                CacheDeviceMemory(VkDeviceMemory deviceMemory);
 
     void                                CacheSampler(uint64_t hash, VkSampler sampler);

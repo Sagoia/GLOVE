@@ -30,13 +30,14 @@
  */
 
 #include "buffer.h"
+#include "utils/cacheManager.h"
 
 namespace vulkanAPI {
 
 Buffer::Buffer(const vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode)
 : mVkContext(vkContext), mVkBuffer(VK_NULL_HANDLE),
 mVkBufferSharingMode(vkSharingMode), mVkBufferUsageFlags(vkBufferUsageFlags),
-mVkSize(0), mVkOffset(0)
+mVkSize(0), mVkOffset(0), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -55,7 +56,11 @@ Buffer::Release(void)
 
     mVkSize = 0;
     if(mVkBuffer != VK_NULL_HANDLE) {
-        vkDestroyBuffer(mVkContext->vkDevice, mVkBuffer, nullptr);
+        if (mCacheManager) {
+            mCacheManager->CacheVkBuffer(mVkBuffer);
+        } else {
+            vkDestroyBuffer(mVkContext->vkDevice, mVkBuffer, nullptr);
+        }
         mVkBuffer = VK_NULL_HANDLE;
     }
 }
