@@ -110,8 +110,8 @@ ShaderResourceInterface::AllocateUniformClientData(void)
         uint8_t* clientData = new uint8_t[clientDataSize];
         memset(static_cast<void *>(clientData), 0, clientDataSize);
 
-        mUniformDataInterface.insert(make_pair(uni.reflectionName, uniformData()));
-        auto it = mUniformDataInterface.find(uni.reflectionName);
+        mUniformDataInterface.insert(make_pair(uni.reflectionNameHash, uniformData()));
+        auto it = mUniformDataInterface.find(uni.reflectionNameHash);
         assert(it != mUniformDataInterface.end());
         it->second.pClientData = clientData;
     }
@@ -126,8 +126,8 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
         if(!uniBlock.isOpaque) {
             assert(uniBlock.blockSize);
 
-            mUniformBlockDataInterface.insert(make_pair(uniBlock.glslBlockName, uniformBlockData()));
-            auto it = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
+            mUniformBlockDataInterface.insert(make_pair(uniBlock.glslBlockNameHash, uniformBlockData()));
+            auto it = mUniformBlockDataInterface.find(uniBlock.glslBlockNameHash);
             assert(it != mUniformBlockDataInterface.end());
 
             it->second.pBufferObject = new UniformBufferObject(vkContext);
@@ -143,7 +143,7 @@ ShaderResourceInterface::GetUniformBufferObject(uint32_t index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    auto itBlock = mUniformBlockDataInterface.find(mUniformBlockInterface[index].glslBlockName);
+    auto itBlock = mUniformBlockDataInterface.find(mUniformBlockInterface[index].glslBlockNameHash);
     return itBlock->second.pBufferObject;
 }
 
@@ -157,7 +157,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
 
     for(auto &uniBlock : mUniformBlockInterface) {
 
-        auto itBlock = mUniformBlockDataInterface.find(uniBlock.glslBlockName);
+        auto itBlock = mUniformBlockDataInterface.find(uniBlock.glslBlockNameHash);
 
         blockDataDirty = false;
         mUniformInterfaceDirty.Clear();
@@ -168,7 +168,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 continue;
             }
 
-            auto itUniform = mUniformDataInterface.find(uniform.reflectionName);
+            auto itUniform = mUniformDataInterface.find(uniform.reflectionNameHash);
 
             // check if is updated
             if(!itUniform->second.clientDataDirty) {
@@ -205,8 +205,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
 
                 // memcopy data
                 srcsize = bufferObject->GetSize();
-                srcData = new uint8_t[srcsize];
-                bufferObject->GetData(srcsize, 0, srcData);
+                srcData = bufferObject->GetDataPtr(0);
 
                 *allocatedNewBufferObject = true;
             }
@@ -219,15 +218,12 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 bufferObject->Allocate(uniBlock.blockSize, srcData);
             }
             itBlock->second.pBufferObject = bufferObject;
-
-            if(srcsize) {
-                delete[] srcData;
-            }
         }
         
         for (uint32_t i = 0; i < mUniformInterfaceDirty.Size(); ++i) {
             auto &u = mUniformInterfaceDirty[i];
             flushData = true;
+            
             itBlock->second.pBufferObject->UpdateData(u.size, u.offset, u.data);
         }
 
@@ -307,7 +303,7 @@ ShaderResourceInterface::SetUniformClientData(uint32_t location, size_t size, co
     size_t arrayOffset = (location - uniform->location) * GlslTypeToSize(uniform->glType);
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
-    auto it = mUniformDataInterface.find(uniform->reflectionName);
+    auto it = mUniformDataInterface.find(uniform->reflectionNameHash);
     memcpy(static_cast<void *>(it->second.pClientData + arrayOffset), ptr, size);
     it->second.clientDataDirty = true;
 }
@@ -322,7 +318,7 @@ ShaderResourceInterface::SetSampler(uint32_t location, int count, const int *tex
                (*textureUnit >= 0 && *textureUnit < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 
         const ShaderResourceInterface::uniform *uniformSampler = GetUniformAtLocation(location);
-        auto it = mUniformDataInterface.find(uniformSampler->reflectionName);
+        auto it = mUniformDataInterface.find(uniformSampler->reflectionNameHash);
 
         assert(uniformSampler->location <= location);
         size_t arrayOffset = (location - uniformSampler->location) * GlslTypeToSize(uniformSampler->glType);
@@ -344,7 +340,7 @@ ShaderResourceInterface::GetUniformClientData(uint32_t index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    auto it = mUniformDataInterface.find(mUniformInterface[index].reflectionName);
+    auto it = mUniformDataInterface.find(mUniformInterface[index].reflectionNameHash);
     return it->second.pClientData;
 }
 
@@ -360,7 +356,7 @@ ShaderResourceInterface::GetUniformClientData(uint32_t location, size_t size, vo
     size_t arrayOffset = (location - uniform->location) * GlslTypeToSize(uniform->glType);
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
-    auto it = mUniformDataInterface.find(uniform->reflectionName);
+    auto it = mUniformDataInterface.find(uniform->reflectionNameHash);
     memcpy(ptr, static_cast<const void *>(it->second.pClientData + arrayOffset), size);
 }
 

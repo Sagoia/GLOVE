@@ -34,6 +34,7 @@ class ShaderResourceInterface {
 public:
     struct attribute {
         string                      name;
+        size_t                      nameHash;
         GLenum                      glType;
         uint32_t                    location;
 
@@ -43,6 +44,9 @@ public:
            location(loc)
         {
             FUN_ENTRY(GL_LOG_TRACE);
+
+            std::hash<string> hash_fn;
+            nameHash = hash_fn(name);
         }
     };
     typedef struct attribute        attribute;
@@ -50,6 +54,7 @@ public:
 
     struct uniform{
         string                      reflectionName;
+        size_t                      reflectionNameHash;
         uint32_t                    location;
         uint32_t                    blockIndex;
         int32_t                     arraySize;
@@ -65,6 +70,9 @@ public:
            offset(offset)
         {
             FUN_ENTRY(GL_LOG_TRACE);
+            
+            std::hash<string> hash_fn;
+            reflectionNameHash = hash_fn(reflectionName);
         }
     };
     typedef struct uniform uniform;
@@ -92,10 +100,11 @@ public:
         }
     };
     typedef struct uniformData uniformData;
-    typedef unordered_map<string, uniformData> uniformDataInterface;
+    typedef unordered_map<size_t, uniformData> uniformDataInterface;
 
     struct uniformBlock {
         string                      glslBlockName;
+        size_t                      glslBlockNameHash;
         uint32_t                    binding;
         size_t                      blockSize;
         shader_type_t               blockStage;
@@ -109,6 +118,9 @@ public:
            isOpaque(opaque)
         {
             FUN_ENTRY(GL_LOG_TRACE);
+            
+            std::hash<string> hash_fn;
+            glslBlockNameHash = hash_fn(glslBlockName);
         }
     };
     typedef struct uniformBlock uniformBlock;
@@ -134,9 +146,9 @@ public:
         }
     };
     typedef struct uniformBlockData uniformBlockData;
-    typedef unordered_map<string, uniformBlockData> uniformBlockDataInterface;
+    typedef unordered_map<size_t, uniformBlockData> uniformBlockDataInterface;
 
-    typedef map<string, uint32_t>   attribsLayout_t;
+    typedef unordered_map<string, uint32_t>   attribsLayout_t;
     
     struct uniformDirty {
         size_t       offset;
@@ -163,9 +175,9 @@ public:
         ~increasedArray(void) { delete [] data; }
         
         inline void Clear(void) { next = 0; }
-        inline size_t Count(void) { return count; }
-        inline size_t Size(void) { return next; }
-        inline Element& operator [](uint32_t i) { return data[i]; }
+        inline size_t Count(void) const { return count; }
+        inline size_t Size(void) const { return next; }
+        inline Element& operator [](uint32_t i) const { return data[i]; }
         inline Element * Allocate(void) {
             if (next >= count) {
                 Element *old = data;

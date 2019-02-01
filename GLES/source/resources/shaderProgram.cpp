@@ -648,9 +648,10 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
     // store attribute locations containing the same VkBuffer and stride
     // as they are directly associated with vertex input bindings
     typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
-    std::map<BUFFER_STRIDE_PAIR, std::vector<uint32_t>> unique_buffer_stride_map;
+    typedef ShaderResourceInterface::increasedArray<uint32_t, 64> LOCATION_ARRAY;
+    std::map<BUFFER_STRIDE_PAIR, LOCATION_ARRAY> unique_buffer_stride_map;
 
-    std::vector<uint32_t> locationUsed;
+    LOCATION_ARRAY locationUsed;
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t attributelocation  = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t occupiedLocations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
@@ -659,9 +660,14 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             const uint32_t location = attributelocation + j;
 
             // if location is currently used then ommit it
-            if (std::find(locationUsed.begin(), locationUsed.end(), location) != locationUsed.end()) {
-                continue;
+            bool isUsed = false;
+            for (uint32_t m = 0; m < locationUsed.Size(); ++m) {
+                if (location == locationUsed[m]) {
+                    isUsed = true;
+                    break;
+                }
             }
+            if (isUsed) { continue; }
 
             GenericVertexAttribute& gva = genericVertAttribs[location];
             bool updatedVBO   = false;
@@ -695,8 +701,10 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             // store each location
             int32_t stride      = gva.GetStride();
             BUFFER_STRIDE_PAIR p = {bo, stride};
-            unique_buffer_stride_map[p].push_back(location);
-            locationUsed.push_back(location);
+            uint32_t *pLocation = unique_buffer_stride_map[p].Allocate();
+            *pLocation = location;
+            uint32_t *pUsed = locationUsed.Allocate();
+            *pUsed = location;
         }
     }
 
@@ -711,8 +719,9 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
     uint32_t current_binding = 0;
     for(const auto& iter : unique_buffer_stride_map) {
         VkBuffer bo = iter.first.first;
-        for(const auto& loc_str_iter : iter.second) {
-            vboLocationBindings[loc_str_iter] = current_binding;
+        const LOCATION_ARRAY &locs = iter.second;
+        for (uint32_t i = 0; i < locs.Size(); ++i) {
+            vboLocationBindings[locs[i]] = current_binding;
         }
         mActiveVertexVkBuffers[current_binding] = bo;
         ++current_binding;

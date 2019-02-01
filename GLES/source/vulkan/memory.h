@@ -97,20 +97,23 @@ public:
     virtual ~UniformMemory();
 
 // Allocate Functions
-    virtual bool                      Create(void);
+    virtual bool                      Create(void) final;
 
 // Release Functions
-    virtual void                      Release(void);
+    virtual void                      Release(void) final;
 
 // Bind Functions
-    virtual bool                      BindBufferMemory(VkBuffer &buffer);
+    virtual bool                      BindBufferMemory(VkBuffer &buffer) final;
 
 // Get Functions
-    virtual bool                      GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
+    virtual bool                      GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const final;
+    inline uint8_t *                  GetDataPtr(VkDeviceSize offset)                                           { FUN_ENTRY(GL_LOG_TRACE); return mSrcData + offset;}
 
 // Set/Update Functions
-    virtual bool                      SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
-    virtual bool                      FlushData(void);
+    virtual bool                      SetData(VkDeviceSize size, VkDeviceSize offset, const void *data) final;
+    virtual bool                      FlushData(void) final;
+    
+    virtual void                      UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data) final { FUN_ENTRY(GL_LOG_TRACE);  SetData(size, offset, data); }
 
 };
 

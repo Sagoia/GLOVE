@@ -115,6 +115,12 @@ public:
 
     bool                    Allocate(size_t size, const void *data) override;
     VkDescriptorBufferInfo* GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }
+    
+    inline void             UpdateData(size_t size, size_t offset, const void *data)
+                                                                                { FUN_ENTRY(GL_LOG_DEBUG); ((vulkanAPI::UniformMemory *)mMemory)->UpdateData(size, offset, data); }
+    
+    inline uint8_t *        GetDataPtr(size_t offset)                           { FUN_ENTRY(GL_LOG_DEBUG); ((vulkanAPI::UniformMemory *)mMemory)->GetDataPtr(offset);}
+    
 };
 
 class VertexBufferObject : public BufferObject
