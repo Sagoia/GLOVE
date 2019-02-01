@@ -137,7 +137,7 @@ public:
     uint32_t                                            GetNumberOfActiveUniforms(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetLiveUniforms(); }
     int                                                 GetUniformLocation(const char *name)        const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformLocation(name); }
     const ShaderResourceInterface::uniform             *GetUniform(uint32_t index)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniform(index); }
-    const ShaderResourceInterface::uniform             *GetUniformAtLocation(uint32_t location)     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformAtLocation(location); }
+    const ShaderResourceInterface::uniform             *GetUniformAtLocation(uint32_t location)             { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformAtLocation(location); }
     uint32_t                                            GetStageCount(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount; }
     VkShaderStageFlagBits                               GetShaderStage(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderStages[0]; }
     VkShaderModule                                      GetShaderModule(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderModules[0]; }
@@ -167,7 +167,7 @@ public:
 
     void                                                SetCustomAttribsLayout(const char *name, int index) { FUN_ENTRY(GL_LOG_TRACE); mShaderResourceInterface.SetCustomAttribsLayout(name, index); }
     void                                                SetUniformData(uint32_t location, size_t size, const void *ptr);
-    void                                                GetUniformData(uint32_t location, size_t size, void *ptr) const;
+    void                                                GetUniformData(uint32_t location, size_t size, void *ptr);
     void                                                SetSampler(uint32_t location, int count, const int *textureUnit);
     void                                                SetCacheManager(CacheManager *cacheManager);
     bool                                                GetValidDescriptorSet(void);
