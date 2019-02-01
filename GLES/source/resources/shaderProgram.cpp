@@ -836,14 +836,14 @@ ShaderProgram::GetInfoLog(void) const
 }
 
 void
-ShaderProgram::GetUniformData(uint32_t location, size_t size, void *ptr) const
+ShaderProgram::GetUniformData(uint32_t location, size_t size, void *ptr)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     assert(ptr);
     assert(IsLinked());
 
-    mShaderResourceInterface.GetUniformClientData(location, size, ptr);
+    mShaderResourceInterface.CopyUniformClientData(location, size, ptr);
 }
 
 void
@@ -1312,6 +1312,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
         writes[i].dstBinding = mShaderResourceInterface.GetUniformBlockBinding(i);
 
         if(mShaderResourceInterface.IsUniformBlockOpaque(i)) {
+            // assert(map_block_texDescriptor.find(i) != map_block_texDescriptor.end());
             writes[i].pImageInfo      = &textureDescriptors[map_block_texDescriptor[i]];
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             writes[i].descriptorCount = mShaderResourceInterface.GetUniformArraySize(i);
