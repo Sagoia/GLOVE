@@ -26,6 +26,27 @@
 #include "resources/uniformBufferObject.h"
 #include "resources/texture.h"
 
+#define DEFAULT_CACHE_SIZE 256
+
+CacheManager::CacheManager(const vulkanAPI::vkContext_t *vkContext) 
+: mVkContext(vkContext) 
+{ 
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mUBOCache.reserve(DEFAULT_CACHE_SIZE);
+    mVBOCache.reserve(DEFAULT_CACHE_SIZE);
+    mTextureCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkImageViewCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkImageCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkBufferCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkDeviceMemoryCache.reserve(DEFAULT_CACHE_SIZE);
+}
+
+CacheManager::~CacheManager() 
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+}
+
 void
 CacheManager::UncacheUBOs()
 {
@@ -281,7 +302,7 @@ CacheManager::GetSampler(uint64_t hash)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    std::map<uint64_t, VkSampler>::iterator it = mVkSamplerCache.find(hash);
+    SamplerMap::iterator it = mVkSamplerCache.find(hash);
     if (it != mVkSamplerCache.end()) {
         return it->second;
     }
@@ -302,7 +323,7 @@ CacheManager::GetRenderPass(uint64_t hash)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    std::map<uint64_t, VkRenderPass>::iterator it = mVkRenderPassCache.find(hash);
+    RenderPassMap::iterator it = mVkRenderPassCache.find(hash);
     if (it != mVkRenderPassCache.end()) {
         return it->second;
     }
