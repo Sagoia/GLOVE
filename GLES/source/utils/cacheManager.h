@@ -24,10 +24,12 @@
 #define __CACHEMANAGER_H__
 
 #include <vector>
-#include <map>
 #include <unordered_map>
+#include "utils/arrays.hpp"
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
+
+#define DEFAULT_CACHE_SIZE 256
 
 namespace vulkanAPI {
     struct vkContext_t;
@@ -42,7 +44,7 @@ private:
     const
     vulkanAPI::vkContext_t *            mVkContext;
 
-    typedef std::vector<UniformBufferObject *> UBOList;
+    typedef Array<UniformBufferObject*, DEFAULT_CACHE_SIZE> UBOList;
     typedef std::unordered_map<VkDeviceSize, UBOList> UBOMap;
     UBOList                             mUBOCache;
     UBOMap                              mUBOs;

@@ -26,14 +26,11 @@
 #include "resources/uniformBufferObject.h"
 #include "resources/texture.h"
 
-#define DEFAULT_CACHE_SIZE 256
-
 CacheManager::CacheManager(const vulkanAPI::vkContext_t *vkContext) 
 : mVkContext(vkContext) 
 { 
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mUBOCache.reserve(DEFAULT_CACHE_SIZE);
     mVBOCache.reserve(DEFAULT_CACHE_SIZE);
     mTextureCache.reserve(DEFAULT_CACHE_SIZE);
     mVkImageViewCache.reserve(DEFAULT_CACHE_SIZE);
@@ -52,13 +49,14 @@ CacheManager::UncacheUBOs()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mUBOCache.empty()) {
-        for (auto ubo : mUBOCache) {
+    if (!mUBOCache.Empty()) {
+        for (uint32_t i = 0; i < mUBOCache.Size(); ++i) {
+            auto &ubo = mUBOCache[i];
             VkDeviceSize size = ubo->GetSize();
-            mUBOs[size].push_back(ubo);
+            mUBOs[size].PushBack(ubo);
         }
 
-        mUBOCache.clear();
+        mUBOCache.Clear();
     }
 }
 
@@ -69,12 +67,14 @@ CacheManager::CleanUpUBOs()
 
     if (!mUBOs.empty()) {
         for (auto uboListPair : mUBOs) {
-            for (auto ubo : uboListPair.second) {
+            auto &ubos = uboListPair.second;
+            for (uint32_t i = 0; i < ubos.Size(); ++i) {
+                auto &ubo = ubos[i];
                 if (ubo != nullptr) {
                     delete ubo;
                 }
             }
-            uboListPair.second.clear();
+            ubos.Clear();
         }
         mUBOs.clear();
     }
@@ -220,7 +220,7 @@ CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mUBOCache.push_back(uniformBufferObject);
+    mUBOCache.PushBack(uniformBufferObject);
 }
 
 UniformBufferObject * 
@@ -232,9 +232,10 @@ CacheManager::GetUBO(VkDeviceSize size)
 
     UBOMap::iterator it = mUBOs.find(size);
     if (it != mUBOs.end()) {
-        if (it->second.size() > 0) {
-            ubo = it->second.back();
-            it->second.pop_back();
+        auto &ubos = it->second;
+        if (ubos.Size() > 0) {
+            ubo = ubos.Back();
+            ubos.PopBack();
         }
     }
 
