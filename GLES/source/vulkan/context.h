@@ -31,7 +31,7 @@
 #include "rendering_api_interface.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
-// #define ENABLE_VK_DEBUG_REPORTER
+#define ENABLE_VK_DEBUG_REPORTER
 #endif
 
 // MoltenVK not support VK_EXT_debug_report
