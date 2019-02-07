@@ -26,6 +26,7 @@
 
 #include "shaderReflection.h"
 #include "bufferObject.h"
+#include "uniformBufferObject.h"
 #include "utils/cacheManager.h"
 #include <vector>
 #include <unordered_map>
@@ -128,49 +129,6 @@ public:
             }
         }
     };
-    
-    struct uniformDirty {
-        size_t       offset;
-        size_t       size;
-        const void * data;
-    };
-    
-    template <class T, size_t N = 265>
-    class increasedArray {
-    private:
-        typedef T Element;
-        const static size_t ElementSize = sizeof(Element);
-        const static size_t DefaultCount = N;
-        
-        Element *data;
-        size_t count;
-        size_t next;
-        
-    public:
-        increasedArray(size_t size = DefaultCount):count(size), next(0) {
-            data = new Element[size];
-        }
-        
-        ~increasedArray(void) { delete [] data; }
-        
-        inline void Clear(void) { next = 0; }
-        inline size_t Count(void) { return count; }
-        inline size_t Size(void) { return next; }
-        inline Element& operator [](uint32_t i) { return data[i]; }
-        inline Element * Allocate(void) {
-            if (next >= count) {
-                Element *old = data;
-                data = new Element[count << 1];
-                memcpy(data, old, ElementSize * count);
-                count <<= 1;
-                delete [] old;
-            }
-            Element *ret = data + next;
-            ++ next;
-            return ret;
-            
-        }
-    };
 
 private:
     uint32_t mLiveAttributes;
@@ -196,7 +154,7 @@ private:
     //uniformBlockInterface mUniformBlockInterface;
     //uniformBlockDataInterface mUniformBlockDataInterface;
     
-    increasedArray<uniformDirty> mUniformInterfaceDirty;
+    //increasedArray<uniformDirty> mUniformInterfaceDirty;
 
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;

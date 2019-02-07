@@ -23,6 +23,7 @@
 
 #include "cacheManager.h"
 #include "resources/bufferObject.h"
+#include "resources/uniformBufferObject.h"
 #include "resources/texture.h"
 
 void

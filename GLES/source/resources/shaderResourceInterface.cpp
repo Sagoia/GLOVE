@@ -149,64 +149,26 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
         auto &uniform = mUniforms[i];
         auto &uniformData = mUniformDatas[i];
 
-        mUniformInterfaceDirty.Clear();
-        bool blockDataDirty = false;
         if (uniformData.clientDataDirty) {
             uniformData.clientDataDirty = false;
-            if (!IsBuildInUniform(uniform.reflectionName)) {
-                blockDataDirty = true;
-                for (size_t j = 0; j < (size_t)uniform.arraySize; ++j) {
-                    size_t size = GlslTypeToSize(uniform.glType);
-                    uniformDirty *dirtyData = mUniformInterfaceDirty.Allocate();
-                    dirtyData->size = size;
-                    dirtyData->offset = uniform.offset + j*GlslTypeToAllignment(uniform.glType);
-                    dirtyData->data = static_cast<const void *>(uniformData.pClientData + j*size);
-                }
+
+            if (IsBuildInUniform(uniform.reflectionName)) {
+                continue;
             }
-        }
-
-        bool flushData = false;
-
-        if(blockDataDirty) {
-            flushData = true;
-
-            size_t   srcsize = 0;
-            uint8_t *srcData = nullptr;
 
             UniformBufferObject *bufferObject = uniformBlockData.pBufferObject;
             if(bufferObject) {
                 mCacheManager->CacheUBO(bufferObject);
-
-                // memcopy data
-                srcsize = bufferObject->GetSize();
-                srcData = new uint8_t[srcsize];
-                bufferObject->GetData(srcsize, 0, srcData);
-
-                *allocatedNewBufferObject = true;
             }
 
             bufferObject = mCacheManager->GetUBO(uniformBlock.blockSize);
             if (bufferObject) {
-                bufferObject->UpdateData(srcsize, 0, srcData);
+                bufferObject->UpdateData(uniformBlock.blockSize, 0, uniformData.pClientData);
             } else {
                 bufferObject = new UniformBufferObject(vkContext);
-                bufferObject->Allocate(uniformBlock.blockSize, srcData);
+                bufferObject->Allocate(uniformBlock.blockSize, uniformData.pClientData);
             }
             uniformBlockData.pBufferObject = bufferObject;
-
-            if(srcsize) {
-                delete[] srcData;
-            }
-        }
-        
-        for (uint32_t m = 0; m < mUniformInterfaceDirty.Size(); ++m) {
-            auto &u = mUniformInterfaceDirty[m];
-            flushData = true;
-            uniformBlockData.pBufferObject->UpdateData(u.size, u.offset, u.data);
-        }
-
-        if (flushData) {
-            uniformBlockData.pBufferObject->FlushData();
         }
     }
 
