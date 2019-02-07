@@ -75,9 +75,9 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
 
     Release();
 
-    VkAttachmentReference           color;
-    VkAttachmentReference           depthstencil;
-    vector<VkAttachmentDescription> attachments;
+    VkAttachmentReference                   color;
+    VkAttachmentReference                   depthstencil;
+    std::vector<VkAttachmentDescription>    attachments;
 
     if(colorFormat != VK_FORMAT_UNDEFINED) {
 

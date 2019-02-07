@@ -106,7 +106,7 @@ ResourceManager::UpdateFramebufferObjects(GLuint index, GLenum target)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+    for(typename std::map<uint32_t, Framebuffer *>::const_iterator it =
         mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
 
         Framebuffer *fb = it->second;
@@ -123,7 +123,7 @@ ResourceManager::IsTextureAttachedToFBO(const Texture *texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    for(typename map<uint32_t, Framebuffer *>::const_iterator it =
+    for(typename std::map<uint32_t, Framebuffer *>::const_iterator it =
         mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
 
         if(it->second->GetColorAttachmentType() == GL_TEXTURE && texture == it->second->GetColorAttachmentTexture()) {
@@ -140,7 +140,7 @@ ResourceManager::ResetShaderProgramDescSetsState(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     ObjectArray<ShaderProgram> *shaderProgramArray = GetShaderProgramArray();
-    for (typename map<uint32_t, ShaderProgram *>::const_iterator it =
+    for (typename std::map<uint32_t, ShaderProgram *>::const_iterator it =
         shaderProgramArray->GetObjects()->begin(); it != shaderProgramArray->GetObjects()->end(); it++) {
         it->second->MoveUsingDescriptorSetsToPending();
     }

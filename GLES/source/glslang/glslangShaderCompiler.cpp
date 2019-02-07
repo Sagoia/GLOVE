@@ -74,7 +74,7 @@ GlslangShaderCompiler::CompileVertexShader(const char* const* source)
 
     assert(mSlangInitialized);
 
-    mVertSource = string(*source);
+    mVertSource = std::string(*source);
 
     if (mSlangVertCompiler) {
         return mSlangVertCompiler->CompileShader(source, EShLangVertex);
@@ -90,7 +90,7 @@ GlslangShaderCompiler::CompileFragmentShader(const char* const* source)
 
     assert(mSlangInitialized);
 
-    mFragSource = string(*source);
+    mFragSource = std::string(*source);
 
     if (mSlangFragCompiler) {
         return mSlangFragCompiler->CompileShader(source, EShLangFragment);
@@ -148,11 +148,11 @@ GlslangShaderCompiler::ConvertShader(ShaderProgram& program, shader_type_t shade
     }
 
     if(mDumpProcessedShaderSource) {
-        cout << "\n\nFINAL SOURCE:\n" << endl;
+        std::cout << "\n\nFINAL SOURCE:\n" << std::endl;
         if(shaderType == SHADER_TYPE_VERTEX) {
-            cout << mVertSource400 << "\n\n" << endl;
+            std::cout << mVertSource400 << "\n\n" << std::endl;
         } else {
-            cout << mFragSource400 << "\n\n" << endl;
+            std::cout << mFragSource400 << "\n\n" << std::endl;
         }
     }
 
@@ -188,7 +188,7 @@ GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYI
     }
 
     mVertSource = mSlangVertCompiler->GetSource();
-    mVertSource400 = string(mVertSource);
+    mVertSource400 = std::string(mVertSource);
     const char* source = ConvertShader(shaderProgram, SHADER_TYPE_VERTEX, isYInverted);
     result = mSlangVertCompiler->CompileShader400(&source, EShLangVertex);
     if(!result) {
@@ -196,7 +196,7 @@ GlslangShaderCompiler::PreprocessShaders(ShaderProgram& shaderProgram, bool isYI
     }
 
     mFragSource = mSlangFragCompiler->GetSource();
-    mFragSource400 = string(mFragSource);
+    mFragSource400 = std::string(mFragSource);
     source = ConvertShader(shaderProgram, SHADER_TYPE_FRAGMENT, isYInverted);
     result = mSlangFragCompiler->CompileShader400(&source, EShLangFragment);
     if(!result) {
@@ -248,21 +248,21 @@ GlslangShaderCompiler::PrintReadableSPV(ShaderProgram* program)
 
     mSlangProgLinker->GenerateSPV(mVertSpv, mFragSpv);
     if(!mVertSpv.empty()) {
-        stringstream filename;
-        filename << "vert_" << hex << (uintptr_t)program << ".spv.txt";
+        std::stringstream filename;
+        filename << "vert_" << std::hex << (uintptr_t)program << ".spv.txt";
 
-        ofstream out;
-        out.open(filename.str(), ios::binary | ios::out);
+        std::ofstream out;
+        out.open(filename.str(), std::ios::binary | std::ios::out);
         spv::Disassemble(out, mVertSpv);
         out.close();
     }
 
     if(!mFragSpv.empty()) {
-        stringstream filename;
-        filename << "frag_" << hex << (uintptr_t)program << ".spv.txt";
+        std::stringstream filename;
+        filename << "frag_" << std::hex << (uintptr_t)program << ".spv.txt";
 
-        ofstream out;
-        out.open(filename.str(), ios::binary | ios::out);
+        std::ofstream out;
+        out.open(filename.str(), std::ios::binary | std::ios::out);
         spv::Disassemble(out, mFragSpv);
         out.close();
     }
@@ -276,12 +276,12 @@ GlslangShaderCompiler::SaveBinaryToFiles(ShaderProgram* program)
     if(mVertSpv.empty() || mFragSpv.empty()) {
         mSlangProgLinker->GenerateSPV(mVertSpv, mFragSpv);
     }
-    stringstream filename;
-    filename << "vert_" << hex << (uintptr_t)program << ".spv.bin";
+    std::stringstream filename;
+    filename << "vert_" << std::hex << (uintptr_t)program << ".spv.bin";
     glslang::OutputSpvBin(mVertSpv, filename.str().c_str());
 
-    filename.str(string());
-    filename << "frag_" << hex << (uintptr_t)program << ".spv.bin";
+    filename.str(std::string());
+    filename << "frag_" << std::hex << (uintptr_t)program << ".spv.bin";
     glslang::OutputSpvBin(mFragSpv, filename.str().c_str());
 }
 
@@ -374,7 +374,7 @@ GlslangShaderCompiler::CompileAttributes(const glslang::TProgram* prog)
             location = GLOVE_INVALID_OFFSET;
         }
 
-        string attributeName = prog->getAttributeName(i);
+        std::string attributeName = prog->getAttributeName(i);
         mShaderReflection->SetAttributeName(attributeName.c_str(), i);
         mShaderReflection->SetAttributeType(prog->getAttributeType(i), i);
         mShaderReflection->SetAttributeLocation((uint32_t)location, i);
@@ -402,23 +402,23 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
 
     for(int i = 0; i < nLiveUniforms; ++i) {
         aggregate_t *pAggregate = nullptr;
-        string uniformName = string(prog->getUniformName(i));
+        std::string uniformName = std::string(prog->getUniformName(i));
         int32_t arrayIndex = -1;
 
         /// Does this uniform belong to an aggregate type?
         const size_t dotPosition = uniformName.find_first_of(".");
-        if(dotPosition != string::npos) {
-            string aggregateName = string(uniformName, 0, dotPosition);
+        if(dotPosition != std::string::npos) {
+            std::string aggregateName = std::string(uniformName, 0, dotPosition);
 
             /// Is this aggregate an array?
             const size_t firstOpenBracket = aggregateName.find_first_of("[");
-            if(firstOpenBracket != string::npos) {
+            if(firstOpenBracket != std::string::npos) {
                 /// Get array index
                 const size_t firstCloseBracket = aggregateName.find_first_of("]");
-                arrayIndex = stoi(string(aggregateName, firstOpenBracket + 1, firstCloseBracket - firstOpenBracket - 1));
+                arrayIndex = stoi(std::string(aggregateName, firstOpenBracket + 1, firstCloseBracket - firstOpenBracket - 1));
                 assert(arrayIndex >= 0);
                 /// remove "[*]" from name
-                aggregateName = string(aggregateName, 0, firstOpenBracket);
+                aggregateName = std::string(aggregateName, 0, firstOpenBracket);
             }
 
             /// Register aggregate and keep track of highest array index (if any)
@@ -434,7 +434,7 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
             }
         }
 
-        assert((!pAggregate && dotPosition == string::npos) || (pAggregate && dotPosition != string::npos));
+        assert((!pAggregate && dotPosition == std::string::npos) || (pAggregate && dotPosition != std::string::npos));
 
         /// Create uniform
         const int arraySize = prog->getUniformArraySize(i);
@@ -442,16 +442,16 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
         const shader_type_t stage = prog->getUniformStages(i) == (EShLangVertexMask | EShLangFragmentMask) ? static_cast<shader_type_t>(SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT) :
                                     prog->getUniformStages(i) == EShLangVertexMask ? SHADER_TYPE_VERTEX : SHADER_TYPE_FRAGMENT;
 
-        mUniforms.emplace_back(string(uniformName, dotPosition != string::npos ? dotPosition + 1 : 0),  /// variableName
-                               uniformName,                                                             /// reflectionName
-                               glType,                                                                  /// glType
-                               GLOVE_MAX_COMBINED_UNIFORM_VECTORS,                                      /// location (not assigned yet)
-                               arraySize,                                                               /// arraySize
-                               arrayIndex,                                                              /// indexIntoAggregateArray
-                               pAggregate,                                                              /// pAggregate
-                               nullptr,                                                                 /// pBlock (not known yet)
-                               stage,                                                                   /// stage
-                               0);                                                                      /// offset (not known yet)
+        mUniforms.emplace_back(std::string(uniformName, dotPosition != std::string::npos ? dotPosition + 1 : 0),    /// variableName
+                               uniformName,                                                                         /// reflectionName
+                               glType,                                                                              /// glType
+                               GLOVE_MAX_COMBINED_UNIFORM_VECTORS,                                                  /// location (not assigned yet)
+                               arraySize,                                                                           /// arraySize
+                               arrayIndex,                                                                          /// indexIntoAggregateArray
+                               pAggregate,                                                                          /// pAggregate
+                               nullptr,                                                                             /// pBlock (not known yet)
+                               stage,                                                                               /// stage
+                               0);                                                                                  /// offset (not known yet)
     }
 
     assert(mUniforms.size() == (uint32_t)nLiveUniforms);
@@ -463,7 +463,7 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
         /// Each unique aggregate name will be encapsulated into a uniform block
         if(mUniformBlocks.find(aggr.second.name) == mUniformBlocks.end()) {
             mUniformBlocks[aggr.second.name] = {aggr.second.name,                                       /// Copy name for debugging
-                                                string("uni") + to_string(binding),                     /// Construct uniform block's name
+                                                std::string("uni") + std::to_string(binding),           /// Construct uniform block's name
                                                 binding,                                                /// Binding index
                                                 false,                                                  /// Definitely not an opaque type
                                                 0,                                                      /// blockSize (not known yet)
@@ -497,7 +497,7 @@ GlslangShaderCompiler::CompileUniforms(const glslang::TProgram* prog)
             /// and is not of a sampler type, will be encapsulated into a uniform block
             if(mUniformBlocks.find(uni.variableName) == mUniformBlocks.end()) {
                 mUniformBlocks[uni.variableName] = {uni.variableName,                                   /// Copy name for debugging
-                                                    string("uni") + to_string(binding),                 /// Construct uniform block's name
+                                                    std::string("uni") + std::to_string(binding),       /// Construct uniform block's name
                                                     binding,                                            /// Binding index
                                                     isSampler,                                          /// true for samplers
                                                     0,                                                  /// blockSize (not known yet)
@@ -554,11 +554,11 @@ GlslangShaderCompiler::SetUniformBlocksOffset(const glslang::TProgram* prog)
 
             assert(uni.pBlock);
             assert((uni.pBlock == pBlock && uni.pAggregate == pBlock->pAggregate) || (uni.pBlock != pBlock && uni.pAggregate != pBlock->pAggregate));
-            string variableName = uni.variableName;
+            std::string variableName = uni.variableName;
 
             /// Remove any other "[*]" from uniformName too
             size_t lastOpenBracket = variableName.find_last_of("[");
-            while(lastOpenBracket > 0 && lastOpenBracket != string::npos){
+            while(lastOpenBracket > 0 && lastOpenBracket != std::string::npos){
                 const size_t lastCloseBracket = variableName.find_last_of("]");
                 variableName.erase(lastOpenBracket, lastCloseBracket - lastOpenBracket + 1);
                 lastOpenBracket = variableName.find_last_of("[");
@@ -566,11 +566,11 @@ GlslangShaderCompiler::SetUniformBlocksOffset(const glslang::TProgram* prog)
 
             /// Query uniform's offset in block from glslang
             size_t offset = GLOVE_INVALID_OFFSET;
-            string uniName;
+            std::string uniName;
             if(uni.pAggregate->name.compare("gl_DepthRange")) {
-                uniName = uni.pAggregate->name + string(".") + variableName;
+                uniName = uni.pAggregate->name + std::string(".") + variableName;
             } else {
-                uniName = string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + string(".") + variableName;
+                uniName = std::string(STRINGIFY_MACRO(GLOVE_VULKAN_DEPTH_RANGE)) + std::string(".") + variableName;
             }
 
             for(uint32_t index = 0; index < (uint32_t)prog->getNumLiveUniformVariables(); ++index) {
@@ -800,8 +800,8 @@ GlslangShaderCompiler::SaveShaderSourceToFile(ShaderProgram* program, bool proce
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    string filename = static_cast<ostringstream *>(&(ostringstream().flush() << (processed ? "shader_processed" : "shader_") << hex << (uintptr_t)program))->str();
-    filename = filename + string(shaderType == SHADER_TYPE_VERTEX ? ".vert" : ".frag");
+    std::string filename = static_cast<std::ostringstream *>(&(std::ostringstream().flush() << (processed ? "shader_processed" : "shader_") << std::hex << (uintptr_t)program))->str();
+    filename = filename + std::string(shaderType == SHADER_TYPE_VERTEX ? ".vert" : ".frag");
 
     FILE *fp = fopen(filename.c_str(), "w");
     assert(fp);

@@ -397,7 +397,7 @@ ShaderProgram::GetVkPipelineCache(void)
     return mPipelineCache->GetPipelineCache();
 }
 
-const string &
+const std::string &
 ShaderProgram::GetAttributeName(int index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);

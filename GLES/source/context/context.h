@@ -71,7 +71,7 @@ private:
     Framebuffer                                *mWriteFBO;
 
     Framebuffer                                *mSystemFBO;
-    vector<Texture *>                           mSystemTextures;
+    std::vector<Texture *>                      mSystemTextures;
 
     typedef std::pair<EGLSurfaceInterface*, EGLSurfaceInterface*> FRAMEBUFFER_SURFACES_PAIR;
     std::map<FRAMEBUFFER_SURFACES_PAIR, Framebuffer*> mSystemFBOMap;
@@ -79,7 +79,7 @@ private:
 // ------------
 
     std::string                                 mExtensions;
-    vector<GLenum>                              mCompressedTextureFormats;
+    std::vector<GLenum>                         mCompressedTextureFormats;
 
 // ------------
 

@@ -34,11 +34,11 @@
 class ShaderResourceInterface {
 public:
     struct attribute {
-        string                      name;
+        std::string                 name;
         GLenum                      glType;
         uint32_t                    location;
 
-        attribute(string n, GLenum type, uint32_t loc)
+        attribute(std::string n, GLenum type, uint32_t loc)
          : name(n),
            glType(type),
            location(loc)
@@ -46,19 +46,19 @@ public:
             FUN_ENTRY(GL_LOG_TRACE);
         }
     };
-    typedef struct attribute        attribute;
-    typedef vector<attribute>       attributeInterface;
-    typedef map<string, uint32_t>   attribsLayout_t;
+    typedef struct attribute                attribute;
+    typedef std::vector<attribute>          attributeInterface;
+    typedef std::map<std::string, uint32_t> attribsLayout_t;
 
     struct uniform{
-        string                      reflectionName;
+        std::string                 reflectionName;
         uint32_t                    location;
         uint32_t                    blockIndex;
         int32_t                     arraySize;
         GLenum                      glType;
         size_t                      offset;
 
-        uniform(string name, uint32_t loc, uint32_t bIndex, int32_t size, GLenum type, size_t offset)
+        uniform(std::string name, uint32_t loc, uint32_t bIndex, int32_t size, GLenum type, size_t offset)
          : reflectionName(name),
            location(loc),
            blockIndex(bIndex),
@@ -93,13 +93,13 @@ public:
     };
 
     struct uniformBlock {
-        string                      glslBlockName;
+        std::string                 glslBlockName;
         uint32_t                    binding;
         size_t                      blockSize;
         shader_type_t               blockStage;
         bool                        isOpaque;
 
-        uniformBlock(string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
+        uniformBlock(std::string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
          : glslBlockName(blockName),
            binding(bind),
            blockSize(bSize),
@@ -148,14 +148,6 @@ private:
     std::vector<uniformBlock>       mUniformBlocks;
     std::vector<uniformBlockData>   mUniformBlockDatas;
 
-    //uniformInterface mUniformInterface;
-    //uniformDataInterface mUniformDataInterface;
-
-    //uniformBlockInterface mUniformBlockInterface;
-    //uniformBlockDataInterface mUniformBlockDataInterface;
-    
-    //increasedArray<uniformDirty> mUniformInterfaceDirty;
-
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;
 
@@ -178,7 +170,7 @@ public:
     inline uint32_t GetAttributeLocation(uint32_t index)                        const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].location; }
     inline GLenum GetAttributeType(uint32_t index)                              const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].glType; }
     int GetAttributeType(int index) const;
-    const string & GetAttributeName(int index) const;
+    const std::string & GetAttributeName(int index) const;
 
     inline int32_t GetUniformblockIndex(uint32_t index)                         const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].blockIndex; }
     inline int32_t GetUniformArraySize(uint32_t index)                          const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].arraySize; }
@@ -207,7 +199,7 @@ public:
     void SetSampler(uint32_t location, int count, const int *textureUnit);
 
     void AllocateUniformClientData(void);
-	  bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
+    bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
     bool UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext, bool *allocatedNewBufferObject);
 
     void UpdateAttributeInterface(void);

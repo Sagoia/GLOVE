@@ -40,7 +40,7 @@ public:
     ShaderConverter();
     ~ShaderConverter();
 
-    void Convert(string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
+    void Convert(std::string& source, const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void Initialize(shader_conversion_type_t conversionType, shader_type_t shaderType);
 
     void SetSlangProgram(glslang::TProgram* slangProgram)                       { FUN_ENTRY(GL_LOG_TRACE); mSlangProg = slangProgram; }
@@ -57,19 +57,19 @@ private:
 
     shader_conversion_type_t    mConversionType;
     shader_type_t               mShaderType;
-    string                      mMemLayoutQualifier;
+    std::string                 mMemLayoutQualifier;
     glslang::TProgram*          mSlangProg;
     const GlslangIoMapResolver *mIoMapResolver;
 
-    void Convert100To400(string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
+    void Convert100To400(std::string& source,const uniformBlockMap_t &uniformBlockMap, ShaderReflection* reflection, bool isYInverted);
     void ProcessMacros(std::string& source);
-    void ProcessHeader(string& source, const uniformBlockMap_t &uniformBlockMap);
-    void ProcessUniforms(string& source, const uniformBlockMap_t &uniformBlockMap);
+    void ProcessHeader(std::string& source, const uniformBlockMap_t &uniformBlockMap);
+    void ProcessUniforms(std::string& source, const uniformBlockMap_t &uniformBlockMap);
     void ProcessInvariantQualifier(std::string& source);
-    void ProcessVaryings(string& source);
-    void ProcessVertexAttributes(string& source, ShaderReflection* reflection);
-    void ConvertGLToVulkanCoordSystem(string& source);
-    void ConvertGLToVulkanDepthRange(string& source);
+    void ProcessVaryings(std::string& source);
+    void ProcessVertexAttributes(std::string& source, ShaderReflection* reflection);
+    void ConvertGLToVulkanCoordSystem(std::string& source);
+    void ConvertGLToVulkanDepthRange(std::string& source);
 
 };
 

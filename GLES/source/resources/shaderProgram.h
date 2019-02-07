@@ -178,7 +178,7 @@ public:
     uint32_t                                            GetNumberOfActiveAttributes(void) const;
     const
     ShaderResourceInterface::attribute                 *GetVertexAttribute(int index) const;
-    const string &                                      GetAttributeName(int index) const;
+    const std::string &                                 GetAttributeName(int index) const;
     int                                                 GetAttributeType(int index) const;
     int                                                 GetAttributeLocation(const char *name) const;
     VkPipelineCache                                     GetVkPipelineCache(void);

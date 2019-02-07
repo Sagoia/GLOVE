@@ -31,15 +31,13 @@
 #include "rendering_api_interface.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
-#define ENABLE_VK_DEBUG_REPORTER
+// #define ENABLE_VK_DEBUG_REPORTER
 #endif
 
 // MoltenVK not support VK_EXT_debug_report
 #ifdef VK_USE_PLATFORM_IOS_MVK
 #undef ENABLE_VK_DEBUG_REPORTER
 #endif
-
-using namespace std;
 
 namespace vulkanAPI {
 
@@ -67,15 +65,15 @@ namespace vulkanAPI {
 #ifdef ENABLE_VK_DEBUG_REPORTER
         VkDebugReportCallbackEXT                            vkDebugReporter;
 #endif
-        vector<VkPhysicalDevice>                            vkGpus;
+        std::vector<VkPhysicalDevice>                       vkGpus;
         VkQueue                                             vkQueue;
         uint32_t                                            vkGraphicsQueueNodeIndex;
         VkDevice                                            vkDevice;
         VkPhysicalDeviceMemoryProperties                    vkDeviceMemoryProperties;
         VkPhysicalDeviceFeatures                            vkDeviceFeatures;
         vkSyncItems_t                                       *vkSyncItems;
-        vector<const char*>                                 enabledInstanceExtensions;
-        vector<const char*>                                 enabledDeviceExtensions;
+        std::vector<const char*>                            enabledInstanceExtensions;
+        std::vector<const char*>                            enabledDeviceExtensions;
         MemoryAllocator                                     *memoryAllocator;
         bool                                                mIsMaintenanceExtSupported;
         bool                                                mInitialized;

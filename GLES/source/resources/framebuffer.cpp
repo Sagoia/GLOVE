@@ -456,7 +456,7 @@ Framebuffer::Create(void)
     for(uint32_t i = 0; i < mAttachmentColors.size(); ++i) {
         vulkanAPI::Framebuffer *frameBuffer = new vulkanAPI::Framebuffer(mVkContext);
 
-        vector<VkImageView> imageViews;
+        std::vector<VkImageView> imageViews;
         if(GetColorAttachmentTexture(i)) {
             imageViews.push_back(GetColorAttachmentTexture(i)->GetVkImageView());
         }

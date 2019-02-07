@@ -64,14 +64,14 @@ IsWhiteSpace(char c)
     return (c == ' ' || c == '\t' || c == '\n');
 }
 
-string::size_type
+std::string::size_type
 SkipWhiteSpaces(const std::string &source, std::string::size_type pos)
 {
     while(IsWhiteSpace(source[pos++]));
     return pos - 1;
 }
 
-string::size_type
+std::string::size_type
 FindToken(const std::string &token, const std::string &source, std::string::size_type pos)
 {
     pos = source.find(token, pos);
@@ -88,7 +88,7 @@ FindToken(const std::string &token, const std::string &source, std::string::size
     return pos;
 }
 
-string
+std::string
 GetNextToken(const std::string &source, std::string::size_type start)
 {
     std::string::size_type pos = start;

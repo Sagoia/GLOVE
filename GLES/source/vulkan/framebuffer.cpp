@@ -56,7 +56,7 @@ Framebuffer::Release(void)
 }
 
 bool
-Framebuffer::Create(vector<VkImageView> *imageViews, VkRenderPass *renderpass, uint32_t width, uint32_t height)
+Framebuffer::Create(std::vector<VkImageView> *imageViews, VkRenderPass *renderpass, uint32_t width, uint32_t height)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

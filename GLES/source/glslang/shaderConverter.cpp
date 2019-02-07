@@ -138,18 +138,18 @@ ShaderConverter::ProcessHeader(std::string& source, const uniformBlockMap_t &uni
     FUN_ENTRY(GL_LOG_DEBUG);
 
     /// Do not add vulkan_DepthRange declaration if gl_DepthRange is not active in the input shader
-    const bool depthRangeActive = uniformBlockMap.find(string("gl_DepthRange")) != uniformBlockMap.cend();
-    const string sourceHeader = string(shaderVersion) +
-                                string(shaderExtensions) +
-                                string(shaderPrecision) +
-                                string(shaderTexture2d) +
-                                string(shaderTextureCube) +
-                                (depthRangeActive ? string(shaderDepthRange) : string("")) +
-                                string(shaderLimitsBuiltIns);
+    const bool depthRangeActive = uniformBlockMap.find(std::string("gl_DepthRange")) != uniformBlockMap.cend();
+    const std::string sourceHeader = std::string(shaderVersion) +
+                                     std::string(shaderExtensions) +
+                                     std::string(shaderPrecision) +
+                                     std::string(shaderTexture2d) +
+                                     std::string(shaderTextureCube) +
+                                     (depthRangeActive ? std::string(shaderDepthRange) : std::string("")) +
+                                     std::string(shaderLimitsBuiltIns);
 
     /// If #version is present
     size_t found = source.find("#version");
-    if(found != string::npos) {
+    if(found != std::string::npos) {
         size_t f1 = source.find("\n", found);
         source.replace(found, f1 - found, sourceHeader);
     } else {
@@ -164,10 +164,10 @@ ShaderConverter::ProcessInvariantQualifier(std::string& source)
 
     size_t found;
 
-    const string invariantStr("invariant");
-    const string invariantVaryingStr("invariant varying");
+    const std::string invariantStr("invariant");
+    const std::string invariantVaryingStr("invariant varying");
     found = FindToken(invariantVaryingStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
 
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + invariantStr.length());
@@ -187,15 +187,15 @@ ShaderConverter::ProcessMacros(std::string& source)
     size_t found;
 
     bool linedirectiveEnabled=false;
-    const string linedirective("#line");
+    const std::string linedirective("#line");
     found = FindToken(linedirective, source, 0);
-    if(found != string::npos) {
+    if(found != std::string::npos) {
         linedirectiveEnabled = true;
     }
 
-    const string lineStr("__LINE__");
+    const std::string lineStr("__LINE__");
     found = FindToken(lineStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
 
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + lineStr.length());
@@ -212,9 +212,9 @@ ShaderConverter::ProcessMacros(std::string& source)
         found = FindToken(lineStr, source, found);
     }
 
-    const string versionStr("__VERSION__");
+    const std::string versionStr("__VERSION__");
     found = FindToken(versionStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
 
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + versionStr.length());
@@ -225,9 +225,9 @@ ShaderConverter::ProcessMacros(std::string& source)
         found = FindToken(versionStr, source, found);
     }
 
-    const  string glStr("GL_ES");
+    const std::string glStr("GL_ES");
     found = FindToken(glStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
 
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + glStr.length());
@@ -252,18 +252,18 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
     /// Start of dead uniform blocks where the active end
     uint32_t unusedBlockBindings = uniformBlockMap.size();
     uniformBlockMap_t::const_iterator uniBlockIt;
-    string layoutSyntax;
-    string blockSyntax;
+    std::string layoutSyntax;
+    std::string blockSyntax;
 
     /// Convert uniforms into uniform blocks
-    string token;
-    const string uniformLiteralStr("uniform");
+    std::string token;
+    const std::string uniformLiteralStr("uniform");
 
     size_t found = FindToken(uniformLiteralStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
         size_t firstNL = source.rfind("\n", found);
-        string commentLine = source.substr(firstNL, found - firstNL);
-        if(commentLine.find("//") != string::npos) {
+        std::string commentLine = source.substr(firstNL, found - firstNL);
+        if(commentLine.find("//") != std::string::npos) {
             found = FindToken(uniformLiteralStr, source, found + uniformLiteralStr.length());
             continue;
         }
@@ -273,8 +273,8 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
 
         /// Either type or precision qualifier
         token = GetNextToken(source, found);
-        string tokenTypeStr = token;
-        string tokenPrecisionStr = "";
+        std::string tokenTypeStr = token;
+        std::string tokenPrecisionStr = "";
 
         if(IsPrecisionQualifier(token)) {
             found = SkipWhiteSpaces(source, found + token.length());
@@ -291,9 +291,9 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
 
             uniBlockIt = uniformBlockMap.find(token);
             if(uniBlockIt != uniformBlockMap.cend()) {
-                layoutSyntax = "layout(binding = " + to_string(uniBlockIt->second.binding) + string(") ");
+                layoutSyntax = "layout(binding = " + std::to_string(uniBlockIt->second.binding) + std::string(") ");
             } else {
-                layoutSyntax = "layout(binding = " + to_string(unusedBlockBindings) + string(") ");
+                layoutSyntax = "layout(binding = " + std::to_string(unusedBlockBindings) + std::string(") ");
                 ++unusedBlockBindings;
             }
             source.insert(f1, layoutSyntax);
@@ -312,7 +312,7 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
         bool   multiple_declaration = false;
         size_t f2  = source.find (",", found + token.length());
         size_t fNL = source.find (';', found + token.length());
-        blockSyntax = string(";\n") + uniformLiteralStr + " " + tokenTypeStr + " " + tokenPrecisionStr;
+        blockSyntax = std::string(";\n") + uniformLiteralStr + " " + tokenTypeStr + " " + tokenPrecisionStr;
         while(f2 <= fNL) {
             /// Move every variable on a new line
             source.replace(found + token.length(), 1, blockSyntax);
@@ -330,13 +330,13 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
         }
 
         // Rename uni* variable cases
-        const string uniStr("uni");
+        const std::string uniStr("uni");
         const size_t uni_count = (mShaderType == SHADER_TYPE_VERTEX) ? GLOVE_MAX_VERTEX_UNIFORM_VECTORS : GLOVE_MAX_FRAGMENT_UNIFORM_VECTORS;
         for (size_t i = 0; i < uni_count; i++) {
-            const string uniformStr(uniStr + to_string(i));
+            const std::string uniformStr(uniStr + std::to_string(i));
             if(!token.compare(uniformStr)) {
                 size_t f1 = FindToken(uniformStr, source, found);
-                while(f1 != string::npos) {
+                while(f1 != std::string::npos) {
 
                     size_t f2 = f1;
                     f1 = SkipWhiteSpaces(source, f1 + uniformStr.length());
@@ -357,26 +357,26 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
         uniBlockIt = uniformBlockMap.find(token);
         if(uniBlockIt != uniformBlockMap.cend()) {
             const uniformBlock_t &block = uniBlockIt->second;
-            layoutSyntax = "layout(" + mMemLayoutQualifier + ", binding = " + to_string(block.binding) + string(") ");
+            layoutSyntax = "layout(" + mMemLayoutQualifier + ", binding = " + std::to_string(block.binding) + std::string(") ");
             source.insert(f1, layoutSyntax);
             f1 += layoutSyntax.length();
 
-            blockSyntax = block.glslBlockName + string(" {");
+            blockSyntax = block.glslBlockName + std::string(" {");
             source.insert(f1 + strlen("uniform\0") + 1, blockSyntax);
         } else {
             /// inactive uniform
-            layoutSyntax = "layout(" + mMemLayoutQualifier + ", binding = " + to_string(unusedBlockBindings) + string(") ");
+            layoutSyntax = "layout(" + mMemLayoutQualifier + ", binding = " + std::to_string(unusedBlockBindings) + std::string(") ");
             source.insert(f1, layoutSyntax);
             f1 += layoutSyntax.length();
 
-            blockSyntax = string("uni") + to_string(unusedBlockBindings) + string(" {");
+            blockSyntax = std::string("uni") + std::to_string(unusedBlockBindings) + std::string(" {");
             source.insert(f1 + strlen("uniform\0") + 1, blockSyntax);
             ++unusedBlockBindings;
         }
 
         /// Close brackets and add block name
         found = source.find(";", found);
-        blockSyntax = string("};");
+        blockSyntax = std::string("};");
         source.insert(found + 1, blockSyntax);
 
         found = FindToken(uniformLiteralStr, source, found);
@@ -392,7 +392,7 @@ ShaderConverter::ProcessVaryings(std::string& source)
     assert(mSlangProg);
 
     int location = 0;
-    map<string, std::pair<int,bool>> varyingsLocationMap;
+    std::map<std::string, std::pair<int,bool>> varyingsLocationMap;
     for(uint32_t out = 0; out < mIoMapResolver->GetNumLiveVaryingOutVariables(); ++out) {
         for(uint32_t in = 0; in < mIoMapResolver->GetNumLiveVaryingInVariables(); ++in) {
             const char *inName  = mIoMapResolver->GetVaryingInName(in);
@@ -401,22 +401,22 @@ ShaderConverter::ProcessVaryings(std::string& source)
             const int   outSize = mIoMapResolver->GetVaryingOutSize(out);
 
             if(!strcmp(inName, outName)) {
-                assert(varyingsLocationMap.find(string(inName)) == varyingsLocationMap.end());
-                varyingsLocationMap[string(inName)] = make_pair(location, (inSize == outSize));
+                assert(varyingsLocationMap.find(std::string(inName)) == varyingsLocationMap.end());
+                varyingsLocationMap[std::string(inName)] = std::make_pair(location, (inSize == outSize));
                 location += mIoMapResolver->GetVaryingInLocations(in);
             }
         }
     }
 
-    const string varyingLiteralStr("varying");
+    const std::string varyingLiteralStr("varying");
 
     size_t found = FindToken(varyingLiteralStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + varyingLiteralStr.length());
 
         /// Either type or precision qualifier
-        string token = GetNextToken(source, found);
+        std::string token = GetNextToken(source, found);
         if(IsPrecisionQualifier(token)) {
             found = SkipWhiteSpaces(source, found + token.length());
             token = GetNextToken(source, found);
@@ -428,9 +428,9 @@ ShaderConverter::ProcessVaryings(std::string& source)
         token = GetNextToken(source, found);
 
         if(varyingsLocationMap.find(token) != varyingsLocationMap.end()) {
-            string layoutSyntax = string("layout(location = ") +
-                                  to_string(varyingsLocationMap[token].first) +
-                                  (mShaderType == SHADER_TYPE_VERTEX ? string(") out") : string(") in"));
+            std::string layoutSyntax = std::string("layout(location = ") +
+                                  std::to_string(varyingsLocationMap[token].first) +
+                                  (mShaderType == SHADER_TYPE_VERTEX ? std::string(") out") : std::string(") in"));
 
             //  Check for varying type mismatch
             //  replace line with dummy word in order to make compilation fail.
@@ -460,15 +460,15 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
     }
 
     /// Handle vertex attributes
-    const string attributeLiteralStr("attribute");
+    const std::string attributeLiteralStr("attribute");
 
     size_t found = FindToken(attributeLiteralStr, source, 0);
-    while(found != string::npos) {
+    while(found != std::string::npos) {
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + attributeLiteralStr.length());
 
         /// Either type or precision qualifier
-        string token = GetNextToken(source, found);
+        std::string token = GetNextToken(source, found);
         if(IsPrecisionQualifier(token)) {
             found = SkipWhiteSpaces(source, found + token.length());
             token = GetNextToken(source, found);
@@ -483,7 +483,7 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 
         std::vector<int>::iterator it = std::find (loc.begin(), loc.end(), location);
         if(location >=0 && it == loc.end()) {
-            string layoutSyntax = string("layout(location = ") + to_string(location) + string(") in");
+            std::string layoutSyntax = std::string("layout(location = ") + std::to_string(location) + std::string(") in");
             source.replace(f1, attributeLiteralStr.length(), layoutSyntax);
             for (int j = 0; j < (int)OccupiedLocationsPerGlType(reflection->GetAttributeType(token.c_str())); j++) {
                 loc.push_back(location + j);
@@ -498,21 +498,21 @@ ShaderConverter::ProcessVertexAttributes(std::string& source, ShaderReflection* 
 }
 
 void
-ShaderConverter::ConvertGLToVulkanCoordSystem(string& source)
+ShaderConverter::ConvertGLToVulkanCoordSystem(std::string& source)
 {
     // Find last "}"
     size_t pos = source.rfind("}");
     //If the "VK_KHR_maintenance1" is not supported, so we have to invert the y coordinates here
-    string GlToVkViewportConversion   = string("    gl_Position.y = -gl_Position.y;\n");
+    std::string GlToVkViewportConversion   = std::string("    gl_Position.y = -gl_Position.y;\n");
     source.insert(pos, GlToVkViewportConversion);
 }
 
 void
-ShaderConverter::ConvertGLToVulkanDepthRange(string& source)
+ShaderConverter::ConvertGLToVulkanDepthRange(std::string& source)
 {
     // Find last "}"
     size_t pos = source.rfind("}");
 
-    string GlToVkDepthRangeConversion = string("    gl_Position.z = (gl_Position.z + gl_Position.w) / 2.0;\n");
+    std::string GlToVkDepthRangeConversion = std::string("    gl_Position.z = (gl_Position.z + gl_Position.w) / 2.0;\n");
     source.insert(pos, GlToVkDepthRangeConversion);
 }

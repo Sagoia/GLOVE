@@ -208,11 +208,11 @@ ShaderResourceInterface::GetUniformLocation(const char *name) const
         }
     } else {
         /// Adjust location according to the specific array index requested
-        string requestedName = string(name);
+        std::string requestedName = std::string(name);
         size_t leftBracketPos = requestedName.find_last_of("[");
         int index = std::stoi(requestedName.substr(leftBracketPos + 1));
 
-        string ptrName = requestedName.substr(0, leftBracketPos);
+        std::string ptrName = requestedName.substr(0, leftBracketPos);
         for(auto &uniIt : mUniforms) {
             if(!ptrName.compare(uniIt.reflectionName)) {
                 if(index >= uniIt.arraySize) {
@@ -304,13 +304,13 @@ ShaderResourceInterface::UpdateAttributeInterface(void)
         return;
     }
 
-    vector<int> locations(nLiveAttributes);
+    std::vector<int> locations(nLiveAttributes);
     for(i = 0; i < nLiveAttributes; ++i) {
-        attribsLayout_t::const_iterator it = mCustomAttributesLayout.find(string(mShaderReflection->GetAttributeName(i)));
+        attribsLayout_t::const_iterator it = mCustomAttributesLayout.find(std::string(mShaderReflection->GetAttributeName(i)));
         locations[i] = (it == mCustomAttributesLayout.end()) ? -1 : it->second;
     }
 
-    vector<int> c;
+    std::vector<int> c;
     for(i = 0; i < nLiveAttributes; ++i) {
         if((uint32_t)mShaderReflection->GetAttributeLocation(i) == GLOVE_INVALID_OFFSET) {
             if(locations[i] != -1) {
@@ -357,7 +357,7 @@ ShaderResourceInterface::GetAttributeLocation(const char *name) const
     return -1;
 }
 
-const string &
+const std::string &
 ShaderResourceInterface::GetAttributeName(int index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);

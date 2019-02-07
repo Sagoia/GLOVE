@@ -50,8 +50,8 @@ class Texture {
             data(nullptr), size(0){ FUN_ENTRY(GL_LOG_TRACE); }
         ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
-    typedef State                  State_t;
-    typedef map<uint32_t, State_t> StateMap_t;
+    typedef State                       State_t;
+    typedef std::map<uint32_t, State_t> StateMap_t;
 
 private:
     const
