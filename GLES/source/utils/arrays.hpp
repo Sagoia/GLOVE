@@ -25,6 +25,8 @@
 #ifndef __ARRAYS_HPP__
 #define __ARRAYS_HPP__
 
+#include <cstdlib>
+#include <cstring>
 #include <map>
 
 /**
@@ -43,7 +45,7 @@ private:
     uint32_t mCounter;                 /**< The id (key-value of the map)
                                           reserved during the creation of a new
                                           object. */
-    map<uint32_t, ELEMENT *> mObjects; /**< The templated map container (one
+    std::map<uint32_t, ELEMENT *> mObjects; /**< The templated map container (one
                                           for each different class that maps
                                           id to a specific object). */
 public:
@@ -63,7 +65,7 @@ public:
     */
     ~ObjectArray()
     {
-        typename map<uint32_t, ELEMENT *>::iterator it;
+        typename std::map<uint32_t, ELEMENT *>::iterator it;
         for(it = mObjects.begin(); it != mObjects.end(); it++) {
             delete it->second;
         }
@@ -86,7 +88,7 @@ public:
     */
     bool Deallocate(uint32_t index)
     {
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
         if(it != mObjects.end()) {
             delete it->second;
             mObjects.erase(it);
@@ -112,7 +114,7 @@ public:
         if(mCounter < index) {
             mCounter = index;
         }
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
         if(it != mObjects.end()) {
             return it->second;
         } else {
@@ -128,7 +130,7 @@ public:
      */
     bool ObjectExists(uint32_t index) const
     {
-        typename map<uint32_t, ELEMENT *>::const_iterator it = mObjects.find(index);
+        typename std::map<uint32_t, ELEMENT *>::const_iterator it = mObjects.find(index);
         return it == mObjects.end() ? false : true;
     }
 
@@ -143,7 +145,7 @@ public:
      */
     uint32_t GetObjectId(const ELEMENT * element) const
     {
-        typename map<uint32_t, ELEMENT *>::const_iterator it;
+        typename std::map<uint32_t, ELEMENT *>::const_iterator it;
         for(it = mObjects.begin(); it != mObjects.end(); it++) {
             if(it->second == element) {
                 return it->first;
@@ -157,10 +159,49 @@ public:
      * @brief Returns the map container for a specific class.
      * @return The map container.
      */
-    map<uint32_t, ELEMENT *> *GetObjects(void)
+    std::map<uint32_t, ELEMENT *> *GetObjects(void)
     {
         return &mObjects;
     }
+};
+
+template <class T, size_t N = 64>
+class Array {
+private:
+    typedef T Element;
+    const static size_t ElementSize = sizeof(Element);
+    const static size_t DefaultCapacity = N;
+        
+    Element *mData;
+    size_t mCapacity;
+    size_t mSize;
+
+    void                Expend(void) {
+        Element *oldData = mData;
+        size_t oldSize = ElementSize * mCapacity;
+        mCapacity <<= 1;
+        mData = new Element[mCapacity];
+        memcpy(mData, oldData, oldSize);
+        delete [] oldData;
+    }
+        
+public:
+    Array(size_t capacity = DefaultCapacity)
+    :mCapacity(capacity), mSize(0) {
+        if (mCapacity == 0) { mCapacity = 1; }
+        mData = new Element[mCapacity];
+    }
+        
+    ~Array(void) { delete [] mData; }
+        
+    inline void         Clear(void)                 { mSize = 0; }
+    inline bool         Empty(void)                 { return (mSize == 0); }
+    inline size_t       Capacity(void)              { return mCapacity; }
+    inline size_t       Size(void)                  { return mSize; }
+    inline Element&     operator [](uint32_t i)     { return mData[i]; }
+    inline Element&     Back(void)                  { return mData[mSize - 1]; }
+    inline void         PopBack(void)               { if (mSize > 0) { --mSize; } }
+    inline void         PushBack(Element &e)        { if (mSize == mCapacity) { Expend();} mData[mSize] = e; ++ mSize; }
 };
 
 #endif // __ARRAYS_HPP__
