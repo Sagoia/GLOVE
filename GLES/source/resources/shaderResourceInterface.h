@@ -99,14 +99,35 @@ public:
         shader_type_t               blockStage;
         bool                        isOpaque;
 
+        size_t                      requiredSize;
+        uint32_t                    cacheIndex;
+
         uniformBlock(std::string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
          : glslBlockName(blockName),
            binding(bind),
            blockSize(bSize),
            blockStage(shaderType),
-           isOpaque(opaque)
+           isOpaque(opaque),
+           requiredSize(0),
+           cacheIndex(0)
         {
             FUN_ENTRY(GL_LOG_TRACE);
+
+            if (!opaque) {
+                assert(bSize > 0);
+                if ((bSize & (bSize - 1)) == 0) {
+                    requiredSize = bSize;
+                } else {
+                    requiredSize = 1;
+                    while (bSize) {
+                        requiredSize <<= 1;
+                        bSize >>= 1;
+                    }
+                }
+                while (requiredSize >> (cacheIndex + 1)) {
+                    ++ cacheIndex;
+                }
+            }
         }
     };
 

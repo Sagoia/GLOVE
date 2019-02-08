@@ -29,8 +29,6 @@
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
 
-#define DEFAULT_CACHE_SIZE 256
-
 namespace vulkanAPI {
     struct vkContext_t;
 }
@@ -41,13 +39,15 @@ class Texture;
 
 class CacheManager {
 private:
+    const static uint32_t DEFAULT_CACHE_SIZE = 256;
+    const static uint32_t UBO_ARRAY_COUNT = 16;
+
     const
     vulkanAPI::vkContext_t *            mVkContext;
 
     typedef Array<UniformBufferObject*, DEFAULT_CACHE_SIZE> UBOList;
-    typedef std::unordered_map<VkDeviceSize, UBOList> UBOMap;
     UBOList                             mUBOCache;
-    UBOMap                              mUBOs;
+    UBOList                             mUBOLists[UBO_ARRAY_COUNT];
 
     std::vector<BufferObject *>         mVBOCache;
     std::vector<Texture *>              mTextureCache;
@@ -84,7 +84,7 @@ public:
     ~CacheManager();
 
     void                                CacheUBO(UniformBufferObject *uniformBufferObject);
-    UniformBufferObject *               GetUBO(VkDeviceSize size);
+    UniformBufferObject *               GetUBO(uint32_t index);
 
     void                                CacheVBO(BufferObject *vbo);
     void                                CacheTexture(Texture *tex);

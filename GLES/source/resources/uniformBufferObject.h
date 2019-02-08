@@ -14,8 +14,8 @@ private:
 
     GLenum                      mUsage;
     bool                        mAllocated;
+    uint32_t                    mCacheIndex;
 
-protected:
     vulkanAPI::UniformMemory*   mMemory;
     vulkanAPI::Buffer*          mBuffer;
 
@@ -27,7 +27,7 @@ public:
     virtual                     ~UniformBufferObject();
 
 // Allocate Functions
-    bool                        Allocate(size_t size, const void *data);
+    bool                        Allocate(size_t bufferSize, const void *data, size_t dataSize);
     inline void                 AllocateVkDescriptorBufferInfo()                    { FUN_ENTRY(GL_LOG_DEBUG); mBuffer->CreateVkDescriptorBufferInfo(); }
 
 // Release Functions
@@ -37,7 +37,8 @@ public:
     bool                        UpdateData(size_t size, size_t offset, const void *data);
 
 // Get Functions
-    inline GLenum               GetUsage(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mUsage;  }
+    inline GLenum               GetUsage(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mUsage; }
+    inline uint32_t             GetCacheIndex(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mCacheIndex; }
     inline size_t               GetSize(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetSize(); }
     inline VkBuffer             GetVkBuffer(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer(); }
     inline VkDescriptorBufferInfo * 

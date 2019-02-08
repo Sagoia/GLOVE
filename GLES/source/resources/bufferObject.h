@@ -39,7 +39,6 @@ private:
     GLenum                  mTarget;
     bool                    mAllocated;
 
-protected:
     vulkanAPI::Memory*      mMemory;
     vulkanAPI::Buffer*      mBuffer;
 

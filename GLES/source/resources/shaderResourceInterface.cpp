@@ -72,9 +72,6 @@ ShaderResourceInterface::CreateInterface(void)
     mLiveUniformBlocks = mShaderReflection->GetLiveUniformBlocks();
 
     assert(mLiveUniforms == mLiveUniformBlocks);
-    if (mLiveUniforms != mLiveUniformBlocks) {
-        int x = 0;
-    }
 
     mAttributeInterface.reserve(mLiveAttributes);
     mUniforms.reserve(mLiveUniforms);
@@ -95,7 +92,7 @@ ShaderResourceInterface::CreateInterface(void)
                                mShaderReflection->GetUniformOffset(i));
     }
 
-    for(uint32_t i = 0; i < mShaderReflection->GetLiveUniformBlocks(); ++i) {
+    for(uint32_t i = 0; i < mLiveUniformBlocks; ++i) {
         mUniformBlocks.emplace_back(mShaderReflection->GetUniformBlockGlslBlockName(i),
                                     mShaderReflection->GetUniformBlockBinding(i),
                                     mShaderReflection->GetUniformBlockBlockSize(i),
@@ -129,7 +126,7 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
         if(!uniBlock.isOpaque) {
             assert(uniBlock.blockSize);
             ubo = new UniformBufferObject(vkContext);
-            ubo->Allocate(uniBlock.blockSize, nullptr);
+            ubo->Allocate(uniBlock.requiredSize, nullptr, uniBlock.blockSize);
         }
         mUniformBlockDatas.emplace_back(ubo);
     }
@@ -161,12 +158,12 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 mCacheManager->CacheUBO(bufferObject);
             }
 
-            bufferObject = mCacheManager->GetUBO(uniformBlock.blockSize);
+            bufferObject = mCacheManager->GetUBO(uniformBlock.cacheIndex);
             if (bufferObject) {
                 bufferObject->UpdateData(uniformBlock.blockSize, 0, uniformData.pClientData);
             } else {
                 bufferObject = new UniformBufferObject(vkContext);
-                bufferObject->Allocate(uniformBlock.blockSize, uniformData.pClientData);
+                bufferObject->Allocate(uniformBlock.requiredSize, uniformData.pClientData, uniformBlock.blockSize);
             }
             uniformBlockData.pBufferObject = bufferObject;
         }

@@ -52,8 +52,12 @@ CacheManager::UncacheUBOs()
     if (!mUBOCache.Empty()) {
         for (uint32_t i = 0; i < mUBOCache.Size(); ++i) {
             auto &ubo = mUBOCache[i];
-            VkDeviceSize size = ubo->GetSize();
-            mUBOs[size].PushBack(ubo);
+            uint32_t index = ubo->GetCacheIndex();
+            if (index < UBO_ARRAY_COUNT) {
+                mUBOLists[index].PushBack(ubo);
+            } else {
+                delete ubo;
+            }
         }
 
         mUBOCache.Clear();
@@ -65,18 +69,15 @@ CacheManager::CleanUpUBOs()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mUBOs.empty()) {
-        for (auto uboListPair : mUBOs) {
-            auto &ubos = uboListPair.second;
-            for (uint32_t i = 0; i < ubos.Size(); ++i) {
-                auto &ubo = ubos[i];
-                if (ubo != nullptr) {
+    for (uint32_t i = 0; i < UBO_ARRAY_COUNT; ++i) {
+        auto &ubos = mUBOLists[i];
+        for (uint32_t j = 0; j < ubos.Size(); ++j) {
+            auto &ubo = ubos[i];
+            if (ubo != nullptr) {
                     delete ubo;
-                }
             }
-            ubos.Clear();
         }
-        mUBOs.clear();
+        ubos.Clear();
     }
 }
 
@@ -224,16 +225,15 @@ CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
 }
 
 UniformBufferObject * 
-CacheManager::GetUBO(VkDeviceSize size)
+CacheManager::GetUBO(uint32_t index)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     UniformBufferObject *ubo = nullptr;
-
-    UBOMap::iterator it = mUBOs.find(size);
-    if (it != mUBOs.end()) {
-        auto &ubos = it->second;
-        if (ubos.Size() > 0) {
+    
+    if (index < UBO_ARRAY_COUNT) {
+        auto &ubos = mUBOLists[index];
+        if (!ubos.Empty()) {
             ubo = ubos.Back();
             ubos.PopBack();
         }

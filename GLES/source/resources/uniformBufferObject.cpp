@@ -1,7 +1,7 @@
 #include "uniformBufferObject.h"
 
 UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode, const VkFlags vkFlags)
-: mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mAllocated(false)
+: mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mAllocated(false), mCacheIndex(0)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -28,19 +28,21 @@ UniformBufferObject::Release()
 }
 
 bool
-UniformBufferObject::Allocate(size_t size, const void *data)
+UniformBufferObject::Allocate(size_t bufferSize, const void *data, size_t dataSize)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mBuffer->SetSize(size);
+    mBuffer->SetSize(bufferSize);
 
     mAllocated = mBuffer->Create()                                            &&
                  mMemory->GetBufferMemoryRequirements(mBuffer->GetVkBuffer()) &&
                  mMemory->Create()                                            &&
-                 UpdateData(size, 0, data)                                    &&
+                 UpdateData(dataSize, 0, data)                                &&
                  mMemory->BindBufferMemory(mBuffer->GetVkBuffer());
 
     if(mAllocated) {
+        mCacheIndex = 0;
+        while (bufferSize >> (mCacheIndex + 1)) { ++ mCacheIndex; }
         AllocateVkDescriptorBufferInfo();
     }
     return mAllocated;
