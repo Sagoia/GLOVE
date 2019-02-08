@@ -348,9 +348,9 @@ Context::CreateShaderCompiler(void)
         //}
 
         ObjectArray<ShaderProgram> *shaderProgramArray = mResourceManager->GetShaderProgramArray();
-        for(typename std::map<uint32_t, ShaderProgram *>::const_iterator it =
-        shaderProgramArray->GetObjects()->begin(); it != shaderProgramArray->GetObjects()->end(); it++) {
-            it->second->SetShaderCompiler(mShaderCompiler);
+        auto &objects = shaderProgramArray->GetObjects();
+        for (uint32_t i = 0; i < objects.Size(); ++i) {
+            objects[i]->SetShaderCompiler(mShaderCompiler);
         }
     }
 }

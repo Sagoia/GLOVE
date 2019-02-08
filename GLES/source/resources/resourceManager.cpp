@@ -106,10 +106,9 @@ ResourceManager::UpdateFramebufferObjects(GLuint index, GLenum target)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    for(typename std::map<uint32_t, Framebuffer *>::const_iterator it =
-        mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
-
-        Framebuffer *fb = it->second;
+    auto &objects = mFramebuffers.GetObjects();
+    for (uint32_t i = 0; i < objects.Size(); ++i) {
+        Framebuffer *fb = objects[i];
         if((fb->GetColorAttachmentType()   == target && index == fb->GetColorAttachmentName()) ||
            (fb->GetDepthAttachmentType()   == target && index == fb->GetDepthAttachmentName()) ||
            (fb->GetStencilAttachmentType() == target && index == fb->GetStencilAttachmentName())) {
@@ -123,10 +122,10 @@ ResourceManager::IsTextureAttachedToFBO(const Texture *texture)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    for(typename std::map<uint32_t, Framebuffer *>::const_iterator it =
-        mFramebuffers.GetObjects()->begin(); it != mFramebuffers.GetObjects()->end(); it++) {
-
-        if(it->second->GetColorAttachmentType() == GL_TEXTURE && texture == it->second->GetColorAttachmentTexture()) {
+    auto &objects = mFramebuffers.GetObjects();
+    for (uint32_t i = 0; i < objects.Size(); ++i) {
+        Framebuffer *fb = objects[i];
+        if(fb->GetColorAttachmentType() == GL_TEXTURE && texture == fb->GetColorAttachmentTexture()) {
             return true;
         }
     }
@@ -140,8 +139,8 @@ ResourceManager::ResetShaderProgramDescSetsState(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     ObjectArray<ShaderProgram> *shaderProgramArray = GetShaderProgramArray();
-    for (typename std::map<uint32_t, ShaderProgram *>::const_iterator it =
-        shaderProgramArray->GetObjects()->begin(); it != shaderProgramArray->GetObjects()->end(); it++) {
-        it->second->MoveUsingDescriptorSetsToPending();
+    auto &objects = shaderProgramArray->GetObjects();
+    for (uint32_t i = 0; i < objects.Size(); ++i) {
+        objects[i]->MoveUsingDescriptorSetsToPending();
     }
 }
