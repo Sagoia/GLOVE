@@ -1194,29 +1194,24 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     const uint32_t nLiveUniformBlocks = mShaderResourceInterface.GetLiveUniformBlocks();
-    uint32_t nSamplers = 0;
-    for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
-        if(mShaderResourceInterface.IsUniformBlockOpaque(i)) {
-            nSamplers += mShaderResourceInterface.GetUniformArraySize(i);
-        }
-    }
+    uint32_t nSamplers = mShaderResourceInterface.GetLiveSamplers();
 
     /// Get texture units from samplers
     uint32_t samp = 0;
-    std::map<uint32_t, uint32_t> map_block_texDescriptor;
+    uint32_t *map_block_texDescriptor = (uint32_t *)calloc(nLiveUniformBlocks, sizeof(uint32_t));
     VkDescriptorImageInfo *textureDescriptors = nullptr;
     if(nSamplers) {
-        textureDescriptors = new VkDescriptorImageInfo[nSamplers];
-        memset(static_cast<void *>(textureDescriptors), 0, nSamplers * sizeof(*textureDescriptors));
+        textureDescriptors = (VkDescriptorImageInfo *)calloc(nSamplers, sizeof(VkDescriptorImageInfo));
 
         for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveUniforms(); ++i) {
-            if(mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D || mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_CUBE) {
-                for(int32_t j = 0; j < mShaderResourceInterface.GetUniformArraySize(i); ++j) {
-                    const glsl_sampler_t textureUnit = *(glsl_sampler_t *)mShaderResourceInterface.GetUniformClientData(i);
+            auto &uniform = mShaderResourceInterface.GetUniform(i);
+            if(uniform.glType == GL_SAMPLER_2D || uniform.glType == GL_SAMPLER_CUBE) {
+                for(int32_t j = 0; j < uniform.arraySize; ++j) {
+                    const glsl_sampler_t textureUnit = *(glsl_sampler_t *)uniform.pClientData;
 
                     /// Sampler might need an update
                     Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
-                    mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
+                    uniform.glType == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
                     // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
                     // when the sampler’s associated texture object is not complete.
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
@@ -1293,7 +1288,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     textureDescriptors[samp].imageView   = activeTexture->GetVkImageView();
 
                     if(j == 0) {
-                        map_block_texDescriptor[mShaderResourceInterface.GetUniformblockIndex(i)] = samp;
+                        map_block_texDescriptor[uniform.blockIndex] = samp;
                     }
                     ++samp;
                 }
@@ -1303,32 +1298,33 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     assert(samp == nSamplers);
 
     samp = 0;
-    VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
-    memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
+    VkWriteDescriptorSet *writes = (VkWriteDescriptorSet *)calloc(nLiveUniformBlocks, sizeof(VkWriteDescriptorSet));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
+        auto &uniformBlock = mShaderResourceInterface.GetUniformBlock(i);
+        auto &uniform = mShaderResourceInterface.GetUniform(i);
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writes[i].pNext      = nullptr;
         writes[i].dstSet     = mVkDescSet;
-        writes[i].dstBinding = mShaderResourceInterface.GetUniformBlockBinding(i);
+        writes[i].dstBinding = uniformBlock.binding;
 
-        if(mShaderResourceInterface.IsUniformBlockOpaque(i)) {
-            // assert(map_block_texDescriptor.find(i) != map_block_texDescriptor.end());
+        if(uniformBlock.isOpaque) {
             writes[i].pImageInfo      = &textureDescriptors[map_block_texDescriptor[i]];
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            writes[i].descriptorCount = mShaderResourceInterface.GetUniformArraySize(i);
-            samp += mShaderResourceInterface.GetUniformArraySize(i);
+            writes[i].descriptorCount = uniform.arraySize; 
+            samp += uniform.arraySize; 
         } else {
             writes[i].descriptorCount = 1;
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            writes[i].pBufferInfo     = mShaderResourceInterface.GetUniformBufferObject(i)->GetBufferDescInfo();
+            writes[i].pBufferInfo     = uniformBlock.pBufferObject->GetBufferDescInfo();
         }
     }
     assert(samp == nSamplers);
 
     vkUpdateDescriptorSets(mVkContext->vkDevice, nLiveUniformBlocks, writes, 0, nullptr);
 
-    delete[] writes;
-    delete[] textureDescriptors;
+    free(map_block_texDescriptor);
+    free(writes);
+    free(textureDescriptors);
 
     mUpdateDescriptorSets = false;
 }

@@ -33,7 +33,7 @@
 #include <string>
 
 ShaderResourceInterface::ShaderResourceInterface()
-: mLiveAttributes(0), mLiveUniforms(0), mLiveUniformBlocks(0),
+: mLiveAttributes(0), mLiveUniforms(0), mLiveUniformBlocks(0), mLiveSamplers(0),
   mActiveAttributeMaxLength(0), mActiveUniformMaxLength(0), mReflectionSize(0), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -106,12 +106,9 @@ ShaderResourceInterface::AllocateUniformClientData(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mUniformDatas.reserve(mUniforms.size());
     for(auto& uni : mUniforms) {
         size_t clientDataSize = uni.arraySize * GlslTypeToSize(uni.glType);
-        uint8_t* clientData = new uint8_t[clientDataSize];
-        memset(static_cast<void *>(clientData), 0, clientDataSize);
-        mUniformDatas.emplace_back(clientData);
+        uni.pClientData = (uint8_t *)calloc(clientDataSize, sizeof(uint8_t));
     }
 }
 
@@ -120,15 +117,17 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mUniformBlockDatas.reserve(mUniformBlocks.size());
+    mLiveSamplers = 0;
     for(auto &uniBlock : mUniformBlocks) {
         UniformBufferObject *ubo = nullptr;
         if(!uniBlock.isOpaque) {
             assert(uniBlock.blockSize);
             ubo = new UniformBufferObject(vkContext);
             ubo->Allocate(uniBlock.requiredSize, nullptr, uniBlock.blockSize);
+        } else {
+            ++ mLiveSamplers;
         }
-        mUniformBlockDatas.emplace_back(ubo);
+        uniBlock.pBufferObject = ubo;
     }
 
     return true;
@@ -141,31 +140,28 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
 
     for (uint32_t i = 0; i < mUniformBlocks.size(); ++i) {
         auto &uniformBlock = mUniformBlocks[i];
-        auto &uniformBlockData = mUniformBlockDatas[i];
-
         auto &uniform = mUniforms[i];
-        auto &uniformData = mUniformDatas[i];
 
-        if (uniformData.clientDataDirty) {
-            uniformData.clientDataDirty = false;
+        if (uniform.clientDataDirty) {
+            uniform.clientDataDirty = false;
 
             if (IsBuildInUniform(uniform.reflectionName)) {
                 continue;
             }
 
-            UniformBufferObject *bufferObject = uniformBlockData.pBufferObject;
+            UniformBufferObject *bufferObject = uniformBlock.pBufferObject;
             if(bufferObject) {
                 mCacheManager->CacheUBO(bufferObject);
             }
 
             bufferObject = mCacheManager->GetUBO(uniformBlock.cacheIndex);
             if (bufferObject) {
-                bufferObject->UpdateData(uniformBlock.blockSize, 0, uniformData.pClientData);
+                bufferObject->UpdateData(uniformBlock.blockSize, 0, uniform.pClientData);
             } else {
                 bufferObject = new UniformBufferObject(vkContext);
-                bufferObject->Allocate(uniformBlock.requiredSize, uniformData.pClientData, uniformBlock.blockSize);
+                bufferObject->Allocate(uniformBlock.requiredSize, uniform.pClientData, uniformBlock.blockSize);
             }
-            uniformBlockData.pBufferObject = bufferObject;
+            uniformBlock.pBufferObject = bufferObject;
         }
     }
 
@@ -173,16 +169,13 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
 }
 
 const ShaderResourceInterface::uniform *
-ShaderResourceInterface::GetUniformAtLocation(uint32_t location, uint32_t *index)
+ShaderResourceInterface::GetUniformAtLocation(uint32_t location)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     for (uint32_t i = 0; i < mUniforms.size(); ++i) {
         const auto &uniform = mUniforms[i];
         if(location >= (uint32_t)uniform.location && location < (uint32_t)(uniform.location + uniform.arraySize)) {
-            if (index) {
-                *index = i;
-            }
             return &uniform;
         }
     }
@@ -229,17 +222,15 @@ ShaderResourceInterface::SetUniformClientData(uint32_t location, size_t size, co
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    uint32_t index = 0;
-    const ShaderResourceInterface::uniform *uniform = GetUniformAtLocation(location, &index);
+    uniform *uniform = const_cast<ShaderResourceInterface::uniform *>(GetUniformAtLocation(location));
     assert(uniform);
     assert(uniform->location <= location);
 
     size_t arrayOffset = (location - uniform->location) * GlslTypeToSize(uniform->glType);
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
-    auto &uniformData = mUniformDatas[index];
-    memcpy(static_cast<void *>(uniformData.pClientData + arrayOffset), ptr, size);
-    uniformData.clientDataDirty = true;
+    memcpy(static_cast<void *>(uniform->pClientData + arrayOffset), ptr, size);
+    uniform->clientDataDirty = true;
 }
 
 void
@@ -251,19 +242,17 @@ ShaderResourceInterface::SetSampler(uint32_t location, int count, const int *tex
         assert((*textureUnit >= GL_TEXTURE0 && *textureUnit < GL_TEXTURE0 + GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS) ||
                (*textureUnit >= 0 && *textureUnit < GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 
-        uint32_t index = 0;
-        const ShaderResourceInterface::uniform *uniformSampler = GetUniformAtLocation(location, &index);
+        uniform *uniformSampler = const_cast<ShaderResourceInterface::uniform *>(GetUniformAtLocation(location));
         assert(uniformSampler);
-        auto &uniformData = mUniformDatas[index];
 
         assert(uniformSampler->location <= location);
         size_t arrayOffset = (location - uniformSampler->location) * GlslTypeToSize(uniformSampler->glType);
 
         /// Make sure textureUnit is inside [0, GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS)
         if(*textureUnit >= GL_TEXTURE0 && *textureUnit < GL_TEXTURE0 + GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
-            *((glsl_sampler_t *)(uniformData.pClientData + arrayOffset)) = (glsl_sampler_t)(*textureUnit - GL_TEXTURE0);
+            *((glsl_sampler_t *)(uniformSampler->pClientData + arrayOffset)) = (glsl_sampler_t)(*textureUnit - GL_TEXTURE0);
         } else {
-            *((glsl_sampler_t *)(uniformData.pClientData + arrayOffset)) = (glsl_sampler_t)(*textureUnit);
+            *((glsl_sampler_t *)(uniformSampler->pClientData + arrayOffset)) = (glsl_sampler_t)(*textureUnit);
         }
 
         ++textureUnit;
@@ -276,16 +265,15 @@ ShaderResourceInterface::CopyUniformClientData(uint32_t location, size_t size, v
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    uint32_t index = 0;
-    const uniform *uniform = GetUniformAtLocation(location, &index);
+    uniform *uniform = const_cast<ShaderResourceInterface::uniform *>(GetUniformAtLocation(location));
+
     assert(uniform);
     assert(uniform->location <= location);
 
     size_t arrayOffset = (location - uniform->location) * GlslTypeToSize(uniform->glType);
     assert(arrayOffset + size <= uniform->arraySize * GlslTypeToSize(uniform->glType));
 
-    auto &uniformData = mUniformDatas[index];
-    memcpy(ptr, static_cast<const void *>(uniformData.pClientData + arrayOffset), size);
+    memcpy(ptr, static_cast<const void *>(uniform->pClientData + arrayOffset), size);
 }
 
 void
