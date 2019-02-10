@@ -38,23 +38,23 @@ private:
     size_t mCapacity;
     size_t mSize;
 
-    void Expend(void) {
+    void Expend(size_t capacity) {
         Element *oldData = mData;
         size_t oldSize = ElementSize * mCapacity;
-        mCapacity <<= 1;
-        mData = (Element *)malloc(mCapacity * ElementSize);
+        mCapacity = capacity;
+        mData = new Element[mCapacity];
         memcpy(mData, oldData, oldSize);
-        free(oldData);
+        delete [] oldData;
     }
         
 public:
     Array(size_t capacity = DefaultCapacity)
     : mCapacity(capacity), mSize(0) {
         if (mCapacity == 0) { mCapacity = 1; }
-        mData = (Element *)malloc(mCapacity * ElementSize);
+        mData = new Element[mCapacity];
     }
         
-    ~Array(void) { free(mData); }
+    ~Array(void) { delete [] mData; }
         
     inline void             Clear(void)                         { mSize = 0; }
     inline bool             Empty(void)                 const   { return (mSize == 0); }
@@ -64,7 +64,8 @@ public:
     inline const Element&   operator [](uint32_t i)     const   { return mData[i]; }
     inline Element&         Back(void)                          { return mData[mSize - 1]; }
     inline void             PopBack(void)                       { if (mSize > 0) { --mSize; } }
-    inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend();} mData[mSize] = e; ++ mSize; }
+    inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend(mCapacity << 1);} mData[mSize] = e; ++ mSize; }
+    inline void             Reserve(size_t size)                { if (size > mCapacity) { Expend(size); } }
 };
 
 /**
