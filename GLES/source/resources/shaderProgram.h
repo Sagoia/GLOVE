@@ -37,6 +37,7 @@ class Context;
 class ShaderProgram {
 private:
     const static uint32_t                               MAX_DESC_SET = 512;
+    const static uint32_t                               MAX_LOCATION_COUNT = GLOVE_MAX_VERTEX_ATTRIBS * 4;
 
     Context                                            *mGLContext;
     const vulkanAPI::vkContext_t                       *mVkContext;
@@ -101,8 +102,8 @@ private:
     void                                                ResetVulkanVertexInput(void);
     void                                                UpdateAttributeInterface(void);
     void                                                BuildShaderResourceInterface(void);
-    bool                                                UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings, bool updatedVertexAttrib);
-    void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
+    bool                                                UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, uint32_t *vboLocationBindings, bool updatedVertexAttrib);
+    void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const uint32_t *vboLocationBindings);
 
     void                                                LineLoopConversion(void* data, uint32_t indexCount, size_t elementByteSize);
     bool                                                ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo);
