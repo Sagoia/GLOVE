@@ -648,23 +648,21 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
         bool operator ==(const bufferLocations &other) const { return (buffer == other.buffer && stride == other.stride); }
     };
 
+    // store attribute locations containing the same VkBuffer and stride
+    // as they are directly associated with vertex input bindings
+    static Array<bufferLocations, GLOVE_MAX_VERTEX_ATTRIBS> unique_buffer_strides;
+    static Array<uint32_t, GLOVE_MAX_VERTEX_ATTRIBS> locations[GLOVE_MAX_VERTEX_ATTRIBS];
+
     if(mGLContext->IsModeLineLoop()) {
         --vertCount;
     }
 
-    // store attribute locations containing the same VkBuffer and stride
-    // as they are directly associated with vertex input bindings
-    //typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
-    //std::map<BUFFER_STRIDE_PAIR, std::vector<uint32_t>> unique_buffer_stride_map;
-
-    //std::vector<uint32_t> locationUsed;
-
-    static Array<uint32_t, GLOVE_MAX_VERTEX_ATTRIBS> locations[GLOVE_MAX_VERTEX_ATTRIBS];
+    unique_buffer_strides.Clear();
     for (uint32_t i = 0; i < GLOVE_MAX_VERTEX_ATTRIBS; ++i) {
         locations[i].Clear();
     }
 
-    Array<bufferLocations, GLOVE_MAX_VERTEX_ATTRIBS> unique_buffer_strides;
+    
     uint32_t locationUsed[MAX_LOCATION_COUNT] = {0,};
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
