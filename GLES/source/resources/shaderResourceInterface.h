@@ -61,6 +61,11 @@ public:
         uint8_t                    *pClientData;
         bool                        clientDataDirty;
 
+        uniform() : location(0), blockIndex(0), arraySize(0), glType(0), offset(0), pClientData(nullptr), clientDataDirty(false)
+        {
+            FUN_ENTRY(GL_LOG_TRACE);
+        }
+
         uniform(std::string name, uint32_t loc, uint32_t bIndex, int32_t size, GLenum type, size_t offset)
          : reflectionName(name),
            location(loc),
@@ -96,6 +101,11 @@ public:
         uint32_t                    cacheIndex;
 
         UniformBufferObject *       pBufferObject;
+
+        uniformBlock() : binding(0), blockSize(0), blockStage(INVALID_SHADER), isOpaque(false), requiredSize(0), cacheIndex(0), pBufferObject(nullptr)
+        {
+            FUN_ENTRY(GL_LOG_TRACE);
+        }
 
         uniformBlock(std::string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
          : glslBlockName(blockName),
@@ -151,8 +161,8 @@ private:
 
     attributeInterface mAttributeInterface;
 
-    std::vector<uniform>            mUniforms;
-    std::vector<uniformBlock>       mUniformBlocks;
+    Array<uniform>      mUniforms;
+    Array<uniformBlock> mUniformBlocks;
 
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;
