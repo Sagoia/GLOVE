@@ -25,8 +25,7 @@
 #ifndef __ARRAYS_HPP__
 #define __ARRAYS_HPP__
 
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
 
 template <class T, size_t N = 1>
 class Array {
@@ -39,23 +38,23 @@ private:
     size_t mCapacity;
     size_t mSize;
 
-    void    Expend(void) {
+    void Expend(void) {
         Element *oldData = mData;
         size_t oldSize = ElementSize * mCapacity;
         mCapacity <<= 1;
-        mData = new Element[mCapacity];
+        mData = (Element *)malloc(mCapacity * ElementSize);
         memcpy(mData, oldData, oldSize);
-        delete [] oldData;
+        free(oldData);
     }
         
 public:
     Array(size_t capacity = DefaultCapacity)
-    :mCapacity(capacity), mSize(0) {
+    : mCapacity(capacity), mSize(0) {
         if (mCapacity == 0) { mCapacity = 1; }
-        mData = new Element[mCapacity];
+        mData = (Element *)malloc(mCapacity * ElementSize);
     }
         
-    ~Array(void) { delete [] mData; }
+    ~Array(void) { free(mData); }
         
     inline void             Clear(void)                         { mSize = 0; }
     inline bool             Empty(void)                 const   { return (mSize == 0); }
@@ -65,7 +64,7 @@ public:
     inline const Element&   operator [](uint32_t i)     const   { return mData[i]; }
     inline Element&         Back(void)                          { return mData[mSize - 1]; }
     inline void             PopBack(void)                       { if (mSize > 0) { --mSize; } }
-    inline void             PushBack(Element &e)                { if (mSize == mCapacity) { Expend();} mData[mSize] = e; ++ mSize; }
+    inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend();} mData[mSize] = e; ++ mSize; }
 };
 
 /**
