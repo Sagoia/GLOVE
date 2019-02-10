@@ -44,9 +44,6 @@ public:
            location(loc)
         {
             FUN_ENTRY(GL_LOG_TRACE);
-
-            std::hash<string> hash_fn;
-            nameHash = hash_fn(name);
         }
     };
     typedef struct attribute                attribute;

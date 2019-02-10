@@ -675,7 +675,6 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             if (locationUsed[location]) {
                 continue;
             }
-            if (isUsed) { continue; }
 
             GenericVertexAttribute& gva = genericVertAttribs[location];
             bool updatedVBO   = false;
