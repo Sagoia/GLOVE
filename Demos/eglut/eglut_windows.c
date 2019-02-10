@@ -78,8 +78,6 @@ _eglutNativeInitWindow(struct eglut_window *win, const char *title,
         hInstance,
         NULL);
 
-    ShowWindow(hwnd, SW_SHOW);
-
     win->native.u.window = hwnd;
     win->native.width = w;
     win->native.height = h;
@@ -94,17 +92,15 @@ _eglutNativeFiniWindow(struct eglut_window *win)
 void
 _eglutNativeEventLoop(void)
 {
+    struct eglut_window *win = _eglut->current;
+    ShowWindow(win->native.u.window, SW_SHOW);
+
     MSG msg = { 0, };
-    while (msg.message != WM_QUIT)
-    {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        {
+    while (msg.message != WM_QUIT) {
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }
-        else
-        {
-            struct eglut_window *win = _eglut->current;
+        } else {
             UpdateWindow(win->native.u.window);
         }
     }

@@ -37,6 +37,7 @@ class Context;
 class ShaderProgram {
 private:
     const static uint32_t                               MAX_DESC_SET = 512;
+    const static uint32_t                               MAX_LOCATION_COUNT = GLOVE_MAX_VERTEX_ATTRIBS * 4;
 
     Context                                            *mGLContext;
     const vulkanAPI::vkContext_t                       *mVkContext;
@@ -101,8 +102,8 @@ private:
     void                                                ResetVulkanVertexInput(void);
     void                                                UpdateAttributeInterface(void);
     void                                                BuildShaderResourceInterface(void);
-    bool                                                UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, std::map<uint32_t, uint32_t>& vboLocationBindings, bool updatedVertexAttrib);
-    void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings);
+    bool                                                UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, uint32_t *vboLocationBindings, bool updatedVertexAttrib);
+    void                                                GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const uint32_t *vboLocationBindings);
 
     void                                                LineLoopConversion(void* data, uint32_t indexCount, size_t elementByteSize);
     bool                                                ConvertIndexBufferToUint16(const void* srcData, size_t elementCount, BufferObject** ibo);
@@ -136,7 +137,7 @@ public:
 
     uint32_t                                            GetNumberOfActiveUniforms(void)             const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetLiveUniforms(); }
     int                                                 GetUniformLocation(const char *name)        const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformLocation(name); }
-    const ShaderResourceInterface::uniform             *GetUniform(uint32_t index)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniform(index); }
+    const ShaderResourceInterface::uniform             *GetUniform(uint32_t index)                  const   { FUN_ENTRY(GL_LOG_TRACE); return &mShaderResourceInterface.GetUniform(index); }
     const ShaderResourceInterface::uniform             *GetUniformAtLocation(uint32_t location)             { FUN_ENTRY(GL_LOG_TRACE); return mShaderResourceInterface.GetUniformAtLocation(location); }
     uint32_t                                            GetStageCount(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount; }
     VkShaderStageFlagBits                               GetShaderStage(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mVkShaderStages[0]; }
@@ -178,7 +179,7 @@ public:
     uint32_t                                            GetNumberOfActiveAttributes(void) const;
     const
     ShaderResourceInterface::attribute                 *GetVertexAttribute(int index) const;
-    const string &                                      GetAttributeName(int index) const;
+    const std::string &                                 GetAttributeName(int index) const;
     int                                                 GetAttributeType(int index) const;
     int                                                 GetAttributeLocation(const char *name) const;
     VkPipelineCache                                     GetVkPipelineCache(void);

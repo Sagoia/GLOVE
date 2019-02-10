@@ -26,6 +26,7 @@
 
 #include "shaderReflection.h"
 #include "bufferObject.h"
+#include "uniformBufferObject.h"
 #include "utils/cacheManager.h"
 #include <vector>
 #include <unordered_map>
@@ -33,12 +34,11 @@
 class ShaderResourceInterface {
 public:
     struct attribute {
-        string                      name;
-        size_t                      nameHash;
+        std::string                 name;
         GLenum                      glType;
         uint32_t                    location;
 
-        attribute(string n, GLenum type, uint32_t loc)
+        attribute(std::string n, GLenum type, uint32_t loc)
          : name(n),
            glType(type),
            location(loc)
@@ -49,46 +49,40 @@ public:
             nameHash = hash_fn(name);
         }
     };
-    typedef struct attribute        attribute;
-    typedef vector<attribute>       attributeInterface;
-    typedef map<string, uint32_t>   attribsLayout_t;
+    typedef struct attribute                attribute;
+    typedef std::vector<attribute>          attributeInterface;
+    typedef std::map<std::string, uint32_t> attribsLayout_t;
 
     struct uniform{
-        string                      reflectionName;
-        size_t                      reflectionNameHash;
+        std::string                 reflectionName;
         uint32_t                    location;
         uint32_t                    blockIndex;
         int32_t                     arraySize;
         GLenum                      glType;
         size_t                      offset;
+        // uniform data
+        uint8_t                    *pClientData;
+        bool                        clientDataDirty;
 
-        uniform(string name, uint32_t loc, uint32_t bIndex, int32_t size, GLenum type, size_t offset)
+        uniform() : location(0), blockIndex(0), arraySize(0), glType(0), offset(0), pClientData(nullptr), clientDataDirty(false)
+        {
+            FUN_ENTRY(GL_LOG_TRACE);
+        }
+
+        uniform(std::string name, uint32_t loc, uint32_t bIndex, int32_t size, GLenum type, size_t offset)
          : reflectionName(name),
            location(loc),
            blockIndex(bIndex),
            arraySize(size),
            glType(type),
-           offset(offset)
-        {
-            FUN_ENTRY(GL_LOG_TRACE);
-            
-            std::hash<string> hash_fn;
-            reflectionNameHash = hash_fn(reflectionName);
-        }
-    };
-
-    struct uniformData {
-        uint8_t                    *pClientData;
-        bool                        clientDataDirty;
-
-        uniformData(uint8_t *pData = nullptr)
-         : pClientData(pData),
+           offset(offset),
+           pClientData(nullptr),
            clientDataDirty(false)
         {
             FUN_ENTRY(GL_LOG_TRACE);
         }
 
-        ~uniformData()
+        ~uniform()
         {
             FUN_ENTRY(GL_LOG_TRACE);
 
@@ -100,37 +94,52 @@ public:
     };
 
     struct uniformBlock {
-        string                      glslBlockName;
-        size_t                      glslBlockNameHash;
+        std::string                 glslBlockName;
         uint32_t                    binding;
         size_t                      blockSize;
         shader_type_t               blockStage;
         bool                        isOpaque;
 
-        uniformBlock(string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
+        size_t                      requiredSize;
+        uint32_t                    cacheIndex;
+
+        UniformBufferObject *       pBufferObject;
+
+        uniformBlock() : binding(0), blockSize(0), blockStage(INVALID_SHADER), isOpaque(false), requiredSize(0), cacheIndex(0), pBufferObject(nullptr)
+        {
+            FUN_ENTRY(GL_LOG_TRACE);
+        }
+
+        uniformBlock(std::string blockName, uint32_t bind, size_t bSize, shader_type_t shaderType, bool opaque)
          : glslBlockName(blockName),
            binding(bind),
            blockSize(bSize),
            blockStage(shaderType),
-           isOpaque(opaque)
+           isOpaque(opaque),
+           requiredSize(0),
+           cacheIndex(0),
+           pBufferObject(nullptr)
         {
             FUN_ENTRY(GL_LOG_TRACE);
-            
-            std::hash<string> hash_fn;
-            glslBlockNameHash = hash_fn(glslBlockName);
+
+            if (!opaque) {
+                assert(bSize > 0);
+                if ((bSize & (bSize - 1)) == 0) {
+                    requiredSize = bSize;
+                } else {
+                    requiredSize = 1;
+                    while (bSize) {
+                        requiredSize <<= 1;
+                        bSize >>= 1;
+                    }
+                }
+                while (requiredSize >> (cacheIndex + 1)) {
+                    ++ cacheIndex;
+                }
+            }
         }
-    };
 
-    struct uniformBlockData {
-        UniformBufferObject *       pBufferObject;
-
-        uniformBlockData(UniformBufferObject *ubo = nullptr)
-         : pBufferObject(ubo)
-        {
-            FUN_ENTRY(GL_LOG_TRACE);
-        }
-
-        ~uniformBlockData()
+        ~uniformBlock()
         {
             FUN_ENTRY(GL_LOG_TRACE);
 
@@ -140,54 +149,12 @@ public:
             }
         }
     };
-    
-    struct uniformDirty {
-        size_t       offset;
-        size_t       size;
-        const void * data;
-    };
-    
-    template <class T, size_t N = 265>
-    class increasedArray {
-    private:
-        typedef T Element;
-        const static size_t ElementSize = sizeof(Element);
-        const static size_t DefaultCount = N;
-        
-        Element *data;
-        size_t count;
-        size_t next;
-        
-    public:
-        increasedArray(size_t size = DefaultCount):count(size), next(0) {
-            data = new Element[size];
-        }
-        
-        ~increasedArray(void) { delete [] data; }
-        
-        inline void Clear(void) { next = 0; }
-        inline size_t Count(void) const { return count; }
-        inline size_t Size(void) const { return next; }
-        inline Element& operator [](uint32_t i) const { return data[i]; }
-        inline Element * Allocate(void) {
-            if (next >= count) {
-                Element *old = data;
-                data = new Element[count << 1];
-                memcpy(data, old, ElementSize * count);
-                count <<= 1;
-                delete [] old;
-            }
-            Element *ret = data + next;
-            ++ next;
-            return ret;
-            
-        }
-    };
 
 private:
     uint32_t mLiveAttributes;
     uint32_t mLiveUniforms;
     uint32_t mLiveUniformBlocks;
+    uint32_t mLiveSamplers;
 
     size_t mActiveAttributeMaxLength;
     size_t mActiveUniformMaxLength;
@@ -197,18 +164,8 @@ private:
 
     attributeInterface mAttributeInterface;
 
-    std::vector<uniform>            mUniforms;
-    std::vector<uniformData>        mUniformDatas;
-    std::vector<uniformBlock>       mUniformBlocks;
-    std::vector<uniformBlockData>   mUniformBlockDatas;
-
-    //uniformInterface mUniformInterface;
-    //uniformDataInterface mUniformDataInterface;
-
-    //uniformBlockInterface mUniformBlockInterface;
-    //uniformBlockDataInterface mUniformBlockDataInterface;
-    
-    increasedArray<uniformDirty> mUniformInterfaceDirty;
+    Array<uniform>      mUniforms;
+    Array<uniformBlock> mUniformBlocks;
 
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;
@@ -222,6 +179,7 @@ public:
     inline uint32_t GetLiveAttributes(void)                                     const { FUN_ENTRY(GL_LOG_TRACE); return mLiveAttributes; }
     inline uint32_t GetLiveUniforms(void)                                       const { FUN_ENTRY(GL_LOG_TRACE); return mLiveUniforms; }
     inline uint32_t GetLiveUniformBlocks(void)                                  const { FUN_ENTRY(GL_LOG_TRACE); return mLiveUniformBlocks; }
+    inline uint32_t GetLiveSamplers(void)                                       const { FUN_ENTRY(GL_LOG_TRACE); return mLiveSamplers; }
 
     inline size_t GetActiveUniformMaxLen(void)                                  const { FUN_ENTRY(GL_LOG_TRACE); return mActiveUniformMaxLength; }
     inline size_t GetActiveAttribMaxLen(void)                                   const { FUN_ENTRY(GL_LOG_TRACE); return mActiveAttributeMaxLength; }
@@ -232,22 +190,23 @@ public:
     inline uint32_t GetAttributeLocation(uint32_t index)                        const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].location; }
     inline GLenum GetAttributeType(uint32_t index)                              const { FUN_ENTRY(GL_LOG_TRACE); return mAttributeInterface[index].glType; }
     int GetAttributeType(int index) const;
-    const string & GetAttributeName(int index) const;
+    const std::string & GetAttributeName(int index) const;
 
+    inline const uniform & GetUniform(uint32_t index)                           const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index]; }
+    inline const uniformBlock & GetUniformBlock(uint32_t index)                 const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index]; }
     inline int32_t GetUniformblockIndex(uint32_t index)                         const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].blockIndex; }
     inline int32_t GetUniformArraySize(uint32_t index)                          const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].arraySize; }
     inline GLenum GetUniformType(uint32_t index)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].glType; }
     void CopyUniformClientData(uint32_t location, size_t size, void *ptr);
-    inline const uint8_t* GetUniformClientData(uint32_t index)                  const { FUN_ENTRY(GL_LOG_DEBUG); return mUniformDatas[index].pClientData; }
-    inline UniformBufferObject * GetUniformBufferObject(uint32_t index)         const { FUN_ENTRY(GL_LOG_DEBUG); return mUniformBlockDatas[index].pBufferObject; }
+    inline const uint8_t* GetUniformClientData(uint32_t index)                  const { FUN_ENTRY(GL_LOG_DEBUG); return mUniforms[index].pClientData; }
+    inline UniformBufferObject * GetUniformBufferObject(uint32_t index)         const { FUN_ENTRY(GL_LOG_DEBUG); return mUniformBlocks[index].pBufferObject; }
     int GetUniformLocation(const char *name) const;
 
     inline uint32_t GetUniformBlockBinding(uint32_t index)                      const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index].binding; }
     inline shader_type_t GetUniformBlockBlockStage(uint32_t index)              const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index].blockStage; }
     inline bool IsUniformBlockOpaque(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index].isOpaque; }
 
-    const ShaderResourceInterface::uniform * GetUniform(uint32_t index)         const { FUN_ENTRY(GL_LOG_TRACE); return index < mUniforms.size() ? mUniforms.data() + index : nullptr; }
-    const ShaderResourceInterface::uniform * GetUniformAtLocation(uint32_t location, uint32_t *index = nullptr);
+    const ShaderResourceInterface::uniform * GetUniformAtLocation(uint32_t location);
     const ShaderResourceInterface::attribute * GetVertexAttribute(int index) const;
 
     void SetActiveAttributeMaxLength(void);
@@ -261,7 +220,7 @@ public:
     void SetSampler(uint32_t location, int count, const int *textureUnit);
 
     void AllocateUniformClientData(void);
-	  bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
+    bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
     bool UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext, bool *allocatedNewBufferObject);
 
     void UpdateAttributeInterface(void);

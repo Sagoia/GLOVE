@@ -358,8 +358,8 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
         return true;
     }
 
-    vector<VkSemaphore> pSems;
-    vector<VkPipelineStageFlags> pFlags;
+    std::vector<VkSemaphore> pSems;
+    std::vector<VkPipelineStageFlags> pFlags;
     if(mVkContext->vkSyncItems->acquireSemaphoreFlag) {
         pSems.push_back(mVkContext->vkSyncItems->vkAcquireSemaphore);
         pFlags.push_back(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);

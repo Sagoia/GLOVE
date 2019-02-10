@@ -267,7 +267,7 @@ Context::GetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei
     assert(uniform);
     GLint len = static_cast<GLint>(std::max(std::min((int)uniform->reflectionName.length(), bufsize-1), 0));
 
-    string index0Str = "";
+    std::string index0Str = "";
     if(uniform->arraySize > 1) {
         len += 3;
         index0Str = "[0]";

@@ -23,20 +23,44 @@
 
 #include "cacheManager.h"
 #include "resources/bufferObject.h"
+#include "resources/uniformBufferObject.h"
 #include "resources/texture.h"
+
+CacheManager::CacheManager(const vulkanAPI::vkContext_t *vkContext) 
+: mVkContext(vkContext) 
+{ 
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    mVBOCache.reserve(DEFAULT_CACHE_SIZE);
+    mTextureCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkImageViewCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkImageCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkBufferCache.reserve(DEFAULT_CACHE_SIZE);
+    mVkDeviceMemoryCache.reserve(DEFAULT_CACHE_SIZE);
+}
+
+CacheManager::~CacheManager() 
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+}
 
 void
 CacheManager::UncacheUBOs()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mUBOCache.empty()) {
-        for (auto ubo : mUBOCache) {
-            VkDeviceSize size = ubo->GetSize();
-            mUBOs[size].push_back(ubo);
+    if (!mUBOCache.Empty()) {
+        for (uint32_t i = 0; i < mUBOCache.Size(); ++i) {
+            auto &ubo = mUBOCache[i];
+            uint32_t index = ubo->GetCacheIndex();
+            if (index < UBO_ARRAY_COUNT) {
+                mUBOLists[index].PushBack(ubo);
+            } else {
+                delete ubo;
+            }
         }
 
-        mUBOCache.clear();
+        mUBOCache.Clear();
     }
 }
 
@@ -45,16 +69,15 @@ CacheManager::CleanUpUBOs()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mUBOs.empty()) {
-        for (auto uboListPair : mUBOs) {
-            for (auto ubo : uboListPair.second) {
-                if (ubo != nullptr) {
+    for (uint32_t i = 0; i < UBO_ARRAY_COUNT; ++i) {
+        auto &ubos = mUBOLists[i];
+        for (uint32_t j = 0; j < ubos.Size(); ++j) {
+            auto &ubo = ubos[i];
+            if (ubo != nullptr) {
                     delete ubo;
-                }
             }
-            uboListPair.second.clear();
         }
-        mUBOs.clear();
+        ubos.Clear();
     }
 }
 
@@ -198,21 +221,21 @@ CacheManager::CacheUBO(UniformBufferObject *uniformBufferObject)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mUBOCache.push_back(uniformBufferObject);
+    mUBOCache.PushBack(uniformBufferObject);
 }
 
 UniformBufferObject * 
-CacheManager::GetUBO(VkDeviceSize size)
+CacheManager::GetUBO(uint32_t index)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     UniformBufferObject *ubo = nullptr;
-
-    UBOMap::iterator it = mUBOs.find(size);
-    if (it != mUBOs.end()) {
-        if (it->second.size() > 0) {
-            ubo = it->second.back();
-            it->second.pop_back();
+    
+    if (index < UBO_ARRAY_COUNT) {
+        auto &ubos = mUBOLists[index];
+        if (!ubos.Empty()) {
+            ubo = ubos.Back();
+            ubos.PopBack();
         }
     }
 
@@ -280,7 +303,7 @@ CacheManager::GetSampler(uint64_t hash)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    std::map<uint64_t, VkSampler>::iterator it = mVkSamplerCache.find(hash);
+    SamplerMap::iterator it = mVkSamplerCache.find(hash);
     if (it != mVkSamplerCache.end()) {
         return it->second;
     }
@@ -301,7 +324,7 @@ CacheManager::GetRenderPass(uint64_t hash)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    std::map<uint64_t, VkRenderPass>::iterator it = mVkRenderPassCache.find(hash);
+    RenderPassMap::iterator it = mVkRenderPassCache.find(hash);
     if (it != mVkRenderPassCache.end()) {
         return it->second;
     }

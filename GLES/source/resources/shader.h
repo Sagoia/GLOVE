@@ -35,7 +35,7 @@ private:
     SlangCompiler *                     mSlangCompiler;
 
     char *                              mSource;
-    vector<uint32_t>                    mSpv;
+    std::vector<uint32_t>               mSpv;
 
     uint32_t                            mSourceLength;
     shader_type_t                       mShaderType;
@@ -62,7 +62,7 @@ public:
     char *                              GetShaderSource(void)                   const;
     int                                 GetShaderSourceLength(void)             const;
     shader_type_t                       GetShaderType(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaderType; }
-    vector<uint32_t> &                  GetSPV(void)                                    { FUN_ENTRY(GL_LOG_TRACE); return mSpv; }
+    std::vector<uint32_t> &             GetSPV(void)                                    { FUN_ENTRY(GL_LOG_TRACE); return mSpv; }
     int                                 GetRefCount(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mRefCounter; }
     bool                                GetMarkForDeletion(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mMarkForDeletion; }
     SlangCompiler *                     GetSlangCompiler(void)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mSlangCompiler; }

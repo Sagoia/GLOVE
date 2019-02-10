@@ -53,7 +53,7 @@ private:
     typedef ObjectArray<ShaderProgram>         ShaderProgramArray;
     typedef ObjectArray<Renderbuffer>          RenderbufferArray;
     typedef ObjectArray<Framebuffer>           FramebufferArray;
-    typedef map<uint32_t, ShadingNamespace_t>  shadingPoolIDs_t;
+    typedef std::map<uint32_t, ShadingNamespace_t>  shadingPoolIDs_t;
 
     BufferArray                                mBuffers;
     RenderbufferArray                          mRenderbuffers;

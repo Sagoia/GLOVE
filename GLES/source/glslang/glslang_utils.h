@@ -32,14 +32,14 @@ namespace glslang {
 }
 
 typedef struct {
-    string                          name;
+    std::string                     name;
     int32_t                         arraySize;                  /// Array size. 1 for non arrays
 } aggregate_t;
-typedef map<string, aggregate_t>    aggregateMap_t;
+typedef std::map<std::string, aggregate_t>  aggregateMap_t;
 
 struct uniformBlock_t {
-    string                          name;                       /// For debug
-    string                          glslBlockName;              /// Block name that will be generated in final GLSL
+    std::string                     name;                       /// For debug
+    std::string                     glslBlockName;              /// Block name that will be generated in final GLSL
     uint32_t                        binding;                    /// layout decoration
     bool                            isOpaque;                   /// true for opaque types (samplers)
     size_t                          blockSize;                  /// Uniform block's size in bytes (including inactive variables)
@@ -55,7 +55,7 @@ struct uniformBlock_t {
     {
         FUN_ENTRY(GL_LOG_TRACE);
     }
-    uniformBlock_t(string n, string gbn, uint32_t b, bool io, size_t bs, shader_type_t bStage, const aggregate_t *pAggr)
+    uniformBlock_t(std::string n, std::string gbn, uint32_t b, bool io, size_t bs, shader_type_t bStage, const aggregate_t *pAggr)
      : name(n),
        glslBlockName(gbn),
        binding(b),
@@ -72,12 +72,12 @@ struct uniformBlock_t {
         FUN_ENTRY(GL_LOG_TRACE);
     }
 };
-typedef struct uniformBlock_t       uniformBlock_t;
-typedef map<string, uniformBlock_t> uniformBlockMap_t;
+typedef struct uniformBlock_t               uniformBlock_t;
+typedef std::map<std::string, uniformBlock_t>    uniformBlockMap_t;
 
 struct uniform_t {
-    string                          variableName;               /// Uniform's name without aggregate's name
-    string                          reflectionName;             /// Full reflection name
+    std::string                     variableName;               /// Uniform's name without aggregate's name
+    std::string                     reflectionName;             /// Full reflection name
     GLenum                          glType;                     /// glType
     uint32_t                        location;                   /// Location assigned to uniform
     int32_t                         arraySize;                  /// Array size. 1 for non arrays
@@ -101,7 +101,7 @@ struct uniform_t {
         assert(0);
     }
 
-    uniform_t(string vn, string rn, GLenum glt, uint32_t loc, int32_t as, int32_t ind, const aggregate_t *pag, uniformBlock_t *pub, shader_type_t stg, size_t off)
+    uniform_t(std::string vn, std::string rn, GLenum glt, uint32_t loc, int32_t as, int32_t ind, const aggregate_t *pag, uniformBlock_t *pub, shader_type_t stg, size_t off)
      : variableName(vn),
        reflectionName(rn),
        glType(glt),

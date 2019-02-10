@@ -25,7 +25,48 @@
 #ifndef __ARRAYS_HPP__
 #define __ARRAYS_HPP__
 
-#include <map>
+#include <stdlib.h>
+
+template <class T, size_t N = 1>
+class Array {
+private:
+    typedef T Element;
+    const static size_t ElementSize = sizeof(Element);
+    const static size_t DefaultCapacity = N;
+        
+    Element *mData;
+    size_t mCapacity;
+    size_t mSize;
+
+    void Expend(size_t capacity) {
+        Element *oldData = mData;
+        size_t oldSize = ElementSize * mCapacity;
+        mCapacity = capacity;
+        mData = new Element[mCapacity];
+        memcpy(mData, oldData, oldSize);
+        delete [] oldData;
+    }
+        
+public:
+    Array(size_t capacity = DefaultCapacity)
+    : mCapacity(capacity), mSize(0) {
+        if (mCapacity == 0) { mCapacity = 1; }
+        mData = new Element[mCapacity];
+    }
+        
+    ~Array(void) { delete [] mData; }
+        
+    inline void             Clear(void)                         { mSize = 0; }
+    inline bool             Empty(void)                 const   { return (mSize == 0); }
+    inline size_t           Capacity(void)              const   { return mCapacity; }
+    inline size_t           Size(void)                  const   { return mSize; }
+    inline Element&         operator [](uint32_t i)             { return mData[i]; }
+    inline const Element&   operator [](uint32_t i)     const   { return mData[i]; }
+    inline Element&         Back(void)                          { return mData[mSize - 1]; }
+    inline void             PopBack(void)                       { if (mSize > 0) { --mSize; } }
+    inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend(mCapacity << 1);} mData[mSize] = e; ++ mSize; }
+    inline void             Reserve(size_t size)                { if (size > mCapacity) { Expend(size); } }
+};
 
 /**
  * @brief A templated class for handling the memory allocation, indexing and
@@ -43,7 +84,7 @@ private:
     uint32_t mCounter;                 /**< The id (key-value of the map)
                                           reserved during the creation of a new
                                           object. */
-    map<uint32_t, ELEMENT *> mObjects; /**< The templated map container (one
+    Array<ELEMENT *> mObjects;         /**< The templated map container (one
                                           for each different class that maps
                                           id to a specific object). */
 public:
@@ -55,6 +96,7 @@ public:
     ObjectArray() :
     mCounter(0)
     {
+
     }
 
     /**
@@ -63,19 +105,20 @@ public:
     */
     ~ObjectArray()
     {
-        typename map<uint32_t, ELEMENT *>::iterator it;
-        for(it = mObjects.begin(); it != mObjects.end(); it++) {
-            delete it->second;
+        for (uint32_t i = 0; i < mObjects.Size(); ++i) {
+            delete mObjects[i];
         }
-        mObjects.clear();
+        mObjects.Clear();
     }
 
     /**
     * @brief Returns the GL handle and reserves this as the new key value.
     * @return The GL handle.
     */
-    uint32_t Allocate()
+    inline uint32_t Allocate()
     {
+        ELEMENT *element = new ELEMENT();
+        mObjects.PushBack(element);
         return ++mCounter;
     }
 
@@ -84,16 +127,13 @@ public:
     * key value (element is  destroyed).
     * @param index: The GL handle of the element to be destroyed.
     */
-    bool Deallocate(uint32_t index)
+    inline bool Deallocate(uint32_t index)
     {
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
-        if(it != mObjects.end()) {
-            delete it->second;
-            mObjects.erase(it);
-
+        if (index <= mObjects.Size()) {
+            delete mObjects[index-1];
+            mObjects[index-1] = nullptr;
             return true;
         }
-
         return false;
     }
 
@@ -107,17 +147,12 @@ public:
      * a new object is created. Consequently this method is the only way to
      * insert a new element in the map.
      */
-    ELEMENT *Object(uint32_t index)
+    inline ELEMENT *Object(uint32_t index)
     {
-        if(mCounter < index) {
-            mCounter = index;
+        if (index <= mObjects.Size()) {
+            return mObjects[index-1];
         }
-        typename map<uint32_t, ELEMENT *>::iterator it = mObjects.find(index);
-        if(it != mObjects.end()) {
-            return it->second;
-        } else {
-            return mObjects[index] = new ELEMENT();
-        }
+        return nullptr;
     }
 
     /**
@@ -126,10 +161,12 @@ public:
      * @param index: The GL handle of the element to be found.
      * @return The decision whether the element exists or not.
      */
-    bool ObjectExists(uint32_t index) const
+    inline bool ObjectExists(uint32_t index) const
     {
-        typename map<uint32_t, ELEMENT *>::const_iterator it = mObjects.find(index);
-        return it == mObjects.end() ? false : true;
+        if (index <= mObjects.Size()) {
+            return (mObjects[index-1] != nullptr);
+        }
+        return false;
     }
 
     /**
@@ -141,12 +178,11 @@ public:
      * The GL handle is returned in case the wanted element exists, else the
      * returned value is 0.
      */
-    uint32_t GetObjectId(const ELEMENT * element) const
+    inline uint32_t GetObjectId(const ELEMENT * element) const
     {
-        typename map<uint32_t, ELEMENT *>::const_iterator it;
-        for(it = mObjects.begin(); it != mObjects.end(); it++) {
-            if(it->second == element) {
-                return it->first;
+        for (uint32_t i = 0; i < mObjects.Size(); ++i) {
+            if (mObjects[i] == element) {
+                return i+1;
             }
         }
 
@@ -157,9 +193,9 @@ public:
      * @brief Returns the map container for a specific class.
      * @return The map container.
      */
-    map<uint32_t, ELEMENT *> *GetObjects(void)
+    inline Array<ELEMENT *>& GetObjects(void)
     {
-        return &mObjects;
+        return mObjects;
     }
 };
 

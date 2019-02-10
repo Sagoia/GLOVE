@@ -25,9 +25,8 @@
 #define __BUFFEROBJECT_H__
 
 #include "GLES2/gl2.h"
-#include "GLES2/gl2ext.h"
-#include "vulkan/buffer.h"
 #include "vulkan/memory.h"
+#include "vulkan/buffer.h"
 
 class CacheManager;
 
@@ -40,7 +39,6 @@ private:
     GLenum                  mTarget;
     bool                    mAllocated;
 
-protected:
     vulkanAPI::Memory*      mMemory;
     vulkanAPI::Buffer*      mBuffer;
 
@@ -52,14 +50,13 @@ public:
     virtual                ~BufferObject();
 
 // Allocate Functions
-    virtual bool            Allocate(size_t size, const void *data);
+    bool                    Allocate(size_t size, const void *data);
 
 // Release Functions
     void                    Release(void);
 
 // Update Functions
     void                    UpdateData(size_t size, size_t offset, const void *data);
-    void                    FlushData();
 
 // Get Functions
     bool                    GetData(size_t size,
@@ -104,23 +101,6 @@ class TransferDstBufferObject : public BufferObject
 public:
     explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_DST_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
-};
-
-class UniformBufferObject : public BufferObject
-{
-    void                    AllocateVkDescriptorBufferInfo(void);
-
-public:
-    explicit                UniformBufferObject(const vulkanAPI::vkContext_t *vkContext);
-
-    bool                    Allocate(size_t size, const void *data) override;
-    VkDescriptorBufferInfo* GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }
-    
-    inline void             UpdateData(size_t size, size_t offset, const void *data)
-                                                                                { FUN_ENTRY(GL_LOG_DEBUG); ((vulkanAPI::UniformMemory *)mMemory)->UpdateData(size, offset, data); }
-    
-    inline uint8_t *        GetDataPtr(size_t offset)                           { FUN_ENTRY(GL_LOG_DEBUG); ((vulkanAPI::UniformMemory *)mMemory)->GetDataPtr(offset);}
-    
 };
 
 class VertexBufferObject : public BufferObject

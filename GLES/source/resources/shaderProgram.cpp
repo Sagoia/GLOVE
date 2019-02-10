@@ -397,7 +397,7 @@ ShaderProgram::GetVkPipelineCache(void)
     return mPipelineCache->GetPipelineCache();
 }
 
-const string &
+const std::string &
 ShaderProgram::GetAttributeName(int index) const
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -625,7 +625,7 @@ ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t first
     FUN_ENTRY(GL_LOG_DEBUG);
 
     // store the location-binding associations for faster lookup
-    std::map<uint32_t, uint32_t> vboLocationBindings;
+    uint32_t vboLocationBindings[MAX_LOCATION_COUNT] = {0,};
 
     if(UpdateVertexAttribProperties(vertCount, firstVertex, genericVertAttribs, vboLocationBindings, updatedVertexAttrib)) {
         GenerateVertexInputProperties(genericVertAttribs, vboLocationBindings);
@@ -637,21 +637,33 @@ ShaderProgram::PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t first
 bool
 ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVertex,
                                               std::vector<GenericVertexAttribute>& genericVertAttribs,
-                                              std::map<uint32_t, uint32_t>& vboLocationBindings, bool updatedVertexAttrib)
+                                              uint32_t *vboLocationBindings, bool updatedVertexAttrib)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    struct bufferLocations {
+        VkBuffer buffer;
+        int32_t  stride;
+
+        bool operator ==(const bufferLocations &other) const { return (buffer == other.buffer && stride == other.stride); }
+    };
+
+    // store attribute locations containing the same VkBuffer and stride
+    // as they are directly associated with vertex input bindings
+    static Array<bufferLocations, GLOVE_MAX_VERTEX_ATTRIBS> unique_buffer_strides;
+    static Array<uint32_t, GLOVE_MAX_VERTEX_ATTRIBS> locations[GLOVE_MAX_VERTEX_ATTRIBS];
 
     if(mGLContext->IsModeLineLoop()) {
         --vertCount;
     }
 
-    // store attribute locations containing the same VkBuffer and stride
-    // as they are directly associated with vertex input bindings
-    typedef std::pair<VkBuffer, int32_t> BUFFER_STRIDE_PAIR;
-    typedef ShaderResourceInterface::increasedArray<uint32_t, 64> LOCATION_ARRAY;
-    std::map<BUFFER_STRIDE_PAIR, LOCATION_ARRAY> unique_buffer_stride_map;
+    unique_buffer_strides.Clear();
+    for (uint32_t i = 0; i < GLOVE_MAX_VERTEX_ATTRIBS; ++i) {
+        locations[i].Clear();
+    }
 
-    LOCATION_ARRAY locationUsed;
+    uint32_t locationUsed[MAX_LOCATION_COUNT] = {0,};
+
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t attributelocation  = mShaderResourceInterface.GetAttributeLocation(i);
         const uint32_t occupiedLocations = OccupiedLocationsPerGlType(mShaderResourceInterface.GetAttributeType(i));
@@ -660,12 +672,8 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             const uint32_t location = attributelocation + j;
 
             // if location is currently used then ommit it
-            bool isUsed = false;
-            for (uint32_t m = 0; m < locationUsed.Size(); ++m) {
-                if (location == locationUsed[m]) {
-                    isUsed = true;
-                    break;
-                }
+            if (locationUsed[location]) {
+                continue;
             }
             if (isUsed) { continue; }
 
@@ -700,11 +708,18 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
             // store each location
             int32_t stride      = gva.GetStride();
-            BUFFER_STRIDE_PAIR p = {bo, stride};
-            uint32_t *pLocation = unique_buffer_stride_map[p].Allocate();
-            *pLocation = location;
-            uint32_t *pUsed = locationUsed.Allocate();
-            *pUsed = location;
+            bufferLocations p   = {bo, stride};
+            uint32_t index = 0;
+            for (; index < unique_buffer_strides.Size(); ++index) {
+                if (p == unique_buffer_strides[index]) {
+                    break;
+                }
+            }
+            if (index == unique_buffer_strides.Size()) {
+                unique_buffer_strides.PushBack(p);
+            }
+            locations[index].PushBack(location);
+            locationUsed[location] = 1;
         }
     }
 
@@ -717,11 +732,11 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
     // generate unique bindings for each VKbuffer/stride pair
     uint32_t current_binding = 0;
-    for(const auto& iter : unique_buffer_stride_map) {
-        VkBuffer bo = iter.first.first;
-        const LOCATION_ARRAY &locs = iter.second;
-        for (uint32_t i = 0; i < locs.Size(); ++i) {
-            vboLocationBindings[locs[i]] = current_binding;
+    for (uint32_t i = 0; i < unique_buffer_strides.Size(); ++i) {
+        VkBuffer bo = unique_buffer_strides[i].buffer;
+        auto &locals = locations[i];
+        for (uint32_t j = 0; j < locals.Size(); ++j) {
+            vboLocationBindings[locals[j]] = current_binding;
         }
         mActiveVertexVkBuffers[current_binding] = bo;
         ++current_binding;
@@ -731,11 +746,11 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 }
 
 void
-ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const std::map<uint32_t, uint32_t>& vboLocationBindings)
+ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>& genericVertAttribs, const uint32_t *vboLocationBindings)
 {
     // create vertex input bindings and attributes
     uint32_t count = 0;
-    std::vector<uint32_t> locationUsed;
+    uint32_t locationUsed[MAX_LOCATION_COUNT] = {0,};
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
         const uint32_t attributelocation  = mShaderResourceInterface.GetAttributeLocation(i);
@@ -743,10 +758,10 @@ ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>
 
         for(uint32_t j = 0; j < occupiedLocations; ++j) {
             const uint32_t location = attributelocation + j;
-            const uint32_t binding  = vboLocationBindings.at(location);
+            const uint32_t binding  = vboLocationBindings[location];
 
             // if location is currently used then ommit it
-            if (std::find(locationUsed.begin(), locationUsed.end(), location) != locationUsed.end()) {
+            if (locationUsed[location]) {
                 continue;
             }
 
@@ -762,7 +777,7 @@ ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>
 
             ++count;
 
-            locationUsed.push_back(location);
+            locationUsed[location] = 1;
         }
     }
 
@@ -1203,29 +1218,24 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     const uint32_t nLiveUniformBlocks = mShaderResourceInterface.GetLiveUniformBlocks();
-    uint32_t nSamplers = 0;
-    for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
-        if(mShaderResourceInterface.IsUniformBlockOpaque(i)) {
-            nSamplers += mShaderResourceInterface.GetUniformArraySize(i);
-        }
-    }
+    uint32_t nSamplers = mShaderResourceInterface.GetLiveSamplers();
 
     /// Get texture units from samplers
     uint32_t samp = 0;
-    std::map<uint32_t, uint32_t> map_block_texDescriptor;
+    uint32_t *map_block_texDescriptor = (uint32_t *)calloc(nLiveUniformBlocks, sizeof(uint32_t));
     VkDescriptorImageInfo *textureDescriptors = nullptr;
     if(nSamplers) {
-        textureDescriptors = new VkDescriptorImageInfo[nSamplers];
-        memset(static_cast<void *>(textureDescriptors), 0, nSamplers * sizeof(*textureDescriptors));
+        textureDescriptors = (VkDescriptorImageInfo *)calloc(nSamplers, sizeof(VkDescriptorImageInfo));
 
         for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveUniforms(); ++i) {
-            if(mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D || mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_CUBE) {
-                for(int32_t j = 0; j < mShaderResourceInterface.GetUniformArraySize(i); ++j) {
-                    const glsl_sampler_t textureUnit = *(glsl_sampler_t *)mShaderResourceInterface.GetUniformClientData(i);
+            auto &uniform = mShaderResourceInterface.GetUniform(i);
+            if(uniform.glType == GL_SAMPLER_2D || uniform.glType == GL_SAMPLER_CUBE) {
+                for(int32_t j = 0; j < uniform.arraySize; ++j) {
+                    const glsl_sampler_t textureUnit = *(glsl_sampler_t *)uniform.pClientData;
 
                     /// Sampler might need an update
                     Texture *activeTexture = mGLContext->GetStateManager()->GetActiveObjectsState()->GetActiveTexture(
-                    mShaderResourceInterface.GetUniformType(i) == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
+                    uniform.glType == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, textureUnit); // TODO remove mGlContext
                     // Calling a sampler from a fragment shader must return (0, 0, 0, 1) 
                     // when the sampler’s associated texture object is not complete.
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
@@ -1302,7 +1312,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     textureDescriptors[samp].imageView   = activeTexture->GetVkImageView();
 
                     if(j == 0) {
-                        map_block_texDescriptor[mShaderResourceInterface.GetUniformblockIndex(i)] = samp;
+                        map_block_texDescriptor[uniform.blockIndex] = samp;
                     }
                     ++samp;
                 }
@@ -1312,32 +1322,33 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     assert(samp == nSamplers);
 
     samp = 0;
-    VkWriteDescriptorSet *writes = new VkWriteDescriptorSet[nLiveUniformBlocks];
-    memset(static_cast<void*>(writes), 0, nLiveUniformBlocks * sizeof(*writes));
+    VkWriteDescriptorSet *writes = (VkWriteDescriptorSet *)calloc(nLiveUniformBlocks, sizeof(VkWriteDescriptorSet));
     for(uint32_t i = 0; i < nLiveUniformBlocks; ++i) {
+        auto &uniformBlock = mShaderResourceInterface.GetUniformBlock(i);
+        auto &uniform = mShaderResourceInterface.GetUniform(i);
         writes[i].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writes[i].pNext      = nullptr;
         writes[i].dstSet     = mVkDescSet;
-        writes[i].dstBinding = mShaderResourceInterface.GetUniformBlockBinding(i);
+        writes[i].dstBinding = uniformBlock.binding;
 
-        if(mShaderResourceInterface.IsUniformBlockOpaque(i)) {
-            // assert(map_block_texDescriptor.find(i) != map_block_texDescriptor.end());
+        if(uniformBlock.isOpaque) {
             writes[i].pImageInfo      = &textureDescriptors[map_block_texDescriptor[i]];
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            writes[i].descriptorCount = mShaderResourceInterface.GetUniformArraySize(i);
-            samp += mShaderResourceInterface.GetUniformArraySize(i);
+            writes[i].descriptorCount = uniform.arraySize; 
+            samp += uniform.arraySize; 
         } else {
             writes[i].descriptorCount = 1;
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            writes[i].pBufferInfo     = mShaderResourceInterface.GetUniformBufferObject(i)->GetBufferDescInfo();
+            writes[i].pBufferInfo     = uniformBlock.pBufferObject->GetBufferDescInfo();
         }
     }
     assert(samp == nSamplers);
 
     vkUpdateDescriptorSets(mVkContext->vkDevice, nLiveUniformBlocks, writes, 0, nullptr);
 
-    delete[] writes;
-    delete[] textureDescriptors;
+    free(map_block_texDescriptor);
+    free(writes);
+    free(textureDescriptors);
 
     mUpdateDescriptorSets = false;
 }

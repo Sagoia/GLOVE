@@ -42,6 +42,7 @@ set(SOURCES
     resources/rect.cpp
     resources/sampler.cpp
     resources/screenSpacePass.cpp
+    resources/uniformBufferObject.cpp
     state/stateManager.cpp
     state/stateActiveObjects.cpp
     state/stateInputAssembly.cpp
@@ -72,6 +73,7 @@ set(SOURCES
     vulkan/framebuffer.cpp
     vulkan/fence.cpp
     vulkan/context.cpp
+    vulkan/uniformMemory.cpp
     vulkan/utils.cpp
 )
 
@@ -100,6 +102,7 @@ set(HEADERS
     resources/rect.h
     resources/sampler.h
     resources/screenSpacePass.h
+    resources/uniformBufferObject.h
     state/stateManager.h
     state/stateActiveObjects.h
     state/stateInputAssembly.h
@@ -135,6 +138,7 @@ set(HEADERS
     vulkan/framebuffer.h
     vulkan/fence.h
     vulkan/context.h
+    vulkan/uniformMemory.h
     vulkan/utils.h
 )
 

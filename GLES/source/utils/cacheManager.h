@@ -24,7 +24,8 @@
 #define __CACHEMANAGER_H__
 
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include "utils/arrays.hpp"
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
 
@@ -38,13 +39,15 @@ class Texture;
 
 class CacheManager {
 private:
+    const static uint32_t DEFAULT_CACHE_SIZE = 256;
+    const static uint32_t UBO_ARRAY_COUNT = 16;
+
     const
     vulkanAPI::vkContext_t *            mVkContext;
 
-    typedef std::vector<UniformBufferObject *> UBOList;
-    typedef std::map<VkDeviceSize, UBOList> UBOMap;
+    typedef Array<UniformBufferObject*, DEFAULT_CACHE_SIZE> UBOList;
     UBOList                             mUBOCache;
-    UBOMap                              mUBOs;
+    UBOList                             mUBOLists[UBO_ARRAY_COUNT];
 
     std::vector<BufferObject *>         mVBOCache;
     std::vector<Texture *>              mTextureCache;
@@ -53,11 +56,13 @@ private:
     std::vector<VkBuffer>               mVkBufferCache;
     std::vector<VkDeviceMemory>         mVkDeviceMemoryCache;
 
-    std::map<uint64_t, VkSampler>       mVkSamplerCache;
-    std::map<uint64_t, VkRenderPass>    mVkRenderPassCache;
+    typedef std::unordered_map<uint64_t, VkSampler> SamplerMap;
+    SamplerMap                          mVkSamplerCache;
+    typedef std::unordered_map<uint64_t, VkRenderPass> RenderPassMap;
+    RenderPassMap                       mVkRenderPassCache;
 
-    typedef std::map<uint64_t, VkPipeline> PipelineHashMap;
-    typedef std::map<VkPipelineCache, PipelineHashMap> PipelineMap;
+    typedef std::unordered_map<uint64_t, VkPipeline> PipelineHashMap;
+    typedef std::unordered_map<VkPipelineCache, PipelineHashMap> PipelineMap;
     PipelineMap                         mVkPipelineCache;
 
     void                                UncacheUBOs();
@@ -75,11 +80,11 @@ private:
     void                                CleanUpPipelineCache();
 
 public:
-     CacheManager(const vulkanAPI::vkContext_t *vkContext) : mVkContext(vkContext) { }
-    ~CacheManager() { }
+     CacheManager(const vulkanAPI::vkContext_t *vkContext);
+    ~CacheManager();
 
     void                                CacheUBO(UniformBufferObject *uniformBufferObject);
-    UniformBufferObject *               GetUBO(VkDeviceSize size);
+    UniformBufferObject *               GetUBO(uint32_t index);
 
     void                                CacheVBO(BufferObject *vbo);
     void                                CacheTexture(Texture *tex);

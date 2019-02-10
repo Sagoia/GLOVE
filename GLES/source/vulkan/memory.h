@@ -24,10 +24,8 @@
 #ifndef __VKMEMORY_H__
 #define __VKMEMORY_H__
 
-#include <cmath>
 #include "utils.h"
 #include "context.h"
-#include "memoryAllocator.h"
 
 class CacheManager;
 
@@ -35,86 +33,49 @@ namespace vulkanAPI {
 
 class Memory {
 
-protected:
+private:
 
     const
-    vkContext_t *                     mVkContext;
+    vkContext_t *                   mVkContext;
 
-    VkDeviceMemory                    mVkMemory;
+    VkDeviceMemory                  mVkMemory;
     const
-    VkMemoryMapFlags                  mVkMemoryFlags;
-    VkFlags                           mVkFlags;
-    VkMemoryRequirements              mVkRequirements;
+    VkMemoryMapFlags                mVkMemoryFlags;
+    VkFlags                         mVkFlags;
+    VkMemoryRequirements            mVkRequirements;
 
-    CacheManager *                    mCacheManager;
+    CacheManager *                  mCacheManager;
 
 public:
 // Constructor
     Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
 
 // Destructor
-    virtual ~Memory();
+    ~Memory();
 
 // Allocate Functions
-    virtual bool                      Create(void);
+    bool                            Create(void);
 
 // Release Functions
-    virtual void                      Release(void);
+    void                            Release(void);
 
 // Bind Functions
-    virtual bool                      BindBufferMemory(VkBuffer &buffer);
-    virtual bool                      BindImageMemory(VkImage &image);
+    bool                            BindBufferMemory(VkBuffer &buffer);
+    bool                            BindImageMemory(VkImage &image);
 
 // Get Functions
-    VkFlags                           GetFlags(void)                            { FUN_ENTRY(GL_LOG_DEBUG); return mVkFlags; }
-    void                              GetImageMemoryRequirements(VkImage &image);
-    bool                              GetBufferMemoryRequirements(VkBuffer &buffer);
-    VkResult                          GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
-    virtual bool                      GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
+    inline VkFlags                  GetFlags(void)                            { FUN_ENTRY(GL_LOG_DEBUG); return mVkFlags; }
+    void                            GetImageMemoryRequirements(VkImage &image);
+    bool                            GetBufferMemoryRequirements(VkBuffer &buffer);
+    VkResult                        GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
+    bool                            GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
 
 // Set/Update Functions
-    virtual bool                      SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
-    virtual void                      UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
-    virtual bool                      FlushData(void)                           { FUN_ENTRY(GL_LOG_DEBUG); return true; }
+    bool                            SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
+    void                            UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
 
-    inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
-
-    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
-};
-
-class UniformMemory : public Memory {
-
-private:
-
-    MemoryBlock                       mMemoryBlock;
-    uint8_t *                         mSrcData;
-
-public:
-// Constructor
-    UniformMemory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
-
-// Destructor
-    virtual ~UniformMemory();
-
-// Allocate Functions
-    virtual bool                      Create(void) final;
-
-// Release Functions
-    virtual void                      Release(void) final;
-
-// Bind Functions
-    virtual bool                      BindBufferMemory(VkBuffer &buffer) final;
-
-// Get Functions
-    virtual bool                      GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const final;
-    inline uint8_t *                  GetDataPtr(VkDeviceSize offset)                                           { FUN_ENTRY(GL_LOG_TRACE); return mSrcData + offset;}
-
-// Set/Update Functions
-    virtual bool                      SetData(VkDeviceSize size, VkDeviceSize offset, const void *data) final;
-    virtual bool                      FlushData(void) final;
-    
-    virtual void                      UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data) final { FUN_ENTRY(GL_LOG_TRACE);  SetData(size, offset, data); }
-
+    inline void                     SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    inline void                     SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };
 
 }

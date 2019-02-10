@@ -328,6 +328,13 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+    if (level == 0) {
+        uint32_t mipLevel = NUMBER_OF_MIP_LEVELS(width, height);
+        if (mState[layer].size() != mipLevel) {
+            mState[layer].resize(mipLevel);
+        }
+    }
+
     mState[layer][level].width  = width;
     mState[layer][level].height = height;
     mState[layer][level].format = format;
@@ -419,6 +426,13 @@ void
 Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenum internalformat, GLsizei size, const void *imageData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
+
+    if (level == 0) {
+        uint32_t mipLevel = NUMBER_OF_MIP_LEVELS(width, height);
+        if (mState[layer].size() != mipLevel) {
+            mState[layer].resize(mipLevel);
+        }
+    }
 
     mState[layer][level].width = width;
     mState[layer][level].height = height;

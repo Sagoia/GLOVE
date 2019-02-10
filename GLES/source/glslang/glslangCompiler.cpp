@@ -56,10 +56,10 @@ GlslangCompiler::IsManageableError(const char* errors)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    size_t pragmaError = string(errors).find("\"on\" or \"off\" expected after '(' for 'debug' pragma");
-    size_t definedError = string(errors).find("cannot use in preprocessor expression when expanded from macros");
+    size_t pragmaError = std::string(errors).find("\"on\" or \"off\" expected after '(' for 'debug' pragma");
+    size_t definedError = std::string(errors).find("cannot use in preprocessor expression when expanded from macros");
 
-    return pragmaError != string::npos || definedError != string::npos;
+    return pragmaError != std::string::npos || definedError != std::string::npos;
 }
 
 bool
@@ -67,11 +67,11 @@ GlslangCompiler::IsNotFullySupported(const char* source, const char* errors)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    size_t nonConstError = string(errors).find("'non-constant initializer' : not supported with this profile: es");
-    size_t matrixCompMult = string(source).find("matrixCompMult(");
-    size_t mod = string(source).find("mod(");
+    size_t nonConstError = std::string(errors).find("'non-constant initializer' : not supported with this profile: es");
+    size_t matrixCompMult = std::string(source).find("matrixCompMult(");
+    size_t mod = std::string(source).find("mod(");
 
-    return nonConstError != string::npos && (matrixCompMult != string::npos || mod != string::npos);
+    return nonConstError != std::string::npos && (matrixCompMult != std::string::npos || mod != std::string::npos);
 }
 
 bool
@@ -81,7 +81,7 @@ GlslangCompiler::CompileShader(const char* const* source, EShLanguage language)
 
     TBuiltInResource* resources = msSlangShaderResources;
 
-    mSource = string(*source);
+    mSource = std::string(*source);
 
     CleanUpShader(mSlangShader);
 

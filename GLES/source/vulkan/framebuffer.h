@@ -45,7 +45,7 @@ public:
     ~Framebuffer();
 
 // Create Functions
-    bool                    Create  (vector<VkImageView> *imageViews, VkRenderPass *renderpass, uint32_t width, uint32_t height);
+    bool                    Create  (std::vector<VkImageView> *imageViews, VkRenderPass *renderpass, uint32_t width, uint32_t height);
 
 // Release Functions
     void                    Release (void);

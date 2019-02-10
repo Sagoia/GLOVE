@@ -47,10 +47,10 @@ private:
     bool mSaveSourceToFiles;
     bool mSaveSpvTextToFile;
 
-    string mVertSource;
-    string mFragSource;
-    string mVertSource400;
-    string mFragSource400;
+    std::string mVertSource;
+    std::string mFragSource;
+    std::string mVertSource400;
+    std::string mFragSource400;
     std::vector<uint32_t> mVertSpv;
     std::vector<uint32_t> mFragSpv;
 
@@ -96,8 +96,8 @@ private:
     /// 1. Basic types and arrays of them
     /// 2. Aggregates of basic types and arrays of them
     /// 3. Opaque types (although they can not be in a uniform block, they are stored here for easy reference)
-    std::map<string, uniformBlock_t>         mUniformBlocks;
-    typedef map<string, uniformBlock_t> uniformBlockMap_t;
+    std::map<std::string, uniformBlock_t>         mUniformBlocks;
+    typedef std::map<std::string, uniformBlock_t> uniformBlockMap_t;
     const uniformBlockMap_t &           GetUniformBlocks(void)            const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks; }
 
 public:

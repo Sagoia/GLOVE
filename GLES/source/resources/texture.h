@@ -50,8 +50,8 @@ class Texture {
             data(nullptr), size(0){ FUN_ENTRY(GL_LOG_TRACE); }
         ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
-    typedef State                  State_t;
-    typedef map<uint32_t, State_t> StateMap_t;
+    typedef State                   State_t;
+    typedef std::vector<State_t>    States_t;
 
 private:
     const
@@ -75,7 +75,7 @@ private:
 
     Rect                        mDims;
     Sampler                     mParameters;
-    StateMap_t*                 mState;
+    States_t*                   mState;
     bool                        mDataUpdated;
     bool                        mDataNoInvertion;
     bool                        mFboColorAttached;
@@ -109,7 +109,7 @@ public:
 
 // Init Functions
     inline void             InitState(void)                                     { FUN_ENTRY(GL_LOG_TRACE); mLayersCount  = mTarget == GL_TEXTURE_2D ? TEXTURE_2D_LAYERS : TEXTURE_CUBE_MAP_LAYERS;
-                                                                                                           mState        = new StateMap_t[mLayersCount]; }
+                                                                                                           mState        = new States_t[mLayersCount]; }
 
 // Helper Functions
     static int              GetDefaultInternalAlignment()                       { FUN_ENTRY(GL_LOG_TRACE); return mDefaultInternalAlignment; }

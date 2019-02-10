@@ -37,7 +37,7 @@ class GlslangCompiler : public SlangCompiler {
 private:
     static TBuiltInResource * msSlangShaderResources;
 
-    string            mSource;
+    std::string       mSource;
     glslang::TShader* mSlangShader;
     glslang::TShader* mSlangShader400;
 

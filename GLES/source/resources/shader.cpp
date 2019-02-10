@@ -124,7 +124,7 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
     delete[] sourceLengths;
 
     if(GLOVE_DUMP_ORIGINAL_SHADER_SOURCE) {
-        cout << "\n\nINPUT SOURCE:\n" << mSource << "\n\n";
+        std::cout << "\n\nINPUT SOURCE:\n" << mSource << "\n\n";
     }
 }
 

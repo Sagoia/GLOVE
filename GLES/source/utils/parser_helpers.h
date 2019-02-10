@@ -29,15 +29,13 @@
 #define STRINGIFY(expr)         #expr
 #define STRINGIFY_MACRO(expr)   STRINGIFY(expr)
 
-using namespace std;
-
 bool                    IsChar(char c);
 bool                    IsWhiteSpace(char c);
-bool                    IsBuildInUniform(const string &source);
-string::size_type       SkipWhiteSpaces(const string &source, string::size_type pos);
-string::size_type       FindToken(const string &token, const string &source, string::size_type pos);
-string                  GetNextToken(const string &source, string::size_type start);
-bool                    IsPrecisionQualifier(const string &token);
-bool                    CanTypeBeInUniformBlock(const string &token);
+bool                    IsBuildInUniform(const std::string &source);
+std::string::size_type  SkipWhiteSpaces(const std::string &source, std::string::size_type pos);
+std::string::size_type  FindToken(const std::string &token, const std::string &source, std::string::size_type pos);
+std::string             GetNextToken(const std::string &source, std::string::size_type start);
+bool                    IsPrecisionQualifier(const std::string &token);
+bool                    CanTypeBeInUniformBlock(const std::string &token);
 
 #endif // __PARSER_HELPERS_H__

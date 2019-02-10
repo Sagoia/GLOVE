@@ -70,9 +70,10 @@ private:
     bool                            mSizeUpdated;
 
     vulkanAPI::RenderPass*          mRenderPass;
-    vector<vulkanAPI::Framebuffer*> mFramebuffers;
+    std::vector<vulkanAPI::Framebuffer*> 
+                                    mFramebuffers;
 
-    vector<Attachment*>             mAttachmentColors;
+    std::vector<Attachment*>        mAttachmentColors;
     Attachment*                     mAttachmentDepth;
     Attachment*                     mAttachmentStencil;
     Texture*                        mDepthStencilTexture;
