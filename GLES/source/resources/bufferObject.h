@@ -81,9 +81,14 @@ public:
 
 class IndexBufferObject : public BufferObject
 {
+private:
+    uint16_t                mMaxIndex;
 
 public:
-    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT), mMaxIndex(0) { FUN_ENTRY(GL_LOG_TRACE); }
+
+    inline void             SetMaxIndex(uint16_t index)                         { FUN_ENTRY(GL_LOG_TRACE); mMaxIndex = index; }
+    inline uint16_t         GetMaxIndex(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return mMaxIndex; }
 
 };
 

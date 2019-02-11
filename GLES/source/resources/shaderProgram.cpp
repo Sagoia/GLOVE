@@ -516,6 +516,16 @@ ShaderProgram::AllocateExplicitIndexBuffer(const void* data, size_t size, Buffer
 
     mExplicitIbo = new IndexBufferObject(mVkContext);
     mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
+    // TODO: support GL_UNSIGNED_INT as index data type
+    const uint16_t *uData = (const uint16_t *)data;
+    uint16_t maxIndex = uData[0];
+    for(uint32_t i = (size / sizeof(uint16_t)) - 1; i > 0; --i) {
+        uint16_t index = uData[i];
+        if(maxIndex < index) {
+            maxIndex = index;
+        }
+    }
+    static_cast<IndexBufferObject *>(mExplicitIbo)->SetMaxIndex(maxIndex);
     *ibo = mExplicitIbo;
 
     return mExplicitIbo->Allocate(size, data);
@@ -612,7 +622,7 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
 
     if(validatedBuffer) {
         *firstIndex = offset;
-        *maxIndex = GetMaxIndex(ibo, indexCount, actualSize, offset);
+        *maxIndex = static_cast<IndexBufferObject *>(ibo)->GetMaxIndex();
         mActiveIndexVkBuffer = ibo->GetVkBuffer();
     }
 }
