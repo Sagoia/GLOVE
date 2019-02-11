@@ -166,6 +166,8 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
                 bufferObject->Allocate(uniformBlock.requiredSize, uniform.pClientData, uniformBlock.blockSize);
             }
             uniformBlock.pBufferObject = bufferObject;
+
+            *allocatedNewBufferObject = true;
         }
     }
 
