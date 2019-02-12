@@ -317,8 +317,8 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
 
     if (level == 0) {
         uint32_t mipLevel = NUMBER_OF_MIP_LEVELS(width, height);
-        if (mState[layer].size() != mipLevel) {
-            mState[layer].resize(mipLevel);
+        if (mState[layer].Size() != mipLevel) {
+            mState[layer].Resize(mipLevel);
         }
     }
 
@@ -421,8 +421,8 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
 
     if (level == 0) {
         uint32_t mipLevel = NUMBER_OF_MIP_LEVELS(width, height);
-        if (mState[layer].size() != mipLevel) {
-            mState[layer].resize(mipLevel);
+        if (mState[layer].Size() != mipLevel) {
+            mState[layer].Resize(mipLevel);
         }
     }
 

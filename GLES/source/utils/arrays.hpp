@@ -66,6 +66,7 @@ public:
     inline void             PopBack(void)                       { if (mSize > 0) { --mSize; } }
     inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend(mCapacity << 1);} mData[mSize] = e; ++ mSize; }
     inline void             Reserve(size_t size)                { if (size > mCapacity) { Expend(size); } }
+    inline void             Resize(size_t size)                 { Reserve(size); if (size > mSize) { mSize = size; } }
 };
 
 /**
