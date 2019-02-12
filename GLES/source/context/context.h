@@ -99,7 +99,7 @@ private:
     void BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool clearStencilEnabled);
     void PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GLenum type, const void *indices);
     void UpdateVertexAttributes(uint32_t vertCount, uint32_t firstVertex);
-    void UpdateIndices(uint32_t* offset, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
+    void UpdateIndices(uint32_t* offset, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
     void BindUniformDescriptors(VkCommandBuffer *CmdBuffer);
     void BindVertexBuffers(VkCommandBuffer *CmdBuffer);
     void BindIndexBuffer(VkCommandBuffer *CmdBuffer, uint32_t offset, VkIndexType type);
