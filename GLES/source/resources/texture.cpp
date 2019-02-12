@@ -41,7 +41,7 @@ Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBuff
 : mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
-mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false),
+mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false), mIsNPOT(false), mIsNPOTAccessCompleted(false),
 mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -67,26 +67,13 @@ Texture::~Texture()
     }
 }
 
-bool
-Texture::IsNPOT(void)
+void
+Texture::UpdateNPOTAccessCompleted(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    State_t *state = &mState[0][0];
-    if(state->format == GL_INVALID_VALUE) {
-        return false;
-    }
-
-    return (!ISPOWEROFTWO(state->width) || !ISPOWEROFTWO(state->height));
-}
-
-bool
-Texture::IsNPOTAccessCompleted(void)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-
-    return !(IsNPOT() && ((GetMinFilter() != GL_LINEAR         && GetMinFilter() != GL_NEAREST)    ||
-                          (GetWrapS()     != GL_CLAMP_TO_EDGE  || GetWrapT()     != GL_CLAMP_TO_EDGE)));
+    mIsNPOTAccessCompleted = !(IsNPOT() && ((GetMinFilter() != GL_LINEAR         && GetMinFilter() != GL_NEAREST)    ||
+                                            (GetWrapS()     != GL_CLAMP_TO_EDGE  || GetWrapT()     != GL_CLAMP_TO_EDGE)));
 }
 
 bool
@@ -340,6 +327,11 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
     mState[layer][level].format = format;
     mState[layer][level].type   = type;
 
+    if (layer == 0 && level == 0) {
+        mIsNPOT = format == GL_INVALID_VALUE ? false : (!ISPOWEROFTWO(width) || !ISPOWEROFTWO(height));
+        UpdateNPOTAccessCompleted();
+    }
+
     if(mState[layer][level].data) {
         delete [] (uint8_t *)mState[layer][level].data;
         mState[layer][level].data = nullptr;
@@ -439,6 +431,11 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
     mState[layer][level].format = internalformat;
     mState[layer][level].type = GL_INVALID_VALUE;
     mState[layer][level].size = size;
+
+    if (layer == 0 && level == 0) {
+        mIsNPOT = internalformat == GL_INVALID_VALUE ? false : (!ISPOWEROFTWO(width) || !ISPOWEROFTWO(height));
+        UpdateNPOTAccessCompleted();
+    }
 
     if (mState[layer][level].data) {
         delete[](uint8_t *)mState[layer][level].data;
