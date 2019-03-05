@@ -89,11 +89,11 @@ Shader::SetShaderSource(GLsizei count, const GLchar *const *source, const GLint 
         /// All strings in source are considered to be null terminated
         if(length == nullptr) {
             /// strlen does not include null termination character
-            sourceLengths[i] = strlen(source[i]);
+            sourceLengths[i] = (uint32_t)strlen(source[i]);
         } else {
             if(length[i] < 0) {
                 /// NULL terminated again
-                sourceLengths[i] = strlen(source[i]);
+                sourceLengths[i] = (uint32_t)strlen(source[i]);
             } else {
                 sourceLengths[i] = length[i];
             }
@@ -159,7 +159,7 @@ Shader::GetInfoLog(void) const
     char *log = nullptr;
 
     if(mSlangCompiler) {
-        uint32_t len = strlen(mSlangCompiler->GetInfoLog()) + 1;
+        uint32_t len = (uint32_t)strlen(mSlangCompiler->GetInfoLog()) + 1;
         log = new char[len];
 
         memcpy(log, mSlangCompiler->GetInfoLog(), len);

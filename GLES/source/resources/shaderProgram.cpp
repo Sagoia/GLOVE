@@ -309,8 +309,8 @@ ShaderProgram::SerializeShadersSpirv(void *binary)
 {
     uint8_t *rawDataPtr = reinterpret_cast<uint8_t *>(binary);
     uint32_t *u32DataPtr = nullptr;
-    uint32_t vsSpirvSize = 4 * mShaderSPVsize[0];
-    uint32_t fsSpirvSize = 4 * mShaderSPVsize[1];
+    uint32_t vsSpirvSize = 4 * (uint32_t)(mShaderSPVsize[0]);
+    uint32_t fsSpirvSize = 4 * (uint32_t)(mShaderSPVsize[1]);
 
     u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
     *u32DataPtr = vsSpirvSize;
@@ -611,7 +611,7 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t indexCoun
     }
 
     if(validatedBuffer) {
-        *firstIndex = offset;
+        *firstIndex = (uint32_t)offset;
         mActiveIndexVkBuffer = ibo->GetVkBuffer();
     }
 }
@@ -772,7 +772,7 @@ ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>
             mVkVertexInputAttribute[count].binding  = binding;
             mVkVertexInputAttribute[count].location = location;
             mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
-            mVkVertexInputAttribute[count].offset   = gva.GetOffset();
+            mVkVertexInputAttribute[count].offset   = static_cast<uint32_t>(gva.GetOffset());
 
             ++count;
 
@@ -819,7 +819,7 @@ ShaderProgram::GetBinaryData(void *binary, GLsizei *binarySize)
 
     if(mPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
         mPipelineCache->GetData(reinterpret_cast<void *>(vulkanDataPtr), &vulkanDataSize);
-        *binarySize = vulkanDataSize + reflectionOffset + spirvOffset;
+        *binarySize = (GLsizei)(vulkanDataSize + reflectionOffset + spirvOffset);
     } else {
         *binarySize = 0;
     }
@@ -831,13 +831,13 @@ ShaderProgram::GetBinaryLength(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     size_t vkPipelineCacheDataLength = 0;
-    uint32_t spirvSize = 2 * sizeof(uint32_t) + 4 * (mShaderSPVsize[0] + mShaderSPVsize[1]);
+    size_t spirvSize = 2 * sizeof(uint32_t) + 4 * (mShaderSPVsize[0] + mShaderSPVsize[1]);
 
     if(mPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
         mPipelineCache->GetData(nullptr, &vkPipelineCacheDataLength);
     }
 
-    return vkPipelineCacheDataLength + mShaderResourceInterface.GetReflectionSize() + spirvSize;
+    return (GLsizei)(vkPipelineCacheDataLength + mShaderResourceInterface.GetReflectionSize() + spirvSize);
 }
 
 char *
@@ -848,7 +848,7 @@ ShaderProgram::GetInfoLog(void) const
     char *log = nullptr;
 
     if(mShaderCompiler) {
-        uint32_t len = strlen(mShaderCompiler->GetProgramInfoLog()) + 1;
+        uint32_t len = (uint32_t)strlen(mShaderCompiler->GetProgramInfoLog()) + 1;
         log = new char[len];
 
         memcpy(log, mShaderCompiler->GetProgramInfoLog(), len);
@@ -1264,13 +1264,13 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             // Get Inverted Data from FBO's Color Attachment Texture
                             GLenum dstInternalFormat = activeTexture->GetExplicitInternalFormat();
                             ImageRect srcRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
-                                GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
-                                GlTypeToElementSize(activeTexture->GetExplicitType()),
-                                Texture::GetDefaultInternalAlignment());
+                                              (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType())),
+                                              (int)(GlTypeToElementSize(activeTexture->GetExplicitType())),
+                                              Texture::GetDefaultInternalAlignment());
                             ImageRect dstRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
-                                GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
-                                GlTypeToElementSize(activeTexture->GetExplicitType()),
-                                Texture::GetDefaultInternalAlignment());
+                                              (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType())),
+                                              (int)(GlTypeToElementSize(activeTexture->GetExplicitType())),
+                                              Texture::GetDefaultInternalAlignment());
 
                             uint8_t* dstData = new uint8_t[dstRect.GetRectBufferSize()];
                             srcRect.y = activeTexture->GetInvertedYOrigin(&srcRect);

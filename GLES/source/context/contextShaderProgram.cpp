@@ -401,9 +401,9 @@ Context::GetProgramiv(GLuint program, GLenum pname, GLint* params)
     case GL_INFO_LOG_LENGTH:             *params = progPtr->GetInfoLogLength(); break;
     case GL_ATTACHED_SHADERS:            *params = (bool)progPtr->GetVertexShader() + (bool)progPtr->GetFragmentShader(); break;
     case GL_ACTIVE_ATTRIBUTES:           *params = progPtr->GetNumberOfActiveAttributes(); break;
-    case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: *params = progPtr->GetActiveAttribMaxLen(); break;
+    case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: *params = (GLint)progPtr->GetActiveAttribMaxLen(); break;
     case GL_ACTIVE_UNIFORMS:             *params = progPtr->GetNumberOfActiveUniforms(); break;
-    case GL_ACTIVE_UNIFORM_MAX_LENGTH:   *params = progPtr->GetActiveUniformMaxLen(); break;
+    case GL_ACTIVE_UNIFORM_MAX_LENGTH:   *params = (GLint)progPtr->GetActiveUniformMaxLen(); break;
     case GL_PROGRAM_BINARY_LENGTH_OES:   *params = progPtr->GetBinaryLength(); break;
     default:                             RecordError(GL_INVALID_ENUM); return; break;
     }
@@ -498,25 +498,25 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     case GL_BOOL_VEC2: {
         glsl_bool_t bData[2];
         progPtr->GetUniformData(location, size, static_cast<void *>(bData));
-        params[0] = bData[0];
-        params[1] = bData[1];
+        params[0] = (float)bData[0];
+        params[1] = (float)bData[1];
         break;
     }
     case GL_BOOL_VEC3: {
         glsl_bool_t bData[3];
         progPtr->GetUniformData(location, size, static_cast<void *>(bData));
-        params[0] = bData[0];
-        params[1] = bData[1];
-        params[2] = bData[2];
+        params[0] = (float)bData[0];
+        params[1] = (float)bData[1];
+        params[2] = (float)bData[2];
         break;
     }
     case GL_BOOL_VEC4: {
         glsl_bool_t bData[4];
         progPtr->GetUniformData(location, size, static_cast<void *>(bData));
-        params[0] = bData[0];
-        params[1] = bData[1];
-        params[2] = bData[2];
-        params[3] = bData[3];
+        params[0] = (float)bData[0];
+        params[1] = (float)bData[1];
+        params[2] = (float)bData[2];
+        params[3] = (float)bData[3];
         break;
     }
 
@@ -530,25 +530,25 @@ Context::GetUniformfv(GLuint program, GLint location, GLfloat *params)
     case GL_INT_VEC2: {
         glsl_int_t iData[2];
         progPtr->GetUniformData(location, size, (void *)iData);
-        params[0] = iData[0];
-        params[1] = iData[1];
+        params[0] = (float)iData[0];
+        params[1] = (float)iData[1];
         break;
     }
     case GL_INT_VEC3: {
         glsl_int_t iData[3];
         progPtr->GetUniformData(location, size, (void *)iData);
-        params[0] = iData[0];
-        params[1] = iData[1];
-        params[2] = iData[2];
+        params[0] = (float)iData[0];
+        params[1] = (float)iData[1];
+        params[2] = (float)iData[2];
         break;
     }
     case GL_INT_VEC4: {
         glsl_int_t iData[4];
         progPtr->GetUniformData(location, size, (void *)iData);
-        params[0] = iData[0];
-        params[1] = iData[1];
-        params[2] = iData[2];
-        params[3] = iData[3];
+        params[0] = (float)iData[0];
+        params[1] = (float)iData[1];
+        params[2] = (float)iData[2];
+        params[3] = (float)iData[3];
         break;
     }
 

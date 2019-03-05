@@ -591,8 +591,8 @@ GlslangShaderCompiler::BuildUniformReflection(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    const int nLiveUniforms = mUniforms.size();
-    const int nLiveUniformBlocks = mUniformBlocks.size();
+    const uint32_t nLiveUniforms = (uint32_t)mUniforms.size();
+    const uint32_t nLiveUniformBlocks = (uint32_t)mUniformBlocks.size();
     mShaderReflection->SetLiveUniforms(nLiveUniforms);
     mShaderReflection->SetLiveUniformBlocks(nLiveUniformBlocks);
 
@@ -623,7 +623,7 @@ GlslangShaderCompiler::BuildUniformReflection(void)
                 mShaderReflection->SetUniformBlockIndex(index, i);
                 mShaderReflection->SetUniformArraySize(uni.arraySize, i);
                 mShaderReflection->SetUniformType(uni.glType, i);
-                mShaderReflection->SetUniformOffset(uni.offset, i);
+                mShaderReflection->SetUniformOffset((GLenum)uni.offset, i);
 
                 break;
             }
@@ -774,13 +774,13 @@ GlslangShaderCompiler::DumpSlangProgramReflection(const glslang::TProgram *prog)
                                                                                       prog->getUniformArraySize(i));
     }
 
-    printf("\nGL_ACTIVE_ATTRIBUTES varyings in: %d\n", ioMapResolver->GetNumLiveVaryingInVariables());
+    printf("\nGL_ACTIVE_ATTRIBUTES varyings in: %zu\n", ioMapResolver->GetNumLiveVaryingInVariables());
     for(uint32_t i = 0; i < ioMapResolver->GetNumLiveVaryingInVariables(); ++i) {
         printf("%s (%s)\n", ioMapResolver->GetVaryingInName(i), ioMapResolver->GetVaryingInType(i));
         printf("  hasLocation: %d = %d\n", ioMapResolver->GetVaryingInHasLocation(i), ioMapResolver->GetVaryingInLocation(i));
     }
 
-    printf("\nACTIVE VARYINGS varyings out: %d\n", ioMapResolver->GetNumLiveVaryingOutVariables());
+    printf("\nACTIVE VARYINGS varyings out: %zu\n", ioMapResolver->GetNumLiveVaryingOutVariables());
     for(uint32_t i = 0; i < ioMapResolver->GetNumLiveVaryingOutVariables(); ++i) {
         printf("%s (%s)\n", ioMapResolver->GetVaryingOutName(i), ioMapResolver->GetVaryingOutType(i));
         printf("  hasLocation: %d = %d\n", ioMapResolver->GetVaryingInHasLocation(i), ioMapResolver->GetVaryingInLocation(i));

@@ -98,7 +98,7 @@ public:
     inline int GetUniformBlockIndex(uint32_t index)                           const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformReflection[index].blockIndex; }
     inline int GetUniformArraySize(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformReflection[index].arraySize; }
     inline uint32_t GetUniformType(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformReflection[index].glType; }
-    inline GLenum GetUniformOffset(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformReflection[index].offset; }
+    inline size_t GetUniformOffset(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformReflection[index].offset; }
 
     inline const char* GetUniformBlockGlslBlockName(uint32_t index)           const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformBlockReflection[index].glslBlockName; }
     inline uint32_t GetUniformBlockBinding(uint32_t index)                    const { FUN_ENTRY(GL_LOG_TRACE); return mReflectionData.mUniformBlockReflection[index].binding; }

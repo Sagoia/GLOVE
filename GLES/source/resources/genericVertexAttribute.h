@@ -64,7 +64,7 @@ public:
     inline GLenum                       GetType(void)                     const { FUN_ENTRY(GL_LOG_TRACE); return mType;       }
     inline GLboolean                    GetNormalized(void)               const { FUN_ENTRY(GL_LOG_TRACE); return mNormalized; }
     inline GLsizei                      GetStride(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mStride;     }
-    inline uint32_t                     GetOffset(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mOffset;     }
+    inline uintptr_t                    GetOffset(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mOffset;     }
     inline uintptr_t                    GetPointer(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mPtr;        }
     inline const BufferObject *         GetExternalVbo(void)              const { FUN_ENTRY(GL_LOG_TRACE); return mExternalVbo;}
 

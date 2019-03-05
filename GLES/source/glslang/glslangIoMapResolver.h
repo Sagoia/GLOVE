@@ -71,7 +71,7 @@ public:
 
     void                            Reset();
 
-    inline uint32_t                 GetNumLiveVaryingInVariables() const { return mVaryingINMap.size(); }
+    inline size_t                   GetNumLiveVaryingInVariables() const { return mVaryingINMap.size(); }
     const char *                    GetVaryingInName(uint32_t index) const;
     const char *                    GetVaryingInType(uint32_t index) const;
     bool                            GetVaryingInHasLocation(uint32_t index) const;
@@ -79,7 +79,7 @@ public:
     int                             GetVaryingInSize(uint32_t index) const;
     int                             GetVaryingInLocations(uint32_t index) const;
 
-    inline uint32_t                 GetNumLiveVaryingOutVariables() const { return mVaryingOUTMap.size(); }
+    inline size_t                   GetNumLiveVaryingOutVariables() const { return mVaryingOUTMap.size(); }
     const char *                    GetVaryingOutName(uint32_t index) const;
     const char *                    GetVaryingOutType(uint32_t index) const;
     bool                            GetVaryingOutHasLocation(uint32_t index) const;

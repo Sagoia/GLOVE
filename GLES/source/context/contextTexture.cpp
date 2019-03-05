@@ -461,12 +461,12 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
     GLenum srcInternalFormat = GlFormatToGlInternalFormat(format, type);
     GLenum dstInternalFormat = activeTexture->GetInternalFormat();
     ImageRect srcRect(0,       0,       width, height,
-                      GlInternalFormatTypeToNumElements(srcInternalFormat, type),
-                      GlTypeToElementSize(type),
+                      (int)(GlInternalFormatTypeToNumElements(srcInternalFormat, type)),
+                      (int)(GlTypeToElementSize(type)),
                       mStateManager.GetPixelStorageState()->GetPixelStoreUnpack());
     ImageRect dstRect(xoffset, yoffset, width, height,
-                      GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetType()),
-                      GlTypeToElementSize(activeTexture->GetType()),
+                      (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetType())),
+                      (int)(GlTypeToElementSize(activeTexture->GetType())),
                       Texture::GetDefaultInternalAlignment());
 
     // copy the buffer contents to the texture
@@ -538,12 +538,12 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
     GLenum dstInternalFormat = internalformat;
     GLenum dstType           = GlInternalFormatToGlType(dstInternalFormat);
     ImageRect srcRect(x, y, width, height,
-                      GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetExplicitType()),
-                      GlTypeToElementSize(fbTexture->GetExplicitType()),
+                      (int)(GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetExplicitType())),
+                      (int)(GlTypeToElementSize(fbTexture->GetExplicitType())),
                       Texture::GetDefaultInternalAlignment());
     ImageRect dstRect(0, 0, width, height,
-                      GlInternalFormatTypeToNumElements(dstInternalFormat, dstType),
-                      GlTypeToElementSize(dstType),
+                      (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, dstType)),
+                      (int)(GlTypeToElementSize(dstType)),
                       Texture::GetDefaultInternalAlignment());
 
     const GLint    layer   = (target == GL_TEXTURE_2D) ? 0 : target - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
@@ -616,12 +616,12 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     GLenum srcInternalFormat = fbTexture->GetExplicitInternalFormat();
     GLenum dstInternalFormat = internalformat;
     ImageRect srcRect(x,       y,       width, height,
-                      GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetExplicitType()),
-                      GlTypeToElementSize(fbTexture->GetExplicitType()),
+                      (int)(GlInternalFormatTypeToNumElements(srcInternalFormat, fbTexture->GetExplicitType())),
+                      (int)(GlTypeToElementSize(fbTexture->GetExplicitType())),
                       Texture::GetDefaultInternalAlignment());
     ImageRect dstRect(xoffset, yoffset, width, height,
-                      GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetType()),
-                      GlTypeToElementSize(activeTexture->GetType()),
+                      (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetType())),
+                      (int)(GlTypeToElementSize(activeTexture->GetType())),
                       Texture::GetDefaultInternalAlignment());
 
     const size_t stageSize = dstRect.GetRectBufferSize();

@@ -200,8 +200,8 @@ ShaderConverter::ProcessMacros(std::string& source)
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + lineStr.length());
 
-        int firstNL  = source.rfind('\n', f1);
-        int secondNL = source.rfind('#' , f1);
+        size_t firstNL  = source.rfind('\n', f1);
+        size_t secondNL = source.rfind('#' , f1);
 
         // check if is used in a define function & linedirective is not used
         if(firstNL >= secondNL && !linedirectiveEnabled) {
@@ -233,8 +233,8 @@ ShaderConverter::ProcessMacros(std::string& source)
         found = SkipWhiteSpaces(source, found + glStr.length());
 
         // check if is used in a ifdef function
-        int firstNL  = source.rfind('\n', f1);
-        int secondNL = source.rfind("#ifdef" , f1);
+        size_t firstNL  = source.rfind('\n', f1);
+        size_t secondNL = source.rfind("#ifdef" , f1);
         if(firstNL >= secondNL) {
             // replace with '1' value
             source.replace(f1, glStr.length(), "1");
@@ -250,7 +250,7 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
     FUN_ENTRY(GL_LOG_DEBUG);
 
     /// Start of dead uniform blocks where the active end
-    uint32_t unusedBlockBindings = uniformBlockMap.size();
+    size_t unusedBlockBindings = uniformBlockMap.size();
     uniformBlockMap_t::const_iterator uniBlockIt;
     std::string layoutSyntax;
     std::string blockSyntax;

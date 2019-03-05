@@ -92,7 +92,7 @@ void DrawMesh(struct openGL_program_t *program, struct openGL_mesh_t *mesh)
     glUseProgram(program->mID);
 
     // Load Textures
-    for (size_t i = 0; i < (size_t)mesh->mTexturesNum; i++) {
+    for (GLint i = 0; i < mesh->mTexturesNum; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, mesh->mTexture[i]->texID);
     }
