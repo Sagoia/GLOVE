@@ -31,12 +31,16 @@ CacheManager::CacheManager(const vulkanAPI::vkContext_t *vkContext)
 { 
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVBOCache.reserve(DEFAULT_CACHE_SIZE);
-    mTextureCache.reserve(DEFAULT_CACHE_SIZE);
-    mVkImageViewCache.reserve(DEFAULT_CACHE_SIZE);
-    mVkImageCache.reserve(DEFAULT_CACHE_SIZE);
-    mVkBufferCache.reserve(DEFAULT_CACHE_SIZE);
-    mVkDeviceMemoryCache.reserve(DEFAULT_CACHE_SIZE);
+    mUBOCache.Reserve(DEFAULT_COUNT);
+    for (uint32_t i = 0; i < UBO_ARRAY_COUNT; ++i) {
+        mUBOLists[i].Reserve(DEFAULT_COUNT);
+    }
+    mVBOCache.Reserve(DEFAULT_COUNT);
+    mTextureCache.Reserve(DEFAULT_COUNT);
+    mVkImageViewCache.Reserve(DEFAULT_COUNT);
+    mVkImageCache.Reserve(DEFAULT_COUNT);
+    mVkBufferCache.Reserve(DEFAULT_COUNT);
+    mVkDeviceMemoryCache.Reserve(DEFAULT_COUNT);
 }
 
 CacheManager::~CacheManager() 
@@ -86,15 +90,15 @@ CacheManager::CleanUpVBOCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!mVBOCache.empty()) {
-        for(uint32_t i = 0; i < mVBOCache.size(); ++i) {
+    if(!mVBOCache.Empty()) {
+        for(uint32_t i = 0; i < mVBOCache.Size(); ++i) {
             if(mVBOCache[i] != nullptr) {
                 delete mVBOCache[i];
                 mVBOCache[i] = nullptr;
             }
         }
 
-        mVBOCache.clear();
+        mVBOCache.Clear();
     }
 }
 
@@ -103,15 +107,15 @@ CacheManager::CleanUpTextureCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if(!mTextureCache.empty()) {
-        for(uint32_t i = 0; i < mTextureCache.size(); ++i) {
+    if(!mTextureCache.Empty()) {
+        for(uint32_t i = 0; i < mTextureCache.Size(); ++i) {
             if(mTextureCache[i] != nullptr) {
                 delete mTextureCache[i];
                 mTextureCache[i] = nullptr;
             }
         }
 
-        mTextureCache.clear();
+        mTextureCache.Clear();
     }
 }
 
@@ -120,12 +124,12 @@ CacheManager::CleanUpImageViewCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mVkImageViewCache.empty()) {
-        for (auto imageView : mVkImageViewCache) {
-            vkDestroyImageView(mVkContext->vkDevice, imageView, nullptr);
+    if (!mVkImageViewCache.Empty()) {
+        for (uint32_t i = 0; i < mVkImageViewCache.Size(); ++i) {
+            vkDestroyImageView(mVkContext->vkDevice, mVkImageViewCache[i], nullptr);
         }
 
-        mVkImageViewCache.clear();
+        mVkImageViewCache.Clear();
     }
 }
 
@@ -134,12 +138,12 @@ CacheManager::CleanUpImageCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mVkImageCache.empty()) {
-        for (auto image : mVkImageCache) {
-            vkDestroyImage(mVkContext->vkDevice, image, nullptr);
+    if (!mVkImageCache.Empty()) {
+        for (uint32_t i = 0; i < mVkImageCache.Size(); ++i) {
+            vkDestroyImage(mVkContext->vkDevice, mVkImageCache[i], nullptr);
         }
 
-        mVkImageCache.clear();
+        mVkImageCache.Clear();
     }
 }
 
@@ -148,12 +152,12 @@ CacheManager::CleanUpBufferCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mVkBufferCache.empty()) {
-        for (auto buffer : mVkBufferCache) {
-            vkDestroyBuffer(mVkContext->vkDevice, buffer, nullptr);
+    if (!mVkBufferCache.Empty()) {
+        for (uint32_t i = 0; i < mVkBufferCache.Size(); ++i) {
+            vkDestroyBuffer(mVkContext->vkDevice, mVkBufferCache[i], nullptr);
         }
 
-        mVkBufferCache.clear();
+        mVkBufferCache.Clear();
     }
 }
 
@@ -162,12 +166,12 @@ CacheManager::CleanUpDeviceMemoryCache()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    if (!mVkDeviceMemoryCache.empty()) {
-        for (auto deviceMemory : mVkDeviceMemoryCache) {
-            vkFreeMemory(mVkContext->vkDevice, deviceMemory, nullptr);
+    if (!mVkDeviceMemoryCache.Empty()) {
+        for (uint32_t i = 0; i < mVkDeviceMemoryCache.Size(); ++i) {
+            vkFreeMemory(mVkContext->vkDevice, mVkDeviceMemoryCache[i], nullptr);
         }
 
-        mVkDeviceMemoryCache.clear();
+        mVkDeviceMemoryCache.Clear();
     }
 }
 
@@ -247,7 +251,7 @@ CacheManager::CacheVBO(BufferObject *vbo)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVBOCache.push_back(vbo);
+    mVBOCache.PushBack(vbo);
 }
 
 void
@@ -255,7 +259,7 @@ CacheManager::CacheTexture(Texture *tex)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mTextureCache.push_back(tex);
+    mTextureCache.PushBack(tex);
 }
 
 void
@@ -263,7 +267,7 @@ CacheManager::CacheVkImageView(VkImageView imageView)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVkImageViewCache.push_back(imageView);
+    mVkImageViewCache.PushBack(imageView);
 }
 
 void
@@ -271,7 +275,7 @@ CacheManager::CacheVkImage(VkImage image)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVkImageCache.push_back(image);
+    mVkImageCache.PushBack(image);
 }
 
 void
@@ -279,7 +283,7 @@ CacheManager::CacheVkBuffer(VkBuffer buffer)
 {
     FUN_ENTRY(GL_LOG_TRACE);
     
-    mVkBufferCache.push_back(buffer);
+    mVkBufferCache.PushBack(buffer);
 }
 
 void
@@ -287,7 +291,7 @@ CacheManager::CacheDeviceMemory(VkDeviceMemory deviceMemory)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVkDeviceMemoryCache.push_back(deviceMemory);
+    mVkDeviceMemoryCache.PushBack(deviceMemory);
 }
 
 void

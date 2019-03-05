@@ -23,7 +23,6 @@
 #ifndef __CACHEMANAGER_H__
 #define __CACHEMANAGER_H__
 
-#include <vector>
 #include <unordered_map>
 #include "arrays.hpp"
 #include "vulkan/vulkan.h"
@@ -39,22 +38,21 @@ class Texture;
 
 class CacheManager {
 private:
-    const static uint32_t DEFAULT_CACHE_SIZE = 256;
+    const static uint32_t DEFAULT_COUNT = 256;
     const static uint32_t UBO_ARRAY_COUNT = 16;
 
     const
     vulkanAPI::vkContext_t *            mVkContext;
 
-    typedef PointArray<UniformBufferObject, DEFAULT_CACHE_SIZE> UBOList;
-    UBOList                             mUBOCache;
-    UBOList                             mUBOLists[UBO_ARRAY_COUNT];
+    PointArray<UniformBufferObject>     mUBOCache;
+    PointArray<UniformBufferObject>     mUBOLists[UBO_ARRAY_COUNT];
 
-    std::vector<BufferObject *>         mVBOCache;
-    std::vector<Texture *>              mTextureCache;
-    std::vector<VkImageView>            mVkImageViewCache;
-    std::vector<VkImage>                mVkImageCache;
-    std::vector<VkBuffer>               mVkBufferCache;
-    std::vector<VkDeviceMemory>         mVkDeviceMemoryCache;
+    PointArray<BufferObject>            mVBOCache;
+    PointArray<Texture>                 mTextureCache;
+    PointArray<VkImageView_T>           mVkImageViewCache;
+    PointArray<VkImage_T>               mVkImageCache;
+    PointArray<VkBuffer_T>              mVkBufferCache;
+    PointArray<VkDeviceMemory_T>        mVkDeviceMemoryCache;
 
     typedef std::unordered_map<uint64_t, VkSampler> SamplerMap;
     SamplerMap                          mVkSamplerCache;
