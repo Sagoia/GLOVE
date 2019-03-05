@@ -62,6 +62,11 @@ Texture::~Texture()
     delete mMemory;
 
     if(mState != nullptr) {
+        for (GLint layer = 0; layer < mLayersCount; ++layer) {
+            for (GLint level = 0; level < mState[layer].Size(); ++level) {
+                delete mState[layer][level];
+            }
+        }
         delete [] mState;
         mState = nullptr;
     }
