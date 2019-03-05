@@ -28,9 +28,9 @@
 #include <stdlib.h>
 
 template <class T, size_t N = 1>
-class Array {
+class PointArray {
 private:
-    typedef T Element;
+    typedef T *Element;
     const static size_t ElementSize = sizeof(Element);
     const static size_t DefaultCapacity = N;
         
@@ -42,19 +42,19 @@ private:
         Element *oldData = mData;
         size_t oldSize = ElementSize * mCapacity;
         mCapacity = capacity;
-        mData = new Element[mCapacity];
+        mData = (Element *)malloc(ElementSize * mCapacity);
         memcpy(mData, oldData, oldSize);
-        delete [] oldData;
+        free(oldData);
     }
         
 public:
-    Array(size_t capacity = DefaultCapacity)
+    PointArray(size_t capacity = DefaultCapacity)
     : mCapacity(capacity), mSize(0) {
         if (mCapacity == 0) { mCapacity = 1; }
-        mData = new Element[mCapacity];
+        mData = (Element *)malloc(ElementSize * mCapacity);
     }
         
-    ~Array(void) { delete [] mData; }
+    ~PointArray(void) { free(mData); }
         
     inline void             Clear(void)                         { mSize = 0; }
     inline bool             Empty(void)                 const   { return (mSize == 0); }
@@ -66,7 +66,6 @@ public:
     inline void             PopBack(void)                       { if (mSize > 0) { --mSize; } }
     inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend(mCapacity << 1);} mData[mSize] = e; ++ mSize; }
     inline void             Reserve(size_t size)                { if (size > mCapacity) { Expend(size); } }
-    inline void             Resize(size_t size)                 { Reserve(size); if (size > mSize) { mSize = size; } }
 };
 
 /**
@@ -85,7 +84,7 @@ private:
     uint32_t mCounter;                 /**< The id (key-value of the map)
                                           reserved during the creation of a new
                                           object. */
-    Array<ELEMENT *> mObjects;         /**< The templated map container (one
+    PointArray<ELEMENT> mObjects;      /**< The templated map container (one
                                           for each different class that maps
                                           id to a specific object). */
 public:
@@ -194,7 +193,7 @@ public:
      * @brief Returns the map container for a specific class.
      * @return The map container.
      */
-    inline Array<ELEMENT *>& GetObjects(void)
+    inline PointArray<ELEMENT>& GetObjects(void)
     {
         return mObjects;
     }

@@ -56,7 +56,13 @@ ShaderResourceInterface::CleanUp(void)
     mLiveUniformBlocks = 0;
 
     mAttributeInterface.clear();
+    for (uint32_t i = 0; i < mUniforms.Size(); ++i) {
+        delete mUniforms[i];
+    }
     mUniforms.Clear();
+    for (uint32_t i = 0; i < mUniformBlocks.Size(); ++i) {
+        delete mUniformBlocks[i];
+    }
     mUniformBlocks.Clear();
 }
 
@@ -84,21 +90,23 @@ ShaderResourceInterface::CreateInterface(void)
     }
 
     for(uint32_t i = 0; i < mLiveUniforms; ++i) {
-        uniform u(mShaderReflection->GetUniformReflectionName(i),
-                  mShaderReflection->GetUniformLocation(i),
-                  mShaderReflection->GetUniformBlockIndex(i),
-                  mShaderReflection->GetUniformArraySize(i),
-                  mShaderReflection->GetUniformType(i),
-                  mShaderReflection->GetUniformOffset(i));
+        uniform *u = new uniform(
+            mShaderReflection->GetUniformReflectionName(i),
+            mShaderReflection->GetUniformLocation(i),
+            mShaderReflection->GetUniformBlockIndex(i),
+            mShaderReflection->GetUniformArraySize(i),
+            mShaderReflection->GetUniformType(i),
+            mShaderReflection->GetUniformOffset(i));
         mUniforms.PushBack(u);
     }
 
     for(uint32_t i = 0; i < mLiveUniformBlocks; ++i) {
-        uniformBlock ub(mShaderReflection->GetUniformBlockGlslBlockName(i),
-                        mShaderReflection->GetUniformBlockBinding(i),
-                        mShaderReflection->GetUniformBlockBlockSize(i),
-                        mShaderReflection->GetUniformBlockBlockStage(i),
-                        mShaderReflection->GetUniformBlockOpaque(i));
+        uniformBlock *ub = new uniformBlock(
+            mShaderReflection->GetUniformBlockGlslBlockName(i),
+            mShaderReflection->GetUniformBlockBinding(i),
+            mShaderReflection->GetUniformBlockBlockSize(i),
+            mShaderReflection->GetUniformBlockBlockStage(i),
+            mShaderReflection->GetUniformBlockOpaque(i));
         mUniformBlocks.PushBack(ub);
     }
 }
@@ -110,8 +118,8 @@ ShaderResourceInterface::AllocateUniformClientData(void)
 
     for (uint32_t i = 0; i < mUniforms.Size(); ++i) {
         auto& uni = mUniforms[i];
-        size_t clientDataSize = uni.arraySize * GlslTypeToSize(uni.glType);
-        uni.pClientData = (uint8_t *)calloc(clientDataSize, sizeof(uint8_t));
+        size_t clientDataSize = uni->arraySize * GlslTypeToSize(uni->glType);
+        uni->pClientData = (uint8_t *)calloc(clientDataSize, sizeof(uint8_t));
     }
 }
 
@@ -124,14 +132,14 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::vkContext
     for (uint32_t i = 0; i < mUniformBlocks.Size(); ++i) {
         auto &uniBlock = mUniformBlocks[i];
         UniformBufferObject *ubo = nullptr;
-        if(!uniBlock.isOpaque) {
-            assert(uniBlock.blockSize);
+        if(!uniBlock->isOpaque) {
+            assert(uniBlock->blockSize);
             ubo = new UniformBufferObject(vkContext);
-            ubo->Allocate(uniBlock.requiredSize, nullptr, uniBlock.blockSize);
+            ubo->Allocate(uniBlock->requiredSize, nullptr, uniBlock->blockSize);
         } else {
             ++ mLiveSamplers;
         }
-        uniBlock.pBufferObject = ubo;
+        uniBlock->pBufferObject = ubo;
     }
 
     return true;
@@ -146,26 +154,26 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::vkContext_t *v
         auto &uniformBlock = mUniformBlocks[i];
         auto &uniform = mUniforms[i];
 
-        if (uniform.clientDataDirty) {
-            uniform.clientDataDirty = false;
+        if (uniform->clientDataDirty) {
+            uniform->clientDataDirty = false;
 
-            if (IsBuildInUniform(uniform.reflectionName)) {
+            if (IsBuildInUniform(uniform->reflectionName)) {
                 continue;
             }
 
-            UniformBufferObject *bufferObject = uniformBlock.pBufferObject;
+            UniformBufferObject *bufferObject = uniformBlock->pBufferObject;
             if(bufferObject) {
                 mCacheManager->CacheUBO(bufferObject);
             }
 
-            bufferObject = mCacheManager->GetUBO(uniformBlock.cacheIndex);
+            bufferObject = mCacheManager->GetUBO(uniformBlock->cacheIndex);
             if (bufferObject) {
-                bufferObject->UpdateData(uniformBlock.blockSize, 0, uniform.pClientData);
+                bufferObject->UpdateData(uniformBlock->blockSize, 0, uniform->pClientData);
             } else {
                 bufferObject = new UniformBufferObject(vkContext);
-                bufferObject->Allocate(uniformBlock.requiredSize, uniform.pClientData, uniformBlock.blockSize);
+                bufferObject->Allocate(uniformBlock->requiredSize, uniform->pClientData, uniformBlock->blockSize);
             }
-            uniformBlock.pBufferObject = bufferObject;
+            uniformBlock->pBufferObject = bufferObject;
 
             *allocatedNewBufferObject = true;
         }
@@ -181,8 +189,8 @@ ShaderResourceInterface::GetUniformAtLocation(uint32_t location)
 
     for (uint32_t i = 0; i < mUniforms.Size(); ++i) {
         const auto &uniform = mUniforms[i];
-        if(location >= (uint32_t)uniform.location && location < (uint32_t)(uniform.location + uniform.arraySize)) {
-            return &uniform;
+        if(location >= (uint32_t)uniform->location && location < (uint32_t)(uniform->location + uniform->arraySize)) {
+            return uniform;
         }
     }
 
@@ -199,8 +207,8 @@ ShaderResourceInterface::GetUniformLocation(const char *name) const
     if(name[strlen(name) - 1] != ']') {
         for (uint32_t i = 0; i < mUniforms.Size(); ++i) {
             auto &uni = mUniforms[i];
-            if(!strcmp(uni.reflectionName.c_str(), name)) {
-                return uni.location;
+            if(!strcmp(uni->reflectionName.c_str(), name)) {
+                return uni->location;
             }
         }
     } else {
@@ -212,11 +220,11 @@ ShaderResourceInterface::GetUniformLocation(const char *name) const
         std::string ptrName = requestedName.substr(0, leftBracketPos);
         for (uint32_t i = 0; i < mUniforms.Size(); ++i) {
             auto &uni = mUniforms[i];
-            if(!ptrName.compare(uni.reflectionName)) {
-                if(index >= uni.arraySize) {
+            if(!ptrName.compare(uni->reflectionName)) {
+                if(index >= uni->arraySize) {
                     return -1;
                 } else {
-                    return uni.location + index;
+                    return uni->location + index;
                 }
             }
         }
@@ -402,7 +410,7 @@ ShaderResourceInterface::SetActiveUniformMaxLength(void)
     mActiveUniformMaxLength = 0;
     for (uint32_t i = 0; i < mUniforms.Size(); ++i) {
         auto &uniform = mUniforms[i];
-        size_t len = uniform.reflectionName.length() + 1;
+        size_t len = uniform->reflectionName.length() + 1;
         if(len > mActiveUniformMaxLength) {
             mActiveUniformMaxLength = len;
         }

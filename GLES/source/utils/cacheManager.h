@@ -25,7 +25,7 @@
 
 #include <vector>
 #include <unordered_map>
-#include "utils/arrays.hpp"
+#include "arrays.hpp"
 #include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
 
@@ -45,7 +45,7 @@ private:
     const
     vulkanAPI::vkContext_t *            mVkContext;
 
-    typedef Array<UniformBufferObject*, DEFAULT_CACHE_SIZE> UBOList;
+    typedef PointArray<UniformBufferObject, DEFAULT_CACHE_SIZE> UBOList;
     UBOList                             mUBOCache;
     UBOList                             mUBOLists[UBO_ARRAY_COUNT];
 

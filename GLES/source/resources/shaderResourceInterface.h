@@ -161,8 +161,8 @@ private:
 
     attributeInterface mAttributeInterface;
 
-    Array<uniform>      mUniforms;
-    Array<uniformBlock> mUniformBlocks;
+    PointArray<uniform>         mUniforms;
+    PointArray<uniformBlock>    mUniformBlocks;
 
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;
@@ -189,19 +189,19 @@ public:
     int GetAttributeType(int index) const;
     const std::string & GetAttributeName(int index) const;
 
-    inline const uniform & GetUniform(uint32_t index)                           const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index]; }
-    inline const uniformBlock & GetUniformBlock(uint32_t index)                 const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index]; }
-    inline int32_t GetUniformblockIndex(uint32_t index)                         const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].blockIndex; }
-    inline int32_t GetUniformArraySize(uint32_t index)                          const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].arraySize; }
-    inline GLenum GetUniformType(uint32_t index)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index].glType; }
+    inline const uniform & GetUniform(uint32_t index)                           const { FUN_ENTRY(GL_LOG_TRACE); return *(mUniforms[index]); }
+    inline const uniformBlock & GetUniformBlock(uint32_t index)                 const { FUN_ENTRY(GL_LOG_TRACE); return *(mUniformBlocks[index]); }
+    inline int32_t GetUniformblockIndex(uint32_t index)                         const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index]->blockIndex; }
+    inline int32_t GetUniformArraySize(uint32_t index)                          const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index]->arraySize; }
+    inline GLenum GetUniformType(uint32_t index)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUniforms[index]->glType; }
     void CopyUniformClientData(uint32_t location, size_t size, void *ptr);
-    inline const uint8_t* GetUniformClientData(uint32_t index)                  const { FUN_ENTRY(GL_LOG_DEBUG); return mUniforms[index].pClientData; }
-    inline UniformBufferObject * GetUniformBufferObject(uint32_t index)         const { FUN_ENTRY(GL_LOG_DEBUG); return mUniformBlocks[index].pBufferObject; }
+    inline const uint8_t* GetUniformClientData(uint32_t index)                  const { FUN_ENTRY(GL_LOG_DEBUG); return mUniforms[index]->pClientData; }
+    inline UniformBufferObject * GetUniformBufferObject(uint32_t index)         const { FUN_ENTRY(GL_LOG_DEBUG); return mUniformBlocks[index]->pBufferObject; }
     int GetUniformLocation(const char *name) const;
 
-    inline uint32_t GetUniformBlockBinding(uint32_t index)                      const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index].binding; }
-    inline shader_type_t GetUniformBlockBlockStage(uint32_t index)              const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index].blockStage; }
-    inline bool IsUniformBlockOpaque(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index].isOpaque; }
+    inline uint32_t GetUniformBlockBinding(uint32_t index)                      const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index]->binding; }
+    inline shader_type_t GetUniformBlockBlockStage(uint32_t index)              const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index]->blockStage; }
+    inline bool IsUniformBlockOpaque(uint32_t index)                            const { FUN_ENTRY(GL_LOG_TRACE); return mUniformBlocks[index]->isOpaque; }
 
     const ShaderResourceInterface::uniform * GetUniformAtLocation(uint32_t location);
     const ShaderResourceInterface::attribute * GetVertexAttribute(int index) const;

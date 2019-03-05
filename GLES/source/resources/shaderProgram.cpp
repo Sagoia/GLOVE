@@ -649,19 +649,16 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
     // store attribute locations containing the same VkBuffer and stride
     // as they are directly associated with vertex input bindings
-    static Array<bufferLocations, GLOVE_MAX_VERTEX_ATTRIBS> unique_buffer_strides;
-    static Array<uint32_t, GLOVE_MAX_VERTEX_ATTRIBS> locations[GLOVE_MAX_VERTEX_ATTRIBS];
+    static bufferLocations unique_buffer_strides[GLOVE_MAX_VERTEX_ATTRIBS];
+    static uint32_t locations[GLOVE_MAX_VERTEX_ATTRIBS][GLOVE_MAX_VERTEX_ATTRIBS];
 
     if(mGLContext->IsModeLineLoop()) {
         --vertCount;
     }
 
-    unique_buffer_strides.Clear();
-    for (uint32_t i = 0; i < GLOVE_MAX_VERTEX_ATTRIBS; ++i) {
-        locations[i].Clear();
-    }
+    uint32_t unique_buffer_strides_count = 0;
+    uint32_t locations_count[GLOVE_MAX_VERTEX_ATTRIBS] = { 0, };
 
-    
     uint32_t locationUsed[MAX_LOCATION_COUNT] = {0,};
 
     for(uint32_t i = 0; i < mShaderResourceInterface.GetLiveAttributes(); ++i) {
@@ -709,15 +706,18 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             int32_t stride      = gva.GetStride();
             bufferLocations p   = {bo, stride};
             uint32_t index = 0;
-            for (; index < unique_buffer_strides.Size(); ++index) {
+            for (; index < unique_buffer_strides_count; ++index) {
                 if (p == unique_buffer_strides[index]) {
                     break;
                 }
             }
-            if (index == unique_buffer_strides.Size()) {
-                unique_buffer_strides.PushBack(p);
+            if (index == unique_buffer_strides_count) {
+                unique_buffer_strides[index] = p;
+                ++ unique_buffer_strides_count;
             }
-            locations[index].PushBack(location);
+            uint32_t location_count = locations_count[index];
+            locations[index][location_count] = location;
+            locations_count[index] = location_count + 1;
             locationUsed[location] = 1;
         }
     }
@@ -731,10 +731,10 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
     // generate unique bindings for each VKbuffer/stride pair
     uint32_t current_binding = 0;
-    for (uint32_t i = 0; i < unique_buffer_strides.Size(); ++i) {
+    for (uint32_t i = 0; i < unique_buffer_strides_count; ++i) {
         VkBuffer bo = unique_buffer_strides[i].buffer;
-        auto &locals = locations[i];
-        for (uint32_t j = 0; j < locals.Size(); ++j) {
+        uint32_t *locals = locations[i];
+        for (uint32_t j = 0; j < locations_count[i]; ++j) {
             vboLocationBindings[locals[j]] = current_binding;
         }
         mActiveVertexVkBuffers[current_binding] = bo;

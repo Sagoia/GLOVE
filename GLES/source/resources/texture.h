@@ -30,7 +30,7 @@
 #include "vulkan/sampler.h"
 #include "vulkan/imageView.h"
 #include "vulkan/cbManager.h"
-#include "utils/arrays.hpp"
+#include "arrays.hpp"
 #include "utils/GlToVkConverter.h"
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
@@ -52,7 +52,7 @@ class Texture {
         ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
     typedef State                   State_t;
-    typedef Array<State_t>          States_t;
+    typedef PointArray<State_t>     States_t;
 
 private:
     const

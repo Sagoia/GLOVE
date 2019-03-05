@@ -98,7 +98,7 @@ Texture::IsCompleted(void)
         return true;
     }
 
-    State_t *state = &mState[0][0];
+    State_t *state = mState[0][0];
     if(state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
         return false;
     }
@@ -115,7 +115,7 @@ Texture::IsCompleted(void)
 
         for(GLint level = 0; level < levels; ++level) {
 
-            state = &mState[layer][level];
+            state = mState[layer][level];
 
             if (!GlInternalFormatIsCompressed(state->format) &&
                 (state->format == GL_INVALID_VALUE || state->type == GL_INVALID_VALUE)) {
@@ -148,7 +148,7 @@ Texture::IsValid(void)
         return false;
     }
 
-    State_t *state = &mState[0][0];
+    State_t *state = mState[0][0];
     if (state->format == GL_INVALID_VALUE || state->width <= 0 || state->height <= 0) {
         return false;
     }
@@ -166,7 +166,7 @@ Texture::IsValid(void)
 
         for (GLint level = 0; level < levels; ++level) {
 
-            state = &mState[layer][level];
+            state = mState[layer][level];
 
             if (!GlInternalFormatIsCompressed(state->format) &&
                 (state->format == GL_INVALID_VALUE || state->type == GL_INVALID_VALUE)) {
@@ -259,7 +259,7 @@ Texture::Allocate(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    State_t *state = &mState[0][0];
+    State_t *state = mState[0][0];
 
     SetWidth (state->width);
     SetHeight(state->height);
@@ -286,7 +286,7 @@ Texture::Allocate(void)
     GLenum dstType = mExplicitType;
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
         for(GLint level = 0; level < mMipLevelsCount; ++level) {
-            state = &mState[layer][level];
+            state = mState[layer][level];
             if(!state->data) {
                 continue;
             }
@@ -317,24 +317,28 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
 
     if (level == 0) {
         uint32_t mipLevel = NUMBER_OF_MIP_LEVELS(width, height);
-        if (mState[layer].Size() != mipLevel) {
-            mState[layer].Resize(mipLevel);
+        if (mState[layer].Capacity() < mipLevel) {
+            mState[layer].Reserve(mipLevel);
+            uint32_t count = mipLevel - mState[layer].Size();
+            for (uint32_t i = 0; i < count; ++i) {
+                mState[layer].PushBack(new State_t());
+            }
         }
     }
 
-    mState[layer][level].width  = width;
-    mState[layer][level].height = height;
-    mState[layer][level].format = format;
-    mState[layer][level].type   = type;
+    mState[layer][level]->width  = width;
+    mState[layer][level]->height = height;
+    mState[layer][level]->format = format;
+    mState[layer][level]->type   = type;
 
     if (layer == 0 && level == 0) {
         mIsNPOT = format == GL_INVALID_VALUE ? false : (!ISPOWEROFTWO(width) || !ISPOWEROFTWO(height));
         UpdateNPOTAccessCompleted();
     }
 
-    if(mState[layer][level].data) {
-        delete [] (uint8_t *)mState[layer][level].data;
-        mState[layer][level].data = nullptr;
+    if(mState[layer][level]->data) {
+        delete [] (uint8_t *)mState[layer][level]->data;
+        mState[layer][level]->data = nullptr;
     }
 
     if(pixels) {
@@ -351,8 +355,8 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
                           GlTypeToElementSize(type),
                           Texture::GetDefaultInternalAlignment());
         size_t size       = dstRect.GetRectBufferSize();
-        mState[layer][level].data = new uint8_t[size];
-        void *data = mState[layer][level].data;
+        mState[layer][level]->data = new uint8_t[size];
+        void *data = mState[layer][level]->data;
         ConvertPixels(srcInternalFormat, srcInternalFormat,
                       &srcRect, pixels,
                       &dstRect, data);
@@ -366,13 +370,13 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mState[layer][level].data == nullptr) {
-        ImageRect srcRect(0, 0, mState[layer][level].width, mState[layer][level].height,
+    if(mState[layer][level]->data == nullptr) {
+        ImageRect srcRect(0, 0, mState[layer][level]->width, mState[layer][level]->height,
                           GlInternalFormatTypeToNumElements(GetInternalFormat(), GetType()),
                           GlTypeToElementSize(GetType()),
                           Texture::GetDefaultInternalAlignment());
         size_t size        = srcRect.GetRectBufferSize();
-        mState[layer][level].data = new uint8_t[size];
+        mState[layer][level]->data = new uint8_t[size];
     }
 
     if(srcData) {
@@ -403,11 +407,11 @@ Texture::SetSubState(ImageRect *srcRect, ImageRect *dstRect, GLint level, GLint 
         tmp_srcRect = *srcRect;
         tmp_dstRect = *dstRect;
         tmp_srcRect.mAlignment = Texture::GetDefaultInternalAlignment();
-        tmp_dstRect.width = mState[layer][level].width;
-        tmp_dstRect.height = mState[layer][level].height;
+        tmp_dstRect.width = mState[layer][level]->width;
+        tmp_dstRect.height = mState[layer][level]->height;
 
         CopyPixelsNoConversion(&tmp_srcRect, dstData,
-                              &tmp_dstRect, mState[layer][level].data);
+                              &tmp_dstRect, mState[layer][level]->data);
         delete[] dstData;
     }
 
@@ -421,32 +425,36 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
 
     if (level == 0) {
         uint32_t mipLevel = NUMBER_OF_MIP_LEVELS(width, height);
-        if (mState[layer].Size() != mipLevel) {
-            mState[layer].Resize(mipLevel);
+        if (mState[layer].Capacity() < mipLevel) {
+            mState[layer].Reserve(mipLevel);
+            uint32_t count = mipLevel - mState[layer].Size();
+            for (uint32_t i = 0; i < count; ++i) {
+                mState[layer].PushBack(new State_t());
+            }
         }
     }
 
-    mState[layer][level].width = width;
-    mState[layer][level].height = height;
-    mState[layer][level].format = internalformat;
-    mState[layer][level].type = GL_INVALID_VALUE;
-    mState[layer][level].size = size;
+    mState[layer][level]->width = width;
+    mState[layer][level]->height = height;
+    mState[layer][level]->format = internalformat;
+    mState[layer][level]->type = GL_INVALID_VALUE;
+    mState[layer][level]->size = size;
 
     if (layer == 0 && level == 0) {
         mIsNPOT = internalformat == GL_INVALID_VALUE ? false : (!ISPOWEROFTWO(width) || !ISPOWEROFTWO(height));
         UpdateNPOTAccessCompleted();
     }
 
-    if (mState[layer][level].data) {
-        delete[](uint8_t *)mState[layer][level].data;
-        mState[layer][level].data = nullptr;
+    if (mState[layer][level]->data) {
+        delete[](uint8_t *)mState[layer][level]->data;
+        mState[layer][level]->data = nullptr;
     }
 
     if (imageData) {
         uint8_t *data = new uint8_t[size];
         if (data) {
             memcpy(data, imageData, size);
-            mState[layer][level].data = data;
+            mState[layer][level]->data = data;
         }
     }
 
