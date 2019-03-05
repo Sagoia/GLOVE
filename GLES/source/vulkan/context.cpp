@@ -291,9 +291,9 @@ CreateVkInstance(void)
     VkApplicationInfo applicationInfo;
     applicationInfo.sType             = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     applicationInfo.pNext             = nullptr;
-    applicationInfo.pApplicationName  = "GLOVE (GL Over Vulkan)\0";
+    applicationInfo.pApplicationName  = "GLOVE (GL Over Vulkan)";
     applicationInfo.applicationVersion= 1;
-    applicationInfo.pEngineName       = "GLOVE (GL Over Vulkan)\0";
+    applicationInfo.pEngineName       = "GLOVE (GL Over Vulkan)";
     applicationInfo.engineVersion     = 1;
     applicationInfo.apiVersion        = VK_API_VERSION_1_0;
 
