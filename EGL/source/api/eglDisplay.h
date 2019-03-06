@@ -40,7 +40,8 @@
 
 typedef void* eglDisplayHandle;
 
-struct EGLDisplay_t {
+class EGLDisplay_t {
+public:
     EGLNativeDisplayType display_id;
     EGLDisplay display;
     void* displayDriver;
@@ -50,7 +51,7 @@ struct EGLDisplay_t {
         displayDriver(nullptr), created(false)
     { }
 
-    static struct EGLDisplay_t globalDisplayList[MAX_NUM_DISPLAYS];
+    static EGLDisplay_t globalDisplayList[MAX_NUM_DISPLAYS];
     static EGLDisplay_t* GetDisplayByID(EGLNativeDisplayType display_id);
     static EGLDisplay_t* FindDisplay(EGLDisplay display);
     static EGLBoolean InitializeDisplay(EGLDisplay dpy, void* displayDriver);

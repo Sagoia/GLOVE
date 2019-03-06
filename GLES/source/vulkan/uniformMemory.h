@@ -15,7 +15,6 @@ private:
     const
     vkContext_t *                   mVkContext;
 
-    VkDeviceMemory                  mVkMemory;
     const
     VkMemoryMapFlags                mVkMemoryFlags;
     VkFlags                         mVkFlags;
