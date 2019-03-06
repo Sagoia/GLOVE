@@ -58,11 +58,15 @@ extern "C" {
 #   define GL_SOURCE_FILE_NAME                          &__FILE__[ PROJECT_LENGTH ]
 #   define FUN_ENTRY(__lvl__)                           GLLogger::FunEntry(__lvl__, GL_SOURCE_FILE_NAME, __func__, __LINE__)
 #   define GLOVE_PRINT(__lvl__, ...)                    GLLogger::Log(__lvl__, __VA_ARGS__)
-#   define GLOVE_PRINT_ERR(...)                         fprintf(stderr, __VA_ARGS__);
 #else
 #   define FUN_ENTRY(__lvl__)
 #   define GLOVE_PRINT(...)
+#endif
+
+#ifdef NDEBUG
 #   define GLOVE_PRINT_ERR(...)
+#else
+#   define GLOVE_PRINT_ERR(...)                         fprintf(stderr, __VA_ARGS__);
 #endif
 
 class GLLogger {

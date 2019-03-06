@@ -126,6 +126,7 @@ GlslangCompiler::CompileShader400(const char* const* source, EShLanguage languag
             result = mSlangShader400->parse(resources, 400, EEsProfile, false, false, static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules | EShMsgOnlyPreprocessor | EShMsgRelaxedErrors));
         }
         GLOVE_PRINT_ERR("shader 400:\n%s\n", mSlangShader400->getInfoLog());
+        GLOVE_PRINT_ERR("shader Source:\n%s\n", *source);
     }
 
     return result;
