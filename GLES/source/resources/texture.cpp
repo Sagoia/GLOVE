@@ -324,7 +324,9 @@ Texture::SetState(GLsizei width, GLsizei height, GLint level, GLint layer, GLenu
         uint32_t mipLevel = (uint32_t)NUMBER_OF_MIP_LEVELS(width, height);
         if (mState[layer].Capacity() < mipLevel) {
             mState[layer].Reserve(mipLevel);
-            uint32_t count = mipLevel - mState[layer].Size();
+        }
+        uint32_t count = mipLevel - mState[layer].Size();
+        if (count > 0) {
             for (uint32_t i = 0; i < count; ++i) {
                 mState[layer].PushBack(new State_t());
             }
@@ -432,7 +434,9 @@ Texture::SetCompressedState(GLsizei width, GLsizei height, GLint level, GLint la
         uint32_t mipLevel = (uint32_t)NUMBER_OF_MIP_LEVELS(width, height);
         if (mState[layer].Capacity() < mipLevel) {
             mState[layer].Reserve(mipLevel);
-            uint32_t count = mipLevel - mState[layer].Size();
+        }
+        uint32_t count = mipLevel - mState[layer].Size();
+        if (count > 0) {
             for (uint32_t i = 0; i < count; ++i) {
                 mState[layer].PushBack(new State_t());
             }
