@@ -26,8 +26,6 @@ set(SOURCES
 )
 
 set(HEADERS
-    ${CMAKE_SOURCE_DIR}/Common/arrays.hpp
-    ${CMAKE_SOURCE_DIR}/EGL/include/rendering_api_interface.h
     api/eglConfig.h
     api/eglConfig_android.h
     api/eglConfig_ios.h
@@ -57,6 +55,11 @@ set(HEADERS
     utils/eglLoggerImpl.h
     utils/eglUtils.h
     utils/simpleLoggerImpl.h
+)
+
+set(OTHER_HEADERS
+    ${CMAKE_SOURCE_DIR}/Common/arrays.hpp
+    ${CMAKE_SOURCE_DIR}/EGL/include/rendering_api_interface.h
 )
 
 # Sets the LIBS variable to contain the libraries that GLESv2 shared library
@@ -91,7 +94,19 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 if(WIN32)
-    add_library(EGL SHARED ${HEADERS} ${SOURCES})
+    foreach(_header IN ITEMS ${HEADERS})
+        get_filename_component(_header_path "${_header}" PATH)
+        string(REPLACE "/" "\\" _group_path "${_header_path}")
+        source_group("Header Files\\${_group_path}" FILES "${_header}")
+    endforeach()
+
+    foreach(_source IN ITEMS ${SOURCES})
+        get_filename_component(_source_path "${_source}" PATH)
+        string(REPLACE "/" "\\" _group_path "${_source_path}")
+        source_group("Source Files\\${_group_path}" FILES "${_source}")
+    endforeach()
+
+    add_library(EGL SHARED ${OTHER_HEADERS} ${HEADERS} ${SOURCES})
 
     set_target_properties(EGL PROPERTIES PREFIX "lib"
                                          POSITION_INDEPENDENT_CODE ON
@@ -100,7 +115,7 @@ if(WIN32)
                                          INSTALL_RPATH "\$ORIGIN")
 else()
     if(IOS)
-        add_library(EGL STATIC ${HEADERS} ${SOURCES})
+        add_library(EGL STATIC ${OTHER_HEADERS} ${HEADERS} ${SOURCES})
         set_target_properties(EGL PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
                                              XCODE_ATTRIBUTE_VALID_ARCHS "arm64"
                                              POSITION_INDEPENDENT_CODE ON

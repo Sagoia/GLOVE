@@ -78,7 +78,6 @@ set(SOURCES
 )
 
 set(HEADERS
-    ${CMAKE_SOURCE_DIR}/Common/arrays.hpp
     api/glFunctions.h
     context/context.h
     glslang/glslang_utils.h
@@ -142,6 +141,10 @@ set(HEADERS
     vulkan/utils.h
 )
 
+set(OTHER_HEADERS
+    ${CMAKE_SOURCE_DIR}/Common/arrays.hpp
+)
+
 # Where the .h files included in the source files can be found.
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include
@@ -155,6 +158,18 @@ link_directories(${GLSLANG_PATH}/lib)
 
 # Ensure we re-link if our external libraries change.
 if(WIN32)
+    foreach(_header IN ITEMS ${HEADERS})
+        get_filename_component(_header_path "${_header}" PATH)
+        string(REPLACE "/" "\\" _group_path "${_header_path}")
+        source_group("Header Files\\${_group_path}" FILES "${_header}")
+    endforeach()
+
+    foreach(_source IN ITEMS ${SOURCES})
+        get_filename_component(_source_path "${_source}" PATH)
+        string(REPLACE "/" "\\" _group_path "${_source_path}")
+        source_group("Source Files\\${_group_path}" FILES "${_source}")
+    endforeach()
+
     set(LIBS
         ${Vulkan_LIBRARY}
         debug ${GLSLANG_PATH}/lib/glslangd.lib
@@ -169,7 +184,7 @@ if(WIN32)
         optimized ${GLSLANG_PATH}/lib/OSDependent.lib
     )
 
-    add_library(GLESv2 SHARED ${HEADERS} ${SOURCES})
+    add_library(GLESv2 SHARED ${OTHER_HEADERS} ${HEADERS} ${SOURCES})
 
     set_target_properties(GLESv2 PROPERTIES PREFIX "lib"
                                             POSITION_INDEPENDENT_CODE ON
@@ -211,7 +226,7 @@ else()
     set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
 
     if(IOS)
-        add_library(GLESv2 STATIC ${HEADERS} ${SOURCES})
+        add_library(GLESv2 STATIC ${OTHER_HEADERS} ${HEADERS} ${SOURCES})
         set_target_properties(GLESv2 PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
                                                 XCODE_ATTRIBUTE_VALID_ARCHS "arm64"
                                                 POSITION_INDEPENDENT_CODE ON
