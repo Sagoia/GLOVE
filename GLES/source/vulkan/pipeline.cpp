@@ -60,10 +60,10 @@ Pipeline::~Pipeline()
 void
 Pipeline::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    mVkViewport.x = x;
-    mVkViewport.y = y;
-    mVkViewport.width = width;
-    mVkViewport.height = height;
+    mVkViewport.x = (float)x;
+    mVkViewport.y = (float)y;
+    mVkViewport.width = (float)width;
+    mVkViewport.height = (float)height;
 }
 
 void

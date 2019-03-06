@@ -352,7 +352,7 @@ EGLSurface_t::SetMipmapLevel(EGLint mipmapLevel)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
 
-    EGLint maxMipmapLevel = NUMBER_OF_MIP_LEVELS(Width, Height);
+    EGLint maxMipmapLevel = (EGLint)NUMBER_OF_MIP_LEVELS(Width, Height);
     MipmapLevel = std::max(0, std::min(mipmapLevel, maxMipmapLevel));
 }
 

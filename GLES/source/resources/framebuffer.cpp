@@ -315,7 +315,7 @@ Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t sten
 {
     GLenum glFormat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
     size_t numElements = GlInternalFormatTypeToNumElements(glFormat, mDepthStencilTexture->GetExplicitType());
-    ImageRect srcRect(clearRect, numElements, 1, Texture::GetDefaultInternalAlignment());
+    ImageRect srcRect(clearRect, (int)numElements, 1, Texture::GetDefaultInternalAlignment());
 
     ImageRect dstRect = srcRect;
     dstRect.x = 0;
@@ -389,12 +389,12 @@ Framebuffer::CreateRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bo
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mUpdated || mSizeUpdated ||
-       mRenderPass->GetColorClearEnabled()   != clearColorEnabled    ||
-       mRenderPass->GetDepthClearEnabled()   != clearDepthEnabled    ||
-       mRenderPass->GetStencilClearEnabled() != clearStencilEnabled  ||
-       mRenderPass->GetColorWriteEnabled()   != writeColorEnabled    ||
-       mRenderPass->GetDepthWriteEnabled()   != writeDepthEnabled    ||
-       mRenderPass->GetStencilWriteEnabled() != writeStencilEnabled) {
+       (bool)mRenderPass->GetColorClearEnabled()   != clearColorEnabled    ||
+       (bool)mRenderPass->GetDepthClearEnabled()   != clearDepthEnabled    ||
+       (bool)mRenderPass->GetStencilClearEnabled() != clearStencilEnabled  ||
+       (bool)mRenderPass->GetColorWriteEnabled()   != writeColorEnabled    ||
+       (bool)mRenderPass->GetDepthWriteEnabled()   != writeDepthEnabled    ||
+       (bool)mRenderPass->GetStencilWriteEnabled() != writeStencilEnabled) {
 
         if(!mIsSystem && mSizeUpdated) {
             CreateDepthStencilTexture();

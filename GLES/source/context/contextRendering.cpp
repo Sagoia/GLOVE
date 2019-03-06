@@ -227,12 +227,11 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     }
 
     uint32_t indexOffset = 0;
-    uint32_t maxIndex = 0;
     if(indexed) {
-        UpdateIndices(&indexOffset, &maxIndex, vertCount, type, indices, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER));
+        UpdateIndices(&indexOffset, vertCount, type, indices, mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER));
     }
 
-    UpdateVertexAttributes(indexed ? maxIndex + 1 : vertCount, firstVertex);
+    UpdateVertexAttributes(vertCount, firstVertex);
 
     if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
         GLboolean colormask[4];
@@ -273,12 +272,12 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
 }
 
 void
-Context::UpdateIndices(uint32_t* offset, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
+Context::UpdateIndices(uint32_t* offset, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
     if(mPipeline->GetUpdateIndexBuffer() || indices) {
-        mStateManager.GetActiveShaderProgram()->PrepareIndexBufferObject(offset, maxIndex, indexCount, type, indices, ibo);
+        mStateManager.GetActiveShaderProgram()->PrepareIndexBufferObject(offset, indexCount, type, indices, ibo);
         mPipeline->SetUpdateIndexBuffer(false);
     }
 }

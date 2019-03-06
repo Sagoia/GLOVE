@@ -95,7 +95,7 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
 
         attachments.push_back(attachmentColor);
 
-        color.attachment           = attachments.size() - 1;
+        color.attachment           = (uint32_t)attachments.size() - 1;
         color.layout               = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     }
 
@@ -118,7 +118,7 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
 
         attachments.push_back(attachmentDepthStencil);
 
-        depthstencil.attachment   = attachments.size() - 1;
+        depthstencil.attachment   = (uint32_t)attachments.size() - 1;
         depthstencil.layout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     }
 

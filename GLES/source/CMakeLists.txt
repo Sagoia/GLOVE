@@ -78,6 +78,7 @@ set(SOURCES
 )
 
 set(HEADERS
+    ${CMAKE_SOURCE_DIR}/Common/arrays.hpp
     api/glFunctions.h
     context/context.h
     glslang/glslang_utils.h
@@ -112,7 +113,6 @@ set(HEADERS
     state/stateRasterization.h
     state/stateHintAspects.h
     state/stateViewportTransformation.h
-    utils/arrays.hpp
     utils/color.hpp
     utils/globals.h
     utils/glsl_types.h
@@ -146,6 +146,7 @@ set(HEADERS
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include
                     ${EGL_PATH}/include
+                    ${CMAKE_SOURCE_DIR}/Common
                     ${GLSLANG_PATH}/include
                     ${Vulkan_INCLUDE_DIR}
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})

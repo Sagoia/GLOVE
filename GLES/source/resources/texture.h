@@ -30,6 +30,7 @@
 #include "vulkan/sampler.h"
 #include "vulkan/imageView.h"
 #include "vulkan/cbManager.h"
+#include "arrays.hpp"
 #include "utils/GlToVkConverter.h"
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
@@ -51,7 +52,7 @@ class Texture {
         ~State() { FUN_ENTRY(GL_LOG_TRACE); if(data) {delete [] (uint8_t *)data; data = nullptr;}}
     };
     typedef State                   State_t;
-    typedef std::vector<State_t>    States_t;
+    typedef PointArray<State_t>     States_t;
 
 private:
     const
@@ -79,6 +80,8 @@ private:
     bool                        mDataUpdated;
     bool                        mDataNoInvertion;
     bool                        mFboColorAttached;
+    bool                        mIsNPOT;
+    bool                        mIsNPOTAccessCompleted;
     
     Texture                    *mDepthStencilTexture;
     uint32_t                    mDepthStencilTextureRefCount;
@@ -174,15 +177,19 @@ public:
                                                                                                            mImageView->SetContext(vkContext);
                                                                                                            mImage->SetContext(vkContext); }
     inline void             SetWrapS(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapS(mode)) { \
-                                                                                                           mSampler->SetAddressModeU(GlTexAddressToVkTexAddress(mode));}}
+                                                                                                           mSampler->SetAddressModeU(GlTexAddressToVkTexAddress(mode)); \
+                                                                                                           UpdateNPOTAccessCompleted();}}
     inline void             SetWrapT(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapT(mode)) { \
-                                                                                                           mSampler->SetAddressModeV(GlTexAddressToVkTexAddress(mode));}}
+                                                                                                           mSampler->SetAddressModeV(GlTexAddressToVkTexAddress(mode)); \
+                                                                                                           UpdateNPOTAccessCompleted();}}
     inline void             SetMinFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMinFilter(mode)){ \
                                                                                                            mSampler->SetMinFilter(GlTexFilterToVkTexFilter(mode)); \
-                                                                                                           mSampler->SetMipmapMode(GlTexMipMapModeToVkMipMapMode(mode));
-                                                                                                           mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.25f : static_cast<float>(mMipLevelsCount-1));}}
+                                                                                                           mSampler->SetMipmapMode(GlTexMipMapModeToVkMipMapMode(mode)); \
+                                                                                                           mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.25f : static_cast<float>(mMipLevelsCount-1)); \
+                                                                                                           UpdateNPOTAccessCompleted();}}
     inline void             SetMagFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMagFilter(mode)) { \
-                                                                                                           mSampler->SetMagFilter(GlTexFilterToVkTexFilter(mode));} }
+                                                                                                           mSampler->SetMagFilter(GlTexFilterToVkTexFilter(mode)); \
+                                                                                                           UpdateNPOTAccessCompleted();}}
     inline void             SetWidth(int width)                                 { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int height)                               { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }
     inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget      = target; }
@@ -218,8 +225,9 @@ public:
                                                                                                                    mFormat != GL_LUMINANCE       &&
                                                                                                                    mFormat != GL_LUMINANCE_ALPHA &&
                                                                                                                    mFormat != GL_BGRA_EXT); }
-           bool             IsNPOT(void);
-           bool             IsNPOTAccessCompleted(void);
+           void             UpdateNPOTAccessCompleted(void);
+    inline bool             IsNPOT(void)                                const   { FUN_ENTRY(GL_LOG_TRACE); return mIsNPOT; }
+    inline bool             IsNPOTAccessCompleted(void)                 const   { FUN_ENTRY(GL_LOG_TRACE); return mIsNPOTAccessCompleted; }
            bool             IsCompleted(void);
            bool             IsValid(void);
 };

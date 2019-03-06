@@ -27,45 +27,46 @@
 
 #include <stdlib.h>
 
-template <class T, size_t N = 1>
-class Array {
+template <class T, uint32_t N = 1>
+class PointArray {
 private:
-    typedef T Element;
-    const static size_t ElementSize = sizeof(Element);
-    const static size_t DefaultCapacity = N;
+    typedef T *Element;
+    const static uint32_t ElementSize = sizeof(Element);
+    const static uint32_t DefaultCapacity = N;
         
     Element *mData;
-    size_t mCapacity;
-    size_t mSize;
+    uint32_t mCapacity;
+    uint32_t mSize;
 
-    void Expend(size_t capacity) {
+    void Expend(uint32_t capacity) {
         Element *oldData = mData;
-        size_t oldSize = ElementSize * mCapacity;
+        uint32_t oldSize = ElementSize * mCapacity;
         mCapacity = capacity;
-        mData = new Element[mCapacity];
+        mData = (Element *)malloc(ElementSize * mCapacity);
         memcpy(mData, oldData, oldSize);
-        delete [] oldData;
+        free(oldData);
     }
         
 public:
-    Array(size_t capacity = DefaultCapacity)
+    PointArray(uint32_t capacity = DefaultCapacity)
     : mCapacity(capacity), mSize(0) {
         if (mCapacity == 0) { mCapacity = 1; }
-        mData = new Element[mCapacity];
+        mData = (Element *)malloc(ElementSize * mCapacity);
     }
         
-    ~Array(void) { delete [] mData; }
+    ~PointArray(void) { free(mData); }
         
     inline void             Clear(void)                         { mSize = 0; }
     inline bool             Empty(void)                 const   { return (mSize == 0); }
-    inline size_t           Capacity(void)              const   { return mCapacity; }
-    inline size_t           Size(void)                  const   { return mSize; }
+    inline uint32_t         Capacity(void)              const   { return mCapacity; }
+    inline uint32_t         Size(void)                  const   { return mSize; }
     inline Element&         operator [](uint32_t i)             { return mData[i]; }
     inline const Element&   operator [](uint32_t i)     const   { return mData[i]; }
     inline Element&         Back(void)                          { return mData[mSize - 1]; }
     inline void             PopBack(void)                       { if (mSize > 0) { --mSize; } }
-    inline void             PushBack(const Element &e)          { if (mSize == mCapacity) { Expend(mCapacity << 1);} mData[mSize] = e; ++ mSize; }
-    inline void             Reserve(size_t size)                { if (size > mCapacity) { Expend(size); } }
+    inline void             PushBack(const Element e)           { if (mSize == mCapacity) { Expend(mCapacity << 1);} mData[mSize] = e; ++ mSize; }
+    inline void             Erase(uint32_t i)                   { if (i < mSize) { for (uint32_t idx = i + 1; idx < mSize; ++idx) { mData[idx - 1] = mData[idx]; } --mSize; } }
+    inline void             Reserve(uint32_t size)              { if (size > mCapacity) { Expend(size); } }
 };
 
 /**
@@ -84,7 +85,7 @@ private:
     uint32_t mCounter;                 /**< The id (key-value of the map)
                                           reserved during the creation of a new
                                           object. */
-    Array<ELEMENT *> mObjects;         /**< The templated map container (one
+    PointArray<ELEMENT> mObjects;      /**< The templated map container (one
                                           for each different class that maps
                                           id to a specific object). */
 public:
@@ -193,7 +194,7 @@ public:
      * @brief Returns the map container for a specific class.
      * @return The map container.
      */
-    inline Array<ELEMENT *>& GetObjects(void)
+    inline PointArray<ELEMENT>& GetObjects(void)
     {
         return mObjects;
     }

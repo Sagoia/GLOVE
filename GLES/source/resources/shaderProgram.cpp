@@ -309,8 +309,8 @@ ShaderProgram::SerializeShadersSpirv(void *binary)
 {
     uint8_t *rawDataPtr = reinterpret_cast<uint8_t *>(binary);
     uint32_t *u32DataPtr = nullptr;
-    uint32_t vsSpirvSize = 4 * mShaderSPVsize[0];
-    uint32_t fsSpirvSize = 4 * mShaderSPVsize[1];
+    uint32_t vsSpirvSize = 4 * (uint32_t)(mShaderSPVsize[0]);
+    uint32_t fsSpirvSize = 4 * (uint32_t)(mShaderSPVsize[1]);
 
     u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
     *u32DataPtr = vsSpirvSize;
@@ -516,16 +516,6 @@ ShaderProgram::AllocateExplicitIndexBuffer(const void* data, size_t size, Buffer
 
     mExplicitIbo = new IndexBufferObject(mVkContext);
     mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
-    // TODO: support GL_UNSIGNED_INT as index data type
-    const uint16_t *uData = (const uint16_t *)data;
-    uint16_t maxIndex = uData[0];
-    for(uint32_t i = (size / sizeof(uint16_t)) - 1; i > 0; --i) {
-        uint16_t index = uData[i];
-        if(maxIndex < index) {
-            maxIndex = index;
-        }
-    }
-    static_cast<IndexBufferObject *>(mExplicitIbo)->SetMaxIndex(maxIndex);
     *ibo = mExplicitIbo;
 
     return mExplicitIbo->Allocate(size, data);
@@ -577,7 +567,7 @@ ShaderProgram::GetMaxIndex(BufferObject* ibo, uint32_t indexCount, size_t actual
 }
 
 void
-ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
+ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -621,8 +611,7 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex
     }
 
     if(validatedBuffer) {
-        *firstIndex = offset;
-        *maxIndex = static_cast<IndexBufferObject *>(ibo)->GetMaxIndex();
+        *firstIndex = (uint32_t)offset;
         mActiveIndexVkBuffer = ibo->GetVkBuffer();
     }
 }
@@ -660,17 +649,15 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
     // store attribute locations containing the same VkBuffer and stride
     // as they are directly associated with vertex input bindings
-    static Array<bufferLocations, GLOVE_MAX_VERTEX_ATTRIBS> unique_buffer_strides;
-    static Array<uint32_t, GLOVE_MAX_VERTEX_ATTRIBS> locations[GLOVE_MAX_VERTEX_ATTRIBS];
+    static bufferLocations unique_buffer_strides[GLOVE_MAX_VERTEX_ATTRIBS];
+    static uint32_t locations[GLOVE_MAX_VERTEX_ATTRIBS][GLOVE_MAX_VERTEX_ATTRIBS];
 
     if(mGLContext->IsModeLineLoop()) {
         --vertCount;
     }
 
-    unique_buffer_strides.Clear();
-    for (uint32_t i = 0; i < GLOVE_MAX_VERTEX_ATTRIBS; ++i) {
-        locations[i].Clear();
-    }
+    uint32_t unique_buffer_strides_count = 0;
+    uint32_t locations_count[GLOVE_MAX_VERTEX_ATTRIBS] = { 0, };
 
     uint32_t locationUsed[MAX_LOCATION_COUNT] = {0,};
 
@@ -719,15 +706,18 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             int32_t stride      = gva.GetStride();
             bufferLocations p   = {bo, stride};
             uint32_t index = 0;
-            for (; index < unique_buffer_strides.Size(); ++index) {
+            for (; index < unique_buffer_strides_count; ++index) {
                 if (p == unique_buffer_strides[index]) {
                     break;
                 }
             }
-            if (index == unique_buffer_strides.Size()) {
-                unique_buffer_strides.PushBack(p);
+            if (index == unique_buffer_strides_count) {
+                unique_buffer_strides[index] = p;
+                ++ unique_buffer_strides_count;
             }
-            locations[index].PushBack(location);
+            uint32_t location_count = locations_count[index];
+            locations[index][location_count] = location;
+            locations_count[index] = location_count + 1;
             locationUsed[location] = 1;
         }
     }
@@ -741,10 +731,10 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
 
     // generate unique bindings for each VKbuffer/stride pair
     uint32_t current_binding = 0;
-    for (uint32_t i = 0; i < unique_buffer_strides.Size(); ++i) {
+    for (uint32_t i = 0; i < unique_buffer_strides_count; ++i) {
         VkBuffer bo = unique_buffer_strides[i].buffer;
-        auto &locals = locations[i];
-        for (uint32_t j = 0; j < locals.Size(); ++j) {
+        uint32_t *locals = locations[i];
+        for (uint32_t j = 0; j < locations_count[i]; ++j) {
             vboLocationBindings[locals[j]] = current_binding;
         }
         mActiveVertexVkBuffers[current_binding] = bo;
@@ -782,7 +772,7 @@ ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>
             mVkVertexInputAttribute[count].binding  = binding;
             mVkVertexInputAttribute[count].location = location;
             mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
-            mVkVertexInputAttribute[count].offset   = gva.GetOffset();
+            mVkVertexInputAttribute[count].offset   = static_cast<uint32_t>(gva.GetOffset());
 
             ++count;
 
@@ -829,7 +819,7 @@ ShaderProgram::GetBinaryData(void *binary, GLsizei *binarySize)
 
     if(mPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
         mPipelineCache->GetData(reinterpret_cast<void *>(vulkanDataPtr), &vulkanDataSize);
-        *binarySize = vulkanDataSize + reflectionOffset + spirvOffset;
+        *binarySize = (GLsizei)(vulkanDataSize + reflectionOffset + spirvOffset);
     } else {
         *binarySize = 0;
     }
@@ -841,13 +831,13 @@ ShaderProgram::GetBinaryLength(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     size_t vkPipelineCacheDataLength = 0;
-    uint32_t spirvSize = 2 * sizeof(uint32_t) + 4 * (mShaderSPVsize[0] + mShaderSPVsize[1]);
+    size_t spirvSize = 2 * sizeof(uint32_t) + 4 * (mShaderSPVsize[0] + mShaderSPVsize[1]);
 
     if(mPipelineCache->GetPipelineCache() != VK_NULL_HANDLE) {
         mPipelineCache->GetData(nullptr, &vkPipelineCacheDataLength);
     }
 
-    return vkPipelineCacheDataLength + mShaderResourceInterface.GetReflectionSize() + spirvSize;
+    return (GLsizei)(vkPipelineCacheDataLength + mShaderResourceInterface.GetReflectionSize() + spirvSize);
 }
 
 char *
@@ -858,7 +848,7 @@ ShaderProgram::GetInfoLog(void) const
     char *log = nullptr;
 
     if(mShaderCompiler) {
-        uint32_t len = strlen(mShaderCompiler->GetProgramInfoLog()) + 1;
+        uint32_t len = (uint32_t)strlen(mShaderCompiler->GetProgramInfoLog()) + 1;
         log = new char[len];
 
         memcpy(log, mShaderCompiler->GetProgramInfoLog(), len);
@@ -1274,13 +1264,13 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             // Get Inverted Data from FBO's Color Attachment Texture
                             GLenum dstInternalFormat = activeTexture->GetExplicitInternalFormat();
                             ImageRect srcRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
-                                GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
-                                GlTypeToElementSize(activeTexture->GetExplicitType()),
-                                Texture::GetDefaultInternalAlignment());
+                                              (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType())),
+                                              (int)(GlTypeToElementSize(activeTexture->GetExplicitType())),
+                                              Texture::GetDefaultInternalAlignment());
                             ImageRect dstRect(0, 0, activeTexture->GetWidth(), activeTexture->GetHeight(),
-                                GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType()),
-                                GlTypeToElementSize(activeTexture->GetExplicitType()),
-                                Texture::GetDefaultInternalAlignment());
+                                              (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, activeTexture->GetExplicitType())),
+                                              (int)(GlTypeToElementSize(activeTexture->GetExplicitType())),
+                                              Texture::GetDefaultInternalAlignment());
 
                             uint8_t* dstData = new uint8_t[dstRect.GetRectBufferSize()];
                             srcRect.y = activeTexture->GetInvertedYOrigin(&srcRect);

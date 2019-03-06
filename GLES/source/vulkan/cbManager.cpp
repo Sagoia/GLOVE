@@ -99,7 +99,7 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
         mVkCommandBuffers.fence[i].Release();
     }
 
-    vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
+    vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, (uint32_t)mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
     mVkCommandBuffers.commandBuffer.clear();
     mVkCommandBuffers.commandBufferState.clear();
     mVkCommandBuffers.fence.clear();

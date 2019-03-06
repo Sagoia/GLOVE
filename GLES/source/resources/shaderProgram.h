@@ -116,7 +116,7 @@ public:
 
     void                                                SetPipelineVertexInputStateInfo(void);
     bool                                                SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *pipelineStagesIDs, VkPipelineShaderStageCreateInfo *pipelineShaderStages);
-    void                                                PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t* maxIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
+    void                                                PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t indexCount, GLenum type, const void* indices, BufferObject* ibo);
     bool                                                PrepareVertexAttribBufferObjects(size_t vertCount, uint32_t firstVertex, std::vector<GenericVertexAttribute>& genericVertAttribs, bool updatedVertexAttrib);
     Shader                                             *IsShaderAttached(Shader *shader);
     void                                                AttachShader(Shader *shader);

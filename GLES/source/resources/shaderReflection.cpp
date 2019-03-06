@@ -86,7 +86,7 @@ ShaderReflection::SerializeReflection(void *binary) const
         *u32DataPtr = mReflectionData.mUniformReflection[i].glType;
         rawDataPtr += sizeof(uint32_t);
         u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
-        *u32DataPtr = mReflectionData.mUniformReflection[i].offset;
+        *u32DataPtr = (uint32_t)mReflectionData.mUniformReflection[i].offset;
         rawDataPtr += sizeof(uint32_t);
     }
 
@@ -103,7 +103,7 @@ ShaderReflection::SerializeReflection(void *binary) const
         *u32DataPtr = mReflectionData.mUniformBlockReflection[i].binding;
         rawDataPtr += sizeof(uint32_t);
         u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
-        *u32DataPtr = mReflectionData.mUniformBlockReflection[i].blockSize;
+        *u32DataPtr = (uint32_t)mReflectionData.mUniformBlockReflection[i].blockSize;
         rawDataPtr += sizeof(uint32_t);
         u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
         *u32DataPtr = mReflectionData.mUniformBlockReflection[i].blockStage;

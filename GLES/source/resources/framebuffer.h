@@ -28,7 +28,7 @@
 #include "renderbuffer.h"
 #include "vulkan/renderPass.h"
 #include "vulkan/framebuffer.h"
-#include "utils/arrays.hpp"
+#include "arrays.hpp"
 
 #ifdef WIN32
     #ifdef DELETE

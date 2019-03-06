@@ -26,6 +26,7 @@ set(SOURCES
 )
 
 set(HEADERS
+    ${CMAKE_SOURCE_DIR}/Common/arrays.hpp
     ${CMAKE_SOURCE_DIR}/EGL/include/rendering_api_interface.h
     api/eglConfig.h
     api/eglConfig_android.h
@@ -85,6 +86,7 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_SOURCE_DIR}/EGL/include
                     ${CMAKE_SOURCE_DIR}/GLES/include
+                    ${CMAKE_SOURCE_DIR}/Common
                     ${Vulkan_INCLUDE_DIR}
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 

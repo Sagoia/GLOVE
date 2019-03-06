@@ -92,12 +92,12 @@ Context::ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum form
     GLenum dstInternalFormat = GlFormatToGlInternalFormat(format, type);
 
     ImageRect srcRect(x, y, width, height,
-                      GlInternalFormatTypeToNumElements(srcInternalFormat, activeTexture->GetExplicitType()),
-                      GlTypeToElementSize(activeTexture->GetExplicitType()),
+                      (int)(GlInternalFormatTypeToNumElements(srcInternalFormat, activeTexture->GetExplicitType())),
+                      (int)(GlTypeToElementSize(activeTexture->GetExplicitType())),
                       Texture::GetDefaultInternalAlignment());
     ImageRect dstRect(0, 0, width, height,
-                      GlInternalFormatTypeToNumElements(dstInternalFormat, type),
-                      GlTypeToElementSize(type),
+                      (int)(GlInternalFormatTypeToNumElements(dstInternalFormat, type)),
+                      (int)(GlTypeToElementSize(type)),
                       mStateManager.GetPixelStorageState()->GetPixelStorePack());
 
     srcRect.y = activeTexture->GetInvertedYOrigin(&srcRect);

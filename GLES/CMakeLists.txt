@@ -12,4 +12,4 @@ endif()
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 add_subdirectory(source)
-add_subdirectory(unitTests)
+# add_subdirectory(unitTests)
