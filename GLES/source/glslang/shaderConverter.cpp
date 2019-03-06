@@ -204,7 +204,7 @@ ShaderConverter::ProcessMacros(std::string& source)
         size_t secondNL = source.rfind('#' , f1);
 
         // check if is used in a define function & linedirective is not used
-        if(firstNL >= secondNL && !linedirectiveEnabled) {
+        if(firstNL != std::string::npos && firstNL >= secondNL && !linedirectiveEnabled) {
             // we have inserted 29 additional lines
             source.replace(f1, lineStr.length(), "__LINE__ - 29");
         }
@@ -235,7 +235,7 @@ ShaderConverter::ProcessMacros(std::string& source)
         // check if is used in a ifdef function
         size_t firstNL  = source.rfind('\n', f1);
         size_t secondNL = source.rfind("#ifdef" , f1);
-        if(firstNL >= secondNL) {
+        if(firstNL != std::string::npos && firstNL >= secondNL) {
             // replace with '1' value
             source.replace(f1, glStr.length(), "1");
         }
