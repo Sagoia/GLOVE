@@ -272,7 +272,7 @@ Texture::Allocate(void)
     SetInternalFormat(GlFormatToGlInternalFormat(state->format, state->type));
 
     if (mImage->GetFormat() == VK_FORMAT_UNDEFINED) {
-        SetVkFormat(FindSupportedVkColorFormat(GlColorFormatToVkColorFormat(state->format, state->type)));
+        SetVkFormat(FindSupportedVkColorFormat(GlColorFormatToXColorFormat(state->format, state->type)));
     }
     mExplicitInternalFormat = XFormatToGlInternalformat(mImage->GetFormat());
     mExplicitType           = GlInternalFormatToGlType(mExplicitInternalFormat);

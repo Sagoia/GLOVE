@@ -28,6 +28,7 @@
 #include <cstdint>
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
+#include "vulkan/types.h"
 
 enum GLColorMaskBit {
     GLC_RED     = 0,
@@ -55,7 +56,27 @@ bool                    GlInternalFormatIsCompressed(GLenum format);
 uint32_t                OccupiedLocationsPerGlType(GLenum type);
 
 // type convert
-GLenum                  XFormatToGlInternalformat(uint32_t format);
+GLenum                  XFormatToGlInternalformat(XFormat format);
+
+XColorComponentFlags    GLColorMaskToXColorComponentFlags(GLubyte colorMask);
+XBlendFactor            GlBlendFactorToXBlendFactor(GLenum mode);
+XLogicOp                GlLogicOpToXLogicOp(GLenum mode);
+XBlendOp                GlBlendEquationToXBlendOp(GLenum mode);
+XCompareOp              GlCompareFuncToXCompareOp(GLenum mode);
+XCullModeFlagBits       GlCullModeToXCullMode(GLenum mode);
+XFrontFace              GlFrontFaceToXFrontFace(GLenum mode);
+XPolygonMode            GLPrimitiveModeToXPolygonMode(GLenum mode);
+XPrimitiveTopology      GlPrimitiveTopologyToXPrimitiveTopology(GLenum mode);
+XSampleCountFlagBits    GlSampleCoverageBitsToXSampleCountFlagBits(GLint bits);
+XStencilOp              GlStencilFuncToXStencilOp(GLenum mode);
+XSamplerAddressMode     GlTexAddressToXTexAddress(GLenum mode);
+XFilter                 GlTexFilterToXTexFilter(GLenum mode);
+XSamplerMipmapMode      GlTexMipMapModeToXMipMapMode(GLenum mode);
+XFormat                 GlInternalFormatToXFormat(GLenum internalformat);
+XFormat                 GlInternalFormatToXFormat(GLenum internalformatDepth, GLenum internalformatStencil);
+XFormat                 GlAttribPointerToXFormat(GLint nElements, GLenum type, GLboolean normalized);
+XIndexType              GlToXIndexType(GLenum type);
+XFormat                 GlColorFormatToXColorFormat(GLenum format, GLenum type);
 
 
 #endif // __GLUTILS_H__

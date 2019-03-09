@@ -52,7 +52,6 @@ set(SOURCES
     state/stateRasterization.cpp
     state/stateHintAspects.cpp
     state/stateViewportTransformation.cpp
-    utils/GlToVkConverter.cpp
     utils/parser_helpers.cpp
     utils/glLogger.cpp
     utils/glUtils.cpp
@@ -114,12 +113,12 @@ set(HEADERS
     utils/color.hpp
     utils/globals.h
     utils/glsl_types.h
-    utils/GlToVkConverter.h
     utils/parser_helpers.h
     utils/glLogger.h
     utils/glLoggerImpl.h
     utils/glUtils.h
     utils/cacheManager.h
+    vulkan/types.h
     vulkan/cbManager.h
     vulkan/commandBufferPool.h
     vulkan/clearPass.h

@@ -31,7 +31,6 @@
 #include "vulkan/imageView.h"
 #include "vulkan/cbManager.h"
 #include "arrays.hpp"
-#include "utils/GlToVkConverter.h"
 
 #define ISPOWEROFTWO(x)           ((x != 0) && !(x & (x - 1)))
 
@@ -177,18 +176,18 @@ public:
                                                                                                            mImageView->SetContext(vkContext);
                                                                                                            mImage->SetContext(vkContext); }
     inline void             SetWrapS(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapS(mode)) { \
-                                                                                                           mSampler->SetAddressModeU(GlTexAddressToVkTexAddress(mode)); \
+                                                                                                           mSampler->SetAddressModeU(GlTexAddressToXTexAddress(mode)); \
                                                                                                            UpdateNPOTAccessCompleted();}}
     inline void             SetWrapT(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapT(mode)) { \
-                                                                                                           mSampler->SetAddressModeV(GlTexAddressToVkTexAddress(mode)); \
+                                                                                                           mSampler->SetAddressModeV(GlTexAddressToXTexAddress(mode)); \
                                                                                                            UpdateNPOTAccessCompleted();}}
     inline void             SetMinFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMinFilter(mode)){ \
-                                                                                                           mSampler->SetMinFilter(GlTexFilterToVkTexFilter(mode)); \
-                                                                                                           mSampler->SetMipmapMode(GlTexMipMapModeToVkMipMapMode(mode)); \
+                                                                                                           mSampler->SetMinFilter(GlTexFilterToXTexFilter(mode)); \
+                                                                                                           mSampler->SetMipmapMode(GlTexMipMapModeToXMipMapMode(mode)); \
                                                                                                            mSampler->SetMaxLod((mode == GL_NEAREST || mode == GL_LINEAR) ? 0.25f : static_cast<float>(mMipLevelsCount-1)); \
                                                                                                            UpdateNPOTAccessCompleted();}}
     inline void             SetMagFilter(GLenum mode)                           { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateMagFilter(mode)) { \
-                                                                                                           mSampler->SetMagFilter(GlTexFilterToVkTexFilter(mode)); \
+                                                                                                           mSampler->SetMagFilter(GlTexFilterToXTexFilter(mode)); \
                                                                                                            UpdateNPOTAccessCompleted();}}
     inline void             SetWidth(int width)                                 { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int height)                               { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }

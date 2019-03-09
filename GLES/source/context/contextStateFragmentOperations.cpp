@@ -48,8 +48,8 @@ Context::BlendEquation(GLenum mode)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateBlendingEquation(mode, mode)) {
-        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationRGB()));
-        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationAlpha()));
+        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToXBlendOp(stateFragmentOperations->GetBlendingEquationRGB()));
+        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToXBlendOp(stateFragmentOperations->GetBlendingEquationAlpha()));
     }
 }
 
@@ -66,8 +66,8 @@ Context::BlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateBlendingEquation(modeRGB, modeAlpha)) {
-        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationRGB()));
-        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToVkBlendOp(stateFragmentOperations->GetBlendingEquationAlpha()));
+        mPipeline->SetColorBlendAttachmentColorOp(GlBlendEquationToXBlendOp(stateFragmentOperations->GetBlendingEquationRGB()));
+        mPipeline->SetColorBlendAttachmentAlphaOp(GlBlendEquationToXBlendOp(stateFragmentOperations->GetBlendingEquationAlpha()));
     }
 }
 
@@ -91,10 +91,10 @@ Context::BlendFunc(GLenum sfactor, GLenum dfactor)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateBlendingFactors(sfactor, sfactor, dfactor, dfactor)) {
-        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceRGB()));
-        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationRGB()));
-        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceAlpha()));
-        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationAlpha()));
+        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorSourceRGB()));
+        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationRGB()));
+        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorSourceAlpha()));
+        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationAlpha()));
     }
 }
 
@@ -118,10 +118,10 @@ Context::BlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateBlendingFactors(srcRGB, srcAlpha, dstRGB, dstAlpha)) {
-        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceRGB()));
-        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationRGB()));
-        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorSourceAlpha()));
-        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToVkBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationAlpha()));
+        mPipeline->SetColorBlendAttachmentSrcColorFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorSourceRGB()));
+        mPipeline->SetColorBlendAttachmentDstColorFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationRGB()));
+        mPipeline->SetColorBlendAttachmentSrcAlphaFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorSourceAlpha()));
+        mPipeline->SetColorBlendAttachmentDstAlphaFactor(GlBlendFactorToXBlendFactor(stateFragmentOperations->GetBlendingFactorDestinationAlpha()));
     }
 }
 
@@ -139,7 +139,7 @@ Context::DepthFunc(GLenum func)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateDepthTestFunc(func)) {
-        mPipeline->SetDepthCompareOp(GlCompareFuncToVkCompareOp(stateFragmentOperations->GetDepthTestFunc()));
+        mPipeline->SetDepthCompareOp(GlCompareFuncToXCompareOp(stateFragmentOperations->GetDepthTestFunc()));
     }
 }
 
@@ -184,13 +184,13 @@ Context::StencilFunc(GLenum func, GLint ref, GLuint mask)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateStencilTestFunc(GL_FRONT, func, ref, mask)) {
-        mPipeline->SetStencilFrontCompareOp(GlCompareFuncToVkCompareOp(stateFragmentOperations->GetStencilTestFuncCompareFront()));
+        mPipeline->SetStencilFrontCompareOp(GlCompareFuncToXCompareOp(stateFragmentOperations->GetStencilTestFuncCompareFront()));
         mPipeline->SetStencilFrontCompareMask(stateFragmentOperations->GetStencilTestFuncMaskFront());
         mPipeline->SetStencilFrontReference(stateFragmentOperations->GetStencilTestFuncRefFront());
     }
 
     if(stateFragmentOperations->UpdateStencilTestFunc(GL_BACK , func, ref, mask)) {
-        mPipeline->SetStencilBackCompareOp(GlCompareFuncToVkCompareOp(stateFragmentOperations->GetStencilTestFuncCompareBack()));
+        mPipeline->SetStencilBackCompareOp(GlCompareFuncToXCompareOp(stateFragmentOperations->GetStencilTestFuncCompareBack()));
         mPipeline->SetStencilBackCompareMask(stateFragmentOperations->GetStencilTestFuncMaskBack());
         mPipeline->SetStencilBackReference(stateFragmentOperations->GetStencilTestFuncRefBack());
     }
@@ -215,13 +215,13 @@ Context::StencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if((face == GL_FRONT || face ==  GL_FRONT_AND_BACK) && stateFragmentOperations->UpdateStencilTestFunc(GL_FRONT, func, ref, mask)) {
-        mPipeline->SetStencilFrontCompareOp(GlCompareFuncToVkCompareOp(stateFragmentOperations->GetStencilTestFuncCompareFront()));
+        mPipeline->SetStencilFrontCompareOp(GlCompareFuncToXCompareOp(stateFragmentOperations->GetStencilTestFuncCompareFront()));
         mPipeline->SetStencilFrontCompareMask(stateFragmentOperations->GetStencilTestFuncMaskFront());
         mPipeline->SetStencilFrontReference(stateFragmentOperations->GetStencilTestFuncRefFront());
     }
 
     if((face == GL_BACK || face ==  GL_FRONT_AND_BACK) && stateFragmentOperations->UpdateStencilTestFunc(GL_BACK , func, ref, mask)) {
-        mPipeline->SetStencilBackCompareOp(GlCompareFuncToVkCompareOp(stateFragmentOperations->GetStencilTestFuncCompareBack()));
+        mPipeline->SetStencilBackCompareOp(GlCompareFuncToXCompareOp(stateFragmentOperations->GetStencilTestFuncCompareBack()));
         mPipeline->SetStencilBackCompareMask(stateFragmentOperations->GetStencilTestFuncMaskBack());
         mPipeline->SetStencilBackReference(stateFragmentOperations->GetStencilTestFuncRefBack());
     }
@@ -241,15 +241,15 @@ Context::StencilOp(GLenum fail, GLenum zfail, GLenum zpass)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if(stateFragmentOperations->UpdateStencilTestOp(GL_FRONT, fail, zfail, zpass)) {
-        mPipeline->SetStencilFrontFailOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpFailFront()));
-        mPipeline->SetStencilFrontZFailOp(GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZfailFront()));
-        mPipeline->SetStencilFrontPassOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZpassFront()));
+        mPipeline->SetStencilFrontFailOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpFailFront()));
+        mPipeline->SetStencilFrontZFailOp(GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZfailFront()));
+        mPipeline->SetStencilFrontPassOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZpassFront()));
     }
 
     if(stateFragmentOperations->UpdateStencilTestOp(GL_BACK , fail, zfail, zpass)) {
-        mPipeline->SetStencilBackFailOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpFailBack()));
-        mPipeline->SetStencilBackZFailOp(GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZfailBack()));
-        mPipeline->SetStencilBackPassOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZpassBack()));
+        mPipeline->SetStencilBackFailOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpFailBack()));
+        mPipeline->SetStencilBackZFailOp(GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZfailBack()));
+        mPipeline->SetStencilBackPassOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZpassBack()));
     }
 }
 
@@ -272,14 +272,14 @@ Context::StencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass)
 
     StateFragmentOperations *stateFragmentOperations = mStateManager.GetFragmentOperationsState();
     if((face == GL_FRONT || face ==  GL_FRONT_AND_BACK) && stateFragmentOperations->UpdateStencilTestOp(GL_FRONT, fail, zfail, zpass)) {
-        mPipeline->SetStencilFrontFailOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpFailFront()));
-        mPipeline->SetStencilFrontZFailOp(GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZfailFront()));
-        mPipeline->SetStencilFrontPassOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZpassFront()));
+        mPipeline->SetStencilFrontFailOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpFailFront()));
+        mPipeline->SetStencilFrontZFailOp(GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZfailFront()));
+        mPipeline->SetStencilFrontPassOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZpassFront()));
     }
 
     if((face == GL_BACK || face ==  GL_FRONT_AND_BACK) && stateFragmentOperations->UpdateStencilTestOp(GL_BACK , fail, zfail, zpass)) {
-        mPipeline->SetStencilBackFailOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpFailBack()));
-        mPipeline->SetStencilBackZFailOp(GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZfailBack()));
-        mPipeline->SetStencilBackPassOp (GlStencilFuncToVkStencilOp(stateFragmentOperations->GetStencilTestOpZpassBack()));
+        mPipeline->SetStencilBackFailOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpFailBack()));
+        mPipeline->SetStencilBackZFailOp(GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZfailBack()));
+        mPipeline->SetStencilBackPassOp (GlStencilFuncToXStencilOp(stateFragmentOperations->GetStencilTestOpZpassBack()));
     }
 }

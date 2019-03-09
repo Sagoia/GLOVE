@@ -35,7 +35,7 @@ Context::CullFace(GLenum mode)
 
     if(mStateManager.GetRasterizationState()->UpdateCullFace(mode)) {
         mPipeline->SetRasterizationCullMode(mStateManager.GetRasterizationState()->GetCullEnabled(),
-                                            GlCullModeToVkCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
+                                            GlCullModeToXCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
     }
 }
 
@@ -50,7 +50,7 @@ Context::FrontFace(GLenum mode)
     }
 
     if(mStateManager.GetRasterizationState()->UpdateFrontFace(mode)) {
-        mPipeline->SetRasterizationFrontFace(GlFrontFaceToVkFrontFace(mStateManager.GetRasterizationState()->GetFrontFace()));
+        mPipeline->SetRasterizationFrontFace(GlFrontFaceToXFrontFace(mStateManager.GetRasterizationState()->GetFrontFace()));
     }
 }
 

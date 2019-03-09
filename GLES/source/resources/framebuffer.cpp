@@ -286,7 +286,7 @@ Framebuffer::CreateDepthStencilTexture(void)
         mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
-        VkFormat vkformat = GlInternalFormatToVkFormat(
+        VkFormat vkformat = GlInternalFormatToXFormat(
             GetDepthAttachmentTexture()   ? GetDepthAttachmentTexture()->GetInternalFormat()   : GL_INVALID_VALUE,
             GetStencilAttachmentTexture() ? GetStencilAttachmentTexture()->GetInternalFormat() : GL_INVALID_VALUE);
 
