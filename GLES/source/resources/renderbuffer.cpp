@@ -83,7 +83,7 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
         mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     } else {
         // convert to supported format
-        vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
+        vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
         mTexture->SetVkFormat(vkformat);
         mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     }
