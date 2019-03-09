@@ -31,15 +31,6 @@
 
 #define CASE_STR(c)                                     case GL_ ##c: return "GL_" STRINGIFY(c);
 
-GLubyte
-GlColorMaskPack(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
-{
-    return static_cast<GLubyte>((red << GLColorMaskBit::GLC_RED)     |
-                                (green << GLColorMaskBit::GLC_GREEN) |
-                                (blue << GLColorMaskBit::GLC_BLUE)   |
-                                (alpha << GLColorMaskBit::GLC_ALPHA));
-}
-
 const char *
 GlAttribTypeToString(GLenum type)
 {
