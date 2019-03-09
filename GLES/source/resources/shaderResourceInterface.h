@@ -161,8 +161,8 @@ private:
 
     attributeInterface mAttributeInterface;
 
-    PointArray<uniform>         mUniforms;
-    PointArray<uniformBlock>    mUniformBlocks;
+    Array<uniform *>        mUniforms;
+    Array<uniformBlock *>   mUniformBlocks;
 
     attribsLayout_t mCustomAttributesLayout;
     CacheManager* mCacheManager;
