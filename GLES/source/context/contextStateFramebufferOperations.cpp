@@ -65,7 +65,7 @@ Context::DepthMask(GLboolean flag)
 
     StateFramebufferOperations *stateFramebufferOperations = mStateManager.GetFramebufferOperationsState();
     if(stateFramebufferOperations->UpdateDepthMask(flag)) {
-        mPipeline->SetDepthWriteEnable(GlBooleanToVkBool(stateFramebufferOperations->GetDepthMask()));
+        mPipeline->SetDepthWriteEnable(stateFramebufferOperations->GetDepthMask());
     }
 }
 
