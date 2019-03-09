@@ -22,7 +22,6 @@
  */
 
 #include "context.h"
-#include "utils/VkToGlConverter.h"
 
 static Context *currentContext = nullptr;
 
@@ -200,7 +199,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext, mCommandBufferManager);
 
-        GLenum glformat = VkFormatToGlInternalformat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
+        GLenum glformat = XFormatToGlInternalformat(eglSurfaceInterface->surfaceColorFormat);
 
         tex->SetTarget(GL_TEXTURE_2D);
         tex->SetWidth(eglSurfaceInterface->width);
@@ -250,7 +249,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
     tex->SetVkImageTiling();
     tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
 
-    GLenum glformat = VkFormatToGlInternalformat(depthStencilFormat);
+    GLenum glformat = XFormatToGlInternalformat(depthStencilFormat);
     tex->InitState();
     tex->SetState(eglSurfaceInterface->width, eglSurfaceInterface->height,
                   0, 0,

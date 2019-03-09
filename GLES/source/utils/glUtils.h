@@ -54,5 +54,8 @@ bool                    GlFormatIsColorRenderable(GLenum format);
 bool                    GlInternalFormatIsCompressed(GLenum format);
 uint32_t                OccupiedLocationsPerGlType(GLenum type);
 
+// type convert
+GLenum                  XFormatToGlInternalformat(uint32_t format);
+
 
 #endif // __GLUTILS_H__
