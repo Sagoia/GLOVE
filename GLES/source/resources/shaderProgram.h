@@ -186,9 +186,9 @@ public:
     void                                                SetShaderModules(void);
 
     void                                                MarkForDeletion(void)                               { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }
-    bool                                                HasVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mShaders[0]; }
-    bool                                                HasFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mShaders[1]; }
-    bool                                                HasStages(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount; }
+    bool                                                HasVertexShader(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[0] != nullptr; }
+    bool                                                HasFragmentShader(void)                     const   { FUN_ENTRY(GL_LOG_TRACE); return mShaders[1] != nullptr; }
+    bool                                                HasStages(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mStageCount > 0; }
     bool                                                HasStagesUpdated(int stageIDs[2])           const   { FUN_ENTRY(GL_LOG_TRACE); return (stageIDs[0] != GetStagesIDs(0) || stageIDs[1] != GetStagesIDs(1)) ? true : false; }
     bool                                                IsLinked(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mLinked; }
     bool                                                IsPrecompiled(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mIsPrecompiled; }

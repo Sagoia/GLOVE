@@ -78,7 +78,7 @@ private:
     Attachment*                     mAttachmentStencil;
     Texture*                        mDepthStencilTexture;
     bool                            mIsSystem;
-    bool                            mBindToTexture;
+    GLint                           mBindToTexture;
     GLenum                          mSurfaceType;
 
     void                            Release(void);

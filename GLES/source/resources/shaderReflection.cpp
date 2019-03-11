@@ -182,7 +182,7 @@ ShaderReflection::DeserializeReflection(const void *binary)
         u32DataPtr = reinterpret_cast<const uint32_t *>(rawDataPtr);
         mReflectionData.mUniformBlockReflection[i].blockStage = static_cast<shader_type_t>(*u32DataPtr);
         rawDataPtr += sizeof(uint32_t);
-        mReflectionData.mUniformBlockReflection[i].isOpaque = *rawDataPtr;
+        mReflectionData.mUniformBlockReflection[i].isOpaque = (*rawDataPtr) > 0;
         rawDataPtr += sizeof(bool);
     }
 

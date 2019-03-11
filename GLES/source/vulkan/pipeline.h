@@ -61,10 +61,10 @@ private:
     VkPipelineShaderStageCreateInfo             mVkPipelineShaderStages[2];
 
     struct {
-    VkBool32                                    Pipeline;
-    VkBool32                                    VertexAttribVBOs;
-    VkBool32                                    IndexBuffer;
-    VkBool32                                    Viewport;
+    bool                                        Pipeline;
+    bool                                        VertexAttribVBOs;
+    bool                                        IndexBuffer;
+    bool                                        Viewport;
     }                                           mUpdateState;
 
     bool                                        mYInverted;
@@ -92,10 +92,10 @@ public:
     inline bool GetUpdateIndexBuffer(void)                                const { FUN_ENTRY(GL_LOG_TRACE); return mUpdateState.IndexBuffer; }
 
 // Set Functions
-    inline void SetUpdateIndexBuffer(VkBool32 enable)                           { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.IndexBuffer      = enable; }
-    inline void SetUpdateVertexAttribVBOs(VkBool32 enable)                      { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.VertexAttribVBOs = enable; }
-    inline void SetUpdateViewportState(VkBool32 enable)                         { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Viewport         = enable; }
-    inline void SetUpdatePipeline(VkBool32 enable)                              { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Pipeline         = enable; }
+    inline void SetUpdateIndexBuffer(bool enable)                               { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.IndexBuffer      = enable; }
+    inline void SetUpdateVertexAttribVBOs(bool enable)                          { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.VertexAttribVBOs = enable; }
+    inline void SetUpdateViewportState(bool enable)                             { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Viewport         = enable; }
+    inline void SetUpdatePipeline(bool enable)                                  { FUN_ENTRY(GL_LOG_TRACE); mUpdateState.Pipeline         = enable; }
 
     inline void SetInputAssemblyTopology(VkPrimitiveTopology topology)          { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineInputAssemblyState.topology            = topology; mUpdateState.Pipeline = true;}
     inline void SetMultisampleAlphaToCoverage(VkBool32 enable)                  { FUN_ENTRY(GL_LOG_TRACE); mVkPipelineMultisampleState.alphaToCoverageEnable = enable;   mUpdateState.Pipeline = true; }
