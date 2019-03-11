@@ -29,6 +29,7 @@
  */
 
 #include "memory.h"
+#include "caches.h"
 #include "utils/cacheManager.h"
 
 namespace vulkanAPI {
@@ -73,7 +74,7 @@ Memory::Release(void)
 
     if(mVkMemory != VK_NULL_HANDLE) {
         if (mCacheManager) {
-            mCacheManager->CacheDeviceMemory(mVkMemory);
+            mCacheManager->GetSubCaches()->CacheDeviceMemory(mVkMemory);
         } else {
             vkFreeMemory(mVkContext->vkDevice, mVkMemory, nullptr);
         }

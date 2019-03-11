@@ -31,6 +31,7 @@
  */
 
 #include "imageView.h"
+#include "caches.h"
 #include "utils/cacheManager.h"
 
 namespace vulkanAPI {
@@ -55,7 +56,7 @@ ImageView::Release(void)
 
     if(mVkImageView != VK_NULL_HANDLE) {
         if (mCacheManager) {
-            mCacheManager->CacheVkImageView(mVkImageView);
+            mCacheManager->GetSubCaches()->CacheVkImageView(mVkImageView);
         } else {
             vkDestroyImageView(mVkContext->vkDevice, mVkImageView, nullptr);
         }

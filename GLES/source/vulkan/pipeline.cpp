@@ -28,6 +28,7 @@
 
 #include "pipeline.h"
 #include "utils.h"
+#include "caches.h"
 #include <algorithm>
 
 namespace vulkanAPI {
@@ -369,14 +370,14 @@ Pipeline::CreateGraphicsPipeline(void)
     Release();
 
     uint64_t hash = HashGraphicsPipelineInfo(mVkPipelineInfo);
-    mVkPipeline = mCacheManager->GetPipeline(mVkPipelineCache, hash);
+    mVkPipeline = mCacheManager->GetSubCaches()->GetPipeline(mVkPipelineCache, hash);
 
     VkResult err = VK_SUCCESS;
     if (mVkPipeline == VK_NULL_HANDLE) {
         err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, nullptr, &mVkPipeline);
         assert(!err);
 
-        mCacheManager->CachePipeline(mVkPipelineCache, hash, mVkPipeline);
+        mCacheManager->GetSubCaches()->CachePipeline(mVkPipelineCache, hash, mVkPipeline);
     }
     
     mUpdateState.Pipeline = false;

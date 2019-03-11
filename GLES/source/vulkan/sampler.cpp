@@ -29,6 +29,7 @@
 
 #include "sampler.h"
 #include "utils.h"
+#include "caches.h"
 #include "utils/cacheManager.h"
 
 namespace vulkanAPI {
@@ -115,13 +116,13 @@ Sampler::Create()
         assert(!err);
     } else {
         mHash = HashSamplerInfo(samplerInfo);
-        mVkSampler = mCacheManager->GetSampler(mHash);
+        mVkSampler = mCacheManager->GetSubCaches()->GetSampler(mHash);
 
         if (mVkSampler == VK_NULL_HANDLE) {
             err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
             assert(!err);
 
-            mCacheManager->CacheSampler(mHash, mVkSampler);
+            mCacheManager->GetSubCaches()->CacheSampler(mHash, mVkSampler);
         }
     }
 
