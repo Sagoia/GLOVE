@@ -48,7 +48,7 @@ private:
 
 public:
 // Constructor
-    Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = 0);
+    Memory(const vkContext_t *vkContext = nullptr, VkFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 // Destructor
     ~Memory();

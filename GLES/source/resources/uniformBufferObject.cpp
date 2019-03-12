@@ -1,12 +1,14 @@
-#include "uniformBufferObject.h"
 
-UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode, const VkFlags vkFlags)
+#include "uniformBufferObject.h"
+#include "vulkan/types.h"
+
+UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mAllocated(false), mCacheIndex(0)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mBuffer = new vulkanAPI::Buffer(vkContext, vkBufferUsageFlags, vkSharingMode);
-    mMemory = new vulkanAPI::UniformMemory(vkContext, vkFlags);
+    mBuffer = new vulkanAPI::Buffer(vkContext, UNIFORM_BUFFER);
+    mMemory = new vulkanAPI::UniformMemory(vkContext);
 }
 
 UniformBufferObject::~UniformBufferObject()
