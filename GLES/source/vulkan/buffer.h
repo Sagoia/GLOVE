@@ -35,7 +35,7 @@ class Buffer {
 
 private:
     const
-    vkContext_t *                     mVkContext;
+    XContext_t *                     mVkContext;
 
     VkBuffer                          mVkBuffer;
     VkDescriptorBufferInfo            mVkDescriptorBufferInfo;
@@ -48,7 +48,7 @@ private:
 
 public:
 // Constructor
-    Buffer(const vkContext_t *vkContext, const XBufferUsageFlags usage, const VkSharingMode vkSharingMode = VK_SHARING_MODE_EXCLUSIVE);
+    Buffer(const XContext_t *vkContext, const XBufferUsageFlags usage, const VkSharingMode vkSharingMode = VK_SHARING_MODE_EXCLUSIVE);
 
 // Destructor
     ~Buffer();
@@ -69,7 +69,7 @@ public:
 // Set Functions
     inline void                       SetSize(VkDeviceSize size)                { FUN_ENTRY(GL_LOG_TRACE); mVkSize             = size;      }
     inline void                       SetFlags(VkBufferUsageFlags flags)        { FUN_ENTRY(GL_LOG_TRACE); mVkBufferUsageFlags = flags;     }
-    inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext          = vkContext; }
+    inline void                       SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext          = vkContext; }
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager       = manager; }
 };
 

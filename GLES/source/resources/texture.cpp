@@ -36,7 +36,7 @@
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
+Texture::Texture(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
 : mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),

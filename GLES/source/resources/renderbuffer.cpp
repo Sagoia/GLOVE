@@ -30,7 +30,7 @@
 #include "utils/glUtils.h"
 #include "vulkan/utils.h"
 
-Renderbuffer::Renderbuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
+Renderbuffer::Renderbuffer(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mVkContext(vkContext), mCommandBufferManager(cbManager),
 mInternalFormat(GL_RGBA4), mTarget(GL_INVALID_VALUE), mTexture(nullptr)
 {

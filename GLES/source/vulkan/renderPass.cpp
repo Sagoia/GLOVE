@@ -35,7 +35,7 @@
 
 namespace vulkanAPI {
 
-RenderPass::RenderPass(const vkContext_t *vkContext)
+RenderPass::RenderPass(const XContext_t *vkContext)
 : mVkContext(vkContext),
   mVkPipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS),
   mVkRenderPass(VK_NULL_HANDLE),

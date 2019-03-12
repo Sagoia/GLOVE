@@ -46,7 +46,7 @@ public:
 private:
 
     const
-    vkContext_t *                     mVkContext;
+    XContext_t *                     mVkContext;
 
     VkImage                           mVkImage;
     VkFormat                          mVkFormat;
@@ -73,7 +73,7 @@ private:
 
 public:
 // Constructor
-    Image(const vkContext_t *vkContext = nullptr);
+    Image(const XContext_t *vkContext = nullptr);
 
 // Destructor
     ~Image();
@@ -111,7 +111,7 @@ public:
     inline uint32_t                   GetLayers(void)                     const { FUN_ENTRY(GL_LOG_TRACE); return mLayers;           }
 
 // Set Functions
-    inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext     = vkContext; }
+    inline void                       SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext     = vkContext; }
     inline void                       SetFormat(VkFormat format)                { FUN_ENTRY(GL_LOG_TRACE); mVkFormat      = format;    }
     inline void                       SetCopyStencil(bool copy)                 { FUN_ENTRY(GL_LOG_TRACE); mCopyStencil   = copy;      }
     inline void                       SetImage(VkImage image)                   { FUN_ENTRY(GL_LOG_TRACE); mVkImage       = image;

@@ -29,7 +29,7 @@
 
 #include "bufferObject.h"
 
-BufferObject::BufferObject(const vulkanAPI::vkContext_t *vkContext, XBufferUsageFlags usage)
+BufferObject::BufferObject(const vulkanAPI::XContext_t *vkContext, XBufferUsageFlags usage)
 : mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mTarget(GL_INVALID_VALUE), mAllocated(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);

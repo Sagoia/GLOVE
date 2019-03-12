@@ -10,7 +10,7 @@ class CacheManager;
 class UniformBufferObject {
 private:
     const
-    vulkanAPI::vkContext_t*     mVkContext;
+    vulkanAPI::XContext_t*     mVkContext;
 
     GLenum                      mUsage;
     bool                        mAllocated;
@@ -20,7 +20,7 @@ private:
     vulkanAPI::Buffer*          mBuffer;
 
 public:
-    explicit                    UniformBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr);
+    explicit                    UniformBufferObject(const vulkanAPI::XContext_t *vkContext = nullptr);
     virtual                     ~UniformBufferObject();
 
 // Allocate Functions
@@ -43,7 +43,7 @@ public:
 
 // Set Functions
     inline void                 SetUsage(GLenum usage)                              { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
-    inline void                 SetVkContext(const vulkanAPI::vkContext_t *vkContext)
+    inline void                 SetVkContext(const vulkanAPI::XContext_t *vkContext)
                                                                                     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
                                                                                                                mBuffer->SetContext(vkContext);
                                                                                                                mMemory->SetContext(vkContext); }

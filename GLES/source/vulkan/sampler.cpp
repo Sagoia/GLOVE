@@ -34,7 +34,7 @@
 
 namespace vulkanAPI {
 
-Sampler::Sampler(const vkContext_t *vkContext)
+Sampler::Sampler(const XContext_t *vkContext)
 : mVkContext(vkContext),
   mVkSampler(VK_NULL_HANDLE),
   mVkMinFilter(VK_FILTER_NEAREST), mVkMagFilter(VK_FILTER_LINEAR),

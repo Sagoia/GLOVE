@@ -30,7 +30,7 @@
 
 uint32_t ResourceManager::mShadingObjectCount = 1;
 
-ResourceManager::ResourceManager(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
+ResourceManager::ResourceManager(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
     mVkContext(vkContext)
 {
     FUN_ENTRY(GL_LOG_TRACE);

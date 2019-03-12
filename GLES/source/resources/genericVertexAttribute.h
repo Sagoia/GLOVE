@@ -29,7 +29,7 @@
 
 class GenericVertexAttribute {
 private:
-    const vulkanAPI::vkContext_t *      mVkContext;
+    const vulkanAPI::XContext_t *      mVkContext;
     GLint                               mElements;
     GLenum                              mType;
     GLboolean                           mNormalized;
@@ -79,7 +79,7 @@ public:
                                                                                                            ptr[3] = mGenericValue[3]; }
 
     // Set Functions
-    inline void                         SetVkContext(const vulkanAPI::vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
+    inline void                         SetVkContext(const vulkanAPI::XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
            void                         Set(GLint nElements, GLenum type, GLboolean normalized, GLsizei stride, const void *ptr, BufferObject *vbo, bool internalVBO);
            void                         SetCurrentVbo(BufferObject *vbo);
     inline void                         SetEnabled(bool enabled)                    { FUN_ENTRY(GL_LOG_TRACE); mEnabled         = enabled;     }

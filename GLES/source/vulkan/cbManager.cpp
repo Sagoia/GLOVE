@@ -41,7 +41,7 @@ namespace vulkanAPI {
 
 CommandBufferManager *CommandBufferManager::mInstance = nullptr;
 
-CommandBufferManager::CommandBufferManager(const vkContext_t *context)
+CommandBufferManager::CommandBufferManager(const XContext_t *context)
 : mVkContext(context)
 {
     FUN_ENTRY(GL_LOG_TRACE);

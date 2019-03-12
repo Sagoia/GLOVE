@@ -91,7 +91,7 @@ static const std::vector<const char*>   validationLayerNames        = {"VK_LAYER
 
 static char **                          enabledInstanceLayers       = nullptr;
 
-static vkContext_t                      GloveVkContext;
+static XContext_t                       GloveVkContext;
 
 static bool
 InitVkLayers(uint32_t* nLayers)
@@ -483,7 +483,7 @@ CreateVkDebugReporter()
 
 #endif
 
-vkContext_t *
+XContext_t *
 GetContext()
 {
     FUN_ENTRY(GL_LOG_DEBUG);

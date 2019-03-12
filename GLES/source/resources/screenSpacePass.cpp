@@ -35,7 +35,7 @@ struct UniformBufferObject_ScreenSpace {
     float color[4];
 };
 
-ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
+ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
     mGLContext(GLContext), mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
     mNumElements(0), mVertexBuffer(nullptr),
     mVertexVkBuffer(VK_NULL_HANDLE), mVertexVkBufferOffset(0),
@@ -144,7 +144,7 @@ ScreenSpacePass::ShaderData::Destroy()
 
 void
 ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cacheManager,
-                                           const vulkanAPI::vkContext_t* mVkContext,
+                                           const vulkanAPI::XContext_t* mVkContext,
                                            vulkanAPI::CommandBufferManager* commandBufferManager)
 {
     FUN_ENTRY(GL_LOG_DEBUG);

@@ -43,8 +43,8 @@ namespace vulkanAPI {
 
     class MemoryAllocator;
 
-    typedef struct vkContext_t {
-        vkContext_t() {
+    typedef struct XContext_t {
+        XContext_t() {
             vkInstance                  = VK_NULL_HANDLE;
             vkQueue                     = VK_NULL_HANDLE;
             mInitialized                = false;
@@ -77,9 +77,9 @@ namespace vulkanAPI {
         MemoryAllocator                                     *memoryAllocator;
         bool                                                mIsMaintenanceExtSupported;
         bool                                                mInitialized;
-    } vkContext_t;
+    } XContext_t;
 
-    vkContext_t *                     GetContext();
+    XContext_t *                     GetContext();
     bool                              InitContext();
     void                              TerminateContext();
     bool                              InstanceExtensionEnabled(const char *name);

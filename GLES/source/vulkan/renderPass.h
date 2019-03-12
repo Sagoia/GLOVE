@@ -35,7 +35,7 @@ class RenderPass {
 private:
 
     const
-    vkContext_t *           mVkContext;
+    XContext_t *           mVkContext;
 
     const
     VkPipelineBindPoint     mVkPipelineBindPoint;
@@ -59,7 +59,7 @@ private:
 public:
 
 // Constructor
-    RenderPass(const vkContext_t *vkContext = nullptr);
+    RenderPass(const XContext_t *vkContext = nullptr);
 
 // Destructor
     ~RenderPass();
@@ -85,7 +85,7 @@ public:
     inline VkRenderPass*    GetRenderPass(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return &mVkRenderPass; }
 
 // Set Functions
-    inline void             SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext           = vkContext; }
+    inline void             SetVkContext(const XContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext           = vkContext; }
     inline void             SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mCacheManager        = cacheManager; }
     inline void             SetColorClearEnabled(bool enable)                   { FUN_ENTRY(GL_LOG_TRACE); mColorClearEnabled   = enable;    }
     inline void             SetDepthClearEnabled(bool enable)                   { FUN_ENTRY(GL_LOG_TRACE); mDepthClearEnabled   = enable;    }

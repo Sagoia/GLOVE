@@ -30,7 +30,7 @@
 #include "shader.h"
 #include "slangCompiler.h"
 
-Shader::Shader(const vulkanAPI::vkContext_t *vkContext)
+Shader::Shader(const vulkanAPI::XContext_t *vkContext)
 : mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mSlangCompiler(nullptr), mSource(nullptr),
   mSourceLength(0), mShaderType(INVALID_SHADER), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
 {

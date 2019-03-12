@@ -26,7 +26,7 @@
 
 namespace vulkanAPI {
 
-Fence::Fence(const vkContext_t *vkContext)
+Fence::Fence(const XContext_t *vkContext)
 : mVkContext(vkContext), mVkFence(VK_NULL_HANDLE)
 {
     FUN_ENTRY(GL_LOG_TRACE);

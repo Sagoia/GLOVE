@@ -33,13 +33,13 @@ class Framebuffer {
 private:
 
     const
-    vkContext_t *           mVkContext;
+    XContext_t *           mVkContext;
 
     VkFramebuffer           mVkFramebuffer;
 
 public:
 // Constructor
-    Framebuffer(const vkContext_t *vkContext = nullptr);
+    Framebuffer(const XContext_t *vkContext = nullptr);
 
 // Destructor
     ~Framebuffer();
