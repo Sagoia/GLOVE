@@ -82,34 +82,18 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 
 #endif //ENABLE_VK_DEBUG_REPORTER
 
-static const std::vector<const char*> requiredDeviceExtensions   = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+static const std::vector<const char*>   requiredDeviceExtensions    = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-static const std::vector<const char*> usefulDeviceExtensions     = {VK_KHR_MAINTENANCE1_EXTENSION_NAME,
-                                                                    VK_IMG_FORMAT_PVRTC_EXTENSION_NAME};
+static const std::vector<const char*>   usefulDeviceExtensions      = {VK_KHR_MAINTENANCE1_EXTENSION_NAME,
+                                                                       VK_IMG_FORMAT_PVRTC_EXTENSION_NAME};
 
-static const std::vector<const char*> validationLayerNames       = {"VK_LAYER_LUNARG_standard_validation"};
+static const std::vector<const char*>   validationLayerNames        = {"VK_LAYER_LUNARG_standard_validation"};
 
-static       char **enabledInstanceLayers           = nullptr;
+static char **                          enabledInstanceLayers       = nullptr;
 
-vkContext_t GloveVkContext;
+static vkContext_t                      GloveVkContext;
 
-bool InitVkLayers(uint32_t* nLayers);
-bool CheckVkInstanceExtensions(void);
-bool CheckVkDeviceExtensions(void);
-bool CreateVkInstance(void);
-bool EnumerateVkGpus(void);
-bool InitVkQueueFamilyIndex(void);
-bool CreateVkDevice(void);
-bool CreateVkCommandPool(void);
-bool CreateVkSemaphores(void);
-void InitVkQueue(void);
-void CreateMemoryAllocator(void);
-#ifdef ENABLE_VK_DEBUG_REPORTER
-bool CreateVkDebugReporter(void);
-VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data);
-#endif
-
-bool
+static bool
 InitVkLayers(uint32_t* nLayers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -162,7 +146,7 @@ InitVkLayers(uint32_t* nLayers)
     return true;
 }
 
-bool
+static bool
 CheckVkInstanceExtensions(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -212,7 +196,7 @@ CheckVkInstanceExtensions(void)
     return true;
 }
 
-bool
+static bool
 CheckVkDeviceExtensions(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -276,7 +260,7 @@ CheckVkDeviceExtensions(void)
     return true;
 }
 
-bool
+static bool
 CreateVkInstance(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -319,7 +303,7 @@ CreateVkInstance(void)
     return (err == VK_SUCCESS);
 }
 
-bool
+static bool
 EnumerateVkGpus(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -348,7 +332,7 @@ EnumerateVkGpus(void)
     return true;
 }
 
-bool
+static bool
 InitVkQueueFamilyIndex(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -375,7 +359,7 @@ InitVkQueueFamilyIndex(void)
     return i < queueFamilyCount ? true : false;
 }
 
-bool
+static bool
 CreateVkDevice(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -415,7 +399,7 @@ CreateVkDevice(void)
     return (err == VK_SUCCESS);
 }
 
-bool
+static bool
 CreateVkSemaphores(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -449,7 +433,7 @@ CreateVkSemaphores(void)
     return true;
 }
 
-void
+static void
 InitVkQueue(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -460,13 +444,44 @@ InitVkQueue(void)
                      &GloveVkContext.vkQueue);
 }
 
-void
+static void
 CreateMemoryAllocator(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     GloveVkContext.memoryAllocator = new MemoryAllocator(GloveVkContext.vkDevice);
 }
+
+#ifdef ENABLE_VK_DEBUG_REPORTER
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data)
+{
+    fprintf(stderr, "Vulkan validation layer log: %s \n", message);
+    return VK_FALSE;
+}
+
+
+static bool
+CreateVkDebugReporter()
+{
+    PFN_vkCreateDebugReportCallbackEXT _vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkCreateDebugReportCallbackEXT");
+    if (!_vkCreateDebugReportCallbackEXT) {
+        return false;
+    }
+
+    VkDebugReportCallbackCreateInfoEXT debugReportInfo;
+    memset(static_cast<void *>(&debugReportInfo), 0, sizeof(debugReportInfo));
+    debugReportInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+    debugReportInfo.pfnCallback = DebugLayerCallback;
+
+    VkResult err = _vkCreateDebugReportCallbackEXT(GloveVkContext.vkInstance, &debugReportInfo, nullptr, &(GloveVkContext.vkDebugReporter));
+    assert(!err);
+
+    return (err == VK_SUCCESS);
+}
+
+#endif
 
 vkContext_t *
 GetContext()
@@ -599,35 +614,5 @@ DeviceExtensionEnabled(const char *name)
 {
     return ExtensionEnabled(name, GloveVkContext.enabledDeviceExtensions);
 }
-
-#ifdef ENABLE_VK_DEBUG_REPORTER
-
-bool
-CreateVkDebugReporter()
-{
-    PFN_vkCreateDebugReportCallbackEXT _vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(GloveVkContext.vkInstance, "vkCreateDebugReportCallbackEXT");
-    if (!_vkCreateDebugReportCallbackEXT) {
-        return false;
-    }
-
-    VkDebugReportCallbackCreateInfoEXT debugReportInfo;
-    memset(static_cast<void *>(&debugReportInfo), 0, sizeof(debugReportInfo));
-    debugReportInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-    debugReportInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
-    debugReportInfo.pfnCallback = DebugLayerCallback;
-
-    VkResult err = _vkCreateDebugReportCallbackEXT(GloveVkContext.vkInstance, &debugReportInfo, nullptr, &(GloveVkContext.vkDebugReporter));
-    assert(!err);
-
-    return (err == VK_SUCCESS);
-}
-
-VKAPI_ATTR VkBool32 VKAPI_CALL DebugLayerCallback(VkDebugReportFlagsEXT flag, VkDebugReportObjectTypeEXT obj_type, uint64_t obj, size_t location, int32_t code, const char *layer_prefix, const char *message, void *user_data)
-{
-    fprintf(stderr, "Vulkan validation layer log: %s \n", message);
-    return VK_FALSE;
-}
-
-#endif
 
 };
