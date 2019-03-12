@@ -30,7 +30,7 @@ class Renderbuffer
 {
 private:
     const
-    vulkanAPI::XContext_t *         mVkContext;
+    vulkanAPI::XContext_t *          mXContext;
 
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
@@ -40,7 +40,7 @@ private:
     Texture *                        mTexture;
 
 public:
-    Renderbuffer(const vulkanAPI::XContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
+    Renderbuffer(const vulkanAPI::XContext_t *xContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~Renderbuffer();
 
 // Allocate Functions
@@ -57,7 +57,7 @@ public:
     inline Texture *   GetTexture(void)                                   const { FUN_ENTRY(GL_LOG_TRACE); return mTexture;        }
 
 // Set Functions
-    inline void        SetVkContext(const vulkanAPI::XContext_t *vkContext)    { FUN_ENTRY(GL_LOG_TRACE); mVkContext            = vkContext; }
+    inline void        SetxContext(const vulkanAPI::XContext_t *xContext)       { FUN_ENTRY(GL_LOG_TRACE); mXContext             = xContext; }
     inline void        SetCommandBufferManager(
                                    vulkanAPI::CommandBufferManager *cbManager)  { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void        SetTarget(GLenum target)                                 { FUN_ENTRY(GL_LOG_TRACE); mTarget               = target;    }

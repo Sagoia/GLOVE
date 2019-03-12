@@ -30,8 +30,8 @@
 
 namespace vulkanAPI {
 
-Framebuffer::Framebuffer(const XContext_t *vkContext)
-: mVkContext(vkContext),
+Framebuffer::Framebuffer(const XContext_t *xContext)
+: mXContext(xContext),
   mVkFramebuffer(VK_NULL_HANDLE)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -50,7 +50,7 @@ Framebuffer::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkFramebuffer != VK_NULL_HANDLE) {
-        vkDestroyFramebuffer(mVkContext->vkDevice, mVkFramebuffer, nullptr);
+        vkDestroyFramebuffer(mXContext->vkDevice, mVkFramebuffer, nullptr);
         mVkFramebuffer = VK_NULL_HANDLE;
     }
 }
@@ -73,7 +73,7 @@ Framebuffer::Create(std::vector<VkImageView> *imageViews, VkRenderPass *renderpa
     info.attachmentCount = static_cast<uint32_t>(imageViews->size());
     info.pAttachments    = imageViews->data();
 
-    VkResult err = vkCreateFramebuffer(mVkContext->vkDevice, &info, nullptr, &mVkFramebuffer);
+    VkResult err = vkCreateFramebuffer(mXContext->vkDevice, &info, nullptr, &mVkFramebuffer);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

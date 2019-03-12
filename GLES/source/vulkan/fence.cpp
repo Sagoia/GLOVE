@@ -26,8 +26,8 @@
 
 namespace vulkanAPI {
 
-Fence::Fence(const XContext_t *vkContext)
-: mVkContext(vkContext), mVkFence(VK_NULL_HANDLE)
+Fence::Fence(const XContext_t *xContext)
+: mXContext(xContext), mVkFence(VK_NULL_HANDLE)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -45,7 +45,7 @@ Fence::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkFence != VK_NULL_HANDLE) {
-        vkDestroyFence(mVkContext->vkDevice, mVkFence, nullptr);
+        vkDestroyFence(mXContext->vkDevice, mVkFence, nullptr);
         mVkFence = VK_NULL_HANDLE;
     }
 }
@@ -55,7 +55,7 @@ Fence::Reset(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkResetFences(mVkContext->vkDevice, 1, &mVkFence);
+    VkResult err = vkResetFences(mXContext->vkDevice, 1, &mVkFence);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
@@ -70,7 +70,7 @@ Fence::Wait(VkBool32 waitAll, uint64_t timeout)
 
     do {
 
-      err = vkWaitForFences(mVkContext->vkDevice, 1, &mVkFence, waitAll, timeout);
+      err = vkWaitForFences(mXContext->vkDevice, 1, &mVkFence, waitAll, timeout);
       assert(!err);
 
       if(err == VK_ERROR_OUT_OF_HOST_MEMORY || err == VK_ERROR_OUT_OF_DEVICE_MEMORY || err == VK_ERROR_DEVICE_LOST)
@@ -91,7 +91,7 @@ Fence::Create(bool signaled)
     info.pNext = nullptr;
     info.flags = signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
 
-    VkResult err = vkCreateFence(mVkContext->vkDevice, &info, nullptr, &mVkFence);
+    VkResult err = vkCreateFence(mXContext->vkDevice, &info, nullptr, &mVkFence);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

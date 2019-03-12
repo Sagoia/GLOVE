@@ -46,7 +46,7 @@ typedef struct {
 class ResourceManager {
 private:
 
-    const vulkanAPI::XContext_t              *mVkContext;
+    const vulkanAPI::XContext_t               *mXContext;
     typedef ObjectArray<Texture>               TextureArray;
     typedef ObjectArray<BufferObject>          BufferArray;
     typedef ObjectArray<Shader>                ShaderArray;
@@ -69,7 +69,7 @@ private:
     Texture                                   *mDefaultTextureCubeMap;
 
 public:
-    ResourceManager(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
+    ResourceManager(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager);
     ~ResourceManager();
 
 // Allocate/Deallocate Functions

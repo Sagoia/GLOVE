@@ -3,8 +3,8 @@
 
 namespace vulkanAPI {
 
-Caches::Caches(const vulkanAPI::XContext_t *vkContext) 
-: mVkContext(vkContext) 
+Caches::Caches(const vulkanAPI::XContext_t *xContext) 
+: mXContext(xContext) 
 { 
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -26,7 +26,7 @@ Caches::CleanUpImageViewCache()
 
     if (!mVkImageViewCache.Empty()) {
         for (uint32_t i = 0; i < mVkImageViewCache.Size(); ++i) {
-            vkDestroyImageView(mVkContext->vkDevice, mVkImageViewCache[i], nullptr);
+            vkDestroyImageView(mXContext->vkDevice, mVkImageViewCache[i], nullptr);
         }
 
         mVkImageViewCache.Clear();
@@ -40,7 +40,7 @@ Caches::CleanUpImageCache()
 
     if (!mVkImageCache.Empty()) {
         for (uint32_t i = 0; i < mVkImageCache.Size(); ++i) {
-            vkDestroyImage(mVkContext->vkDevice, mVkImageCache[i], nullptr);
+            vkDestroyImage(mXContext->vkDevice, mVkImageCache[i], nullptr);
         }
 
         mVkImageCache.Clear();
@@ -54,7 +54,7 @@ Caches::CleanUpBufferCache()
 
     if (!mVkBufferCache.Empty()) {
         for (uint32_t i = 0; i < mVkBufferCache.Size(); ++i) {
-            vkDestroyBuffer(mVkContext->vkDevice, mVkBufferCache[i], nullptr);
+            vkDestroyBuffer(mXContext->vkDevice, mVkBufferCache[i], nullptr);
         }
 
         mVkBufferCache.Clear();
@@ -68,7 +68,7 @@ Caches::CleanUpDeviceMemoryCache()
 
     if (!mVkDeviceMemoryCache.Empty()) {
         for (uint32_t i = 0; i < mVkDeviceMemoryCache.Size(); ++i) {
-            vkFreeMemory(mVkContext->vkDevice, mVkDeviceMemoryCache[i], nullptr);
+            vkFreeMemory(mXContext->vkDevice, mVkDeviceMemoryCache[i], nullptr);
         }
 
         mVkDeviceMemoryCache.Clear();
@@ -82,7 +82,7 @@ Caches::CleanUpSampleCache()
 
     if (!mVkSamplerCache.empty()) {
         for (auto sampler : mVkSamplerCache) {
-            vkDestroySampler(mVkContext->vkDevice, sampler.second, nullptr);
+            vkDestroySampler(mXContext->vkDevice, sampler.second, nullptr);
         }
 
         mVkSamplerCache.clear();
@@ -96,7 +96,7 @@ Caches::CleanUpRenderPassCache()
 
     if (!mVkRenderPassCache.empty()) {
         for (auto renderPass : mVkRenderPassCache) {
-            vkDestroyRenderPass(mVkContext->vkDevice, renderPass.second, nullptr);
+            vkDestroyRenderPass(mXContext->vkDevice, renderPass.second, nullptr);
         }
 
         mVkRenderPassCache.clear();
@@ -111,7 +111,7 @@ Caches::CleanUpPipelineCache()
     if (!mVkPipelineCache.empty()) {
         for (auto pipelineMap : mVkPipelineCache) {
             for (auto pipeline : pipelineMap.second) {
-                vkDestroyPipeline(mVkContext->vkDevice, pipeline.second, nullptr);
+                vkDestroyPipeline(mXContext->vkDevice, pipeline.second, nullptr);
             }
             pipelineMap.second.clear();
         }

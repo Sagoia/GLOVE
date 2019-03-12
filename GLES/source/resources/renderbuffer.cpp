@@ -30,8 +30,8 @@
 #include "utils/glUtils.h"
 #include "vulkan/utils.h"
 
-Renderbuffer::Renderbuffer(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
-: mVkContext(vkContext), mCommandBufferManager(cbManager),
+Renderbuffer::Renderbuffer(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager)
+: mXContext(xContext), mCommandBufferManager(cbManager),
 mInternalFormat(GL_RGBA4), mTarget(GL_INVALID_VALUE), mTexture(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -60,7 +60,7 @@ Renderbuffer::InitTexture(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
     
-    mTexture = new Texture(mVkContext, mCommandBufferManager);
+    mTexture = new Texture(mXContext, mCommandBufferManager);
     mTexture->SetTarget(GL_TEXTURE_2D);
     mTexture->InitState();
 }
@@ -83,7 +83,7 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
         mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     } else {
         // convert to supported format
-        vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
+        vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mXContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
         mTexture->SetVkFormat(vkformat);
         mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     }

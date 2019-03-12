@@ -64,7 +64,7 @@ Context::LineWidth(GLfloat width)
         return;
     }
     
-    if(mVkContext->vkDeviceFeatures.wideLines == VK_FALSE) {
+    if(mXContext->vkDeviceFeatures.wideLines == VK_FALSE) {
         return;
     }
 

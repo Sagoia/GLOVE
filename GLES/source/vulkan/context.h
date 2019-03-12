@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __VKCONTEXT_H__
-#define __VKCONTEXT_H__
+#ifndef __xContext_H__
+#define __xContext_H__
 
 #include <map>
 #include <vector>
@@ -88,4 +88,4 @@ namespace vulkanAPI {
     template<typename T>  inline void SafeDelete(T*& ptr)                       { FUN_ENTRY(GL_LOG_TRACE); delete ptr; ptr = nullptr; }
 };
 
-#endif // __VKCONTEXT_H__
+#endif // __xContext_H__

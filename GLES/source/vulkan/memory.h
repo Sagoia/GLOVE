@@ -36,7 +36,7 @@ class Memory {
 private:
 
     const
-    XContext_t *                   mVkContext;
+    XContext_t *                    mXContext;
 
     VkDeviceMemory                  mVkMemory;
     const
@@ -48,7 +48,7 @@ private:
 
 public:
 // Constructor
-    Memory(const XContext_t *vkContext = nullptr, VkFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    Memory(const XContext_t *xContext = nullptr, VkFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 // Destructor
     ~Memory();
@@ -74,7 +74,7 @@ public:
     bool                            SetData(VkDeviceSize size, VkDeviceSize offset, const void *data);
     void                            UpdateData(VkDeviceSize size, VkDeviceSize offset, const void *data);
 
-    inline void                     SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    inline void                     SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext; }
     inline void                     SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };
 

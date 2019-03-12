@@ -30,8 +30,8 @@
 
 uint32_t ResourceManager::mShadingObjectCount = 1;
 
-ResourceManager::ResourceManager(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
-    mVkContext(vkContext)
+ResourceManager::ResourceManager(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager):
+    mXContext(xContext)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -57,7 +57,7 @@ ResourceManager::CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManage
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mDefaultTexture2D = new Texture(mVkContext, cbManager);
+    mDefaultTexture2D = new Texture(mXContext, cbManager);
     mDefaultTexture2D->SetTarget(GL_TEXTURE_2D);
     mDefaultTexture2D->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
     mDefaultTexture2D->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
@@ -65,7 +65,7 @@ ResourceManager::CreateDefaultTextures(vulkanAPI::CommandBufferManager *cbManage
     mDefaultTexture2D->SetVkImageTiling();
     mDefaultTexture2D->InitState();
 
-    mDefaultTextureCubeMap = new Texture(mVkContext, cbManager);
+    mDefaultTextureCubeMap = new Texture(mXContext, cbManager);
     mDefaultTextureCubeMap->SetTarget(GL_TEXTURE_CUBE_MAP);
     mDefaultTextureCubeMap->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
     mDefaultTextureCubeMap->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));

@@ -35,7 +35,7 @@ class ImageView {
 private:
 
     const
-    XContext_t *                     mVkContext;
+    XContext_t *                      mXContext;
 
     VkImageView                       mVkImageView;
 
@@ -43,7 +43,7 @@ private:
 
 public:
 // Constructor
-    ImageView(const XContext_t *vkContext = nullptr);
+    ImageView(const XContext_t *xContext = nullptr);
 
 // Destructor
     ~ImageView();
@@ -58,7 +58,7 @@ public:
     inline VkImageView                GetImageView(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageView; }
 
 // Set Functions
-    inline void                       SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    inline void                       SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext; }
 
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 };

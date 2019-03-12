@@ -10,7 +10,7 @@ class CacheManager;
 class UniformBufferObject {
 private:
     const
-    vulkanAPI::XContext_t*     mVkContext;
+    vulkanAPI::XContext_t*      mXContext;
 
     GLenum                      mUsage;
     bool                        mAllocated;
@@ -20,7 +20,7 @@ private:
     vulkanAPI::Buffer*          mBuffer;
 
 public:
-    explicit                    UniformBufferObject(const vulkanAPI::XContext_t *vkContext = nullptr);
+    explicit                    UniformBufferObject(const vulkanAPI::XContext_t *xContext = nullptr);
     virtual                     ~UniformBufferObject();
 
 // Allocate Functions
@@ -43,10 +43,9 @@ public:
 
 // Set Functions
     inline void                 SetUsage(GLenum usage)                              { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
-    inline void                 SetVkContext(const vulkanAPI::XContext_t *vkContext)
-                                                                                    { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
-                                                                                                               mBuffer->SetContext(vkContext);
-                                                                                                               mMemory->SetContext(vkContext); }
+    inline void                 SetxContext(const vulkanAPI::XContext_t *xContext)  { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext;
+                                                                                                               mBuffer->SetContext(xContext);
+                                                                                                               mMemory->SetContext(xContext); }
     inline void                 SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
                                                                                                                mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions

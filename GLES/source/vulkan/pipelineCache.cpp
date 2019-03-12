@@ -26,8 +26,8 @@
 
 namespace vulkanAPI {
 
-PipelineCache::PipelineCache(const XContext_t *vkContext)
-: mVkContext(vkContext), mVkPipelineCache(VK_NULL_HANDLE)
+PipelineCache::PipelineCache(const XContext_t *xContext)
+: mXContext(xContext), mVkPipelineCache(VK_NULL_HANDLE)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -45,7 +45,7 @@ PipelineCache::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mVkPipelineCache != VK_NULL_HANDLE) {
-        vkDestroyPipelineCache(mVkContext->vkDevice, mVkPipelineCache, nullptr);
+        vkDestroyPipelineCache(mXContext->vkDevice, mVkPipelineCache, nullptr);
         mVkPipelineCache = VK_NULL_HANDLE;
     }
 }
@@ -53,7 +53,7 @@ PipelineCache::Release(void)
 bool
 PipelineCache::GetData(void* data, size_t* size) const
 {
-    VkResult err = vkGetPipelineCacheData(mVkContext->vkDevice, mVkPipelineCache, size, data);
+    VkResult err = vkGetPipelineCacheData(mXContext->vkDevice, mVkPipelineCache, size, data);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
@@ -73,7 +73,7 @@ PipelineCache::Create(const void *data, size_t size)
     info.pInitialData    = data;
     info.initialDataSize = size;
 
-    VkResult err = vkCreatePipelineCache(mVkContext->vkDevice, &info, nullptr, &mVkPipelineCache);
+    VkResult err = vkCreatePipelineCache(mXContext->vkDevice, &info, nullptr, &mVkPipelineCache);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

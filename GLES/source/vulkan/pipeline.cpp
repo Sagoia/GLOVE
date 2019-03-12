@@ -33,8 +33,8 @@
 
 namespace vulkanAPI {
 
-Pipeline::Pipeline(const XContext_t *vkContext)
-: mVkContext(vkContext), mVkPipeline(VK_NULL_HANDLE), mVkPipelineLayout(VK_NULL_HANDLE),
+Pipeline::Pipeline(const XContext_t *xContext)
+: mXContext(xContext), mVkPipeline(VK_NULL_HANDLE), mVkPipelineLayout(VK_NULL_HANDLE),
   mVkPipelineCache(VK_NULL_HANDLE), mVkPipelineVertexInputState(VK_NULL_HANDLE),
   mVkPipelineShaderStageCount(0), mYInverted(false), mCacheManager(nullptr)
 {
@@ -93,7 +93,7 @@ Pipeline::ComputeViewport(int fboWidth, int fboHeight, int viewportX, int viewpo
 
     viewportW = std::min(viewportW, fboWidth);
     viewportH = std::min(viewportH, fboHeight);
-    if(mVkContext->mIsMaintenanceExtSupported && !mYInverted) {
+    if(mXContext->mIsMaintenanceExtSupported && !mYInverted) {
         viewportY = fboHeight - viewportY;
         viewportH = -viewportH;
     }
@@ -374,7 +374,7 @@ Pipeline::CreateGraphicsPipeline(void)
 
     VkResult err = VK_SUCCESS;
     if (mVkPipeline == VK_NULL_HANDLE) {
-        err = vkCreateGraphicsPipelines(mVkContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, nullptr, &mVkPipeline);
+        err = vkCreateGraphicsPipelines(mXContext->vkDevice, mVkPipelineCache, 1, &mVkPipelineInfo, nullptr, &mVkPipeline);
         assert(!err);
 
         mCacheManager->GetSubCaches()->CachePipeline(mVkPipelineCache, hash, mVkPipeline);

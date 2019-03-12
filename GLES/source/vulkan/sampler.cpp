@@ -34,8 +34,8 @@
 
 namespace vulkanAPI {
 
-Sampler::Sampler(const XContext_t *vkContext)
-: mVkContext(vkContext),
+Sampler::Sampler(const XContext_t *xContext)
+: mXContext(xContext),
   mVkSampler(VK_NULL_HANDLE),
   mVkMinFilter(VK_FILTER_NEAREST), mVkMagFilter(VK_FILTER_LINEAR),
   mVkMipmapMode(VK_SAMPLER_MIPMAP_MODE_LINEAR),
@@ -68,7 +68,7 @@ Sampler::Release(void)
 
     if(mVkSampler != VK_NULL_HANDLE) {
         if (!mCacheManager) {
-            vkDestroySampler(mVkContext->vkDevice, mVkSampler, nullptr);
+            vkDestroySampler(mXContext->vkDevice, mVkSampler, nullptr);
         }
         mVkSampler = VK_NULL_HANDLE;
     }
@@ -112,14 +112,14 @@ Sampler::Create()
     VkResult err = VK_SUCCESS;
 
     if (!mCacheManager) {
-        err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
+        err = vkCreateSampler(mXContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
         assert(!err);
     } else {
         mHash = HashSamplerInfo(samplerInfo);
         mVkSampler = mCacheManager->GetSubCaches()->GetSampler(mHash);
 
         if (mVkSampler == VK_NULL_HANDLE) {
-            err = vkCreateSampler(mVkContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
+            err = vkCreateSampler(mXContext->vkDevice, &samplerInfo, nullptr, &mVkSampler);
             assert(!err);
 
             mCacheManager->GetSubCaches()->CacheSampler(mHash, mVkSampler);

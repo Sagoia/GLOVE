@@ -34,13 +34,13 @@ class PipelineCache {
 private:
 
     const
-    XContext_t *                     mVkContext;
+    XContext_t *                      mXContext;
 
     VkPipelineCache                   mVkPipelineCache;
 
 public:
 // Constructor
-    PipelineCache(const XContext_t *vkContext = nullptr);
+    PipelineCache(const XContext_t *xContext = nullptr);
 
 // Destructor
     ~PipelineCache();
@@ -58,7 +58,7 @@ public:
     inline VkPipelineCache            GetPipelineCache(void)              const { FUN_ENTRY(GL_LOG_TRACE); return mVkPipelineCache; }
 
 // Set Functions
-    inline void                       SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    inline void                       SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext; }
 };
 
 }

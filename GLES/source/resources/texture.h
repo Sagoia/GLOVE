@@ -55,7 +55,7 @@ class Texture {
 
 private:
     const
-    vulkanAPI::XContext_t *    mVkContext;
+    vulkanAPI::XContext_t *    mXContext;
 
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
@@ -98,7 +98,7 @@ private:
     void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vulkanAPI::XContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
+    Texture(const vulkanAPI::XContext_t  *xContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
             const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     ~Texture();
 
@@ -169,12 +169,11 @@ public:
                                                                                                            mImageView->SetCacheManager(cacheManager);
                                                                                                            mImage->SetCacheManager(cacheManager);
                                                                                                            mMemory->SetCacheManager(cacheManager); }
-    inline void             SetVkContext(const
-                                         vulkanAPI::XContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
-                                                                                                           mMemory->SetContext(vkContext);
-                                                                                                           mSampler->SetContext(vkContext);
-                                                                                                           mImageView->SetContext(vkContext);
-                                                                                                           mImage->SetContext(vkContext); }
+    inline void             SetxContext(const vulkanAPI::XContext_t *xContext)  { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext;
+                                                                                                           mMemory->SetContext(xContext);
+                                                                                                           mSampler->SetContext(xContext);
+                                                                                                           mImageView->SetContext(xContext);
+                                                                                                           mImage->SetContext(xContext); }
     inline void             SetWrapS(GLenum mode)                               { FUN_ENTRY(GL_LOG_TRACE); if(mParameters.UpdateWrapS(mode)) { \
                                                                                                            mSampler->SetAddressModeU(GlTexAddressToXTexAddress(mode)); \
                                                                                                            UpdateNPOTAccessCompleted();}}

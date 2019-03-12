@@ -81,7 +81,7 @@ private:
 
     static CommandBufferManager    *mInstance;
     VkCommandPool                   mVkCmdPool;
-    const XContext_t              *mVkContext;
+    const XContext_t               *mXContext;
 
     uint32_t                        mActiveCmdBuffer;
     int32_t                         mLastSubmittedBuffer;

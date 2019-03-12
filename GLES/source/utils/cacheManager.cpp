@@ -27,12 +27,12 @@
 #include "resources/texture.h"
 #include "vulkan/caches.h"
 
-CacheManager::CacheManager(const vulkanAPI::XContext_t *vkContext) 
-: mVkContext(vkContext) 
+CacheManager::CacheManager(const vulkanAPI::XContext_t *xContext) 
+: mXContext(xContext) 
 { 
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mSubCaches = new vulkanAPI::Caches(vkContext);
+    mSubCaches = new vulkanAPI::Caches(xContext);
 
     mUBOCache.Reserve(DEFAULT_COUNT);
     for (uint32_t i = 0; i < UBO_ARRAY_COUNT; ++i) {

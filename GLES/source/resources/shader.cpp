@@ -30,8 +30,8 @@
 #include "shader.h"
 #include "slangCompiler.h"
 
-Shader::Shader(const vulkanAPI::XContext_t *vkContext)
-: mVkContext(vkContext), mVkShaderModule(VK_NULL_HANDLE), mSlangCompiler(nullptr), mSource(nullptr),
+Shader::Shader(const vulkanAPI::XContext_t *xContext)
+: mXContext(xContext), mVkShaderModule(VK_NULL_HANDLE), mSlangCompiler(nullptr), mSource(nullptr),
   mSourceLength(0), mShaderType(INVALID_SHADER), mRefCounter(0), mMarkForDeletion(false), mCompiled(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -239,7 +239,7 @@ Shader::CreateVkShaderModule(void)
     moduleCreateInfo.codeSize = mSpv.size() * sizeof(uint32_t);
     moduleCreateInfo.pCode = mSpv.data();
 
-    if(vkCreateShaderModule(mVkContext->vkDevice, &moduleCreateInfo, 0, &mVkShaderModule)) {
+    if(vkCreateShaderModule(mXContext->vkDevice, &moduleCreateInfo, 0, &mVkShaderModule)) {
         return VK_NULL_HANDLE;
     }
 

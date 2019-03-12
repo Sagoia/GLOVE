@@ -43,15 +43,15 @@ Context::Context()
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mVkContext            = vulkanAPI::GetContext();
-    mCommandBufferManager = new vulkanAPI::CommandBufferManager(mVkContext);
+    mXContext             = vulkanAPI::GetContext();
+    mCommandBufferManager = new vulkanAPI::CommandBufferManager(mXContext);
 
     InitExtensions();
 
-    mResourceManager = new ResourceManager(mVkContext, mCommandBufferManager);
+    mResourceManager = new ResourceManager(mXContext, mCommandBufferManager);
     mShaderCompiler  = new GlslangShaderCompiler();
-    mPipeline        = new vulkanAPI::Pipeline(mVkContext);
-    mCacheManager    = new CacheManager(mVkContext);
+    mPipeline        = new vulkanAPI::Pipeline(mXContext);
+    mCacheManager    = new CacheManager(mXContext);
 
     mStateManager.InitVkPipelineStates(mPipeline);
 
@@ -69,7 +69,7 @@ Context::Context()
     mIsYInverted        = !(vulkanAPI::GetContext()->mIsMaintenanceExtSupported);
     mIsModeLineLoop     = false;
 
-    mScreenSpacePass = new ScreenSpacePass(this, mVkContext, mCommandBufferManager);
+    mScreenSpacePass = new ScreenSpacePass(this, mXContext, mCommandBufferManager);
     mScreenSpacePass->SetCacheManager(mCacheManager);
     mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
 
@@ -147,14 +147,14 @@ Context::InitExtensions()
 {
     mCompressedTextureFormats.clear();
     mExtensions = "GL_OES_get_program_binary GL_OES_rgb8_rgba8 GL_EXT_texture_format_BGRA8888";
-    if (mVkContext->vkDeviceFeatures.textureCompressionBC) { 
+    if (mXContext->vkDeviceFeatures.textureCompressionBC) { 
         mExtensions += " GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_s3tc";
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGB_S3TC_DXT1_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT);
         mCompressedTextureFormats.push_back(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
     }
-    if (mVkContext->vkDeviceFeatures.textureCompressionETC2) {
+    if (mXContext->vkDeviceFeatures.textureCompressionETC2) {
         mExtensions += " GL_OES_compressed_ETC1_RGB8_texture";
         mCompressedTextureFormats.push_back(GL_ETC1_RGB8_OES);
     }
@@ -193,11 +193,11 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
 
     VkImage *vkImages = reinterpret_cast<VkImage *>(eglSurfaceInterface->images);
 
-    Framebuffer *fbo = new Framebuffer(mVkContext, mCommandBufferManager);
+    Framebuffer *fbo = new Framebuffer(mXContext, mCommandBufferManager);
     fbo->SetCacheManager(mCacheManager);
 
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
-        Texture *tex = new Texture(mVkContext, mCommandBufferManager);
+        Texture *tex = new Texture(mXContext, mCommandBufferManager);
 
         GLenum glformat = XFormatToGlInternalformat((XFormat)eglSurfaceInterface->surfaceColorFormat);
 
@@ -235,13 +235,13 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkFormat depthStencilFormat = vulkanAPI::FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], eglSurfaceInterface->depthSize, eglSurfaceInterface->stencilSize);
+    VkFormat depthStencilFormat = vulkanAPI::FindSupportedDepthStencilFormat(mXContext->vkGpus[0], eglSurfaceInterface->depthSize, eglSurfaceInterface->stencilSize);
 
     if(depthStencilFormat == VK_FORMAT_UNDEFINED) {
         return nullptr;
     }
 
-    Texture *tex = new Texture(mVkContext, mCommandBufferManager);
+    Texture *tex = new Texture(mXContext, mCommandBufferManager);
     tex->SetTarget(GL_TEXTURE_2D);
     tex->SetVkFormat(depthStencilFormat);
     tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));

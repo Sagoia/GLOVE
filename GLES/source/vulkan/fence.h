@@ -33,13 +33,13 @@ class Fence {
 private:
 
     const
-    XContext_t *                     mVkContext;
+    XContext_t *                      mXContext;
 
     VkFence                           mVkFence;
 
 public:
 // Constructor
-    Fence(const XContext_t *vkContext = nullptr);
+    Fence(const XContext_t *xContext = nullptr);
 
 // Destructor
     ~Fence();
@@ -60,7 +60,7 @@ public:
     inline VkFence                    GetFence(void)                      const { FUN_ENTRY(GL_LOG_TRACE); return mVkFence; }
 
 // Set Functions
-    inline void                       SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    inline void                       SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext; }
 };
 
 }

@@ -34,7 +34,7 @@ class CacheManager;
 class BufferObject {
 private:
     const
-    vulkanAPI::XContext_t* mVkContext;
+    vulkanAPI::XContext_t*  mXContext;
 
     GLenum                  mUsage;
     GLenum                  mTarget;
@@ -44,7 +44,7 @@ private:
     vulkanAPI::Buffer*      mBuffer;
 
 public:
-    explicit                BufferObject(const vulkanAPI::XContext_t *vkContext = nullptr, XBufferUsageFlags usage = X_BUFFER_USAGE_UNKNOW);
+    explicit                BufferObject(const vulkanAPI::XContext_t *xContext = nullptr, XBufferUsageFlags usage = X_BUFFER_USAGE_UNKNOW);
     virtual                ~BufferObject();
 
 // Allocate Functions
@@ -67,9 +67,9 @@ public:
 // Set Functions
     void                    SetTarget(GLenum target);
     inline void             SetUsage(GLenum usage)                                { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
-    inline void             SetVkContext(const vulkanAPI::XContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
-                                                                                                             mBuffer->SetContext(vkContext);
-                                                                                                             mMemory->SetContext(vkContext); }
+    inline void             SetxContext(const vulkanAPI::XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext;
+                                                                                                             mBuffer->SetContext(xContext);
+                                                                                                             mMemory->SetContext(xContext); }
     inline void             SetCacheManager(CacheManager *cacheManager)           { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
                                                                                                              mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions
@@ -81,7 +81,7 @@ class IndexBufferObject : public BufferObject
 {
 
 public:
-    explicit                IndexBufferObject(const vulkanAPI::XContext_t *vkContext)        : BufferObject(vkContext, X_BUFFER_USAGE_INDEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                IndexBufferObject(const vulkanAPI::XContext_t *xContext)        : BufferObject(xContext, X_BUFFER_USAGE_INDEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -89,7 +89,7 @@ class TransferSrcBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferSrcBufferObject(const vulkanAPI::XContext_t *vkContext)  : BufferObject(vkContext, X_BUFFER_USAGE_TRANSFER_SRC) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferSrcBufferObject(const vulkanAPI::XContext_t *xContext)  : BufferObject(xContext, X_BUFFER_USAGE_TRANSFER_SRC) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -97,7 +97,7 @@ class TransferDstBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferDstBufferObject(const vulkanAPI::XContext_t *vkContext)  : BufferObject(vkContext, X_BUFFER_USAGE_TRANSFER_DST) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferDstBufferObject(const vulkanAPI::XContext_t *xContext)  : BufferObject(xContext, X_BUFFER_USAGE_TRANSFER_DST) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -105,7 +105,7 @@ class VertexBufferObject : public BufferObject
 {
 
 public:
-    explicit                VertexBufferObject(const vulkanAPI::XContext_t *vkContext)       : BufferObject(vkContext, X_BUFFER_USAGE_VERTEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                VertexBufferObject(const vulkanAPI::XContext_t *xContext)       : BufferObject(xContext, X_BUFFER_USAGE_VERTEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 

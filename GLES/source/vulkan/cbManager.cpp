@@ -42,7 +42,7 @@ namespace vulkanAPI {
 CommandBufferManager *CommandBufferManager::mInstance = nullptr;
 
 CommandBufferManager::CommandBufferManager(const XContext_t *context)
-: mVkContext(context)
+: mXContext(context)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
@@ -77,14 +77,14 @@ CommandBufferManager::~CommandBufferManager()
 
     mReferencedResources.clear();
 
-    if(mVkContext->vkDevice != VK_NULL_HANDLE ) {
+    if(mXContext->vkDevice != VK_NULL_HANDLE ) {
 
-        vkDeviceWaitIdle(mVkContext->vkDevice);
+        vkDeviceWaitIdle(mXContext->vkDevice);
 
         DestroyVkCmdBuffers();
 
         if(mVkCmdPool != VK_NULL_HANDLE) {
-            vkDestroyCommandPool(mVkContext->vkDevice, mVkCmdPool, nullptr);
+            vkDestroyCommandPool(mXContext->vkDevice, mVkCmdPool, nullptr);
             mVkCmdPool = VK_NULL_HANDLE;
         }
     }
@@ -99,14 +99,14 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
         mVkCommandBuffers.fence[i].Release();
     }
 
-    vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, (uint32_t)mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
+    vkFreeCommandBuffers(mXContext->vkDevice, mVkCmdPool, (uint32_t)mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
     mVkCommandBuffers.commandBuffer.clear();
     mVkCommandBuffers.commandBufferState.clear();
     mVkCommandBuffers.fence.clear();
     memset(static_cast<void *>(&mVkCommandBuffers), 0, mVkCommandBuffers.commandBuffer.size()*sizeof(State));
 
     if(mVkAuxCommandBuffer != VK_NULL_HANDLE) {
-        vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
+        vkFreeCommandBuffers(mXContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
         mVkAuxCommandBuffer = VK_NULL_HANDLE;
     }
 
@@ -115,7 +115,7 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
     for(uint32_t i = 0; i < secondaryBuffersPoolSize; ++i) {
         VkCommandBuffer *removingSecondaryBuffer = mSecondaryCmdBufferPool.RemoveBuffer();
         if(removingSecondaryBuffer) {
-            vkFreeCommandBuffers(mVkContext->vkDevice, mVkCmdPool, 1, removingSecondaryBuffer);
+            vkFreeCommandBuffers(mXContext->vkDevice, mVkCmdPool, 1, removingSecondaryBuffer);
             delete removingSecondaryBuffer;
         }
     }
@@ -151,7 +151,7 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
     cmdAllocInfo.commandBufferCount = numOfBuffers;
 
-    err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, commandBuffers);
+    err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, commandBuffers);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -176,19 +176,19 @@ CommandBufferManager::FreeResources(void)
             switch(resourceBase->mType) {
             case RESOURCE_TYPE_SHADER: {
                 referencedResource_t<VkShaderModule> *resource = (referencedResource_t<VkShaderModule> *)resourceBase;
-                vkDestroyShaderModule(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
+                vkDestroyShaderModule(mXContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             case RESOURCE_TYPE_PIPELINE_LAYOUT: {
                 referencedResource_t<VkPipelineLayout> *resource = (referencedResource_t<VkPipelineLayout> *)resourceBase;
-                vkDestroyPipelineLayout(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
+                vkDestroyPipelineLayout(mXContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             case RESOURCE_TYPE_DESC_POOL: {
                 referencedResource_t<VkDescriptorPool> *resource = (referencedResource_t<VkDescriptorPool> *)resourceBase;
-                vkDestroyDescriptorPool(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
+                vkDestroyDescriptorPool(mXContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             case RESOURCE_TYPE_DESC_SET_LAYOUT: {
                 referencedResource_t<VkDescriptorSetLayout> *resource = (referencedResource_t<VkDescriptorSetLayout> *)resourceBase;
-                vkDestroyDescriptorSetLayout(mVkContext->vkDevice, resource->mResourcePtr, nullptr);
+                vkDestroyDescriptorSetLayout(mXContext->vkDevice, resource->mResourcePtr, nullptr);
                 } break;
             default: NOT_REACHED(); break;
             }
@@ -213,9 +213,9 @@ CommandBufferManager::AllocateVkCmdPool(void)
     cmdPoolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     cmdPoolInfo.pNext            = nullptr;
     cmdPoolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    cmdPoolInfo.queueFamilyIndex = mVkContext->vkGraphicsQueueNodeIndex;
+    cmdPoolInfo.queueFamilyIndex = mXContext->vkGraphicsQueueNodeIndex;
 
-    VkResult err = vkCreateCommandPool(mVkContext->vkDevice, &cmdPoolInfo, nullptr, &mVkCmdPool);
+    VkResult err = vkCreateCommandPool(mXContext->vkDevice, &cmdPoolInfo, nullptr, &mVkCmdPool);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -241,7 +241,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     cmdAllocInfo.commandBufferCount = GLOVE_NUM_COMMAND_BUFFERS;
 
-    VkResult err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, mVkCommandBuffers.commandBuffer.data());
+    VkResult err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, mVkCommandBuffers.commandBuffer.data());
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -249,7 +249,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     }
 
     cmdAllocInfo.commandBufferCount = 1;
-    err = vkAllocateCommandBuffers(mVkContext->vkDevice, &cmdAllocInfo, &mVkAuxCommandBuffer);
+    err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, &mVkAuxCommandBuffer);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -259,7 +259,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     for(uint32_t i = 0; i < GLOVE_NUM_COMMAND_BUFFERS; ++i) {
         mVkCommandBuffers.commandBufferState[i] = CMD_BUFFER_INITIAL_STATE;
 
-        mVkCommandBuffers.fence[i].SetContext(mVkContext);
+        mVkCommandBuffers.fence[i].SetContext(mXContext);
         if(!mVkCommandBuffers.fence[i].Create(false)) {
             return false;
         }
@@ -360,12 +360,12 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
 
     std::vector<VkSemaphore> pSems;
     std::vector<VkPipelineStageFlags> pFlags;
-    if(mVkContext->vkSyncItems->acquireSemaphoreFlag) {
-        pSems.push_back(mVkContext->vkSyncItems->vkAcquireSemaphore);
+    if(mXContext->vkSyncItems->acquireSemaphoreFlag) {
+        pSems.push_back(mXContext->vkSyncItems->vkAcquireSemaphore);
         pFlags.push_back(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
     }
-    if(mVkContext->vkSyncItems->drawSemaphoreFlag) {
-        pSems.push_back(mVkContext->vkSyncItems->vkDrawSemaphore);
+    if(mXContext->vkSyncItems->drawSemaphoreFlag) {
+        pSems.push_back(mXContext->vkSyncItems->vkDrawSemaphore);
         pFlags.push_back(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
     }
 
@@ -378,12 +378,12 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
     submitInfo.pWaitSemaphores      = pSems.data();
     submitInfo.pWaitDstStageMask    = pFlags.data();
     submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores    = &mVkContext->vkSyncItems->vkDrawSemaphore;
+    submitInfo.pSignalSemaphores    = &mXContext->vkSyncItems->vkDrawSemaphore;
 
-    mVkContext->vkSyncItems->drawSemaphoreFlag    = true;
-    mVkContext->vkSyncItems->acquireSemaphoreFlag = false;
+    mXContext->vkSyncItems->drawSemaphoreFlag    = true;
+    mXContext->vkSyncItems->acquireSemaphoreFlag = false;
 
-    VkResult err = vkQueueSubmit(mVkContext->vkQueue, 1, &submitInfo, mVkCommandBuffers.fence[mActiveCmdBuffer].GetFence());
+    VkResult err = vkQueueSubmit(mXContext->vkQueue, 1, &submitInfo, mVkCommandBuffers.fence[mActiveCmdBuffer].GetFence());
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -462,7 +462,7 @@ CommandBufferManager::SubmitVkAuxCommandBuffer(void)
     info.commandBufferCount     = 1;
     info.pCommandBuffers        = &mVkAuxCommandBuffer;
 
-    VkResult err = vkQueueSubmit(mVkContext->vkQueue, 1, &info, mVkAuxFence);
+    VkResult err = vkQueueSubmit(mXContext->vkQueue, 1, &info, mVkAuxFence);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_DEVICE_LOST);
@@ -473,7 +473,7 @@ CommandBufferManager::WaitVkAuxCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkQueueWaitIdle(mVkContext->vkQueue);
+    VkResult err = vkQueueWaitIdle(mXContext->vkQueue);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_DEVICE_LOST);

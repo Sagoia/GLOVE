@@ -56,7 +56,7 @@ struct ShaderData {
 
     }
     void InitResources(class Context *GLContext, CacheManager* cacheManager,
-                       const vulkanAPI::XContext_t *mVkContext,
+                       const vulkanAPI::XContext_t *xContext,
                        vulkanAPI::CommandBufferManager* commandBufferManager);
     bool Generate(const std::string& vertexSource, const std::string& fragmentSource);
     void Destroy(void);
@@ -65,7 +65,7 @@ struct ShaderData {
 // ------------
 
     class Context                              *mGLContext;
-    const vulkanAPI::XContext_t               *mVkContext;
+    const vulkanAPI::XContext_t                *mXContext;
     vulkanAPI::CommandBufferManager            *mCommandBufferManager;
     CacheManager*                               mCacheManager;
 
@@ -113,7 +113,7 @@ struct ShaderData {
     bool                                        DestroyDescriptorSets();
 
 public:
-    ScreenSpacePass(class Context *GLContext, const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager);
+    ScreenSpacePass(class Context *GLContext, const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager);
     ~ScreenSpacePass();
 
     bool                                        Initialize();

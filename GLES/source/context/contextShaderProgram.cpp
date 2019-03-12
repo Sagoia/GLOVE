@@ -83,7 +83,7 @@ Context::CreateProgram(void)
 
     GLuint         res     = mResourceManager->AllocateShaderProgram();
     ShaderProgram *progPtr = mResourceManager->GetShaderProgram(res);
-    progPtr->SetVkContext(mVkContext);
+    progPtr->SetxContext(mXContext);
     progPtr->SetCommandBufferManager(mCommandBufferManager);
     progPtr->SetGlContext(this);
     progPtr->SetShaderCompiler(mShaderCompiler);
