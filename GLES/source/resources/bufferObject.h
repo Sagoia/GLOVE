@@ -44,7 +44,7 @@ private:
     vulkanAPI::Buffer*      mBuffer;
 
 public:
-    explicit                BufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr, XBufferUsageFlags usage = USAGE_UNKNOW);
+    explicit                BufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr, XBufferUsageFlags usage = X_BUFFER_USAGE_UNKNOW);
     virtual                ~BufferObject();
 
 // Allocate Functions
@@ -74,14 +74,14 @@ public:
                                                                                                              mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions
     inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != nullptr; }
-    inline bool             IsIndexBuffer(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (mBuffer->GetFlags() & INDEX_BUFFER) > 0; }
+    inline bool             IsIndexBuffer(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (mBuffer->GetFlags() & X_BUFFER_USAGE_INDEX_BUFFER) > 0; }
 };
 
 class IndexBufferObject : public BufferObject
 {
 
 public:
-    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, INDEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, X_BUFFER_USAGE_INDEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -89,7 +89,7 @@ class TransferSrcBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferSrcBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, TRANSFER_SRC) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferSrcBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, X_BUFFER_USAGE_TRANSFER_SRC) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -97,7 +97,7 @@ class TransferDstBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, TRANSFER_DST) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, X_BUFFER_USAGE_TRANSFER_DST) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -105,7 +105,7 @@ class VertexBufferObject : public BufferObject
 {
 
 public:
-    explicit                VertexBufferObject(const vulkanAPI::vkContext_t *vkContext)       : BufferObject(vkContext, VERTEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                VertexBufferObject(const vulkanAPI::vkContext_t *vkContext)       : BufferObject(vkContext, X_BUFFER_USAGE_VERTEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
