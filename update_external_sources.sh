@@ -15,6 +15,8 @@ GOOGLETEST_REPOSITORY="https://github.com/google/googletest.git"
 
 GLSLANG_REVISION=$(cat $EXT_DIR/glslang_revision)
 GOOGLETEST_REVISION=$(cat $EXT_DIR/googletest_revision)
+GLSLANG_FLAGS="-DENABLE_AMD_EXTENSIONS=OFF -DENABLE_NV_EXTENSIONS=OFF -DENABLE_OPT=OFF"
+
 echo "GLSLANG_REVISION=$GLSLANG_REVISION"
 echo "GOOGLETEST_REVISION=$GOOGLETEST_REVISION"
 
@@ -38,19 +40,28 @@ function update() {
 
 function build() {
     PROJECT=$1
+    PROJECT_FLAGS=""
     echo "Building $EXT_DIR/$PROJECT"
     if [ -z "$INSTALL_PATH" ]; then
         INSTALL_PREFIX="$EXT_DIR/$PROJECT"
     else
         INSTALL_PREFIX="$INSTALL_PATH"
     fi
+
+    if [ $PROJECT == "glslang" ]; then
+        PROJECT_FLAGS=$GLSLANG_FLAGS
+    fi
+
+    echo "PROJECT_FLAGS:" $PROJECT_FLAGS
+
     cd $EXT_DIR/$PROJECT
     mkdir -p $BUILD_FOLDER
     cd $BUILD_FOLDER
     cmake -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
           -DCMAKE_SYSROOT=$SYSROOT \
-          -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+          -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+          $PROJECT_FLAGS ..
     make -j $(nproc)
     make install
 }
