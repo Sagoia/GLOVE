@@ -53,7 +53,7 @@ Context::Context()
     mPipeline        = new vulkanAPI::Pipeline(mXContext);
     mCacheManager    = new CacheManager(mXContext);
 
-    mStateManager.InitVkPipelineStates(mPipeline);
+    mStateManager.InitPipelineStates(mPipeline);
 
     InitializeDefaultTextures();
 
@@ -71,7 +71,7 @@ Context::Context()
 
     mScreenSpacePass = new ScreenSpacePass(this, mXContext, mCommandBufferManager);
     mScreenSpacePass->SetCacheManager(mCacheManager);
-    mStateManager.InitVkPipelineStates(mScreenSpacePass->GetPipeline());
+    mStateManager.InitPipelineStates(mScreenSpacePass->GetPipeline());
 
 }
 
