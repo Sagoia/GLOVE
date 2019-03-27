@@ -38,7 +38,7 @@ namespace vulkanAPI {
 Image::Image(const XContext_t *xContext)
 : mXContext(xContext), mVkImage(VK_NULL_HANDLE), mVkFormat(VK_FORMAT_UNDEFINED), mVkImageType(VK_IMAGE_TYPE_2D),
 mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED), mVkPipelineStage(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT),
-mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),
+mVkImageTiling(VK_IMAGE_TILING_LINEAR), mXImageTarget(X_IMAGE_TARGET_2D),
 mVkSampleCount(VK_SAMPLE_COUNT_1_BIT), mVkSharingMode(VK_SHARING_MODE_EXCLUSIVE),
 mWidth(0), mHeight(0), mMipLevels(1), mLayers(1), mDelete(true),
 mCopyStencil(false),
@@ -115,13 +115,13 @@ Image::Create(void)
     VkImageCreateInfo info;
     info.sType          = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     info.pNext          = nullptr;
-    info.flags          = mVkImageTarget == VK_IMAGE_TARGET_2D ? 0 : VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+    info.flags          = mXImageTarget == X_IMAGE_TARGET_2D ? 0 : VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     info.imageType      = mVkImageType;
     info.format         = mVkFormat;
     info.extent.width   = mWidth;
     info.extent.height  = mHeight;
     info.extent.depth   = 1;
-    info.arrayLayers    = mVkImageTarget == VK_IMAGE_TARGET_2D ? TEXTURE_2D_LAYERS : TEXTURE_CUBE_MAP_LAYERS;
+    info.arrayLayers    = mXImageTarget == X_IMAGE_TARGET_2D ? TEXTURE_2D_LAYERS : TEXTURE_CUBE_MAP_LAYERS;
     info.mipLevels      = mMipLevels;
     info.samples        = mVkSampleCount;
     info.tiling         = mVkImageTiling;

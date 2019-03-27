@@ -30,19 +30,13 @@
 
 class CacheManager;
 
-#define TEXTURE_2D_LAYERS         1
-#define TEXTURE_CUBE_MAP_LAYERS   6
-
 namespace vulkanAPI {
 
 class Image {
-public:
 
-    typedef enum VkImageTarget {
-        VK_IMAGE_TARGET_2D   = 0,
-        VK_IMAGE_TARGET_CUBE = 1,
-        VK_IMAGE_TARGET_MAX  = 2
-    } VkImageTarget;
+public:
+    const static int TEXTURE_2D_LAYERS          = 1;
+    const static int TEXTURE_CUBE_MAP_LAYERS    = 6;
 
 private:
 
@@ -57,7 +51,7 @@ private:
     VkPipelineStageFlags              mVkPipelineStage;
     VkImageTiling                     mVkImageTiling;
     VkImageSubresourceRange           mVkImageSubresourceRange;
-    VkImageTarget                     mVkImageTarget;
+    XImageTarget                      mXImageTarget;
     VkSampleCountFlagBits             mVkSampleCount;
     VkSharingMode                     mVkSharingMode;
     VkBufferImageCopy                 mVkBufferImageCopy;
@@ -103,7 +97,7 @@ public:
 // Get Functions
     inline VkImage &                  GetImage(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mVkImage;          }
     inline VkFormat                   GetFormat(void)                     const { FUN_ENTRY(GL_LOG_TRACE); return mVkFormat;         }
-    inline VkImageTarget              GetImageTarget(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageTarget;    }
+    inline XImageTarget               GetImageTarget(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mXImageTarget;     }
     inline VkImageUsageFlags          GetImageUsage(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageUsage;     }
     inline VkImageLayout              GetImageLayout(void)                const { FUN_ENTRY(GL_LOG_TRACE); return mVkImageLayout;    }
     inline VkBufferImageCopy *        GetBufferImageCopy(void)                  { FUN_ENTRY(GL_LOG_TRACE); return &mVkBufferImageCopy;      }
@@ -120,7 +114,7 @@ public:
     inline void                       SetImageUsage(VkImageUsageFlags usage)    { FUN_ENTRY(GL_LOG_TRACE); mVkImageUsage  = usage;     }
            void                       SetImageTiling();
     inline void                       SetImageTiling(VkImageTiling tiling)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTiling = tiling;    }
-    inline void                       SetImageTarget(VkImageTarget target)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTarget = target;    }
+    inline void                       SetImageTarget(XImageTarget target)       { FUN_ENTRY(GL_LOG_TRACE); mXImageTarget  = target;    }
     inline void                       SetImageLayout(VkImageLayout layout)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageLayout = layout;    }
     inline void                       SetWidth(uint32_t width)                  { FUN_ENTRY(GL_LOG_TRACE); mWidth         = width;     }
     inline void                       SetHeight(uint32_t height)                { FUN_ENTRY(GL_LOG_TRACE); mHeight        = height;    }

@@ -38,6 +38,11 @@ class CacheManager;
 
 class Texture {
 
+public:
+    const static int TEXTURE_2D_LAYERS          = 1;
+    const static int TEXTURE_CUBE_MAP_LAYERS    = 6;
+
+private:
     struct State {
         GLint                      width;
         GLint                      height;
@@ -53,7 +58,6 @@ class Texture {
     typedef State               State_t;
     typedef Array<State_t *>    States_t;
 
-private:
     const
     vulkanAPI::XContext_t *    mXContext;
 
@@ -208,8 +212,7 @@ public:
     inline void             SetVkImageLayout(VkImageLayout layout)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageLayout(layout); }
     inline void             SetVkImageTiling(VkImageTiling tiling)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling(tiling); }
     inline void             SetVkImageTiling(void)                              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
-    inline void             SetVkImageTarget(vulkanAPI::Image::VkImageTarget
-                                                                     target)    { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTarget(target); }
+    inline void             SetXImageTarget(XImageTarget target)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTarget(target); }
 
 // Increase/Decrease Functions
     inline void             IncreaseDepthStencilTextureRefCount(void)                              { FUN_ENTRY(GL_LOG_TRACE); ++mDepthStencilTextureRefCount; }
