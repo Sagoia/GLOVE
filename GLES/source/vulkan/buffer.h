@@ -25,7 +25,6 @@
 #define __VKBUFFER_H__
 
 #include "context.h"
-#include "types.h"
 
 class CacheManager;
 

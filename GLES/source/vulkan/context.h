@@ -27,7 +27,7 @@
 #include <map>
 #include <vector>
 #include "utils/glLogger.h"
-#include "vulkan/vulkan.h"
+#include "utils.h"
 #include "rendering_api_interface.h"
 
 #if defined(DEBUG) || defined(_DEBUG)

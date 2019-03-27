@@ -1,6 +1,5 @@
 
 #include "uniformBufferObject.h"
-#include "vulkan/types.h"
 
 UniformBufferObject::UniformBufferObject(const vulkanAPI::XContext_t *xContext)
 : mXContext(xContext), mUsage(GL_STATIC_DRAW), mAllocated(false), mCacheIndex(0)
