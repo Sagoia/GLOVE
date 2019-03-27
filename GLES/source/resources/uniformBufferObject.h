@@ -37,7 +37,6 @@ public:
     inline GLenum               GetUsage(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mUsage; }
     inline uint32_t             GetCacheIndex(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mCacheIndex; }
     inline size_t               GetSize(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetSize(); }
-    inline VkBuffer             GetVkBuffer(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer(); }
     inline VkDescriptorBufferInfo * 
                                 GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }
 
@@ -49,7 +48,7 @@ public:
     inline void                 SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
                                                                                                                mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions
-    inline bool                 HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != nullptr; }
+    inline bool                 HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->HasBuffer(); }
 };
 
 #endif //__UNIFORMBUFFEROBJECT_H__

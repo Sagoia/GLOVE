@@ -131,12 +131,12 @@ Memory::SetData(VkDeviceSize size, VkDeviceSize offset, const void *data)
 }
 
 bool
-Memory::GetBufferMemoryRequirements(VkBuffer &buffer)
+Memory::GetBufferMemoryRequirements(Buffer *buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     memset(static_cast<void *>(&mVkRequirements), 0, sizeof(mVkRequirements));
-    vkGetBufferMemoryRequirements(mXContext->vkDevice, buffer, &mVkRequirements);
+    vkGetBufferMemoryRequirements(mXContext->vkDevice, buffer->GetVkBuffer(), &mVkRequirements);
 
     return true;
 }
@@ -188,11 +188,11 @@ Memory::GetMemoryTypeIndexFromProperties(uint32_t *typeIndex)
 }
 
 bool
-Memory::BindBufferMemory(VkBuffer &buffer)
+Memory::BindBufferMemory(Buffer *buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkBindBufferMemory(mXContext->vkDevice, buffer, mVkMemory, 0);
+    VkResult err = vkBindBufferMemory(mXContext->vkDevice, buffer->GetVkBuffer(), mVkMemory, 0);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

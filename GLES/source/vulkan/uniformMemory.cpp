@@ -47,12 +47,12 @@ UniformMemory::Release(void)
 }
 
 bool
-UniformMemory::GetBufferMemoryRequirements(VkBuffer &buffer)
+UniformMemory::GetBufferMemoryRequirements(Buffer *buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
     memset(static_cast<void *>(&mVkRequirements), 0, sizeof(mVkRequirements));
-    vkGetBufferMemoryRequirements(mXContext->vkDevice, buffer, &mVkRequirements);
+    vkGetBufferMemoryRequirements(mXContext->vkDevice, buffer->GetVkBuffer(), &mVkRequirements);
 
     return true;
 }
@@ -95,11 +95,11 @@ UniformMemory::GetMemoryTypeIndexFromProperties(uint32_t *typeIndex)
 }
 
 bool
-UniformMemory::BindBufferMemory(VkBuffer &buffer)
+UniformMemory::BindBufferMemory(Buffer *buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkBindBufferMemory(mXContext->vkDevice, buffer, mMemoryBlock.vkMemory, mMemoryBlock.offset);
+    VkResult err = vkBindBufferMemory(mXContext->vkDevice, buffer->GetVkBuffer(), mMemoryBlock.vkMemory, mMemoryBlock.offset);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

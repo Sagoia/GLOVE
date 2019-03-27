@@ -69,8 +69,10 @@ public:
 // Set Functions
     inline void                       SetSize(VkDeviceSize size)                { FUN_ENTRY(GL_LOG_TRACE); mVkSize             = size;      }
     inline void                       SetFlags(VkBufferUsageFlags flags)        { FUN_ENTRY(GL_LOG_TRACE); mVkBufferUsageFlags = flags;     }
-    inline void                       SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext          = xContext; }
-    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager       = manager; }
+    inline void                       SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext           = xContext;  }
+    inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager       = manager;   }
+
+    inline bool                       HasBuffer(void)                           { FUN_ENTRY(GL_LOG_TRACE); return mVkBuffer != nullptr;     }
 };
 
 }

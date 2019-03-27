@@ -62,18 +62,19 @@ public:
     inline GLenum           GetUsage(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mUsage;  }
     inline GLenum           GetTarget(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mTarget; }
     inline size_t           GetSize(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetSize(); }
-    inline VkBuffer         GetVkBuffer(void)                                   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer(); }
+    inline vulkanAPI::Buffer* 
+                            GetBuffer(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer; }
 
 // Set Functions
     void                    SetTarget(GLenum target);
-    inline void             SetUsage(GLenum usage)                                { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
-    inline void             SetxContext(const vulkanAPI::XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext;
-                                                                                                             mBuffer->SetContext(xContext);
-                                                                                                             mMemory->SetContext(xContext); }
-    inline void             SetCacheManager(CacheManager *cacheManager)           { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
-                                                                                                             mMemory->SetCacheManager(cacheManager); }
+    inline void             SetUsage(GLenum usage)                              { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
+    inline void             SetxContext(const vulkanAPI::XContext_t *xContext)  { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext;
+                                                                                                           mBuffer->SetContext(xContext);
+                                                                                                           mMemory->SetContext(xContext); }
+    inline void             SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
+                                                                                                           mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions
-    inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != nullptr; }
+    inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->HasBuffer(); }
     inline bool             IsIndexBuffer(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (mBuffer->GetFlags() & X_BUFFER_USAGE_INDEX_BUFFER) > 0; }
 };
 

@@ -612,7 +612,7 @@ ShaderProgram::PrepareIndexBufferObject(uint32_t* firstIndex, uint32_t indexCoun
 
     if(validatedBuffer) {
         *firstIndex = (uint32_t)offset;
-        mActiveIndexVkBuffer = ibo->GetVkBuffer();
+        mActiveIndexVkBuffer = ibo->GetBuffer()->GetVkBuffer();
     }
 }
 
@@ -679,7 +679,7 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             if(updatedVBO) {
                 updatedVertexAttrib = true;
             }
-            VkBuffer bo       = vbo->GetVkBuffer();
+            VkBuffer bo       = vbo->GetBuffer()->GetVkBuffer();
 
             // If the primitives are rendered with GL_LINE_LOOP, which is not
             // supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
@@ -697,7 +697,7 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
                 vboLineLoopUpdated->Allocate(sizeNew, dataNew);
 
                 delete[] dataNew;
-                bo          = vboLineLoopUpdated->GetVkBuffer();
+                bo          = vboLineLoopUpdated->GetBuffer()->GetVkBuffer();
                 mCacheManager->CacheVBO(vboLineLoopUpdated);
                 updatedVertexAttrib = true;
             }

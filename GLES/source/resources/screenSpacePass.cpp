@@ -98,7 +98,7 @@ ScreenSpacePass::CreateMeshData()
         return false;
     }
 
-    mVertexVkBuffer = mVertexBuffer->GetVkBuffer();
+    mVertexVkBuffer = mVertexBuffer->GetBuffer()->GetVkBuffer();
     mVertexVkBufferOffset = 0;
 
     return true;

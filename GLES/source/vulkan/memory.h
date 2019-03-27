@@ -26,6 +26,7 @@
 
 #include "utils.h"
 #include "context.h"
+#include "buffer.h"
 
 class CacheManager;
 
@@ -60,13 +61,13 @@ public:
     void                            Release(void);
 
 // Bind Functions
-    bool                            BindBufferMemory(VkBuffer &buffer);
+    bool                            BindBufferMemory(Buffer *buffer);
     bool                            BindImageMemory(VkImage &image);
 
 // Get Functions
     inline VkFlags                  GetFlags(void)                            { FUN_ENTRY(GL_LOG_DEBUG); return mVkFlags; }
     void                            GetImageMemoryRequirements(VkImage &image);
-    bool                            GetBufferMemoryRequirements(VkBuffer &buffer);
+    bool                            GetBufferMemoryRequirements(Buffer *buffer);
     VkResult                        GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
     bool                            GetData(VkDeviceSize size, VkDeviceSize offset, void *data) const;
 

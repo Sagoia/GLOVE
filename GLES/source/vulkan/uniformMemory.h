@@ -3,6 +3,7 @@
 
 #include "context.h"
 #include "memoryAllocator.h"
+#include "buffer.h"
 
 class CacheManager;
 
@@ -38,11 +39,11 @@ public:
     void                            Release(void);
 
     // Bind Functions
-    bool                            BindBufferMemory(VkBuffer &buffer);
+    bool                            BindBufferMemory(Buffer *buffer);
 
     // Get Functions
     inline VkFlags                  GetFlags(void)                            { FUN_ENTRY(GL_LOG_DEBUG); return mVkFlags; }
-    bool                            GetBufferMemoryRequirements(VkBuffer &buffer);
+    bool                            GetBufferMemoryRequirements(Buffer *buffer);
     VkResult                        GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
 
     // Set Functions

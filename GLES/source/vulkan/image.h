@@ -26,11 +26,12 @@
 
 #include "utils.h"
 #include "context.h"
+#include "buffer.h"
+
+class CacheManager;
 
 #define TEXTURE_2D_LAYERS         1
 #define TEXTURE_CUBE_MAP_LAYERS   6
-
-class CacheManager;
 
 namespace vulkanAPI {
 
@@ -89,8 +90,8 @@ public:
     void                              CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWidth, uint32_t extentHeight, uint32_t miplevel, uint32_t layer, uint32_t layerCount);
 
 // Copy Functions
-    void                              CopyBufferToImage(VkCommandBuffer *activeCmdBuffer, VkBuffer srcBuffer);
-    void                              CopyImageToBuffer(VkCommandBuffer *activeCmdBuffer, VkBuffer srcBuffer);
+    void                              CopyBufferToImage(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer);
+    void                              CopyImageToBuffer(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer);
 
 // Modify Functions
     void                              ModifyImageSubresourceRange(uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);

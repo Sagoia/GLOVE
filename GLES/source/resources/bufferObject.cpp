@@ -63,11 +63,11 @@ BufferObject::Allocate(size_t size, const void *data)
 
     mBuffer->SetSize(size);
 
-    mAllocated = mBuffer->Create()                                            &&
-                 mMemory->GetBufferMemoryRequirements(mBuffer->GetVkBuffer()) &&
-                 mMemory->Create()                                            &&
-                 mMemory->SetData(size, 0, data)                              &&
-                 mMemory->BindBufferMemory(mBuffer->GetVkBuffer());
+    mAllocated = mBuffer->Create()                              &&
+                 mMemory->GetBufferMemoryRequirements(mBuffer)  &&
+                 mMemory->Create()                              &&
+                 mMemory->SetData(size, 0, data)                &&
+                 mMemory->BindBufferMemory(mBuffer);
     return mAllocated;
 }
 
