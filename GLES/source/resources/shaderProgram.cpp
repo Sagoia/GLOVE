@@ -1338,7 +1338,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
         } else {
             writes[i].descriptorCount = 1;
             writes[i].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            writes[i].pBufferInfo     = uniformBlock.pBufferObject->GetBufferDescInfo();
+            writes[i].pBufferInfo = uniformBlock.pBufferObject->GetBuffer()->GetVkDescriptorBufferInfo();
         }
     }
     assert(samp == nSamplers);

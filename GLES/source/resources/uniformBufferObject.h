@@ -25,7 +25,6 @@ public:
 
 // Allocate Functions
     bool                        Allocate(size_t bufferSize, const void *data, size_t dataSize);
-    inline void                 AllocateVkDescriptorBufferInfo()                    { FUN_ENTRY(GL_LOG_DEBUG); mBuffer->CreateVkDescriptorBufferInfo(); }
 
 // Release Functions
     void                        Release(void);
@@ -37,8 +36,7 @@ public:
     inline GLenum               GetUsage(void)                              const   { FUN_ENTRY(GL_LOG_TRACE); return mUsage; }
     inline uint32_t             GetCacheIndex(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mCacheIndex; }
     inline size_t               GetSize(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetSize(); }
-    inline VkDescriptorBufferInfo * 
-                                GetBufferDescInfo(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkDescriptorBufferInfo(); }
+    inline vulkanAPI::Buffer*   GetBuffer(void)                             const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer; }
 
 // Set Functions
     inline void                 SetUsage(GLenum usage)                              { FUN_ENTRY(GL_LOG_TRACE); mUsage     = usage; }
