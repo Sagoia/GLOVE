@@ -392,7 +392,7 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlColorFormatToXColorFormat(format, type));
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(format, type));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -474,7 +474,7 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlColorFormatToXColorFormat(format, type));
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(format, type));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -562,7 +562,7 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -640,7 +640,7 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     delete[] stagePixels;
 
     if(activeTexture->IsCompleted()) {
-        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }
@@ -716,7 +716,7 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
 
     if (activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedVkColorFormat(GlInternalFormatToXFormat(internalformat));
+        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlInternalFormatToXFormat(internalformat));
         activeTexture->SetVkFormat(vkformat);
         activeTexture->Allocate();
     }

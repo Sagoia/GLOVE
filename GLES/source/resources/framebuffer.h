@@ -100,7 +100,7 @@ public:
                                                const float *colorValue, float depthValue, uint32_t stencilValue, const Rect *clearRect);
     void                    BeginVkRenderPass(void);
     bool                    EndVkRenderPass(void);
-    void                    PrepareVkImage(VkImageLayout newImageLayout);
+    void                    PrepareImage(XImageLayout newImageLayout);
 
 // Add Functions
     void                    AddColorAttachment(Texture *texture);

@@ -215,9 +215,9 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetVkImageTiling();
         tex->SetXImageTarget(X_IMAGE_TARGET_2D);
         tex->SetVkImage(vkImages[i]);
-        tex->CreateVkImageSubResourceRange();
-        tex->CreateVkImageView();
-        tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        tex->CreateImageSubResourceRange();
+        tex->CreateImageView();
+        tex->PrepareImageLayout(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);
         fbo->AddColorAttachment(tex);
         mSystemTextures.push_back(tex);
     }

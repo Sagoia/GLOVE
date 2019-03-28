@@ -27,7 +27,7 @@ private:
 
 public:
     // Constructor
-    UniformMemory(const XContext_t *xContext = nullptr, VkFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    UniformMemory(const XContext_t *xContext = nullptr, XFlags flags = X_MEMORY_PROPERTY_FLAG_DEFAULT_BIT);
 
     // Destructor
     ~UniformMemory();

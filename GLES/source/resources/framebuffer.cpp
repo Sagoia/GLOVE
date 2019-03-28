@@ -260,9 +260,9 @@ Framebuffer::CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, 
     mRenderPass->SetStencilWriteEnabled(writeStencilEnabled);
 
     return mRenderPass->Create(GetColorAttachmentTexture() ?
-                               GetColorAttachmentTexture()->GetVkFormat() : VK_FORMAT_UNDEFINED,
+                               GetColorAttachmentTexture()->GetImage()->GetFormat() : VK_FORMAT_UNDEFINED,
                                mDepthStencilTexture ?
-                               mDepthStencilTexture->GetVkFormat() : VK_FORMAT_UNDEFINED);
+                               mDepthStencilTexture->GetImage()->GetFormat() : VK_FORMAT_UNDEFINED);
 }
 
 void
@@ -296,7 +296,7 @@ Framebuffer::CreateDepthStencilTexture(void)
         mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         mDepthStencilTexture->SetVkImageTiling();
-        GLenum glformat = XFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
+        GLenum glformat = XFormatToGlInternalformat(mDepthStencilTexture->GetImage()->GetFormat());
         mDepthStencilTexture->InitState();
         mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat),
                                        GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), nullptr);
@@ -312,7 +312,7 @@ Framebuffer::CreateDepthStencilTexture(void)
 void
 Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t stencilMaskFront, const Rect& clearRect)
 {
-    GLenum glFormat = XFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
+    GLenum glFormat = XFormatToGlInternalformat(mDepthStencilTexture->GetImage()->GetFormat());
     size_t numElements = GlInternalFormatTypeToNumElements(glFormat, mDepthStencilTexture->GetExplicitType());
     ImageRect srcRect(clearRect, (int)numElements, 1, Texture::GetDefaultInternalAlignment());
 
@@ -434,14 +434,14 @@ Framebuffer::EndVkRenderPass(void)
 }
 
 void
-Framebuffer::PrepareVkImage(VkImageLayout newImageLayout)
+Framebuffer::PrepareImage(XImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(GetColorAttachmentTexture() && newImageLayout != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-        GetColorAttachmentTexture()->PrepareVkImageLayout(newImageLayout);
-    } else if(GetDepthStencilAttachmentTexture() && newImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-        GetDepthStencilAttachmentTexture()->PrepareVkImageLayout(newImageLayout);
+    if(GetColorAttachmentTexture() && newImageLayout != X_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT) {
+        GetColorAttachmentTexture()->PrepareImageLayout(newImageLayout);
+    } else if(GetDepthStencilAttachmentTexture() && newImageLayout == X_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT) {
+        GetDepthStencilAttachmentTexture()->PrepareImageLayout(newImageLayout);
     }
 }
 
@@ -457,10 +457,10 @@ Framebuffer::Create(void)
 
         std::vector<VkImageView> imageViews;
         if(GetColorAttachmentTexture(i)) {
-            imageViews.push_back(GetColorAttachmentTexture(i)->GetVkImageView());
+            imageViews.push_back(GetColorAttachmentTexture(i)->GetImageView()->GetImageView());
         }
         if(mDepthStencilTexture) {
-            imageViews.push_back(mDepthStencilTexture->GetVkImageView());
+            imageViews.push_back(mDepthStencilTexture->GetImageView()->GetImageView());
         }
 
         if(!frameBuffer->Create(&imageViews, GetVkRenderPass(), GetWidth(), GetHeight())) {

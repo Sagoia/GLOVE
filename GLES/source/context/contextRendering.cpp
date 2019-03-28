@@ -53,8 +53,8 @@ Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool 
                                 stateFramebufferOperations->IsStencilWriteEnabled() == GL_TRUE,
                                 clearColorValue, clearDepthValue, clearStencilValue,
                                 &mClearRect);
-    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    mWriteFBO->PrepareImage(X_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT);
+    mWriteFBO->PrepareImage(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);
 }
 
 void
@@ -434,14 +434,14 @@ Context::Finish(void)
     if(!mWriteFBO->IsInDeleteState()) {
         if(mWriteFBO == mSystemFBO) {
             if(mWriteFBO->GetSurfaceType() == GLOVE_SURFACE_WINDOW) {
-                mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+                mWriteFBO->PrepareImage(X_IMAGE_LAYOUT_PRESENT);
             } else if (mWriteFBO->GetSurfaceType() == GLOVE_SURFACE_PBUFFER) {
                 if(mSystemFBO->GetBindToTexture()) {
-                    mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                    mWriteFBO->PrepareImage(X_IMAGE_LAYOUT_SHADER_READ);
                 }
             }
         } else {
-            mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            mWriteFBO->PrepareImage(X_IMAGE_LAYOUT_SHADER_READ);
         }
     }
     mWriteFBO->SetStateIdle();

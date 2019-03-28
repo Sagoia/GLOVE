@@ -1240,7 +1240,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                     if( !activeTexture->IsCompleted() || !activeTexture->IsNPOTAccessCompleted()) {
                         if (activeTexture->IsValid()) {
                             activeTexture->Allocate();
-                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                            activeTexture->PrepareImageLayout(X_IMAGE_LAYOUT_SHADER_READ);
                         }
                         else {
                             uint8_t pixels[4] = {0,0,0,255};
@@ -1253,13 +1253,13 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             if(activeTexture->IsCompleted()) {
                                 activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
                                 activeTexture->Allocate();
-                                activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                                activeTexture->PrepareImageLayout(X_IMAGE_LAYOUT_SHADER_READ);
                             }
                         }
                     }
                     else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
                         if (mXContext->mIsMaintenanceExtSupported) {
-                            activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                            activeTexture->PrepareImageLayout(X_IMAGE_LAYOUT_SHADER_READ);
                         } else {
                             // Get Inverted Data from FBO's Color Attachment Texture
                             GLenum dstInternalFormat = activeTexture->GetExplicitInternalFormat();
@@ -1284,7 +1284,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             inverted_texture->SetXImageTarget(X_IMAGE_TARGET_2D);
                             inverted_texture->InitState();
 
-                            inverted_texture->SetVkFormat(activeTexture->GetVkFormat());
+                            inverted_texture->SetVkFormat(activeTexture->GetImage()->GetFormat());
                             inverted_texture->SetState(activeTexture->GetWidth(), activeTexture->GetHeight(),
                                 0, 0,
                                 GlInternalFormatToGlFormat(dstInternalFormat),
@@ -1294,7 +1294,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
 
                             if (inverted_texture->IsCompleted()) {
                                 inverted_texture->Allocate();
-                                inverted_texture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                                inverted_texture->PrepareImageLayout(X_IMAGE_LAYOUT_SHADER_READ);
                                 mCacheManager->CacheTexture(inverted_texture);
                             }
 
@@ -1304,11 +1304,11 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         }
                     }
 
-                    activeTexture->CreateVkSampler();
+                    activeTexture->CreateSampler();
 
-                    textureDescriptors[samp].sampler     = activeTexture->GetVkSampler();
-                    textureDescriptors[samp].imageLayout = activeTexture->GetVkImageLayout();
-                    textureDescriptors[samp].imageView   = activeTexture->GetVkImageView();
+                    textureDescriptors[samp].sampler     = activeTexture->GetSampler()->GetSampler();
+                    textureDescriptors[samp].imageLayout = activeTexture->GetImage()->GetImageLayout();
+                    textureDescriptors[samp].imageView   = activeTexture->GetImageView()->GetImageView();
 
                     if(j == 0) {
                         map_block_texDescriptor[uniform.blockIndex] = samp;

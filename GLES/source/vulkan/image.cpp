@@ -32,6 +32,7 @@
 #include "image.h"
 #include "caches.h"
 #include "utils/cacheManager.h"
+#include <algorithm>
 
 namespace vulkanAPI {
 
@@ -176,6 +177,24 @@ Image::CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWi
 }
 
 void
+Image::DoCopy(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer, bool copyToImage)
+{
+    FUN_ENTRY(GL_LOG_DEBUG);
+
+    VkImageLayout oldImageLayout = mVkImageLayout;
+    oldImageLayout = (oldImageLayout != VK_IMAGE_LAYOUT_UNDEFINED && oldImageLayout != VK_IMAGE_LAYOUT_PREINITIALIZED) ? oldImageLayout : VK_IMAGE_LAYOUT_GENERAL;
+    VkImageLayout newImageLayout = copyToImage ? VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+    ModifyImageLayout(activeCmdBuffer, newImageLayout);
+    if(copyToImage) {
+        CopyBufferToImage(activeCmdBuffer, srcBuffer);
+    } else {
+        CopyImageToBuffer(activeCmdBuffer, srcBuffer);
+    }
+    ModifyImageLayout(activeCmdBuffer, oldImageLayout);
+}
+
+void
 Image::CopyBufferToImage(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -192,11 +211,48 @@ Image::CopyImageToBuffer(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer)
 }
 
 void
-Image::BlitImage(VkCommandBuffer *activeCmdBuffer, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, const VkImageBlit* imageBlit, VkFilter imageFilter)
+Image::BlitImage(GLenum hintMipmapMode, VkCommandBuffer activeCmdBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    vkCmdBlitImage(*activeCmdBuffer, GetImage(), srcImageLayout, dstImage, dstImageLayout, 1, imageBlit, imageFilter);
+    // Blit LoD Level '0' to rest layers
+    VkImageBlit imageBlit;
+    memset(static_cast<void *>(&imageBlit), 0, sizeof(imageBlit));
+    imageBlit.srcSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBlit.srcSubresource.mipLevel       = 0;
+    imageBlit.srcSubresource.baseArrayLayer = 0;
+    imageBlit.srcSubresource.layerCount     = mLayers;
+    imageBlit.srcOffsets[1].x               = mWidth;
+    imageBlit.srcOffsets[1].y               = mHeight;
+    imageBlit.srcOffsets[1].z               = 1;
+
+    imageBlit.dstSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBlit.dstSubresource.mipLevel       = 1;
+    imageBlit.dstSubresource.baseArrayLayer = 0;
+    imageBlit.dstSubresource.layerCount     = mLayers;
+    imageBlit.dstOffsets[1].x               = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].x >> 1), 1.0));
+    imageBlit.dstOffsets[1].y               = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].y >> 1), 1.0));
+    imageBlit.dstOffsets[1].z               = 1;
+
+    VkFilter      filter         = hintMipmapMode == GL_FASTEST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+    VkImageLayout oldImageLayout = mVkImageLayout;
+
+    ModifyImageSubresourceRange(0, mMipLevels, 0, mLayers);
+    ModifyImageLayout(activeCmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    for(GLuint mipLevel = 1; mipLevel < mMipLevels; ++mipLevel) {
+        ModifyImageSubresourceRange(mipLevel, 1, 0, mLayers);
+        vkCmdBlitImage(activeCmdBuffer, mVkImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mVkImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, filter);
+
+        imageBlit.srcSubresource.mipLevel = imageBlit.dstSubresource.mipLevel;
+        imageBlit.srcOffsets[1].x         = imageBlit.dstOffsets[1].x;
+        imageBlit.srcOffsets[1].y         = imageBlit.dstOffsets[1].y;
+
+        imageBlit.dstSubresource.mipLevel++;
+        imageBlit.dstOffsets[1].x = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].x >> 1), 1.0));
+        imageBlit.dstOffsets[1].y = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].y >> 1), 1.0));
+    }
+    ModifyImageSubresourceRange(0, mMipLevels, 0, mLayers);
+    ModifyImageLayout(activeCmdBuffer, oldImageLayout);
 }
 
 void
@@ -235,7 +291,7 @@ Image::ModifyImageSubresourceRange(uint32_t baseMipLevel, uint32_t levelCount, u
 }
 
 void
-Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImageLayout)
+Image::ModifyImageLayout(VkCommandBuffer activeCmdBuffer, VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -363,14 +419,14 @@ Image::ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImag
         break;
     }
 
-    vkCmdPipelineBarrier(*activeCmdBuffer, srcStages, destStages, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    vkCmdPipelineBarrier(activeCmdBuffer, srcStages, destStages, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
     mVkImageLayout = newImageLayout;
     mVkPipelineStage = destStages;
 }
 
-VkFormat
-Image::FindSupportedVkColorFormat(VkFormat format)
+XFormat
+Image::FindSupportedColorFormat(XFormat format)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
