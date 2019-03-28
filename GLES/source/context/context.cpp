@@ -122,8 +122,8 @@ Context::ReleaseSystemFBO(void)
     mCacheManager->CleanUpCaches();
 
     if(mCommandBufferManager) {
-        mCommandBufferManager->DestroyVkCmdBuffers();
-        mCommandBufferManager->AllocateVkCmdBuffers();
+        mCommandBufferManager->DestroyCommandBuffers();
+        mCommandBufferManager->AllocateCommandBuffers();
     }
 
     mReadSurface = nullptr;
@@ -210,11 +210,11 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetType(GlInternalFormatToGlType(glformat));
         tex->SetExplicitType(GlInternalFormatToGlType(glformat));
 
-        tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
-        tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
-        tex->SetVkImageTiling();
+        tex->SetXFormat(static_cast<XFormat>(eglSurfaceInterface->surfaceColorFormat));
+        tex->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+        tex->SetImageTiling();
         tex->SetXImageTarget(X_IMAGE_TARGET_2D);
-        tex->SetVkImage(vkImages[i]);
+        tex->GetImage()->SetImage(vkImages[i]);
         tex->CreateImageSubResourceRange();
         tex->CreateImageView();
         tex->PrepareImageLayout(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);
@@ -243,10 +243,10 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
 
     Texture *tex = new Texture(mXContext, mCommandBufferManager);
     tex->SetTarget(GL_TEXTURE_2D);
-    tex->SetVkFormat(depthStencilFormat);
-    tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-    tex->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    tex->SetVkImageTiling();
+    tex->SetXFormat(depthStencilFormat);
+    tex->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+    tex->GetImage()->SetImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    tex->SetImageTiling();
     tex->SetXImageTarget(X_IMAGE_TARGET_2D);
 
     GLenum glformat = XFormatToGlInternalformat(depthStencilFormat);

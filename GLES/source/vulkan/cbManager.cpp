@@ -49,16 +49,16 @@ CommandBufferManager::CommandBufferManager(const XContext_t *context)
     mActiveCmdBuffer    = 0;
     mLastSubmittedBuffer= GLOVE_NO_BUFFER_TO_WAIT;
 
-    mVkCmdPool          = VK_NULL_HANDLE;
-    mVkAuxCommandBuffer = VK_NULL_HANDLE;
-    mVkAuxFence         = VK_NULL_HANDLE;
+    mCmdPool          = VK_NULL_HANDLE;
+    mAuxCmdBuffer = VK_NULL_HANDLE;
+    mAuxFence         = VK_NULL_HANDLE;
 
-    if(!AllocateVkCmdPool()) {
+    if(!AllocateCommandPool()) {
         assert(false);
         return ;
     }
 
-    if(!AllocateVkCmdBuffers()) {
+    if(!AllocateCommandBuffers()) {
         assert(false);
         return ;
     }
@@ -81,33 +81,33 @@ CommandBufferManager::~CommandBufferManager()
 
         vkDeviceWaitIdle(mXContext->vkDevice);
 
-        DestroyVkCmdBuffers();
+        DestroyCommandBuffers();
 
-        if(mVkCmdPool != VK_NULL_HANDLE) {
-            vkDestroyCommandPool(mXContext->vkDevice, mVkCmdPool, nullptr);
-            mVkCmdPool = VK_NULL_HANDLE;
+        if(mCmdPool != VK_NULL_HANDLE) {
+            vkDestroyCommandPool(mXContext->vkDevice, mCmdPool, nullptr);
+            mCmdPool = VK_NULL_HANDLE;
         }
     }
 }
 
 void
-CommandBufferManager::DestroyVkCmdBuffers(void)
+CommandBufferManager::DestroyCommandBuffers(void)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    for(uint32_t i = 0; i < mVkCommandBuffers.fence.size(); ++i) {
-        mVkCommandBuffers.fence[i].Release();
+    for(uint32_t i = 0; i < mPrimaryCmdBuffers.fence.size(); ++i) {
+        mPrimaryCmdBuffers.fence[i].Release();
     }
 
-    vkFreeCommandBuffers(mXContext->vkDevice, mVkCmdPool, (uint32_t)mVkCommandBuffers.commandBuffer.size(), mVkCommandBuffers.commandBuffer.data());
-    mVkCommandBuffers.commandBuffer.clear();
-    mVkCommandBuffers.commandBufferState.clear();
-    mVkCommandBuffers.fence.clear();
-    memset(static_cast<void *>(&mVkCommandBuffers), 0, mVkCommandBuffers.commandBuffer.size()*sizeof(State));
+    vkFreeCommandBuffers(mXContext->vkDevice, mCmdPool, (uint32_t)mPrimaryCmdBuffers.commandBuffer.size(), mPrimaryCmdBuffers.commandBuffer.data());
+    mPrimaryCmdBuffers.commandBuffer.clear();
+    mPrimaryCmdBuffers.commandBufferState.clear();
+    mPrimaryCmdBuffers.fence.clear();
+    memset(static_cast<void *>(&mPrimaryCmdBuffers), 0, mPrimaryCmdBuffers.commandBuffer.size()*sizeof(State));
 
-    if(mVkAuxCommandBuffer != VK_NULL_HANDLE) {
-        vkFreeCommandBuffers(mXContext->vkDevice, mVkCmdPool, 1, &mVkAuxCommandBuffer);
-        mVkAuxCommandBuffer = VK_NULL_HANDLE;
+    if(mAuxCmdBuffer != VK_NULL_HANDLE) {
+        vkFreeCommandBuffers(mXContext->vkDevice, mCmdPool, 1, &mAuxCmdBuffer);
+        mAuxCmdBuffer = VK_NULL_HANDLE;
     }
 
     uint32_t secondaryBuffersPoolSize = mSecondaryCmdBufferPool.GetSize();
@@ -115,7 +115,7 @@ CommandBufferManager::DestroyVkCmdBuffers(void)
     for(uint32_t i = 0; i < secondaryBuffersPoolSize; ++i) {
         VkCommandBuffer *removingSecondaryBuffer = mSecondaryCmdBufferPool.RemoveBuffer();
         if(removingSecondaryBuffer) {
-            vkFreeCommandBuffers(mXContext->vkDevice, mVkCmdPool, 1, removingSecondaryBuffer);
+            vkFreeCommandBuffers(mXContext->vkDevice, mCmdPool, 1, removingSecondaryBuffer);
             delete removingSecondaryBuffer;
         }
     }
@@ -131,7 +131,7 @@ CommandBufferManager::Release(void)
 }
 
 VkCommandBuffer *
-CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
+CommandBufferManager::AllocateSecondaryCommandBuffers(uint32_t numOfBuffers)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -147,7 +147,7 @@ CommandBufferManager::AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers)
     VkCommandBufferAllocateInfo cmdAllocInfo;
     cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     cmdAllocInfo.pNext              = nullptr;
-    cmdAllocInfo.commandPool        = mVkCmdPool;
+    cmdAllocInfo.commandPool        = mCmdPool;
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
     cmdAllocInfo.commandBufferCount = numOfBuffers;
 
@@ -204,7 +204,7 @@ CommandBufferManager::FreeResources(void)
 }
 
 bool
-CommandBufferManager::AllocateVkCmdPool(void)
+CommandBufferManager::AllocateCommandPool(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -215,7 +215,7 @@ CommandBufferManager::AllocateVkCmdPool(void)
     cmdPoolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     cmdPoolInfo.queueFamilyIndex = mXContext->vkGraphicsQueueNodeIndex;
 
-    VkResult err = vkCreateCommandPool(mXContext->vkDevice, &cmdPoolInfo, nullptr, &mVkCmdPool);
+    VkResult err = vkCreateCommandPool(mXContext->vkDevice, &cmdPoolInfo, nullptr, &mCmdPool);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -226,22 +226,22 @@ CommandBufferManager::AllocateVkCmdPool(void)
 }
 
 bool
-CommandBufferManager::AllocateVkCmdBuffers(void)
+CommandBufferManager::AllocateCommandBuffers(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    mVkCommandBuffers.commandBuffer.resize(GLOVE_NUM_COMMAND_BUFFERS);
-    mVkCommandBuffers.commandBufferState.resize(GLOVE_NUM_COMMAND_BUFFERS);
-    mVkCommandBuffers.fence.resize(GLOVE_NUM_COMMAND_BUFFERS);
+    mPrimaryCmdBuffers.commandBuffer.resize(GLOVE_NUM_COMMAND_BUFFERS);
+    mPrimaryCmdBuffers.commandBufferState.resize(GLOVE_NUM_COMMAND_BUFFERS);
+    mPrimaryCmdBuffers.fence.resize(GLOVE_NUM_COMMAND_BUFFERS);
 
     VkCommandBufferAllocateInfo cmdAllocInfo;
     cmdAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     cmdAllocInfo.pNext              = nullptr;
-    cmdAllocInfo.commandPool        = mVkCmdPool;
+    cmdAllocInfo.commandPool        = mCmdPool;
     cmdAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     cmdAllocInfo.commandBufferCount = GLOVE_NUM_COMMAND_BUFFERS;
 
-    VkResult err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, mVkCommandBuffers.commandBuffer.data());
+    VkResult err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, mPrimaryCmdBuffers.commandBuffer.data());
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -249,7 +249,7 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     }
 
     cmdAllocInfo.commandBufferCount = 1;
-    err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, &mVkAuxCommandBuffer);
+    err = vkAllocateCommandBuffers(mXContext->vkDevice, &cmdAllocInfo, &mAuxCmdBuffer);
     assert(!err);
 
     if(err != VK_SUCCESS) {
@@ -257,10 +257,10 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
     }
 
     for(uint32_t i = 0; i < GLOVE_NUM_COMMAND_BUFFERS; ++i) {
-        mVkCommandBuffers.commandBufferState[i] = CMD_BUFFER_INITIAL_STATE;
+        mPrimaryCmdBuffers.commandBufferState[i] = COMMAND_BUFFER_INITIAL_STATE;
 
-        mVkCommandBuffers.fence[i].SetContext(mXContext);
-        if(!mVkCommandBuffers.fence[i].Create(false)) {
+        mPrimaryCmdBuffers.fence[i].SetContext(mXContext);
+        if(!mPrimaryCmdBuffers.fence[i].Create(false)) {
             return false;
         }
     }
@@ -269,11 +269,11 @@ CommandBufferManager::AllocateVkCmdBuffers(void)
 }
 
 bool
-CommandBufferManager::BeginVkDrawCommandBuffer(void)
+CommandBufferManager::BeginDrawCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] == CMD_BUFFER_RECORDING_STATE) {
+    if(mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] == COMMAND_BUFFER_RECORDING_STATE) {
         return true;
     }
 
@@ -283,20 +283,20 @@ CommandBufferManager::BeginVkDrawCommandBuffer(void)
     info.flags            = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     info.pInheritanceInfo = nullptr;
 
-    VkResult err = vkBeginCommandBuffer(mVkCommandBuffers.commandBuffer[mActiveCmdBuffer], &info);
+    VkResult err = vkBeginCommandBuffer(mPrimaryCmdBuffers.commandBuffer[mActiveCmdBuffer], &info);
     assert(!err);
 
     if(err != VK_SUCCESS) {
         return false;
     }
 
-    mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_RECORDING_STATE;
+    mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] = COMMAND_BUFFER_RECORDING_STATE;
 
     return true;
 }
 
 bool
-CommandBufferManager::BeginVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer)
+CommandBufferManager::BeginSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -327,22 +327,22 @@ CommandBufferManager::BeginVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBu
 
 
 void
-CommandBufferManager::EndVkDrawCommandBuffer(void)
+CommandBufferManager::EndDrawCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] == CMD_BUFFER_EXECUTABLE_STATE ||
-       mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] == CMD_BUFFER_INITIAL_STATE) {
+    if(mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] == COMMAND_BUFFER_EXECUTABLE_STATE ||
+       mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] == COMMAND_BUFFER_INITIAL_STATE) {
         return;
     }
 
-    vkEndCommandBuffer(mVkCommandBuffers.commandBuffer[mActiveCmdBuffer]);
+    vkEndCommandBuffer(mPrimaryCmdBuffers.commandBuffer[mActiveCmdBuffer]);
 
-    mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_EXECUTABLE_STATE;
+    mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] = COMMAND_BUFFER_EXECUTABLE_STATE;
 }
 
 void
-CommandBufferManager::EndVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer)
+CommandBufferManager::EndSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -350,11 +350,11 @@ CommandBufferManager::EndVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuff
 }
 
 bool
-CommandBufferManager::SubmitVkDrawCommandBuffer(void)
+CommandBufferManager::SubmitDrawCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] == CMD_BUFFER_INITIAL_STATE) {
+    if(mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] == COMMAND_BUFFER_INITIAL_STATE) {
         return true;
     }
 
@@ -373,7 +373,7 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
     submitInfo.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.pNext                = nullptr;
     submitInfo.commandBufferCount   = 1;
-    submitInfo.pCommandBuffers      = &mVkCommandBuffers.commandBuffer[mActiveCmdBuffer];
+    submitInfo.pCommandBuffers      = &mPrimaryCmdBuffers.commandBuffer[mActiveCmdBuffer];
     submitInfo.waitSemaphoreCount   = static_cast<uint32_t>(pSems.size());
     submitInfo.pWaitSemaphores      = pSems.data();
     submitInfo.pWaitDstStageMask    = pFlags.data();
@@ -383,19 +383,19 @@ CommandBufferManager::SubmitVkDrawCommandBuffer(void)
     mXContext->vkSyncItems->drawSemaphoreFlag    = true;
     mXContext->vkSyncItems->acquireSemaphoreFlag = false;
 
-    VkResult err = vkQueueSubmit(mXContext->vkQueue, 1, &submitInfo, mVkCommandBuffers.fence[mActiveCmdBuffer].GetFence());
+    VkResult err = vkQueueSubmit(mXContext->vkQueue, 1, &submitInfo, mPrimaryCmdBuffers.fence[mActiveCmdBuffer].GetFence());
     assert(!err);
 
     if(err != VK_SUCCESS) {
         return false;
     }
 
-    mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_SUBMITED_STATE;
+    mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] = COMMAND_BUFFER_SUBMITED_STATE;
 
     mLastSubmittedBuffer = mActiveCmdBuffer;
     mActiveCmdBuffer = (mActiveCmdBuffer + 1) % GLOVE_NUM_COMMAND_BUFFERS;
 
-    mVkCommandBuffers.commandBufferState[mActiveCmdBuffer] = CMD_BUFFER_INITIAL_STATE;
+    mPrimaryCmdBuffers.commandBufferState[mActiveCmdBuffer] = COMMAND_BUFFER_INITIAL_STATE;
 
     return true;
 }
@@ -407,12 +407,12 @@ CommandBufferManager::WaitLastSubmition(void)
 
     if(mLastSubmittedBuffer != GLOVE_NO_BUFFER_TO_WAIT) {
 
-        if(!mVkCommandBuffers.fence[mLastSubmittedBuffer].Wait(VK_TRUE, GLOVE_FENCE_WAIT_TIMEOUT))
+        if(!mPrimaryCmdBuffers.fence[mLastSubmittedBuffer].Wait(VK_TRUE, GLOVE_FENCE_WAIT_TIMEOUT))
             return false;
 
         FreeResources();
 
-        if(!mVkCommandBuffers.fence[mLastSubmittedBuffer].Reset()) {
+        if(!mPrimaryCmdBuffers.fence[mLastSubmittedBuffer].Reset()) {
             return false;
         }
 
@@ -424,7 +424,7 @@ CommandBufferManager::WaitLastSubmition(void)
 }
 
 bool
-CommandBufferManager::BeginVkAuxCommandBuffer(void)
+CommandBufferManager::BeginAuxCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -434,25 +434,25 @@ CommandBufferManager::BeginVkAuxCommandBuffer(void)
     info.flags            = 0;
     info.pInheritanceInfo = nullptr;
 
-    VkResult err = vkBeginCommandBuffer(mVkAuxCommandBuffer, &info);
+    VkResult err = vkBeginCommandBuffer(mAuxCmdBuffer, &info);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
 }
 
 bool
-CommandBufferManager::EndVkAuxCommandBuffer(void)
+CommandBufferManager::EndAuxCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkEndCommandBuffer(mVkAuxCommandBuffer);
+    VkResult err = vkEndCommandBuffer(mAuxCmdBuffer);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
 }
 
 bool
-CommandBufferManager::SubmitVkAuxCommandBuffer(void)
+CommandBufferManager::SubmitAuxCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -460,16 +460,16 @@ CommandBufferManager::SubmitVkAuxCommandBuffer(void)
     info.sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     info.pNext                  = nullptr;
     info.commandBufferCount     = 1;
-    info.pCommandBuffers        = &mVkAuxCommandBuffer;
+    info.pCommandBuffers        = &mAuxCmdBuffer;
 
-    VkResult err = vkQueueSubmit(mXContext->vkQueue, 1, &info, mVkAuxFence);
+    VkResult err = vkQueueSubmit(mXContext->vkQueue, 1, &info, mAuxFence);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY && err != VK_ERROR_DEVICE_LOST);
 }
 
 bool
-CommandBufferManager::WaitVkAuxCommandBuffer(void)
+CommandBufferManager::WaitAuxCommandBuffer(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 

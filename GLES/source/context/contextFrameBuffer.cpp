@@ -156,8 +156,9 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
     case GL_COLOR_ATTACHMENT0: {
         if (renderbuffer) {
             Texture *tex = mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture();
-            if (!(tex->GetImage()->GetImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
-                tex->SetVkImageUsage(tex->GetImage()->GetImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+            vulkanAPI::Image *image = tex->GetImage();
+            if (!(image->GetImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+                image->SetImageUsage(image->GetImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
                 tex->Allocate();
             }
             tex->PrepareImageLayout(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);
@@ -230,8 +231,9 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
     case GL_COLOR_ATTACHMENT0: {
         if (texture) {
             Texture *tex = mResourceManager->GetTexture(texture);
-            if (!(tex->GetImage()->GetImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
-                tex->SetVkImageUsage(tex->GetImage()->GetImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+            vulkanAPI::Image *image = tex->GetImage();
+            if (!(image->GetImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+                image->SetImageUsage(image->GetImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
                 tex->Allocate();
             }
             tex->PrepareImageLayout(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);

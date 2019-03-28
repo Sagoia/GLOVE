@@ -79,16 +79,16 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
     XFormat xFormat = GlInternalFormatToXFormat(mInternalFormat);
 
     if(GlFormatIsColorRenderable(mInternalFormat)) {
-        mTexture->SetVkFormat(xFormat);
-        mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+        mTexture->SetXFormat(xFormat);
+        mTexture->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     } else {
         // convert to supported format
         xFormat = vulkanAPI::FindSupportedDepthStencilFormat(mXContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(xFormat), vulkanAPI::GetVkFormatStencilBits(xFormat));
-        mTexture->SetVkFormat(xFormat);
-        mTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+        mTexture->SetXFormat(xFormat);
+        mTexture->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     }
     mTexture->SetXImageTarget(X_IMAGE_TARGET_2D);
-    mTexture->SetVkImageTiling();
+    mTexture->SetImageTiling();
     mTexture->SetState(width, height, 0, 0, GlInternalFormatToGlFormat(mInternalFormat),
                        GlInternalFormatToGlType(mInternalFormat), Texture::GetDefaultInternalAlignment(), nullptr);
 

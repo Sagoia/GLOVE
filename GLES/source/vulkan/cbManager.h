@@ -32,11 +32,11 @@
 namespace vulkanAPI {
 
 typedef enum {
-    CMD_BUFFER_INITIAL_STATE = 0,
-    CMD_BUFFER_RECORDING_STATE,
-    CMD_BUFFER_EXECUTABLE_STATE,
-    CMD_BUFFER_SUBMITED_STATE
-} cmdBufferState_t;
+    COMMAND_BUFFER_INITIAL_STATE = 0,
+    COMMAND_BUFFER_RECORDING_STATE,
+    COMMAND_BUFFER_EXECUTABLE_STATE,
+    COMMAND_BUFFER_SUBMITED_STATE
+} commandBufferState_t;
 
 typedef enum {
     RESOURCE_TYPE_SHADER = 0,
@@ -72,7 +72,7 @@ private:
 
     typedef struct State {
         std::vector<VkCommandBuffer>         commandBuffer;
-        std::vector<cmdBufferState_t>        commandBufferState;
+        std::vector<commandBufferState_t>    commandBufferState;
         std::vector<Fence>                   fence;
 
         State()  { FUN_ENTRY(GL_LOG_TRACE); }
@@ -80,16 +80,16 @@ private:
     } State;
 
     static CommandBufferManager    *mInstance;
-    VkCommandPool                   mVkCmdPool;
+    VkCommandPool                   mCmdPool;
     const XContext_t               *mXContext;
 
     uint32_t                        mActiveCmdBuffer;
     int32_t                         mLastSubmittedBuffer;
 
-    State                           mVkCommandBuffers;
+    State                           mPrimaryCmdBuffers;
 
-    VkCommandBuffer                 mVkAuxCommandBuffer;
-    VkFence                         mVkAuxFence;
+    VkCommandBuffer                 mAuxCmdBuffer;
+    VkFence                         mAuxFence;
     CommandBufferPool               mSecondaryCmdBufferPool;
 
     std::vector<resourceBase_t *>   mReferencedResources;
@@ -107,34 +107,34 @@ public:
     void Release(void);
 
 // Allocate Functions
-    bool AllocateVkCmdPool(void);
-    bool AllocateVkCmdBuffers(void);
+    bool AllocateCommandPool(void);
+    bool AllocateCommandBuffers(void);
+    VkCommandBuffer *AllocateSecondaryCommandBuffers(uint32_t numOfBuffers);
 
 // Destroy Functions
-    void DestroyVkCmdBuffers(void);
-    VkCommandBuffer *AllocateVkSecondaryCmdBuffers(uint32_t numOfBuffers);
+    void DestroyCommandBuffers(void);
 
 // Begin Functions
-    bool BeginVkAuxCommandBuffer(void);
-    bool BeginVkDrawCommandBuffer(void);
-    bool BeginVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer);
+    bool BeginAuxCommandBuffer(void);
+    bool BeginDrawCommandBuffer(void);
+    bool BeginSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer, VkRenderPass renderPass, VkFramebuffer framebuffer);
 
 // End Functions
-    bool EndVkAuxCommandBuffer(void);
-    void EndVkDrawCommandBuffer(void);
-    void EndVkSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer);
+    bool EndAuxCommandBuffer(void);
+    void EndDrawCommandBuffer(void);
+    void EndSecondaryCommandBuffer(const VkCommandBuffer *cmdBuffer);
 
 // Submit Functions
-    bool SubmitVkDrawCommandBuffer(void);
-    bool SubmitVkAuxCommandBuffer(void);
+    bool SubmitDrawCommandBuffer(void);
+    bool SubmitAuxCommandBuffer(void);
 
 // Wait Functions
     bool WaitLastSubmition(void);
-    bool WaitVkAuxCommandBuffer(void);
+    bool WaitAuxCommandBuffer(void);
 
 // Get Functions
-    inline VkCommandBuffer GetActiveCommandBuffer(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mVkCommandBuffers.commandBuffer[mActiveCmdBuffer]; }
-    inline VkCommandBuffer GetAuxCommandBuffer(void)                      const { FUN_ENTRY(GL_LOG_TRACE); return mVkAuxCommandBuffer; }
+    inline VkCommandBuffer GetActiveCommandBuffer(void)                   const { FUN_ENTRY(GL_LOG_TRACE); return mPrimaryCmdBuffers.commandBuffer[mActiveCmdBuffer]; }
+    inline VkCommandBuffer GetAuxCommandBuffer(void)                      const { FUN_ENTRY(GL_LOG_TRACE); return mAuxCmdBuffer; }
 
 // Resource Functions
     template<typename T>

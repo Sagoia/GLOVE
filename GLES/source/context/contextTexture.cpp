@@ -56,9 +56,9 @@ Context::BindTexture(GLenum target, GLuint texture)
             tex->SetCommandBufferManager(mCommandBufferManager);
             tex->SetCacheManager(mCacheManager);
             tex->SetTarget(target);
-            tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+            tex->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
             tex->SetXImageTarget(target == GL_TEXTURE_2D ? X_IMAGE_TARGET_2D : X_IMAGE_TARGET_CUBE);
-            tex->SetVkImageTiling();
+            tex->SetImageTiling();
 
             tex->InitState();
         } else if(tex->GetTarget() != target) {
@@ -392,8 +392,8 @@ Context::TexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei w
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(format, type));
-        activeTexture->SetVkFormat(vkformat);
+        XFormat xFormat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(format, type));
+        activeTexture->SetXFormat(xFormat);
         activeTexture->Allocate();
     }
 }
@@ -474,8 +474,8 @@ Context::TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(format, type));
-        activeTexture->SetVkFormat(vkformat);
+        XFormat xFormat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(format, type));
+        activeTexture->SetXFormat(xFormat);
         activeTexture->Allocate();
     }
 }
@@ -562,8 +562,8 @@ Context::CopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint
 
     if(activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
-        activeTexture->SetVkFormat(vkformat);
+        XFormat xFormat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
+        activeTexture->SetXFormat(xFormat);
         activeTexture->Allocate();
     }
 }
@@ -640,8 +640,8 @@ Context::CopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     delete[] stagePixels;
 
     if(activeTexture->IsCompleted()) {
-        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
-        activeTexture->SetVkFormat(vkformat);
+        XFormat xFormat = activeTexture->FindSupportedColorFormat(GlColorFormatToXColorFormat(activeTexture->GetFormat(), activeTexture->GetType()));
+        activeTexture->SetXFormat(xFormat);
         activeTexture->Allocate();
     }
 }
@@ -716,8 +716,8 @@ Context::CompressedTexImage2D(GLenum target, GLint level, GLenum internalformat,
 
     if (activeTexture->IsCompleted()) {
         // pass contents to the driver
-        VkFormat vkformat = activeTexture->FindSupportedColorFormat(GlInternalFormatToXFormat(internalformat));
-        activeTexture->SetVkFormat(vkformat);
+        XFormat xFormat = activeTexture->FindSupportedColorFormat(GlInternalFormatToXFormat(internalformat));
+        activeTexture->SetXFormat(xFormat);
         activeTexture->Allocate();
     }
 }
