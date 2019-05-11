@@ -359,13 +359,13 @@ Context::DrawArrays(GLenum mode, GLint first, GLsizei count)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if(count < 0) {
-        RecordError(GL_INVALID_VALUE);
-        return;
-    }
-
     if(mode > GL_TRIANGLE_FAN) {
         RecordError(GL_INVALID_ENUM);
+        return;
+    }
+    
+    if(count < 0) {
+        RecordError(GL_INVALID_VALUE);
         return;
     }
 
