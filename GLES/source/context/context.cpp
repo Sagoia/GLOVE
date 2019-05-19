@@ -168,7 +168,9 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext);
 
-        GLenum glformat = VkFormatToGlInternalformat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
+        VkFormat surfaceColorFormat = static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat);
+        GLenum glformat = VkFormatToGlInternalformat(surfaceColorFormat);
+        GLenum glType = GlInternalFormatToGlType(glformat);
 
         tex->SetTarget(GL_TEXTURE_2D);
         tex->SetWidth(eglSurfaceInterface->width);
@@ -176,16 +178,17 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetInternalFormat(glformat);
         tex->SetExplicitInternalFormat(glformat);
         tex->SetFormat(GlInternalFormatToGlFormat(glformat));
-        tex->SetType(GlInternalFormatToGlType(glformat));
-        tex->SetExplicitType(GlInternalFormatToGlType(glformat));
+        tex->SetType(glType);
+        tex->SetExplicitType(glType);
 
-        tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
+        tex->SetVkFormat(surfaceColorFormat);
         tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
         tex->SetVkImageTiling();
         tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
         tex->SetVkImage(vkImages[i]);
         tex->CreateVkImageSubResourceRange();
         tex->CreateVkImageView();
+        
         fbo->AddColorAttachment(tex);
         mSystemTextures.push_back(tex);
     }
