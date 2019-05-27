@@ -20,7 +20,10 @@ private:
     vulkanAPI::Buffer*          mBuffer;
 
 public:
-    explicit                    UniformBufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr);
+    explicit                    UniformBufferObject(const vulkanAPI::vkContext_t *vkContext          = nullptr,
+                                                    const VkBufferUsageFlags      vkBufferUsageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                                    const VkSharingMode           vkSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
+                                                    const VkFlags                 vkFlags            = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     virtual                     ~UniformBufferObject();
 
 // Allocate Functions
@@ -50,7 +53,7 @@ public:
     inline void                 SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
                                                                                                                mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions
-    inline bool                 HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != nullptr; }
+    inline bool                 HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != VK_NULL_HANDLE; }
 };
 
 #endif //__UNIFORMBUFFEROBJECT_H__

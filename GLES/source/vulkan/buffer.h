@@ -25,7 +25,6 @@
 #define __VKBUFFER_H__
 
 #include "context.h"
-#include "types.h"
 
 class CacheManager;
 
@@ -48,7 +47,7 @@ private:
 
 public:
 // Constructor
-    Buffer(const vkContext_t *vkContext, const XBufferUsageFlags usage, const VkSharingMode vkSharingMode = VK_SHARING_MODE_EXCLUSIVE);
+    Buffer(const vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode);
 
 // Destructor
     ~Buffer();

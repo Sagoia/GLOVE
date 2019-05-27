@@ -35,9 +35,9 @@
 
 namespace vulkanAPI {
 
-Buffer::Buffer(const vkContext_t *vkContext, const XBufferUsageFlags usage, const VkSharingMode vkSharingMode)
+Buffer::Buffer(const vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode)
 : mVkContext(vkContext), mVkBuffer(VK_NULL_HANDLE),
-mVkBufferSharingMode(vkSharingMode), mVkBufferUsageFlags(usage),
+mVkBufferSharingMode(vkSharingMode), mVkBufferUsageFlags(vkBufferUsageFlags),
 mVkSize(0), mVkOffset(0), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);

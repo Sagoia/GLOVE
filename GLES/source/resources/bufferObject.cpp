@@ -28,14 +28,15 @@
  */
 
 #include "bufferObject.h"
+#include "vulkan/memory.h"
 
-BufferObject::BufferObject(const vulkanAPI::vkContext_t *vkContext, XBufferUsageFlags usage)
+BufferObject::BufferObject(const vulkanAPI::vkContext_t *vkContext, const VkBufferUsageFlags vkBufferUsageFlags, const VkSharingMode vkSharingMode, const VkFlags vkFlags)
 : mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mTarget(GL_INVALID_VALUE), mAllocated(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mBuffer = new vulkanAPI::Buffer(vkContext, usage);
-    mMemory = new vulkanAPI::Memory(vkContext);
+    mBuffer = new vulkanAPI::Buffer(vkContext, vkBufferUsageFlags, vkSharingMode);
+    mMemory = new vulkanAPI::Memory(vkContext, vkFlags);
 }
 
 BufferObject::~BufferObject()

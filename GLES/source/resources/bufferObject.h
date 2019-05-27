@@ -25,7 +25,6 @@
 #define __BUFFEROBJECT_H__
 
 #include "GLES2/gl2.h"
-#include "vulkan/types.h"
 #include "vulkan/memory.h"
 #include "vulkan/buffer.h"
 
@@ -44,7 +43,10 @@ private:
     vulkanAPI::Buffer*      mBuffer;
 
 public:
-    explicit                BufferObject(const vulkanAPI::vkContext_t *vkContext = nullptr, XBufferUsageFlags usage = USAGE_UNKNOW);
+    explicit                BufferObject(const vulkanAPI::vkContext_t *vkContext          = nullptr,
+                                         const VkBufferUsageFlags      vkBufferUsageFlags = VK_NULL_HANDLE,
+                                         const VkSharingMode           vkSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
+                                         const VkFlags                 vkFlags            = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     virtual                ~BufferObject();
 
 // Allocate Functions
@@ -73,15 +75,15 @@ public:
     inline void             SetCacheManager(CacheManager *cacheManager)           { FUN_ENTRY(GL_LOG_TRACE); mBuffer->SetCacheManager(cacheManager);
                                                                                                              mMemory->SetCacheManager(cacheManager); }
 // Has/Is Functions
-    inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != nullptr; }
-    inline bool             IsIndexBuffer(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (mBuffer->GetFlags() & INDEX_BUFFER) > 0; }
+    inline bool             HasData(void)                               const   { FUN_ENTRY(GL_LOG_TRACE); return mBuffer->GetVkBuffer() != VK_NULL_HANDLE; }
+    inline bool             IsIndexBuffer(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (mBuffer->GetFlags() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) > 0; }
 };
 
 class IndexBufferObject : public BufferObject
 {
 
 public:
-    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, INDEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                IndexBufferObject(const vulkanAPI::vkContext_t *vkContext)        : BufferObject(vkContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -89,7 +91,7 @@ class TransferSrcBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferSrcBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, TRANSFER_SRC) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferSrcBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_SRC_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -97,7 +99,7 @@ class TransferDstBufferObject : public BufferObject
 {
 
 public:
-    explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, TRANSFER_DST) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                TransferDstBufferObject(const vulkanAPI::vkContext_t *vkContext)  : BufferObject(vkContext, VK_BUFFER_USAGE_TRANSFER_DST_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
@@ -105,7 +107,7 @@ class VertexBufferObject : public BufferObject
 {
 
 public:
-    explicit                VertexBufferObject(const vulkanAPI::vkContext_t *vkContext)       : BufferObject(vkContext, VERTEX_BUFFER) { FUN_ENTRY(GL_LOG_TRACE); }
+    explicit                VertexBufferObject(const vulkanAPI::vkContext_t *vkContext)       : BufferObject(vkContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) { FUN_ENTRY(GL_LOG_TRACE); }
 
 };
 
