@@ -286,7 +286,11 @@ ScreenSpacePass::CreateDefaultPipelineStates()
     mVertexInputInfo.pVertexAttributeDescriptions = mVkAttributeDescriptions.data();
 
     mPipeline->SetVertexInputState(&mVertexInputInfo);
-    mPipeline->CreateCommonDynamicState();
+
+    std::vector<VkDynamicState> states = {VK_DYNAMIC_STATE_VIEWPORT,
+                                          VK_DYNAMIC_STATE_SCISSOR};
+    mPipeline->CreateDynamicState(states);
+
     mPipeline->SetDepthTestEnable(false);
 
     return true;

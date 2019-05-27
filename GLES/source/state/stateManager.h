@@ -56,7 +56,7 @@ public:
              GLboolean                        IsCapabilityEnabled(GLenum cap);
 
 // Init Functions
-             void                             InitPipelineStates(vulkanAPI::Pipeline *pipeline);
+             void                             InitVkPipelineStates(vulkanAPI::Pipeline *pipeline);
 
 // Get Functions
       inline StateActiveObjects*              GetActiveObjectsState(void)             { FUN_ENTRY(GL_LOG_TRACE); return &mActiveObjectsState; }

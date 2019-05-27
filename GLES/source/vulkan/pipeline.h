@@ -169,7 +169,6 @@ public:
                                      VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor,
                                      VkBlendOp colorBlendOp, VkBlendOp alphaBlendOp, VkLogicOp logicOp, VkBool32 logicOpEnable, uint32_t attachmentCount, float *blendConstants);
           void CreateViewportState(uint32_t viewportCount, uint32_t scissorCount);
-          void CreateCommonDynamicState(bool lineWidth = false);
           void CreateDynamicState(const std::vector<VkDynamicState>& states);
           void CreateDepthStencilState(VkBool32 depthTestEnable, VkBool32 depthWriteEnable, VkCompareOp depthCompareOp, VkBool32 depthBoundsTestEnable,
                                        float minDepthBounds, float maxDepthBounds, VkBool32  stencilTestEnable, VkStencilOp backfailOp, VkStencilOp backpassOp,

@@ -283,20 +283,6 @@ Pipeline::CreateMultisampleState(VkBool32 alphaToOneEnable, VkBool32 alphaToCove
 }
 
 void
-Pipeline::CreateCommonDynamicState(bool lineWidth)
-{
-    FUN_ENTRY(GL_LOG_DEBUG);
-    std::vector<VkDynamicState> states = {VK_DYNAMIC_STATE_VIEWPORT,
-                                          VK_DYNAMIC_STATE_SCISSOR,
-                                          VK_DYNAMIC_STATE_LINE_WIDTH};
-
-    if (!lineWidth) {
-        states.pop_back();
-    }
-    CreateDynamicState(states);
-}
-
-void
 Pipeline::CreateDynamicState(const std::vector<VkDynamicState>& states)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
