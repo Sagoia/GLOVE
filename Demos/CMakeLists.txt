@@ -60,5 +60,5 @@ link_directories(${CMAKE_BINARY_DIR}/EGL
 add_subdirectory(assets)
 add_subdirectory(eglut)
 add_subdirectory(engine)
-add_subdirectory(tools)
+# add_subdirectory(tools)
 add_subdirectory(demos)
