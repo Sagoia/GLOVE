@@ -34,7 +34,7 @@ Context::CullFace(GLenum mode)
     }
 
     if(mStateManager.GetRasterizationState()->UpdateCullFace(mode)) {
-        mPipeline->SetRasterizationCullMode(mStateManager.GetRasterizationState()->GetCullEnabled(),
+        mPipeline->SetRasterizationCullMode(GlBooleanToVkBool(mStateManager.GetRasterizationState()->GetCullEnabled()),
                                             GlCullModeToVkCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
     }
 }

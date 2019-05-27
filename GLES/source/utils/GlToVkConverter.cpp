@@ -25,6 +25,14 @@
 #include "glLogger.h"
 #include "glUtils.h"
 
+VkBool32
+GlBooleanToVkBool(GLboolean value)
+{
+    FUN_ENTRY(GL_LOG_TRACE);
+
+    return value ? VK_TRUE : VK_FALSE;
+}
+
 VkColorComponentFlags
 GLColorMaskToVkColorComponentFlags(GLubyte colorMask)
 {

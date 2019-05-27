@@ -52,27 +52,27 @@ Context::SetCapability(GLenum cap, GLboolean enable)
         break;
     case GL_DEPTH_TEST:
         if(mStateManager.GetFragmentOperationsState()->UpdateDepthTestEnabled(enable)) {
-            mPipeline->SetDepthTestEnable(mStateManager.GetFragmentOperationsState()->GetDepthTestEnabled());
+            mPipeline->SetDepthTestEnable(GlBooleanToVkBool(mStateManager.GetFragmentOperationsState()->GetDepthTestEnabled()));
         }
         break;
     case GL_STENCIL_TEST:
         if(mStateManager.GetFragmentOperationsState()->UpdateStencilTestEnabled(enable)) {
-            mPipeline->SetStencilTestEnable(mStateManager.GetFragmentOperationsState()->GetStencilTestEnabled());
+            mPipeline->SetStencilTestEnable(GlBooleanToVkBool(mStateManager.GetFragmentOperationsState()->GetStencilTestEnabled()));
         }
         break;
     case GL_CULL_FACE:
         if(mStateManager.GetRasterizationState()->UpdateCullEnabled(enable)) {
-            mPipeline->SetRasterizationCullMode(mStateManager.GetRasterizationState()->GetCullEnabled(), GlCullModeToVkCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
+            mPipeline->SetRasterizationCullMode(GlBooleanToVkBool(mStateManager.GetRasterizationState()->GetCullEnabled()), GlCullModeToVkCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
         }
         break;
     case GL_POLYGON_OFFSET_FILL:
         if(mStateManager.GetRasterizationState()->UpdatePolygonOffsetFillEnabled(enable)) {
-            mPipeline->SetRasterizationDepthBiasEnable(mStateManager.GetRasterizationState()->GetPolygonOffsetFillEnabled());
+            mPipeline->SetRasterizationDepthBiasEnable(GlBooleanToVkBool(mStateManager.GetRasterizationState()->GetPolygonOffsetFillEnabled()));
         }
         break;
     case GL_SAMPLE_ALPHA_TO_COVERAGE:
         if(mStateManager.GetFragmentOperationsState()->UpdateSampleAlphaToCoverageEnabled(enable)) {
-            mPipeline->SetMultisampleAlphaToCoverage(mStateManager.GetFragmentOperationsState()->GetSampleAlphaToCoverageEnabled());
+            mPipeline->SetMultisampleAlphaToCoverage(GlBooleanToVkBool(mStateManager.GetFragmentOperationsState()->GetSampleAlphaToCoverageEnabled()));
         }
         break;
     case GL_SAMPLE_COVERAGE:
@@ -82,7 +82,7 @@ Context::SetCapability(GLenum cap, GLboolean enable)
         break;
     case GL_BLEND:
         if(mStateManager.GetFragmentOperationsState()->UpdateBlendingEnabled(enable)) {
-            mPipeline->SetColorBlendAttachmentEnable(mStateManager.GetFragmentOperationsState()->GetBlendingEnabled());
+            mPipeline->SetColorBlendAttachmentEnable(GlBooleanToVkBool(mStateManager.GetFragmentOperationsState()->GetBlendingEnabled()));
         }
         break;
     case GL_DITHER:
