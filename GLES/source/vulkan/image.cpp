@@ -176,19 +176,19 @@ Image::CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWi
 }
 
 void
-Image::CopyBufferToImage(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer)
+Image::CopyBufferToImage(VkCommandBuffer *activeCmdBuffer, VkBuffer srcBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    vkCmdCopyBufferToImage(activeCmdBuffer, srcBuffer->GetVkBuffer(), mVkImage, mVkImageLayout, 1, &mVkBufferImageCopy);
+    vkCmdCopyBufferToImage(*activeCmdBuffer, srcBuffer, mVkImage, mVkImageLayout, 1, &mVkBufferImageCopy);
 }
 
 void
-Image::CopyImageToBuffer(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer)
+Image::CopyImageToBuffer(VkCommandBuffer *activeCmdBuffer, VkBuffer srcBuffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    vkCmdCopyImageToBuffer(activeCmdBuffer, mVkImage, mVkImageLayout, srcBuffer->GetVkBuffer(), 1, &mVkBufferImageCopy);
+    vkCmdCopyImageToBuffer(*activeCmdBuffer, mVkImage, mVkImageLayout, srcBuffer, 1, &mVkBufferImageCopy);
 }
 
 void

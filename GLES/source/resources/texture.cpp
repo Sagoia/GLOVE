@@ -583,9 +583,9 @@ Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, G
     {
         mImage->ModifyImageLayout(&activeCmdBuffer, newImageLayout);
         if(copyToImage) {
-            mImage->CopyBufferToImage(activeCmdBuffer, tbo->GetBuffer());
+            mImage->CopyBufferToImage(&activeCmdBuffer, tbo->GetVkBuffer());
         } else {
-            mImage->CopyImageToBuffer(activeCmdBuffer, tbo->GetBuffer());
+            mImage->CopyImageToBuffer(&activeCmdBuffer, tbo->GetVkBuffer());
         }
         mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
     }

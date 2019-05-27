@@ -36,11 +36,11 @@ UniformBufferObject::Allocate(size_t bufferSize, const void *data, size_t dataSi
 
     mBuffer->SetSize(bufferSize);
 
-    mAllocated = mBuffer->Create()                              &&
-                 mMemory->GetBufferMemoryRequirements(mBuffer)  &&
-                 mMemory->Create()                              &&
-                 UpdateData(dataSize, 0, data)                  &&
-                 mMemory->BindBufferMemory(mBuffer);
+    mAllocated = mBuffer->Create()                                            &&
+                 mMemory->GetBufferMemoryRequirements(mBuffer->GetVkBuffer()) &&
+                 mMemory->Create()                                            &&
+                 UpdateData(dataSize, 0, data)                                &&
+                 mMemory->BindBufferMemory(mBuffer->GetVkBuffer());
 
     if(mAllocated) {
         mCacheIndex = 0;
