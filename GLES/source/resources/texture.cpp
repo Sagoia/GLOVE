@@ -28,6 +28,7 @@
  */
 
 #include "texture.h"
+#include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
 #include "utils/cacheManager.h"
 
@@ -274,7 +275,7 @@ Texture::Allocate(void)
     if (mImage->GetFormat() == VK_FORMAT_UNDEFINED) {
         SetVkFormat(FindSupportedVkColorFormat(GlColorFormatToVkColorFormat(state->format, state->type)));
     }
-    mExplicitInternalFormat = XFormatToGlInternalformat(mImage->GetFormat());
+    mExplicitInternalFormat = VkFormatToGlInternalformat(mImage->GetFormat());
     mExplicitType           = GlInternalFormatToGlType(mExplicitInternalFormat);
 
     if(!CreateVkTexture()) {

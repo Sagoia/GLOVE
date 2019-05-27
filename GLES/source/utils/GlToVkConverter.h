@@ -44,6 +44,7 @@ VkStencilOp             GlStencilFuncToVkStencilOp(GLenum mode);
 VkSamplerAddressMode    GlTexAddressToVkTexAddress(GLenum mode);
 VkFilter                GlTexFilterToVkTexFilter(GLenum mode);
 VkSamplerMipmapMode     GlTexMipMapModeToVkMipMapMode(GLenum mode);
+VkFormat                GlTexInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformat);
 VkFormat                GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatStencil);
 VkFormat                GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized);

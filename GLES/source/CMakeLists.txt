@@ -54,6 +54,7 @@ set(SOURCES
     state/stateViewportTransformation.cpp
     utils/GlToVkConverter.cpp
     utils/parser_helpers.cpp
+    utils/VkToGlConverter.cpp
     utils/glLogger.cpp
     utils/glUtils.cpp
     utils/cacheManager.cpp
@@ -116,6 +117,7 @@ set(HEADERS
     utils/glsl_types.h
     utils/GlToVkConverter.h
     utils/parser_helpers.h
+    utils/VkToGlConverter.h
     utils/glLogger.h
     utils/glLoggerImpl.h
     utils/glUtils.h

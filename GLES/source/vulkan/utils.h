@@ -24,8 +24,6 @@
 #ifndef __VKUTILS_H__
 #define __VKUTILS_H__
 
-#include "GLES2/gl2.h"
-#include "GLES2/gl2ext.h"
 #include "vulkan/vulkan.h"
 #include <vector>
 
@@ -45,11 +43,6 @@ uint64_t                HashSamplerInfo(const VkSamplerCreateInfo &info);
 uint64_t                HashRenderPassInfo(const VkRenderPassCreateInfo &info);
 uint64_t                HashGraphicsPipelineInfo(const VkGraphicsPipelineCreateInfo &info);
 
-// type convert
-GLenum                  VkFormatToGlInternalformat(VkFormat format);
-
 }
-
-inline GLenum           XFormatToGlInternalformat(uint32_t format) { return vulkanAPI::VkFormatToGlInternalformat(static_cast<VkFormat>(format)); }
 
 #endif // __VKUTILS_H__

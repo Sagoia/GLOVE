@@ -27,6 +27,7 @@
  */
 
 #include "framebuffer.h"
+#include "utils/VkToGlConverter.h"
 #include "utils/glUtils.h"
 #include "utils/cacheManager.h"
 
@@ -296,7 +297,7 @@ Framebuffer::CreateDepthStencilTexture(void)
         mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         mDepthStencilTexture->SetVkImageTiling();
-        GLenum glformat = XFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
+        GLenum glformat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
         mDepthStencilTexture->InitState();
         mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat),
                                        GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), nullptr);
@@ -312,7 +313,7 @@ Framebuffer::CreateDepthStencilTexture(void)
 void
 Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t stencilMaskFront, const Rect& clearRect)
 {
-    GLenum glFormat = XFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
+    GLenum glFormat = VkFormatToGlInternalformat(mDepthStencilTexture->GetVkFormat());
     size_t numElements = GlInternalFormatTypeToNumElements(glFormat, mDepthStencilTexture->GetExplicitType());
     ImageRect srcRect(clearRect, (int)numElements, 1, Texture::GetDefaultInternalAlignment());
 

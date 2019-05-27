@@ -376,45 +376,4 @@ HashGraphicsPipelineInfo(const VkGraphicsPipelineCreateInfo &info)
     return hash;
 }
 
-GLenum
-VkFormatToGlInternalformat(VkFormat format)
-{
-    FUN_ENTRY(GL_LOG_TRACE);
-
-    switch (format) {
-    case VK_FORMAT_R5G6B5_UNORM_PACK16:     return GL_RGB565;
-    case VK_FORMAT_R4G4B4A4_UNORM_PACK16:   return GL_RGBA4;
-    case VK_FORMAT_R5G5B5A1_UNORM_PACK16:   return GL_RGB5_A1;
-    case VK_FORMAT_R8G8B8_UNORM:            return GL_RGB8_OES;
-
-    case VK_FORMAT_R8G8B8A8_UINT:
-    case VK_FORMAT_R8G8B8A8_USCALED:
-    case VK_FORMAT_R8G8B8A8_SSCALED:
-    case VK_FORMAT_R8G8B8A8_SRGB:
-    case VK_FORMAT_R8G8B8A8_UNORM:          return GL_RGBA8_OES;
-
-    case VK_FORMAT_B8G8R8A8_SRGB:
-    case VK_FORMAT_B8G8R8A8_UNORM:          return GL_BGRA8_EXT;
-
-    case VK_FORMAT_D16_UNORM:               return GL_DEPTH_COMPONENT16;
-    case VK_FORMAT_D16_UNORM_S8_UINT:
-    case VK_FORMAT_D24_UNORM_S8_UINT:
-    case VK_FORMAT_D32_SFLOAT_S8_UINT:      return GL_DEPTH24_STENCIL8_OES;
-    case VK_FORMAT_X8_D24_UNORM_PACK32:     return GL_DEPTH_COMPONENT24_OES;
-    case VK_FORMAT_D32_SFLOAT:              return GL_DEPTH_COMPONENT32_OES;
-    case VK_FORMAT_S8_UINT:                 return GL_STENCIL_INDEX8;
-
-    case VK_FORMAT_BC1_RGB_UNORM_BLOCK:         return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-    case VK_FORMAT_BC1_RGBA_UNORM_BLOCK:        return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-    case VK_FORMAT_BC2_UNORM_BLOCK:             return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-    case VK_FORMAT_BC3_UNORM_BLOCK:             return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-    case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:     return GL_ETC1_RGB8_OES;
-    case VK_FORMAT_PVRTC1_4BPP_UNORM_BLOCK_IMG: return GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
-    case VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG: return GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
-
-    case VK_FORMAT_UNDEFINED:
-    default: { NOT_FOUND_ENUM(format);      return GL_INVALID_VALUE; }
-    }
-}
-
 }

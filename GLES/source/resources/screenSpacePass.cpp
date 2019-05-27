@@ -22,6 +22,7 @@
  */
 
 #include "screenSpacePass.h"
+#include "utils/VkToGlConverter.h"
 #include "shaderProgram.h"
 #include "glslang/glslangShaderCompiler.h"
 #include "context/context.h"
