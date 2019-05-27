@@ -73,7 +73,7 @@ ImageView::Create(vulkanAPI::Image *image)
     info.sType            = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     info.pNext            = nullptr;
     info.flags            = 0;
-    info.viewType         = (image->GetImageTarget() == X_IMAGE_TARGET_2D) ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_CUBE;
+    info.viewType         = (image->GetImageTarget() == Image::VK_IMAGE_TARGET_2D) ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_CUBE;
     info.image            = image->GetImage();
     info.format           = image->GetFormat();
     info.components.r     = VK_COMPONENT_SWIZZLE_R;

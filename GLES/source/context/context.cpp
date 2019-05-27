@@ -213,7 +213,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
         tex->SetVkFormat(static_cast<VkFormat>(eglSurfaceInterface->surfaceColorFormat));
         tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT));
         tex->SetVkImageTiling();
-        tex->SetXImageTarget(X_IMAGE_TARGET_2D);
+        tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
         tex->SetVkImage(vkImages[i]);
         tex->CreateVkImageSubResourceRange();
         tex->CreateVkImageView();
@@ -247,7 +247,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
     tex->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     tex->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     tex->SetVkImageTiling();
-    tex->SetXImageTarget(X_IMAGE_TARGET_2D);
+    tex->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
 
     GLenum glformat = XFormatToGlInternalformat(depthStencilFormat);
     tex->InitState();

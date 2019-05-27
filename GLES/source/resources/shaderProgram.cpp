@@ -1281,7 +1281,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             inverted_texture->SetTarget(GL_TEXTURE_2D);
                             inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_TRANSFER_DST_BIT));
                             inverted_texture->SetVkImageTiling();
-                            inverted_texture->SetXImageTarget(X_IMAGE_TARGET_2D);
+                            inverted_texture->SetVkImageTarget(vulkanAPI::Image::VK_IMAGE_TARGET_2D);
                             inverted_texture->InitState();
 
                             inverted_texture->SetVkFormat(activeTexture->GetVkFormat());
