@@ -82,6 +82,7 @@ namespace vulkanAPI {
     vkContext_t *                     GetContext();
     bool                              InitContext();
     void                              TerminateContext();
+    void                              ClearContextResources();
     bool                              InstanceExtensionEnabled(const char *name);
     bool                              DeviceExtensionEnabled(const char *name);
 
