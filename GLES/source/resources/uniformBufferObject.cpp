@@ -7,7 +7,7 @@ UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mBuffer = new vulkanAPI::Buffer(vkContext, X_BUFFER_USAGE_UNIFORM_BUFFER);
+    mBuffer = new vulkanAPI::Buffer(vkContext, UNIFORM_BUFFER);
     mMemory = new vulkanAPI::UniformMemory(vkContext);
 }
 

@@ -95,7 +95,8 @@ BufferObject::SetTarget(GLenum target)
     // realloc with combined flags in case GL specifies at a later state that an
     // already allocated, e.g., vertex buffer is also an index buffer and vice-versa
     if(mTarget != target && mTarget != GL_INVALID_VALUE) {
-        XBufferUsageFlags combinedBuffers = (X_BUFFER_USAGE_VERTEX_BUFFER | X_BUFFER_USAGE_INDEX_BUFFER);
+        VkBufferUsageFlags combinedBuffers =
+                static_cast<VkBufferUsageFlags>(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
         if(mBuffer->GetFlags() != combinedBuffers && mAllocated == true) {
             size_t size = mBuffer->GetSize();
             uint8_t *srcData = new uint8_t[size];
@@ -106,9 +107,9 @@ BufferObject::SetTarget(GLenum target)
             delete[] srcData;
         }
     } else if(target == GL_ARRAY_BUFFER) {
-        mBuffer->SetFlags(X_BUFFER_USAGE_VERTEX_BUFFER);
+        mBuffer->SetFlags(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
     } else if(target == GL_ELEMENT_ARRAY_BUFFER) {
-        mBuffer->SetFlags(X_BUFFER_USAGE_INDEX_BUFFER);
+        mBuffer->SetFlags(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
     }
     mTarget = target;
 }
