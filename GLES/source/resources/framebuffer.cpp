@@ -292,7 +292,7 @@ Framebuffer::CreateDepthStencilTexture(void)
             GetStencilAttachmentTexture() ? GetStencilAttachmentTexture()->GetInternalFormat() : GL_INVALID_VALUE);
 
         // convert to supported format
-        vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
+        vkformat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], GetVkFormatDepthBits(vkformat), GetVkFormatStencilBits(vkformat));
         mDepthStencilTexture->SetVkFormat(vkformat);
         mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);

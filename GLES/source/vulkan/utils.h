@@ -27,7 +27,6 @@
 #include "vulkan/vulkan.h"
 #include <vector>
 
-namespace vulkanAPI {
 
 uint32_t                GetVkFormatStencilBits(VkFormat format);
 uint32_t                GetVkFormatDepthBits(VkFormat format);
@@ -42,7 +41,5 @@ const char *            VkResultToString(VkResult res);
 uint64_t                HashSamplerInfo(const VkSamplerCreateInfo &info);
 uint64_t                HashRenderPassInfo(const VkRenderPassCreateInfo &info);
 uint64_t                HashGraphicsPipelineInfo(const VkGraphicsPipelineCreateInfo &info);
-
-}
 
 #endif // __VKUTILS_H__

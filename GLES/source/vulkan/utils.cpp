@@ -29,8 +29,6 @@
 #include "utils/glLogger.h"
 #include "utils/parser_helpers.h"
 
-namespace vulkanAPI {
-
 uint32_t
 GetVkFormatDepthBits(VkFormat format)
 {
@@ -376,4 +374,3 @@ HashGraphicsPipelineInfo(const VkGraphicsPipelineCreateInfo &info)
     return hash;
 }
 
-}

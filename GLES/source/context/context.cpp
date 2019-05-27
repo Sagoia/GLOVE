@@ -236,7 +236,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkFormat depthStencilFormat = vulkanAPI::FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], eglSurfaceInterface->depthSize, eglSurfaceInterface->stencilSize);
+    VkFormat depthStencilFormat = FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], eglSurfaceInterface->depthSize, eglSurfaceInterface->stencilSize);
 
     if(depthStencilFormat == VK_FORMAT_UNDEFINED) {
         return nullptr;
