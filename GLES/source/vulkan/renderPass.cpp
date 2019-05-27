@@ -29,7 +29,6 @@
  */
 
 #include "renderPass.h"
-#include "caches.h"
 #include "utils.h"
 #include "utils/cacheManager.h"
 
@@ -153,13 +152,13 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
         assert(!err);
     } else {
         mHash = HashRenderPassInfo(info);
-        mVkRenderPass = mCacheManager->GetSubCaches()->GetRenderPass(mHash);
+        mVkRenderPass = mCacheManager->GetRenderPass(mHash);
 
         if (mVkRenderPass == VK_NULL_HANDLE) {
             err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
             assert(!err);
 
-            mCacheManager->GetSubCaches()->CacheRenderPass(mHash, mVkRenderPass);
+            mCacheManager->CacheRenderPass(mHash, mVkRenderPass);
         }
     }
 

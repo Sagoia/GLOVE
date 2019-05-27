@@ -30,7 +30,6 @@
  */
 
 #include "buffer.h"
-#include "caches.h"
 #include "utils/cacheManager.h"
 
 namespace vulkanAPI {
@@ -58,7 +57,7 @@ Buffer::Release(void)
     mVkSize = 0;
     if(mVkBuffer != VK_NULL_HANDLE) {
         if (mCacheManager) {
-            mCacheManager->GetSubCaches()->CacheVkBuffer(mVkBuffer);
+            mCacheManager->CacheVkBuffer(mVkBuffer);
         } else {
             vkDestroyBuffer(mVkContext->vkDevice, mVkBuffer, nullptr);
         }

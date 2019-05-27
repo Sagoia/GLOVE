@@ -25,7 +25,6 @@
 #ifndef __ARRAYS_HPP__
 #define __ARRAYS_HPP__
 
-#include <stdint.h>
 #include <stdlib.h>
 
 template <class T, uint32_t N = 1>

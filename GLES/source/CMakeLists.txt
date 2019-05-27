@@ -56,7 +56,6 @@ set(SOURCES
     utils/glLogger.cpp
     utils/glUtils.cpp
     utils/cacheManager.cpp
-    vulkan/caches.cpp
     vulkan/cbManager.cpp
     vulkan/commandBufferPool.cpp
     vulkan/clearPass.cpp
@@ -119,7 +118,6 @@ set(HEADERS
     utils/glLoggerImpl.h
     utils/glUtils.h
     utils/cacheManager.h
-    vulkan/caches.h
     vulkan/types.h
     vulkan/cbManager.h
     vulkan/commandBufferPool.h

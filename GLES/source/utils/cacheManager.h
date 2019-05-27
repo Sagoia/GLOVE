@@ -23,12 +23,13 @@
 #ifndef __CACHEMANAGER_H__
 #define __CACHEMANAGER_H__
 
+#include <unordered_map>
 #include "arrays.hpp"
+#include "vulkan/vulkan.h"
 #include "utils/glLogger.h"
 
 namespace vulkanAPI {
     struct vkContext_t;
-    class Caches;
 }
 
 class UniformBufferObject;
@@ -37,37 +38,67 @@ class Texture;
 
 class CacheManager {
 private:
-    const static uint32_t DEFAULT_COUNT     = 256;
-    const static uint32_t UBO_ARRAY_COUNT   = 16;
+    const static uint32_t DEFAULT_COUNT = 256;
+    const static uint32_t UBO_ARRAY_COUNT = 16;
 
     const
-    vulkanAPI::vkContext_t *            mVkContext;
+    vulkanAPI::vkContext_t *        mVkContext;
 
-    Array<UniformBufferObject *>        mUBOCache;
-    Array<UniformBufferObject *>        mUBOLists[UBO_ARRAY_COUNT];
+    Array<UniformBufferObject *>    mUBOCache;
+    Array<UniformBufferObject *>    mUBOLists[UBO_ARRAY_COUNT];
 
-    Array<BufferObject *>               mVBOCache;
-    Array<Texture *>                    mTextureCache;
+    Array<BufferObject *>           mVBOCache;
+    Array<Texture *>                mTextureCache;
+    Array<VkImageView>              mVkImageViewCache;
+    Array<VkImage>                  mVkImageCache;
+    Array<VkBuffer>                 mVkBufferCache;
+    Array<VkDeviceMemory>           mVkDeviceMemoryCache;
 
-    vulkanAPI::Caches *                 mSubCaches;
+    typedef std::unordered_map<uint64_t, VkSampler> SamplerMap;
+    SamplerMap                          mVkSamplerCache;
+    typedef std::unordered_map<uint64_t, VkRenderPass> RenderPassMap;
+    RenderPassMap                       mVkRenderPassCache;
+
+    typedef std::unordered_map<uint64_t, VkPipeline> PipelineHashMap;
+    typedef std::unordered_map<VkPipelineCache, PipelineHashMap> PipelineMap;
+    PipelineMap                         mVkPipelineCache;
 
     void                                UncacheUBOs();
     void                                CleanUpUBOs();
 
     void                                CleanUpVBOCache();
     void                                CleanUpTextureCache();
+    void                                CleanUpImageViewCache();
+    void                                CleanUpImageCache();
+    void                                CleanUpBufferCache();
+    void                                CleanUpDeviceMemoryCache();
+
+    void                                CleanUpSampleCache();
+    void                                CleanUpRenderPassCache();
+    void                                CleanUpPipelineCache();
 
 public:
      CacheManager(const vulkanAPI::vkContext_t *vkContext);
     ~CacheManager();
-
-    inline vulkanAPI::Caches *          GetSubCaches(void) { FUN_ENTRY(GL_LOG_TRACE); return mSubCaches; }
 
     void                                CacheUBO(UniformBufferObject *uniformBufferObject);
     UniformBufferObject *               GetUBO(uint32_t index);
 
     void                                CacheVBO(BufferObject *vbo);
     void                                CacheTexture(Texture *tex);
+    void                                CacheVkImageView(VkImageView imageView);
+    void                                CacheVkImage(VkImage image);
+    void                                CacheVkBuffer(VkBuffer buffer);
+    void                                CacheDeviceMemory(VkDeviceMemory deviceMemory);
+
+    void                                CacheSampler(uint64_t hash, VkSampler sampler);
+    VkSampler                           GetSampler(uint64_t hash);
+
+    void                                CacheRenderPass(uint64_t hash, VkRenderPass renderPass);
+    VkRenderPass                        GetRenderPass(uint64_t hash);
+
+    void                                CachePipeline(VkPipelineCache pipelineCache, uint64_t hash, VkPipeline pipeline);
+    VkPipeline                          GetPipeline(VkPipelineCache pipelineCache, uint64_t hash);
 
     void                                CleanUpFrameCaches();
     void                                CleanUpCaches();
