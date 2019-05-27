@@ -67,7 +67,7 @@ public:
     inline uintptr_t                    GetPointer(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mPtr;        }
     inline const BufferObject *         GetExternalVbo(void)              const { FUN_ENTRY(GL_LOG_TRACE); return mExternalVbo;}
 
-    inline XFormat                      GetXFormat(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return GlAttribPointerToXFormat(mElements, mType, mNormalized); }
+    inline VkFormat                     GetVkFormat(void)                 const { FUN_ENTRY(GL_LOG_TRACE); return GlAttribPointerToXFormat(mElements, mType, mNormalized); }
     inline bool                         IsInternalVBO(void)        const { FUN_ENTRY(GL_LOG_TRACE); return mInternalVBOStatus;}
     inline void                         GetGenericValue(GLint *ptr)       const { FUN_ENTRY(GL_LOG_TRACE); ptr[0] = static_cast<GLint>(mGenericValue[0]);
                                                                                                            ptr[1] = static_cast<GLint>(mGenericValue[1]);

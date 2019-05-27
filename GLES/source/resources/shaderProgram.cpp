@@ -771,7 +771,7 @@ ShaderProgram::GenerateVertexInputProperties(std::vector<GenericVertexAttribute>
 
             mVkVertexInputAttribute[count].binding  = binding;
             mVkVertexInputAttribute[count].location = location;
-            mVkVertexInputAttribute[count].format   = gva.GetXFormat();
+            mVkVertexInputAttribute[count].format   = gva.GetVkFormat();
             mVkVertexInputAttribute[count].offset   = static_cast<uint32_t>(gva.GetOffset());
 
             ++count;
