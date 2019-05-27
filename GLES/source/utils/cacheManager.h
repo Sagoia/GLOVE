@@ -42,17 +42,17 @@ private:
     const static uint32_t UBO_ARRAY_COUNT = 16;
 
     const
-    vulkanAPI::vkContext_t *        mVkContext;
+    vulkanAPI::vkContext_t *            mVkContext;
 
-    Array<UniformBufferObject *>    mUBOCache;
-    Array<UniformBufferObject *>    mUBOLists[UBO_ARRAY_COUNT];
+    PointArray<UniformBufferObject>     mUBOCache;
+    PointArray<UniformBufferObject>     mUBOLists[UBO_ARRAY_COUNT];
 
-    Array<BufferObject *>           mVBOCache;
-    Array<Texture *>                mTextureCache;
-    Array<VkImageView>              mVkImageViewCache;
-    Array<VkImage>                  mVkImageCache;
-    Array<VkBuffer>                 mVkBufferCache;
-    Array<VkDeviceMemory>           mVkDeviceMemoryCache;
+    PointArray<BufferObject>            mVBOCache;
+    PointArray<Texture>                 mTextureCache;
+    PointArray<VkImageView_T>           mVkImageViewCache;
+    PointArray<VkImage_T>               mVkImageCache;
+    PointArray<VkBuffer_T>              mVkBufferCache;
+    PointArray<VkDeviceMemory_T>        mVkDeviceMemoryCache;
 
     typedef std::unordered_map<uint64_t, VkSampler> SamplerMap;
     SamplerMap                          mVkSamplerCache;

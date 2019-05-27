@@ -28,9 +28,9 @@
 #include <stdlib.h>
 
 template <class T, uint32_t N = 1>
-class Array {
+class PointArray {
 private:
-    typedef T Element;
+    typedef T *Element;
     const static uint32_t ElementSize = sizeof(Element);
     const static uint32_t DefaultCapacity = N;
         
@@ -48,13 +48,13 @@ private:
     }
         
 public:
-    Array(uint32_t capacity = DefaultCapacity)
+    PointArray(uint32_t capacity = DefaultCapacity)
     : mCapacity(capacity), mSize(0) {
         if (mCapacity == 0) { mCapacity = 1; }
         mData = (Element *)malloc(ElementSize * mCapacity);
     }
         
-    ~Array(void) { free(mData); }
+    ~PointArray(void) { free(mData); }
         
     inline void             Clear(void)                         { mSize = 0; }
     inline bool             Empty(void)                 const   { return (mSize == 0); }
@@ -82,12 +82,10 @@ public:
 template <class ELEMENT>
 class ObjectArray {
 private:
-    typedef ELEMENT * ELEMENT_PRT;
-
     uint32_t mCounter;                 /**< The id (key-value of the map)
                                           reserved during the creation of a new
                                           object. */
-    Array<ELEMENT_PRT> mObjects;  /**< The templated map container (one
+    PointArray<ELEMENT> mObjects;      /**< The templated map container (one
                                           for each different class that maps
                                           id to a specific object). */
 public:
@@ -196,7 +194,7 @@ public:
      * @brief Returns the map container for a specific class.
      * @return The map container.
      */
-    inline Array<ELEMENT_PRT>& GetObjects(void)
+    inline PointArray<ELEMENT>& GetObjects(void)
     {
         return mObjects;
     }
