@@ -35,8 +35,8 @@
 
 namespace vulkanAPI {
 
-Buffer::Buffer(const XContext_t *xContext, const XBufferUsageFlags usage, const VkSharingMode vkSharingMode)
-: mXContext(xContext), mVkBuffer(VK_NULL_HANDLE),
+Buffer::Buffer(const XContext_t *vkContext, const XBufferUsageFlags usage, const VkSharingMode vkSharingMode)
+: mVkContext(vkContext), mVkBuffer(VK_NULL_HANDLE),
 mVkBufferSharingMode(vkSharingMode), mVkBufferUsageFlags(usage),
 mVkSize(0), mVkOffset(0), mCacheManager(nullptr)
 {
@@ -60,7 +60,7 @@ Buffer::Release(void)
         if (mCacheManager) {
             mCacheManager->GetSubCaches()->CacheVkBuffer(mVkBuffer);
         } else {
-            vkDestroyBuffer(mXContext->vkDevice, mVkBuffer, nullptr);
+            vkDestroyBuffer(mVkContext->vkDevice, mVkBuffer, nullptr);
         }
         mVkBuffer = VK_NULL_HANDLE;
     }
@@ -81,7 +81,7 @@ Buffer::Create(void)
     info.queueFamilyIndexCount = 0;
     info.pQueueFamilyIndices   = nullptr;
 
-    VkResult err = vkCreateBuffer(mXContext->vkDevice, &info, nullptr, &mVkBuffer);
+    VkResult err = vkCreateBuffer(mVkContext->vkDevice, &info, nullptr, &mVkBuffer);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

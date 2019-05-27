@@ -51,7 +51,7 @@ class Context {
 private:
 // ------------
     const
-    vulkanAPI::XContext_t                      *mXContext;
+    vulkanAPI::XContext_t                     *mVkContext;
 // ------------
     Rect                                        mClearRect;
     StateManager                                mStateManager;

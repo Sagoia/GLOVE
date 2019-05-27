@@ -33,7 +33,7 @@ class Pipeline {
 private:
 
     const
-    XContext_t *                                mXContext;
+    XContext_t *                               mVkContext;
 
     VkViewport                                  mVkViewport;
     VkRect2D                                    mVkScissorRect;
@@ -76,7 +76,7 @@ private:
 
 public:
 // Constructor
-    Pipeline(const XContext_t *xContext);
+    Pipeline(const XContext_t *vkContext);
 
 // Destructor
     ~Pipeline();

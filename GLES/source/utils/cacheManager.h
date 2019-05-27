@@ -41,7 +41,7 @@ private:
     const static uint32_t UBO_ARRAY_COUNT   = 16;
 
     const
-    vulkanAPI::XContext_t *             mXContext;
+    vulkanAPI::XContext_t *            mVkContext;
 
     Array<UniformBufferObject *>        mUBOCache;
     Array<UniformBufferObject *>        mUBOLists[UBO_ARRAY_COUNT];
@@ -58,7 +58,7 @@ private:
     void                                CleanUpTextureCache();
 
 public:
-     CacheManager(const vulkanAPI::XContext_t *xContext);
+     CacheManager(const vulkanAPI::XContext_t *vkContext);
     ~CacheManager();
 
     inline vulkanAPI::Caches *          GetSubCaches(void) { FUN_ENTRY(GL_LOG_TRACE); return mSubCaches; }

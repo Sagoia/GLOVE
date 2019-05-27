@@ -36,8 +36,8 @@
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
-: mXContext(xContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
+Texture::Texture(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
 mMipLevelsCount(1), mLayersCount(1), mState(nullptr), mDataUpdated(false), mDataNoInvertion(false), mFboColorAttached(false), mIsNPOT(false), mIsNPOTAccessCompleted(false),
@@ -45,10 +45,10 @@ mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mImage     = new vulkanAPI::Image(xContext);
-    mImageView = new vulkanAPI::ImageView(xContext);
-    mMemory    = new vulkanAPI::Memory(xContext, vkFlags);
-    mSampler   = new vulkanAPI::Sampler(xContext);
+    mImage     = new vulkanAPI::Image(vkContext);
+    mImageView = new vulkanAPI::ImageView(vkContext);
+    mMemory    = new vulkanAPI::Memory(vkContext, vkFlags);
+    mSampler   = new vulkanAPI::Sampler(vkContext);
 }
 
 Texture::~Texture()
@@ -478,7 +478,7 @@ Texture::CopyPixelsToHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplevel
 
     // create a buffer at the size of the requested subrectangle
     const size_t srcSize   = srcRect->GetRectBufferSize();
-    BufferObject *tbo = new TransferDstBufferObject(mXContext);
+    BufferObject *tbo = new TransferDstBufferObject(mVkContext);
     tbo->Allocate(srcSize, nullptr);
 
     // use the global rect offsets for transfering the subpixels from Vulkan
@@ -525,7 +525,7 @@ Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplev
                   &tmp_srcRect, srcData,
                   &tmp_dstRect, dstData);
 
-    BufferObject *tbo = new TransferSrcBufferObject(mXContext);
+    BufferObject *tbo = new TransferSrcBufferObject(mVkContext);
     tbo->Allocate(dstSize, dstData);
 
     // use the global rect offsets for transfering the subpixels to Vulkan
@@ -558,7 +558,7 @@ Texture::CopyPixelsFromHost(ImageRect *srcRect, ImageRect *dstRect, GLint miplev
 void
 Texture::CpoyCompressedPixelFromHost(Rect *srcRect, GLint miplevel, GLint layer, GLenum format, const void *srcData, GLsizei dataSize)
 {
-    BufferObject *tbo = new TransferSrcBufferObject(mXContext);
+    BufferObject *tbo = new TransferSrcBufferObject(mVkContext);
     tbo->Allocate(dataSize, srcData);
 
     // use the global rect offsets for transfering the subpixels to Vulkan

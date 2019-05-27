@@ -35,12 +35,12 @@ struct UniformBufferObject_ScreenSpace {
     float color[4];
 };
 
-ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager):
-    mGLContext(GLContext), mXContext(xContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
+ScreenSpacePass::ScreenSpacePass(Context* GLContext, const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager):
+    mGLContext(GLContext), mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
     mNumElements(0), mVertexBuffer(nullptr),
     mVertexVkBuffer(VK_NULL_HANDLE), mVertexVkBufferOffset(0),
-    mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mXContext)),
-    mPipeline(new vulkanAPI::Pipeline(xContext)),
+    mVertexInputInfo(), mPipelineCache(new vulkanAPI::PipelineCache(mVkContext)),
+    mPipeline(new vulkanAPI::Pipeline(vkContext)),
     mInitialized(false), mValid(false)
 {
     FUN_ENTRY(GL_LOG_TRACE);
@@ -93,7 +93,7 @@ ScreenSpacePass::CreateMeshData()
 
     mNumElements = static_cast<uint32_t>(vertices.size());
 
-    mVertexBuffer = new VertexBufferObject(mXContext);
+    mVertexBuffer = new VertexBufferObject(mVkContext);
     if(!mVertexBuffer->Allocate(mNumElements * sizeof(ScreenSpaceVertex), vertices.data())) {
         return false;
     }
@@ -144,7 +144,7 @@ ScreenSpacePass::ShaderData::Destroy()
 
 void
 ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cacheManager,
-                                           const vulkanAPI::XContext_t* mXContext,
+                                           const vulkanAPI::XContext_t* mVkContext,
                                            vulkanAPI::CommandBufferManager* commandBufferManager)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
@@ -153,11 +153,11 @@ ScreenSpacePass::ShaderData::InitResources(Context *GLContext, CacheManager* cac
     shaderCompiler = new GlslangShaderCompiler();
     vertShader = new Shader();
     vertShader->SetSlangCompiler(new GlslangCompiler());
-    vertShader->SetxContext(mXContext);
+    vertShader->SetVkContext(mVkContext);
     fragShader = new Shader();
     fragShader->SetSlangCompiler(new GlslangCompiler());
-    fragShader->SetxContext(mXContext);
-    shaderProgram = new ShaderProgram(mXContext, nullptr);
+    fragShader->SetVkContext(mVkContext);
+    shaderProgram = new ShaderProgram(mVkContext, nullptr);
     shaderProgram->SetShaderCompiler(shaderCompiler);
     shaderProgram->SetCacheManager(cacheManager);
     shaderProgram->SetGlContext(GLContext);
@@ -223,7 +223,7 @@ void main() {\n\
 }\n\
 ";
 
-    mShaderData.InitResources(mGLContext, mCacheManager, mXContext, mCommandBufferManager);
+    mShaderData.InitResources(mGLContext, mCacheManager, mVkContext, mCommandBufferManager);
     mShaderData.Generate(vertexSource100, fragmentSource100);
 
     if(!mShaderData.shaderProgram->SetPipelineShaderStage(mPipeline->GetShaderStageCountRef(), mPipeline->GetShaderStageIDsRef(), mPipeline->GetShaderStages())) {

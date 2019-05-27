@@ -56,7 +56,7 @@ private:
     };
 
     const
-    vulkanAPI::XContext_t           *mXContext;
+    vulkanAPI::XContext_t          *mVkContext;
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
     ObjectArray<Texture>            *mTextureArray;
     ObjectArray<Renderbuffer>       *mRenderbufferArray;
@@ -84,7 +84,7 @@ private:
     void                            Release(void);
 
 public:
-    Framebuffer(const vulkanAPI::XContext_t *xContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
+    Framebuffer(const vulkanAPI::XContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~Framebuffer();
 
 // Create Functions
@@ -152,8 +152,8 @@ public:
     inline GLint            GetSurfaceType(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mSurfaceType;                    }
 
 // Set Functions
-    inline void             SetxContext(const
-                                vulkanAPI::XContext_t *xContext)                { FUN_ENTRY(GL_LOG_TRACE); mXContext = xContext; mRenderPass->SetxContext(xContext); }
+    inline void             SetVkContext(const
+                                vulkanAPI::XContext_t *vkContext)              { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
     inline void             SetCommandBufferManager(
                                 vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void             SetResources(

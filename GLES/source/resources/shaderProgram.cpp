@@ -30,16 +30,16 @@
 #include "context/context.h"
 #include <iterator>
 
-ShaderProgram::ShaderProgram(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager)
+ShaderProgram::ShaderProgram(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mGLContext(nullptr)
 , mGenericVertexAttributes(GLOVE_MAX_VERTEX_ATTRIBS)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mXContext = xContext;
+    mVkContext = vkContext;
 
     for (auto& gva : mGenericVertexAttributes) {
-        gva.SetxContext(xContext);
+        gva.SetVkContext(vkContext);
     }
 
     mCommandBufferManager = cbManager;
@@ -62,7 +62,7 @@ ShaderProgram::ShaderProgram(const vulkanAPI::XContext_t *xContext, vulkanAPI::C
     mVkDescSet = VK_NULL_HANDLE;
     mVkPipelineLayout = VK_NULL_HANDLE;
 
-    mPipelineCache = new vulkanAPI::PipelineCache(mXContext);
+    mPipelineCache = new vulkanAPI::PipelineCache(mVkContext);
 
     mStageCount = 0;
 
@@ -514,7 +514,7 @@ ShaderProgram::AllocateExplicitIndexBuffer(const void* data, size_t size, Buffer
         mExplicitIbo = nullptr;
     }
 
-    mExplicitIbo = new IndexBufferObject(mXContext);
+    mExplicitIbo = new IndexBufferObject(mVkContext);
     mExplicitIbo->SetTarget(GL_ELEMENT_ARRAY_BUFFER);
     *ibo = mExplicitIbo;
 
@@ -684,7 +684,7 @@ ShaderProgram::UpdateVertexAttribProperties(size_t vertCount, uint32_t firstVert
             // If the primitives are rendered with GL_LINE_LOOP, which is not
             // supported in Vulkan, we have to modify the vbo and add the first vertex at the end.
             if(mGLContext->IsModeLineLoop() && !mActiveIndexVkBuffer) {
-                BufferObject* vboLineLoopUpdated = new VertexBufferObject(mXContext);
+                BufferObject* vboLineLoopUpdated = new VertexBufferObject(mVkContext);
 
                 size_t sizeOld = vbo->GetSize();
                 size_t sizeOne = gva.GetStride();
@@ -920,13 +920,13 @@ ShaderProgram::ReleaseVkObjects(void)
 
     while (!mPendingDescSets.empty()) {
         VkDescriptorSet descSet = mPendingDescSets.front();
-        vkFreeDescriptorSets(mXContext->vkDevice, mVkDescPool, 1, &descSet);
+        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &descSet);
         mPendingDescSets.pop();
     }
 
     while (!mUsingDescSets.empty()) {
         VkDescriptorSet descSet = mUsingDescSets.front();
-        vkFreeDescriptorSets(mXContext->vkDevice, mVkDescPool, 1, &descSet);
+        vkFreeDescriptorSets(mVkContext->vkDevice, mVkDescPool, 1, &descSet);
         mUsingDescSets.pop();
     }
 
@@ -977,7 +977,7 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
     descLayoutInfo.bindingCount = nLiveUniformBlocks;
     descLayoutInfo.pBindings = mVkDescSetLayoutBind;
 
-    if(vkCreateDescriptorSetLayout(mXContext->vkDevice, &descLayoutInfo, 0, &mVkDescSetLayout) != VK_SUCCESS) {
+    if(vkCreateDescriptorSetLayout(mVkContext->vkDevice, &descLayoutInfo, 0, &mVkDescSetLayout) != VK_SUCCESS) {
         assert(0);
         return false;
     }
@@ -995,7 +995,7 @@ ShaderProgram::CreateDescriptorSetLayout(uint32_t nLiveUniformBlocks)
     pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
     pipelineLayoutCreateInfo.pPushConstantRanges    = nullptr;
 
-    if(vkCreatePipelineLayout(mXContext->vkDevice, &pipelineLayoutCreateInfo, 0, &mVkPipelineLayout) != VK_SUCCESS) {
+    if(vkCreatePipelineLayout(mVkContext->vkDevice, &pipelineLayoutCreateInfo, 0, &mVkPipelineLayout) != VK_SUCCESS) {
         assert(0);
         return false;
     }
@@ -1030,7 +1030,7 @@ ShaderProgram::CreateDescriptorPool(uint32_t nLiveUniformBlocks)
     descriptorPoolInfo.maxSets = MAX_DESC_SET;
     descriptorPoolInfo.pPoolSizes = descTypeCounts;
 
-    if(vkCreateDescriptorPool(mXContext->vkDevice, &descriptorPoolInfo, 0, &mVkDescPool) != VK_SUCCESS) {
+    if(vkCreateDescriptorPool(mVkContext->vkDevice, &descriptorPoolInfo, 0, &mVkDescPool) != VK_SUCCESS) {
         assert(0);
         return false;
     }
@@ -1056,7 +1056,7 @@ ShaderProgram::CreateDescriptorSet(void)
     descAllocInfo.descriptorSetCount = 1;
     descAllocInfo.pSetLayouts = &mVkDescSetLayout;
 
-    if(vkAllocateDescriptorSets(mXContext->vkDevice, &descAllocInfo, &mVkDescSet) != VK_SUCCESS) {
+    if(vkAllocateDescriptorSets(mVkContext->vkDevice, &descAllocInfo, &mVkDescSet) != VK_SUCCESS) {
         assert(0);
         return false;
     }
@@ -1163,7 +1163,7 @@ ShaderProgram::UpdateDescriptorSet(void)
 
     assert(mVkDescSet);
     assert(mGLContext);
-    assert(mXContext);
+    assert(mVkContext);
 
     if(mShaderResourceInterface.GetLiveUniformBlocks() == 0) {
         return;
@@ -1172,7 +1172,7 @@ ShaderProgram::UpdateDescriptorSet(void)
     /// Transfer any new local uniform data into the buffer objects
     if(mUpdateDescriptorData) {
         bool allocatedNewBufferObject = false;
-        mShaderResourceInterface.UpdateUniformBufferData(mXContext, &allocatedNewBufferObject);
+        mShaderResourceInterface.UpdateUniformBufferData(mVkContext, &allocatedNewBufferObject);
         if(allocatedNewBufferObject) {
             mUpdateDescriptorSets = true;
         }
@@ -1258,7 +1258,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                         }
                     }
                     else if(mGLContext->GetResourceManager()->IsTextureAttachedToFBO(activeTexture)) {
-                        if (mXContext->mIsMaintenanceExtSupported) {
+                        if (mVkContext->mIsMaintenanceExtSupported) {
                             activeTexture->PrepareVkImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                         } else {
                             // Get Inverted Data from FBO's Color Attachment Texture
@@ -1277,7 +1277,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             activeTexture->CopyPixelsToHost(&srcRect, &dstRect, 0, 0, dstInternalFormat, static_cast<void *>(dstData));
 
                             // Create new Texture with this data 
-                            Texture *inverted_texture = new Texture(mXContext, mCommandBufferManager);
+                            Texture *inverted_texture = new Texture(mVkContext, mCommandBufferManager);
                             inverted_texture->SetTarget(GL_TEXTURE_2D);
                             inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_TRANSFER_DST_BIT));
                             inverted_texture->SetVkImageTiling();
@@ -1343,7 +1343,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
     }
     assert(samp == nSamplers);
 
-    vkUpdateDescriptorSets(mXContext->vkDevice, nLiveUniformBlocks, writes, 0, nullptr);
+    vkUpdateDescriptorSets(mVkContext->vkDevice, nLiveUniformBlocks, writes, 0, nullptr);
 
     free(map_block_texDescriptor);
     free(writes);
@@ -1383,7 +1383,7 @@ ShaderProgram::BuildShaderResourceInterface(void)
     mShaderResourceInterface.CreateInterface();
     mShaderResourceInterface.SetReflection(nullptr);
     mShaderResourceInterface.AllocateUniformClientData();
-    mShaderResourceInterface.AllocateUniformBufferObjects(mXContext);
+    mShaderResourceInterface.AllocateUniformBufferObjects(mVkContext);
 
     mShaderResourceInterface.SetActiveUniformMaxLength();
     mShaderResourceInterface.SetActiveAttributeMaxLength();

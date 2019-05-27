@@ -2,8 +2,8 @@
 
 namespace vulkanAPI {
 
-UniformMemory::UniformMemory(const XContext_t *xContext, VkFlags flags)
-: mXContext(xContext), mVkMemoryFlags(0), mVkFlags(flags), mCacheManager(nullptr)
+UniformMemory::UniformMemory(const XContext_t *vkContext, VkFlags flags)
+: mVkContext(vkContext), mVkMemoryFlags(0), mVkFlags(flags), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -30,7 +30,7 @@ UniformMemory::Create()
     err = GetMemoryTypeIndexFromProperties(&allocInfo.memoryTypeIndex);
     assert(!err);
 
-    mXContext->memoryAllocator->Allocate(mVkRequirements.size, mVkRequirements.alignment, allocInfo.memoryTypeIndex, mMemoryBlock);
+    mVkContext->memoryAllocator->Allocate(mVkRequirements.size, mVkRequirements.alignment, allocInfo.memoryTypeIndex, mMemoryBlock);
     assert(mMemoryBlock.vkMemory);
 
     return (mMemoryBlock.vkMemory != VK_NULL_HANDLE);
@@ -42,7 +42,7 @@ UniformMemory::Release(void)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if (mMemoryBlock.vkMemory != VK_NULL_HANDLE) {
-        mXContext->memoryAllocator->Deallocate(mMemoryBlock);
+        mVkContext->memoryAllocator->Deallocate(mMemoryBlock);
     }
 }
 
@@ -52,7 +52,7 @@ UniformMemory::GetBufferMemoryRequirements(VkBuffer &buffer)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     memset(static_cast<void *>(&mVkRequirements), 0, sizeof(mVkRequirements));
-    vkGetBufferMemoryRequirements(mXContext->vkDevice, buffer, &mVkRequirements);
+    vkGetBufferMemoryRequirements(mVkContext->vkDevice, buffer, &mVkRequirements);
 
     return true;
 }
@@ -65,10 +65,10 @@ UniformMemory::GetMemoryTypeIndexFromProperties(uint32_t *typeIndex)
     uint32_t typeBitsShift = mVkRequirements.memoryTypeBits;
 
     // Search memtypes to find first index with those properties
-    for(uint32_t i = 0; i < mXContext->vkDeviceMemoryProperties.memoryTypeCount; i++) {
+    for(uint32_t i = 0; i < mVkContext->vkDeviceMemoryProperties.memoryTypeCount; i++) {
         if((typeBitsShift & 1) == 1) {
             // Type is available, does it match user properties?
-            if ((mXContext->vkDeviceMemoryProperties.memoryTypes[i].propertyFlags & mVkFlags) == mVkFlags) {
+            if ((mVkContext->vkDeviceMemoryProperties.memoryTypes[i].propertyFlags & mVkFlags) == mVkFlags) {
                 *typeIndex = i;
                 return VK_SUCCESS;
             }
@@ -79,10 +79,10 @@ UniformMemory::GetMemoryTypeIndexFromProperties(uint32_t *typeIndex)
     typeBitsShift = mVkRequirements.memoryTypeBits;
 
     // Retry with properties = 0x0
-    for(uint32_t i = 0; i < mXContext->vkDeviceMemoryProperties.memoryTypeCount; i++) {
+    for(uint32_t i = 0; i < mVkContext->vkDeviceMemoryProperties.memoryTypeCount; i++) {
         if((typeBitsShift & 1) == 1) {
             // Type is available, does it match user properties?
-            if ((mXContext->vkDeviceMemoryProperties.memoryTypes[i].propertyFlags & 0) == 0) {
+            if ((mVkContext->vkDeviceMemoryProperties.memoryTypes[i].propertyFlags & 0) == 0) {
                 *typeIndex = i;
                 return VK_SUCCESS;
             }
@@ -99,7 +99,7 @@ UniformMemory::BindBufferMemory(VkBuffer &buffer)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkBindBufferMemory(mXContext->vkDevice, buffer, mMemoryBlock.vkMemory, mMemoryBlock.offset);
+    VkResult err = vkBindBufferMemory(mVkContext->vkDevice, buffer, mMemoryBlock.vkMemory, mMemoryBlock.offset);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
@@ -110,7 +110,7 @@ UniformMemory::Lock(void **pData)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    VkResult err = vkMapMemory(mXContext->vkDevice, mMemoryBlock.vkMemory, mMemoryBlock.offset, mVkRequirements.size, mVkMemoryFlags, pData);
+    VkResult err = vkMapMemory(mVkContext->vkDevice, mMemoryBlock.vkMemory, mMemoryBlock.offset, mVkRequirements.size, mVkMemoryFlags, pData);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);
@@ -121,7 +121,7 @@ UniformMemory::Unlock(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    vkUnmapMemory(mXContext->vkDevice, mMemoryBlock.vkMemory);
+    vkUnmapMemory(mVkContext->vkDevice, mMemoryBlock.vkMemory);
 
     return true;
 }

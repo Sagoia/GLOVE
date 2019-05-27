@@ -52,7 +52,7 @@ Context::BindTexture(GLenum target, GLuint texture)
     {
         tex = mResourceManager->GetTexture(texture);
         if(tex->GetTarget() == GL_INVALID_VALUE) {
-            tex->SetxContext(mXContext);
+            tex->SetVkContext(mVkContext);
             tex->SetCommandBufferManager(mCommandBufferManager);
             tex->SetCacheManager(mCacheManager);
             tex->SetTarget(target);

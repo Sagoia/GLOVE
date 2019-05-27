@@ -76,7 +76,7 @@ GenericVertexAttribute::GenerateUserSpaceVBO(uint32_t numVertices, bool& updated
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    BufferObject *vbo = new VertexBufferObject(mXContext);
+    BufferObject *vbo = new VertexBufferObject(mVkContext);
     void *srcData = reinterpret_cast<void*>(GetPointer());
     size_t byteSize = numVertices * GetStride();
 
@@ -108,7 +108,7 @@ GenericVertexAttribute::AttachDeviceSpaceVBO(uint32_t numVertices, bool& updated
         size_t byteSize = vbo->GetSize();
         uint8_t *srcData = new uint8_t[byteSize];
         vbo->GetData(byteSize, 0, srcData);
-        vbo = new VertexBufferObject(mXContext);
+        vbo = new VertexBufferObject(mVkContext);
         ConvertFixedBufferToFloat(vbo, byteSize, srcData, numVertices);
         delete[] srcData;
         mCacheManager->CacheVBO(vbo);
@@ -123,7 +123,7 @@ GenericVertexAttribute::UpdateGenericValueVBO(bool& updatedVBO)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     // TODO: do not recreate the VBO
-    BufferObject *vbo = new VertexBufferObject(mXContext);
+    BufferObject *vbo = new VertexBufferObject(mVkContext);
     GLfloat genericValue[4];
     GetGenericValue(genericValue);
     vbo->Allocate(mElements * sizeof(float), static_cast<const void *>(genericValue));

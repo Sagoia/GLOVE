@@ -36,8 +36,8 @@
 
 namespace vulkanAPI {
 
-ImageView::ImageView(const XContext_t *xContext)
-: mXContext(xContext), mVkImageView(VK_NULL_HANDLE), mCacheManager(nullptr)
+ImageView::ImageView(const XContext_t *vkContext)
+: mVkContext(vkContext), mVkImageView(VK_NULL_HANDLE), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -58,7 +58,7 @@ ImageView::Release(void)
         if (mCacheManager) {
             mCacheManager->GetSubCaches()->CacheVkImageView(mVkImageView);
         } else {
-            vkDestroyImageView(mXContext->vkDevice, mVkImageView, nullptr);
+            vkDestroyImageView(mVkContext->vkDevice, mVkImageView, nullptr);
         }
         mVkImageView = VK_NULL_HANDLE;
     }
@@ -82,7 +82,7 @@ ImageView::Create(vulkanAPI::Image *image)
     info.components.a     = VK_COMPONENT_SWIZZLE_A;
     info.subresourceRange = image->GetImageSubresourceRange();
 
-    VkResult err = vkCreateImageView(mXContext->vkDevice, &info, 0, &mVkImageView);
+    VkResult err = vkCreateImageView(mVkContext->vkDevice, &info, 0, &mVkImageView);
     assert(!err);
 
     return (err != VK_ERROR_OUT_OF_HOST_MEMORY && err != VK_ERROR_OUT_OF_DEVICE_MEMORY);

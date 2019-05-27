@@ -30,7 +30,7 @@ class SlangCompiler;
 
 class Shader {
 private:
-    const vulkanAPI::XContext_t *       mXContext;
+    const vulkanAPI::XContext_t *      mVkContext;
     VkShaderModule                      mVkShaderModule;
     SlangCompiler *                     mSlangCompiler;
 
@@ -47,7 +47,7 @@ private:
     void                                DestroyVkShader(void);
 
 public:
-    Shader(const vulkanAPI::XContext_t *xContext = nullptr);
+    Shader(const vulkanAPI::XContext_t *vkContext = nullptr);
     ~Shader();
 
     bool                                CompileShader(void);
@@ -69,8 +69,8 @@ public:
 
 // Set Functions
     void                                SetShaderSource(GLsizei count, const GLchar *const *string, const GLint *length);
-    void                                SetxContext(const
-                                                    vulkanAPI::XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext        = xContext; }
+    void                                SetVkContext(const
+                                                    vulkanAPI::XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext       = vkContext; }
     void                                SetSlangCompiler(SlangCompiler *compiler)       { FUN_ENTRY(GL_LOG_TRACE); mSlangCompiler   = compiler; }
     void                                SetShaderType(shader_type_t type)               { FUN_ENTRY(GL_LOG_TRACE); mShaderType      = type; }
     void                                MarkForDeletion(void)                           { FUN_ENTRY(GL_LOG_TRACE); mMarkForDeletion = true; }

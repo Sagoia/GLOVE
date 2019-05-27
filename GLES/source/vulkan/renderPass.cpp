@@ -35,8 +35,8 @@
 
 namespace vulkanAPI {
 
-RenderPass::RenderPass(const XContext_t *xContext)
-: mXContext(xContext),
+RenderPass::RenderPass(const XContext_t *vkContext)
+: mVkContext(vkContext),
   mVkPipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS),
   mVkRenderPass(VK_NULL_HANDLE),
   mColorClearEnabled(false), mDepthClearEnabled(false), mStencilClearEnabled(false),
@@ -63,7 +63,7 @@ RenderPass::Release(void)
 
     if(mVkRenderPass != VK_NULL_HANDLE) {
         if (!mCacheManager) {
-            vkDestroyRenderPass(mXContext->vkDevice, mVkRenderPass, nullptr);
+            vkDestroyRenderPass(mVkContext->vkDevice, mVkRenderPass, nullptr);
         }
         mVkRenderPass = VK_NULL_HANDLE;
     }
@@ -149,14 +149,14 @@ RenderPass::Create(VkFormat colorFormat, VkFormat depthstencilFormat)
     VkResult err = VK_SUCCESS;
 
     if (!mCacheManager) {
-        err = vkCreateRenderPass(mXContext->vkDevice, &info, nullptr, &mVkRenderPass);
+        err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
         assert(!err);
     } else {
         mHash = HashRenderPassInfo(info);
         mVkRenderPass = mCacheManager->GetSubCaches()->GetRenderPass(mHash);
 
         if (mVkRenderPass == VK_NULL_HANDLE) {
-            err = vkCreateRenderPass(mXContext->vkDevice, &info, nullptr, &mVkRenderPass);
+            err = vkCreateRenderPass(mVkContext->vkDevice, &info, nullptr, &mVkRenderPass);
             assert(!err);
 
             mCacheManager->GetSubCaches()->CacheRenderPass(mHash, mVkRenderPass);

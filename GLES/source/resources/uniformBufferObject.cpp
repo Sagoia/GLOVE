@@ -2,13 +2,13 @@
 #include "uniformBufferObject.h"
 #include "vulkan/types.h"
 
-UniformBufferObject::UniformBufferObject(const vulkanAPI::XContext_t *xContext)
-: mXContext(xContext), mUsage(GL_STATIC_DRAW), mAllocated(false), mCacheIndex(0)
+UniformBufferObject::UniformBufferObject(const vulkanAPI::XContext_t *vkContext)
+: mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mAllocated(false), mCacheIndex(0)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mBuffer = new vulkanAPI::Buffer(xContext, X_BUFFER_USAGE_UNIFORM_BUFFER);
-    mMemory = new vulkanAPI::UniformMemory(xContext);
+    mBuffer = new vulkanAPI::Buffer(vkContext, X_BUFFER_USAGE_UNIFORM_BUFFER);
+    mMemory = new vulkanAPI::UniformMemory(vkContext);
 }
 
 UniformBufferObject::~UniformBufferObject()

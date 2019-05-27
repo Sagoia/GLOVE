@@ -35,8 +35,8 @@
 
 namespace vulkanAPI {
 
-Image::Image(const XContext_t *xContext)
-: mXContext(xContext), mVkImage(VK_NULL_HANDLE), mVkFormat(VK_FORMAT_UNDEFINED), mVkImageType(VK_IMAGE_TYPE_2D),
+Image::Image(const XContext_t *vkContext)
+: mVkContext(vkContext), mVkImage(VK_NULL_HANDLE), mVkFormat(VK_FORMAT_UNDEFINED), mVkImageType(VK_IMAGE_TYPE_2D),
 mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED), mVkPipelineStage(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT),
 mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),
 mVkSampleCount(VK_SAMPLE_COUNT_1_BIT), mVkSharingMode(VK_SHARING_MODE_EXCLUSIVE),
@@ -65,7 +65,7 @@ Image::Release(void)
         if (mCacheManager) {
             mCacheManager->GetSubCaches()->CacheVkImage(mVkImage);
         } else {
-            vkDestroyImage(mXContext->vkDevice, mVkImage, nullptr);
+            vkDestroyImage(mVkContext->vkDevice, mVkImage, nullptr);
         }
         mVkImage = VK_NULL_HANDLE;
 
@@ -84,7 +84,7 @@ void
 Image::SetImageTiling(void)
 {
     VkFormatProperties props;
-    vkGetPhysicalDeviceFormatProperties(mXContext->vkGpus[0], mVkFormat, &props);
+    vkGetPhysicalDeviceFormatProperties(mVkContext->vkGpus[0], mVkFormat, &props);
 
     VkFormatFeatureFlagBits flagbits = static_cast<VkFormatFeatureFlagBits>(0);
     if(mVkImageUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) {
@@ -132,7 +132,7 @@ Image::Create(void)
     info.queueFamilyIndexCount = 0;
     info.pQueueFamilyIndices   = nullptr;
 
-    VkResult err = vkCreateImage(mXContext->vkDevice, &info, nullptr, &mVkImage);
+    VkResult err = vkCreateImage(mVkContext->vkDevice, &info, nullptr, &mVkImage);
     assert(!err);
 
     mDelete = VK_TRUE;
@@ -376,7 +376,7 @@ Image::FindSupportedVkColorFormat(VkFormat format)
 
     //Check if the selected vkformat supports VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
     VkFormatProperties formatDeviceProps;
-    vkGetPhysicalDeviceFormatProperties(mXContext->vkGpus[0], format, &formatDeviceProps);
+    vkGetPhysicalDeviceFormatProperties(mVkContext->vkGpus[0], format, &formatDeviceProps);
 
     VkFlags flags = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_TRANSFER_SRC_BIT | VK_FORMAT_FEATURE_TRANSFER_DST_BIT;
 

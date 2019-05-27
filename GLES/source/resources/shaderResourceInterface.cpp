@@ -124,7 +124,7 @@ ShaderResourceInterface::AllocateUniformClientData(void)
 }
 
 bool
-ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::XContext_t *xContext)
+ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::XContext_t *vkContext)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -134,7 +134,7 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::XContext_
         UniformBufferObject *ubo = nullptr;
         if(!uniBlock->isOpaque) {
             assert(uniBlock->blockSize);
-            ubo = new UniformBufferObject(xContext);
+            ubo = new UniformBufferObject(vkContext);
             ubo->Allocate(uniBlock->requiredSize, nullptr, uniBlock->blockSize);
         } else {
             ++ mLiveSamplers;
@@ -146,7 +146,7 @@ ShaderResourceInterface::AllocateUniformBufferObjects(const vulkanAPI::XContext_
 }
 
 bool
-ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::XContext_t *xContext, bool *allocatedNewBufferObject)
+ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::XContext_t *vkContext, bool *allocatedNewBufferObject)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -170,7 +170,7 @@ ShaderResourceInterface::UpdateUniformBufferData(const vulkanAPI::XContext_t *xC
             if (bufferObject) {
                 bufferObject->UpdateData(uniformBlock->blockSize, 0, uniform->pClientData);
             } else {
-                bufferObject = new UniformBufferObject(xContext);
+                bufferObject = new UniformBufferObject(vkContext);
                 bufferObject->Allocate(uniformBlock->requiredSize, uniform->pClientData, uniformBlock->blockSize);
             }
             uniformBlock->pBufferObject = bufferObject;

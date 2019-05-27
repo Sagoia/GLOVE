@@ -38,7 +38,7 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
         fbo = mResourceManager->GetFramebuffer(framebuffer);
         if(fbo->GetTarget() == GL_INVALID_VALUE) {
             fbo->SetTarget(target);
-            fbo->SetxContext(mXContext);
+            fbo->SetVkContext(mVkContext);
             fbo->SetCommandBufferManager(mCommandBufferManager);
             fbo->SetResources(mResourceManager->GetTextureArray(), mResourceManager->GetRenderbufferArray());
             fbo->SetCacheManager(mCacheManager);
@@ -59,7 +59,7 @@ Context::BindFramebuffer(GLenum target, GLuint framebuffer)
     mWriteFBO->SetStateIdle();
 
     mStateManager.GetActiveObjectsState()->SetActiveFramebufferObjectID(framebuffer);
-    if (mXContext->mIsMaintenanceExtSupported) {
+    if (mVkContext->mIsMaintenanceExtSupported) {
         mPipeline->SetYInverted(mWriteFBO != mSystemFBO);
         GLenum frontFace = mStateManager.GetRasterizationState()->GetFrontFace();
         mPipeline->SetRasterizationFrontFace(GlFrontFaceToXFrontFace(frontFace));

@@ -30,14 +30,14 @@
 #include "utils/glUtils.h"
 #include "utils/cacheManager.h"
 
-Framebuffer::Framebuffer(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager)
-: mXContext(xContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
+Framebuffer::Framebuffer(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
+: mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mState(IDLE),
 mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr), mIsSystem(false), mBindToTexture(GL_FALSE), mSurfaceType(GLOVE_SURFACE_INVALID)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 
-    mRenderPass           = new vulkanAPI::RenderPass(xContext);
+    mRenderPass           = new vulkanAPI::RenderPass(vkContext);
     mAttachmentDepth      = new Attachment();
     mAttachmentStencil    = new Attachment();
 }
@@ -283,7 +283,7 @@ Framebuffer::CreateDepthStencilTexture(void)
             mDepthStencilTexture = nullptr;
         }
         
-        mDepthStencilTexture = new Texture(mXContext, mCommandBufferManager);
+        mDepthStencilTexture = new Texture(mVkContext, mCommandBufferManager);
         mDepthStencilTexture->SetTarget(GL_TEXTURE_2D);
 
         VkFormat vkformat = GlInternalFormatToXFormat(
@@ -291,7 +291,7 @@ Framebuffer::CreateDepthStencilTexture(void)
             GetStencilAttachmentTexture() ? GetStencilAttachmentTexture()->GetInternalFormat() : GL_INVALID_VALUE);
 
         // convert to supported format
-        vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mXContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
+        vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mVkContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
         mDepthStencilTexture->SetVkFormat(vkformat);
         mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
         mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -453,7 +453,7 @@ Framebuffer::Create(void)
     Release();
 
     for(uint32_t i = 0; i < mAttachmentColors.size(); ++i) {
-        vulkanAPI::Framebuffer *frameBuffer = new vulkanAPI::Framebuffer(mXContext);
+        vulkanAPI::Framebuffer *frameBuffer = new vulkanAPI::Framebuffer(mVkContext);
 
         std::vector<VkImageView> imageViews;
         if(GetColorAttachmentTexture(i)) {

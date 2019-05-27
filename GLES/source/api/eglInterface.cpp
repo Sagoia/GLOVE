@@ -40,7 +40,7 @@ void                  flush(api_context_t api_context);
 void                  finish(api_context_t api_context);
 void                  bind_to_texture(api_context_t api_context, uint32_t bind);
 
-static void           FillInVkInterface(vulkanAPI::XContext_t* xContext);
+static void           FillInVkInterface(vulkanAPI::XContext_t* vkContext);
 
 rendering_api_interface_t GLES2Interface = {
     gles2_state,
@@ -68,15 +68,15 @@ EGLAPI rendering_api_interface_t * EGLAPIENTRY GetGLES2Interface(void)
 }
 #endif
 
-static void FillInVkInterface(vulkanAPI::XContext_t* xContext)
+static void FillInVkInterface(vulkanAPI::XContext_t* vkContext)
 {
-    vkInterface.vkInstance = xContext->vkInstance;
-    vkInterface.vkGpus = &xContext->vkGpus[0];
-    vkInterface.vkQueue = xContext->vkQueue;
-    vkInterface.vkGraphicsQueueNodeIndex = xContext->vkGraphicsQueueNodeIndex;
-    vkInterface.vkDeviceMemoryProperties = xContext->vkDeviceMemoryProperties;
-    vkInterface.vkDevice = xContext->vkDevice;
-    vkInterface.vkSyncItems = xContext->vkSyncItems;
+    vkInterface.vkInstance = vkContext->vkInstance;
+    vkInterface.vkGpus = &vkContext->vkGpus[0];
+    vkInterface.vkQueue = vkContext->vkQueue;
+    vkInterface.vkGraphicsQueueNodeIndex = vkContext->vkGraphicsQueueNodeIndex;
+    vkInterface.vkDeviceMemoryProperties = vkContext->vkDeviceMemoryProperties;
+    vkInterface.vkDevice = vkContext->vkDevice;
+    vkInterface.vkSyncItems = vkContext->vkSyncItems;
 }
 
 api_state_t init_API()

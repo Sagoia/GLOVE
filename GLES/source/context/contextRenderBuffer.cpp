@@ -40,7 +40,7 @@ Context::BindRenderbuffer(GLenum target, GLuint renderbuffer)
 
     Renderbuffer *rendbuff = mResourceManager->GetRenderbuffer(renderbuffer);
     if(rendbuff->GetTarget() == GL_INVALID_VALUE) {
-        rendbuff->SetxContext(mXContext);
+        rendbuff->SetVkContext(mVkContext);
         rendbuff->SetCommandBufferManager(mCommandBufferManager);
         rendbuff->SetTarget(target);
         rendbuff->InitTexture();

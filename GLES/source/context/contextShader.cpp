@@ -55,7 +55,7 @@ Context::CreateShader(GLenum type)
     GLuint res     = mResourceManager->AllocateShader();
     Shader *shader = mResourceManager->GetShader(res);
     shader->SetShaderType(type == GL_VERTEX_SHADER ? SHADER_TYPE_VERTEX : SHADER_TYPE_FRAGMENT);
-    shader->SetxContext(mXContext);
+    shader->SetVkContext(mVkContext);
     shader->SetSlangCompiler(new GlslangCompiler());
 
     return mResourceManager->PushShadingObject({ SHADER_ID, res });
