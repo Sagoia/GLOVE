@@ -33,7 +33,7 @@
 Framebuffer::Framebuffer(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mVkContext(vkContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mTarget(GL_INVALID_VALUE), mWriteBufferIndex(0), mState(IDLE),
-mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr), mIsSystem(false), mBindToTexture(GL_FALSE), mSurfaceType(GLOVE_SURFACE_INVALID)
+mUpdated(true), mSizeUpdated(false), mDepthStencilTexture(nullptr), mIsSystem(false), mBindToTexture(false), mSurfaceType(GLOVE_SURFACE_INVALID)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 

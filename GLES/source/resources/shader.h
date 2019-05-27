@@ -78,7 +78,7 @@ public:
 // Is/Has Functions
     bool                                IsCompiled(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mCompiled; }
     bool                                IsVertex(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return (mShaderType == SHADER_TYPE_VERTEX) ? true : false; }
-    bool                                HasSource(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return mSource != nullptr; }
+    bool                                HasSource(void)                         const   { FUN_ENTRY(GL_LOG_TRACE); return (bool)mSource; }
 };
 
 #endif // __SHADER_H__

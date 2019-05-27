@@ -43,15 +43,15 @@ private:
     VkClearValue            mVkClearValues[2];
     VkRect2D                mVkRenderArea;
 
-    bool                    mColorClearEnabled;
-    bool                    mDepthClearEnabled;
-    bool                    mStencilClearEnabled;
+    VkBool32                mColorClearEnabled;
+    VkBool32                mDepthClearEnabled;
+    VkBool32                mStencilClearEnabled;
 
-    bool                    mColorWriteEnabled;
-    bool                    mDepthWriteEnabled;
-    bool                    mStencilWriteEnabled;
+    VkBool32                mColorWriteEnabled;
+    VkBool32                mDepthWriteEnabled;
+    VkBool32                mStencilWriteEnabled;
 
-    bool                    mStarted;
+    VkBool32                mStarted;
 
     uint64_t                mHash;
     CacheManager *          mCacheManager;
@@ -76,23 +76,23 @@ public:
     void                    Release (void);
 
 // Get functions
-    inline bool             GetColorClearEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mColorClearEnabled;   }
-    inline bool             GetDepthClearEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mDepthClearEnabled;   }
-    inline bool             GetStencilClearEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mStencilClearEnabled; }
-    inline bool             GetColorWriteEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mColorWriteEnabled;   }
-    inline bool             GetDepthWriteEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mDepthWriteEnabled;   }
-    inline bool             GetStencilWriteEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mStencilWriteEnabled; }
+    inline VkBool32         GetColorClearEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mColorClearEnabled;   }
+    inline VkBool32         GetDepthClearEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mDepthClearEnabled;   }
+    inline VkBool32         GetStencilClearEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mStencilClearEnabled; }
+    inline VkBool32         GetColorWriteEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mColorWriteEnabled;   }
+    inline VkBool32         GetDepthWriteEnabled(void)                    const { FUN_ENTRY(GL_LOG_TRACE); return mDepthWriteEnabled;   }
+    inline VkBool32         GetStencilWriteEnabled(void)                  const { FUN_ENTRY(GL_LOG_TRACE); return mStencilWriteEnabled; }
     inline VkRenderPass*    GetRenderPass(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return &mVkRenderPass; }
 
 // Set Functions
     inline void             SetVkContext(const vkContext_t *vkContext)          { FUN_ENTRY(GL_LOG_TRACE); mVkContext           = vkContext; }
     inline void             SetCacheManager(CacheManager *cacheManager)         { FUN_ENTRY(GL_LOG_TRACE); mCacheManager        = cacheManager; }
-    inline void             SetColorClearEnabled(bool enable)                   { FUN_ENTRY(GL_LOG_TRACE); mColorClearEnabled   = enable;    }
-    inline void             SetDepthClearEnabled(bool enable)                   { FUN_ENTRY(GL_LOG_TRACE); mDepthClearEnabled   = enable;    }
-    inline void             SetStencilClearEnabled(bool enable)                 { FUN_ENTRY(GL_LOG_TRACE); mStencilClearEnabled = enable;    }
-    inline void             SetColorWriteEnabled(bool enable)                   { FUN_ENTRY(GL_LOG_TRACE); mColorWriteEnabled   = enable;    }
-    inline void             SetDepthWriteEnabled(bool enable)                   { FUN_ENTRY(GL_LOG_TRACE); mDepthWriteEnabled   = enable;    }
-    inline void             SetStencilWriteEnabled(bool enable)                 { FUN_ENTRY(GL_LOG_TRACE); mStencilWriteEnabled = enable;    }
+    inline void             SetColorClearEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mColorClearEnabled   = enable;    }
+    inline void             SetDepthClearEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mDepthClearEnabled   = enable;    }
+    inline void             SetStencilClearEnabled(VkBool32 enable)             { FUN_ENTRY(GL_LOG_TRACE); mStencilClearEnabled = enable;    }
+    inline void             SetColorWriteEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mColorWriteEnabled   = enable;    }
+    inline void             SetDepthWriteEnabled(VkBool32 enable)               { FUN_ENTRY(GL_LOG_TRACE); mDepthWriteEnabled   = enable;    }
+    inline void             SetStencilWriteEnabled(VkBool32 enable)             { FUN_ENTRY(GL_LOG_TRACE); mStencilWriteEnabled = enable;    }
 
            void             SetClearArea(const VkRect2D *rect);
            void             SetClearColorValue(const float *value);

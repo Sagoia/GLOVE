@@ -48,11 +48,11 @@ Context::PrepareRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bool 
 
     // perform a screen-space pass
     mWriteFBO->CreateRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled,
-                                stateFramebufferOperations->IsColorWriteEnabled() == GL_TRUE,
-                                stateFramebufferOperations->IsDepthWriteEnabled() == GL_TRUE,
-                                stateFramebufferOperations->IsStencilWriteEnabled() == GL_TRUE,
-                                clearColorValue, clearDepthValue, clearStencilValue,
-                                &mClearRect);
+                                stateFramebufferOperations->IsColorWriteEnabled(),
+                                stateFramebufferOperations->IsDepthWriteEnabled(),
+                                stateFramebufferOperations->IsStencilWriteEnabled(),
+                                 clearColorValue, clearDepthValue, clearStencilValue,
+                                 &mClearRect);
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     mWriteFBO->PrepareVkImage(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 }
@@ -72,9 +72,9 @@ Context::Clear(GLbitfield mask)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    bool clearColorEnabled   = (mask & GL_COLOR_BUFFER_BIT) > 0;
-    bool clearDepthEnabled   = (mask & GL_DEPTH_BUFFER_BIT) > 0;
-    bool clearStencilEnabled = (mask & GL_STENCIL_BUFFER_BIT) > 0;
+    bool clearColorEnabled   = (mask & GL_COLOR_BUFFER_BIT);
+    bool clearDepthEnabled   = (mask & GL_DEPTH_BUFFER_BIT);
+    bool clearStencilEnabled = (mask & GL_STENCIL_BUFFER_BIT);
 
     if(!clearColorEnabled && !clearDepthEnabled && !clearStencilEnabled) {
         RecordError(GL_INVALID_VALUE);
