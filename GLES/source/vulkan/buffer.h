@@ -55,6 +55,7 @@ public:
 
 // Create Functions
     bool                              Create(void);
+    void                              CreateVkDescriptorBufferInfo(void);
 
 // Release Functions
     void                              Release(void);
@@ -71,8 +72,6 @@ public:
     inline void                       SetContext(const XContext_t *xContext)    { FUN_ENTRY(GL_LOG_TRACE); mXContext           = xContext;  }
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager       = manager;   }
 
-// Other Functions
-    void                              FillDescriptorBufferInfo(void);
     inline bool                       HasBuffer(void)                           { FUN_ENTRY(GL_LOG_TRACE); return mVkBuffer != nullptr;     }
 };
 

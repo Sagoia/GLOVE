@@ -45,7 +45,7 @@ UniformBufferObject::Allocate(size_t bufferSize, const void *data, size_t dataSi
     if(mAllocated) {
         mCacheIndex = 0;
         while (bufferSize >> (mCacheIndex + 1)) { ++ mCacheIndex; }
-        mBuffer->FillDescriptorBufferInfo();
+        AllocateVkDescriptorBufferInfo();
     }
     return mAllocated;
 }

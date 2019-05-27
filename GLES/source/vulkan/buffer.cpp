@@ -88,7 +88,7 @@ Buffer::Create(void)
 }
 
 void
-Buffer::FillDescriptorBufferInfo(void)
+Buffer::CreateVkDescriptorBufferInfo(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
