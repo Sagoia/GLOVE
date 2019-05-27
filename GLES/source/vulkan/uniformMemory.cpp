@@ -2,7 +2,7 @@
 
 namespace vulkanAPI {
 
-UniformMemory::UniformMemory(const XContext_t *xContext, XFlags flags)
+UniformMemory::UniformMemory(const XContext_t *xContext, VkFlags flags)
 : mXContext(xContext), mVkMemoryFlags(0), mVkFlags(flags), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);

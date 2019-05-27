@@ -74,7 +74,9 @@ public:
     ~Image();
 
 // Blit Functions
-    void                              BlitImage(GLenum hintMipmapMode, VkCommandBuffer activeCmdBuffer);
+    void                              BlitImage(        VkCommandBuffer *activeCmdBuffer, VkImageLayout srcImageLayout,
+                                                        VkImage          dstImage,        VkImageLayout dstImageLayout,
+                                                  const VkImageBlit*     imageBlit,       VkFilter      imageFilter);
 
 // Create Functions
     bool                              Create(void);
@@ -82,17 +84,12 @@ public:
     void                              CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWidth, uint32_t extentHeight, uint32_t miplevel, uint32_t layer, uint32_t layerCount);
 
 // Copy Functions
-    void                              DoCopy(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer, bool copyToImage);
     void                              CopyBufferToImage(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer);
     void                              CopyImageToBuffer(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer);
 
 // Modify Functions
     void                              ModifyImageSubresourceRange(uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    inline bool                       CanModifyImageLayout(XImageLayout newImageLayout)
-                                                                                { FUN_ENTRY(GL_LOG_DEBUG); return newImageLayout != mVkImageLayout; }
-    inline void                       ModifyImageLayout(VkCommandBuffer activeCmdBuffer, XImageLayout newImageLayout) 
-                                                                                { FUN_ENTRY(GL_LOG_DEBUG); ModifyImageLayout(activeCmdBuffer, (VkImageLayout)newImageLayout); }
-    void                              ModifyImageLayout(VkCommandBuffer activeCmdBuffer, VkImageLayout newImageLayout);
+    void                              ModifyImageLayout(VkCommandBuffer *activeCmdBuffer, VkImageLayout newImageLayout);
 
 // Release Functions
     void                              Release(void);
@@ -126,7 +123,7 @@ public:
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager  = manager;   }
 
 // Find Functions
-    XFormat                           FindSupportedColorFormat(XFormat format);
+    VkFormat                          FindSupportedVkColorFormat(VkFormat format);
 };
 
 }

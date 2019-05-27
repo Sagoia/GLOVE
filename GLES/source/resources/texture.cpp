@@ -36,7 +36,7 @@
 // TODO:: this needs to be further discussed
 int Texture::mDefaultInternalAlignment = 1;
 
-Texture::Texture(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager, const XFlags flags)
+Texture::Texture(const vulkanAPI::XContext_t *xContext, vulkanAPI::CommandBufferManager *cbManager, const VkFlags vkFlags)
 : mXContext(xContext), mCommandBufferManager(cbManager), mCacheManager(nullptr),
 mFormat(GL_INVALID_VALUE), mTarget(GL_INVALID_VALUE), mType(GL_INVALID_VALUE), mInternalFormat(GL_INVALID_VALUE),
 mExplicitType(GL_INVALID_VALUE), mExplicitInternalFormat(GL_INVALID_VALUE),
@@ -47,7 +47,7 @@ mDepthStencilTexture(nullptr), mDepthStencilTextureRefCount(0u), mDirty(false)
 
     mImage     = new vulkanAPI::Image(xContext);
     mImageView = new vulkanAPI::ImageView(xContext);
-    mMemory    = new vulkanAPI::Memory(xContext, flags);
+    mMemory    = new vulkanAPI::Memory(xContext, vkFlags);
     mSampler   = new vulkanAPI::Sampler(xContext);
 }
 
@@ -197,7 +197,7 @@ Texture::IsValid(void)
 }
 
 void
-Texture::ReleaseResources(void)
+Texture::ReleaseVkResources(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -208,7 +208,7 @@ Texture::ReleaseResources(void)
 }
 
 bool
-Texture::CreateImage(void)
+Texture::CreateVkImage(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -222,7 +222,7 @@ Texture::CreateImage(void)
 }
 
 bool
-Texture::AllocateMemory(void)
+Texture::AllocateVkMemory(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
@@ -232,28 +232,28 @@ Texture::AllocateMemory(void)
 }
 
 bool
-Texture::CreateTexture(void)
+Texture::CreateVkTexture(void)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    ReleaseResources();
+    ReleaseVkResources();
 
-    if(!CreateImage()) {
+    if(!CreateVkImage()) {
         return false;
     }
 
-    if(!AllocateMemory()) {
+    if(!AllocateVkMemory()) {
         mImage->Release();
         return false;
     }
 
-    if(!CreateImageView()) {
+    if(!CreateVkImageView()) {
         mImage->Release();
         mMemory->Release();
         return false;
     }
 
-    PrepareImageLayout(X_IMAGE_LAYOUT_GENERAL);
+    PrepareVkImageLayout(VK_IMAGE_LAYOUT_GENERAL);
 
     return true;
 }
@@ -272,12 +272,12 @@ Texture::Allocate(void)
     SetInternalFormat(GlFormatToGlInternalFormat(state->format, state->type));
 
     if (mImage->GetFormat() == VK_FORMAT_UNDEFINED) {
-        SetVkFormat(FindSupportedColorFormat(GlColorFormatToXColorFormat(state->format, state->type)));
+        SetVkFormat(FindSupportedVkColorFormat(GlColorFormatToXColorFormat(state->format, state->type)));
     }
     mExplicitInternalFormat = XFormatToGlInternalformat(mImage->GetFormat());
     mExplicitType           = GlInternalFormatToGlType(mExplicitInternalFormat);
 
-    if(!CreateTexture()) {
+    if(!CreateVkTexture()) {
         return false;
     }
 
@@ -573,21 +573,33 @@ Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, G
     mImage->CreateBufferImageCopy(rect->x, rect->y, rect->width, rect->height, miplevel, layer, 1);
     mImage->ModifyImageSubresourceRange(miplevel, 1, layer, 1);
 
+    VkImageLayout oldImageLayout = mImage->GetImageLayout();
+    oldImageLayout = (oldImageLayout != VK_IMAGE_LAYOUT_UNDEFINED &&
+                      oldImageLayout != VK_IMAGE_LAYOUT_PREINITIALIZED) ? oldImageLayout : VK_IMAGE_LAYOUT_GENERAL;
+    VkImageLayout newImageLayout = copyToImage ? VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
     mCommandBufferManager->BeginVkAuxCommandBuffer();
-
-    mImage->DoCopy(mCommandBufferManager->GetAuxCommandBuffer(), tbo->GetBuffer(), copyToImage);
-
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
+    {
+        mImage->ModifyImageLayout(&activeCmdBuffer, newImageLayout);
+        if(copyToImage) {
+            mImage->CopyBufferToImage(activeCmdBuffer, tbo->GetBuffer());
+        } else {
+            mImage->CopyImageToBuffer(activeCmdBuffer, tbo->GetBuffer());
+        }
+        mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
+    }
     mCommandBufferManager->EndVkAuxCommandBuffer();
     mCommandBufferManager->SubmitVkAuxCommandBuffer();
     mCommandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
-Texture::PrepareImageLayout(XImageLayout newImageLayout)
+Texture::PrepareVkImageLayout(VkImageLayout newImageLayout)
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
-    if ( !(mImage->CanModifyImageLayout(newImageLayout)) ) {
+    if (newImageLayout == mImage->GetImageLayout()) {
         return;
     }
 
@@ -595,7 +607,7 @@ Texture::PrepareImageLayout(XImageLayout newImageLayout)
     VkCommandBuffer cmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
 
     mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
-    mImage->ModifyImageLayout(cmdBuffer, newImageLayout);
+    mImage->ModifyImageLayout(&cmdBuffer, newImageLayout);
 
     mCommandBufferManager->EndVkAuxCommandBuffer();
     mCommandBufferManager->SubmitVkAuxCommandBuffer();
@@ -646,7 +658,7 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     // create Mipmapped Texture
     mMipLevelsCount = (GLint)NUMBER_OF_MIP_LEVELS(GetWidth(), GetHeight());
-    CreateTexture();
+    CreateVkTexture();
 
     // set back base mipLevel for all layers
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
@@ -657,10 +669,53 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     delete [] basePixels;
 
+    // Blit LoD Level '0' to rest layers
+    VkImageBlit imageBlit;
+    memset(static_cast<void *>(&imageBlit), 0, sizeof(imageBlit));
+    imageBlit.srcSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBlit.srcSubresource.mipLevel       = 0;
+    imageBlit.srcSubresource.baseArrayLayer = 0;
+    imageBlit.srcSubresource.layerCount     = mLayersCount;
+    imageBlit.srcOffsets[1].x               = GetWidth();
+    imageBlit.srcOffsets[1].y               = GetHeight();
+    imageBlit.srcOffsets[1].z               = 1;
+
+    imageBlit.dstSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBlit.dstSubresource.mipLevel       = 1;
+    imageBlit.dstSubresource.baseArrayLayer = 0;
+    imageBlit.dstSubresource.layerCount     = mLayersCount;
+    imageBlit.dstOffsets[1].x               = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].x >> 1), 1.0));
+    imageBlit.dstOffsets[1].y               = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].y >> 1), 1.0));
+    imageBlit.dstOffsets[1].z               = 1;
+
     mCommandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
+    {
+        VkFilter      filter         = hintMipmapMode == GL_FASTEST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+        VkImageLayout oldImageLayout = mImage->GetImageLayout();
 
-    mImage->BlitImage(hintMipmapMode, mCommandBufferManager->GetAuxCommandBuffer());
+        mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
+        mImage->ModifyImageLayout(&activeCmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        for(GLint mipLevel = 1; mipLevel < mMipLevelsCount; ++mipLevel) {
+            mImage->ModifyImageSubresourceRange(mipLevel, 1, 0, mLayersCount);
+            mImage->ModifyImageLayout(&activeCmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            mImage->BlitImage        (&activeCmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                        mImage->GetImage(),
+                                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                        &imageBlit, filter);
+            mImage->ModifyImageLayout(&activeCmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
+            imageBlit.srcSubresource.mipLevel = imageBlit.dstSubresource.mipLevel;
+            imageBlit.srcOffsets[1].x         = imageBlit.dstOffsets[1].x;
+            imageBlit.srcOffsets[1].y         = imageBlit.dstOffsets[1].y;
+
+            imageBlit.dstSubresource.mipLevel++;
+            imageBlit.dstOffsets[1].x = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].x >> 1), 1.0));
+            imageBlit.dstOffsets[1].y = static_cast<int32_t>(std::max(std::floor(imageBlit.srcOffsets[1].y >> 1), 1.0));
+        }
+        mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
+        mImage->ModifyImageLayout(&activeCmdBuffer, oldImageLayout);
+    }
     mCommandBufferManager->EndVkAuxCommandBuffer();
     mCommandBufferManager->SubmitVkAuxCommandBuffer();
     mCommandBufferManager->WaitVkAuxCommandBuffer();

@@ -156,11 +156,11 @@ Context::FramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum render
     case GL_COLOR_ATTACHMENT0: {
         if (renderbuffer) {
             Texture *tex = mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture();
-            if (!(tex->GetImage()->GetImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
-                tex->SetVkImageUsage(tex->GetImage()->GetImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+            if (!(tex->GetVkImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+                tex->SetVkImageUsage(tex->GetVkImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
                 tex->Allocate();
             }
-            tex->PrepareImageLayout(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);
+            tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
         int width  = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetWidth()  : -1;
         int height = renderbuffer ? mResourceManager->GetRenderbuffer(renderbuffer)->GetTexture()->GetHeight() : -1;
@@ -230,11 +230,11 @@ Context::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget
     case GL_COLOR_ATTACHMENT0: {
         if (texture) {
             Texture *tex = mResourceManager->GetTexture(texture);
-            if (!(tex->GetImage()->GetImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
-                tex->SetVkImageUsage(tex->GetImage()->GetImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+            if (!(tex->GetVkImageUsage() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+                tex->SetVkImageUsage(tex->GetVkImageUsage() | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
                 tex->Allocate();
             }
-            tex->PrepareImageLayout(X_IMAGE_LAYOUT_COLOR_ATTACHMENT);
+            tex->PrepareVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
         int width = texture ? mResourceManager->GetTexture(texture)->GetWidth() : -1;
         int height = texture ? mResourceManager->GetTexture(texture)->GetHeight() : -1;

@@ -98,11 +98,12 @@ private:
 
     static int                  mDefaultInternalAlignment;
 
-    bool                        AllocateMemory(void);
-    void                        ReleaseResources(void);
+    bool                        AllocateVkMemory(void);
+    void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vulkanAPI::XContext_t  *xContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr, const XFlags flags = X_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    Texture(const vulkanAPI::XContext_t  *xContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
+            const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     ~Texture();
 
 // Generate Functions
@@ -119,14 +120,14 @@ public:
 // Helper Functions
     static int              GetDefaultInternalAlignment()                       { FUN_ENTRY(GL_LOG_TRACE); return mDefaultInternalAlignment; }
     inline int              GetInvertedYOrigin(const Rect* rect)                { FUN_ENTRY(GL_LOG_TRACE); return mDims.height - rect->height - rect->y; }
-    void                    PrepareImageLayout(XImageLayout newImageLayout);
+    void                    PrepareVkImageLayout(VkImageLayout newImageLayout);
 
 // Create Functions
-    bool                    CreateTexture(void);
-    bool                    CreateImage(void);
-    bool                    CreateImageView(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mImageView->Create(mImage); }
-    bool                    CreateSampler(void)                               { FUN_ENTRY(GL_LOG_TRACE); return mSampler->Create(); }
-    void                    CreateImageSubResourceRange(void)                 { FUN_ENTRY(GL_LOG_TRACE); return mImage->CreateImageSubresourceRange(); }
+    bool                    CreateVkTexture(void);
+    bool                    CreateVkImage(void);
+    bool                    CreateVkImageView(void)                             { FUN_ENTRY(GL_LOG_TRACE); return mImageView->Create(mImage); }
+    bool                    CreateVkSampler(void)                               { FUN_ENTRY(GL_LOG_TRACE); return mSampler->Create(); }
+    void                    CreateVkImageSubResourceRange(void)                 { FUN_ENTRY(GL_LOG_TRACE); return mImage->CreateImageSubresourceRange(); }
 
 // Copy Functions
      void                   CopyPixelsFromHost (ImageRect *srcRect, ImageRect *dstRect, GLint miplevel, GLint layer, GLenum srcFormat, const void *srcData);
@@ -155,11 +156,14 @@ public:
     inline Texture         *GetDepthStencilTexture(void)                const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthStencilTexture;}
     inline uint32_t         GetDepthStencilTextureRefCount(void)        const   { FUN_ENTRY(GL_LOG_TRACE); return mDepthStencilTextureRefCount; }
 
-    inline vulkanAPI::Image*        GetImage(void)                              { FUN_ENTRY(GL_LOG_TRACE); return mImage; }
-    inline vulkanAPI::ImageView*    GetImageView(void)                          { FUN_ENTRY(GL_LOG_TRACE); return mImageView; }
-    inline vulkanAPI::Sampler*      GetSampler(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mSampler; }
+    inline vulkanAPI::Image* GetImage(void)                                     { FUN_ENTRY(GL_LOG_TRACE); return mImage; }
 
-    inline XFormat          FindSupportedColorFormat(XFormat format)            { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedColorFormat(format); }
+    inline VkSampler        GetVkSampler(void)                          const   { FUN_ENTRY(GL_LOG_TRACE); return mSampler->GetSampler(); }
+    inline VkFormat         GetVkFormat(void)                           const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
+    inline VkFlags          GetVkImageUsage(void)                       const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageUsage(); }
+    inline VkImageLayout    GetVkImageLayout(void)                      const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetImageLayout(); }
+    inline VkImageView      GetVkImageView(void)                        const   { FUN_ENTRY(GL_LOG_TRACE); return mImageView->GetImageView(); }
+    VkFormat                FindSupportedVkColorFormat(VkFormat format)         { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedVkColorFormat(format); }
 
 // Set Functions
     inline void             SetCommandBufferManager(
