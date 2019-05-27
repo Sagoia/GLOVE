@@ -56,7 +56,7 @@ private:
     };
 
     const
-    vulkanAPI::XContext_t          *mVkContext;
+    vulkanAPI::vkContext_t          *mVkContext;
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
     ObjectArray<Texture>            *mTextureArray;
     ObjectArray<Renderbuffer>       *mRenderbufferArray;
@@ -84,7 +84,7 @@ private:
     void                            Release(void);
 
 public:
-    Framebuffer(const vulkanAPI::XContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
+    Framebuffer(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~Framebuffer();
 
 // Create Functions
@@ -153,7 +153,7 @@ public:
 
 // Set Functions
     inline void             SetVkContext(const
-                                vulkanAPI::XContext_t *vkContext)              { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
+                                vulkanAPI::vkContext_t *vkContext)              { FUN_ENTRY(GL_LOG_TRACE); mVkContext   = vkContext; mRenderPass->SetVkContext(vkContext); }
     inline void             SetCommandBufferManager(
                                 vulkanAPI::CommandBufferManager *cbManager)     { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager; }
     inline void             SetResources(

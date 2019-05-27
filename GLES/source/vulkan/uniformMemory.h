@@ -13,7 +13,7 @@ class UniformMemory {
 private:
 
     const
-    XContext_t *                   mVkContext;
+    vkContext_t *                   mVkContext;
 
     const
     VkMemoryMapFlags                mVkMemoryFlags;
@@ -26,7 +26,7 @@ private:
 
 public:
     // Constructor
-    UniformMemory(const XContext_t *vkContext = nullptr, VkFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    UniformMemory(const vkContext_t *vkContext = nullptr, VkFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     // Destructor
     ~UniformMemory();
@@ -46,7 +46,7 @@ public:
     VkResult                        GetMemoryTypeIndexFromProperties(uint32_t *typeIndex);
 
     // Set Functions
-    inline void                     SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
+    inline void                     SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; }
     inline void                     SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager = manager; }
 
     // Update Functions

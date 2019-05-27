@@ -27,7 +27,7 @@
 #include "resources/texture.h"
 #include "vulkan/caches.h"
 
-CacheManager::CacheManager(const vulkanAPI::XContext_t *vkContext) 
+CacheManager::CacheManager(const vulkanAPI::vkContext_t *vkContext) 
 : mVkContext(vkContext) 
 { 
     FUN_ENTRY(GL_LOG_TRACE);

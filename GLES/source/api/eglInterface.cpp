@@ -40,7 +40,7 @@ void                  flush(api_context_t api_context);
 void                  finish(api_context_t api_context);
 void                  bind_to_texture(api_context_t api_context, uint32_t bind);
 
-static void           FillInVkInterface(vulkanAPI::XContext_t* vkContext);
+static void           FillInVkInterface(vulkanAPI::vkContext_t* vkContext);
 
 rendering_api_interface_t GLES2Interface = {
     gles2_state,
@@ -68,7 +68,7 @@ EGLAPI rendering_api_interface_t * EGLAPIENTRY GetGLES2Interface(void)
 }
 #endif
 
-static void FillInVkInterface(vulkanAPI::XContext_t* vkContext)
+static void FillInVkInterface(vulkanAPI::vkContext_t* vkContext)
 {
     vkInterface.vkInstance = vkContext->vkInstance;
     vkInterface.vkGpus = &vkContext->vkGpus[0];

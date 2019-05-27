@@ -217,8 +217,8 @@ public:
     void SetSampler(uint32_t location, int count, const int *textureUnit);
 
     void AllocateUniformClientData(void);
-    bool AllocateUniformBufferObjects(const vulkanAPI::XContext_t *vkContext);
-    bool UpdateUniformBufferData(const vulkanAPI::XContext_t *vkContext, bool *allocatedNewBufferObject);
+    bool AllocateUniformBufferObjects(const vulkanAPI::vkContext_t *vkContext);
+    bool UpdateUniformBufferData(const vulkanAPI::vkContext_t *vkContext, bool *allocatedNewBufferObject);
 
     void UpdateAttributeInterface(void);
     void CreateInterface(void);

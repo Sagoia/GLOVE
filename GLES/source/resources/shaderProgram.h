@@ -40,7 +40,7 @@ private:
     const static uint32_t                               MAX_LOCATION_COUNT = GLOVE_MAX_VERTEX_ATTRIBS * 4;
 
     Context                                            *mGLContext;
-    const vulkanAPI::XContext_t                       *mVkContext;
+    const vulkanAPI::vkContext_t                       *mVkContext;
     vulkanAPI::CommandBufferManager                    *mCommandBufferManager;
 
     VkDescriptorSetLayout                               mVkDescSetLayout;
@@ -111,7 +111,7 @@ private:
     uint32_t                                            GetMaxIndex(BufferObject* ibo, uint32_t indexCount, size_t actualSize, VkDeviceSize offset);
 
 public:
-    ShaderProgram(const vulkanAPI::XContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
+    ShaderProgram(const vulkanAPI::vkContext_t *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr);
     ~ShaderProgram();
 
     void                                                SetPipelineVertexInputStateInfo(void);
@@ -161,7 +161,7 @@ public:
 
     void                                                SetCommandBufferManager(
                                                         vulkanAPI::CommandBufferManager *cbManager)         { FUN_ENTRY(GL_LOG_TRACE); mCommandBufferManager = cbManager;}
-    void                                                SetVkContext(const vulkanAPI::XContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext); for (auto& gva : mGenericVertexAttributes) { gva.SetVkContext(vkContext); } }
+    void                                                SetVkContext(const vulkanAPI::vkContext_t *vkContext) { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext; mPipelineCache->SetContext(mVkContext); for (auto& gva : mGenericVertexAttributes) { gva.SetVkContext(vkContext); } }
     void                                                SetGlContext(Context *context)                      { FUN_ENTRY(GL_LOG_TRACE); assert(context); mGLContext = context; }
     void                                                SetShaderCompiler(ShaderCompiler* shaderCompiler)   { FUN_ENTRY(GL_LOG_TRACE); assert(shaderCompiler != nullptr); mShaderCompiler = shaderCompiler; }
     void                                                SetStagesIDs(uint32_t index, uint32_t id)           { FUN_ENTRY(GL_LOG_TRACE); mStagesIDs[index] = id; }

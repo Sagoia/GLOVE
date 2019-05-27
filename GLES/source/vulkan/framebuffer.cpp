@@ -30,7 +30,7 @@
 
 namespace vulkanAPI {
 
-Framebuffer::Framebuffer(const XContext_t *vkContext)
+Framebuffer::Framebuffer(const vkContext_t *vkContext)
 : mVkContext(vkContext),
   mVkFramebuffer(VK_NULL_HANDLE)
 {

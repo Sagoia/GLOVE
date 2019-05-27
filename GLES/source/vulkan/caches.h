@@ -12,7 +12,7 @@ class Caches {
 private:
     const static uint32_t DEFAULT_COUNT     = 256;
 
-    const XContext_t *     mVkContext;
+    const vkContext_t *     mVkContext;
 
     Array<VkImageView>      mVkImageViewCache;
     Array<VkImage>          mVkImageCache;
@@ -29,7 +29,7 @@ private:
     PipelineMap             mVkPipelineCache;
 
 public:
-     Caches(const vulkanAPI::XContext_t *vkContext);
+     Caches(const vulkanAPI::vkContext_t *vkContext);
     ~Caches();
 
     void                    CleanUpImageViewCache();

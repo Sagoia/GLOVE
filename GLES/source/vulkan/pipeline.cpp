@@ -33,7 +33,7 @@
 
 namespace vulkanAPI {
 
-Pipeline::Pipeline(const XContext_t *vkContext)
+Pipeline::Pipeline(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkPipeline(VK_NULL_HANDLE), mVkPipelineLayout(VK_NULL_HANDLE),
   mVkPipelineCache(VK_NULL_HANDLE), mVkPipelineVertexInputState(VK_NULL_HANDLE),
   mVkPipelineShaderStageCount(0), mYInverted(false), mCacheManager(nullptr)

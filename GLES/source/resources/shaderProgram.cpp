@@ -30,7 +30,7 @@
 #include "context/context.h"
 #include <iterator>
 
-ShaderProgram::ShaderProgram(const vulkanAPI::XContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
+ShaderProgram::ShaderProgram(const vulkanAPI::vkContext_t *vkContext, vulkanAPI::CommandBufferManager *cbManager)
 : mGLContext(nullptr)
 , mGenericVertexAttributes(GLOVE_MAX_VERTEX_ATTRIBS)
 {

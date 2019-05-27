@@ -2,7 +2,7 @@
 #include "uniformBufferObject.h"
 #include "vulkan/types.h"
 
-UniformBufferObject::UniformBufferObject(const vulkanAPI::XContext_t *vkContext)
+UniformBufferObject::UniformBufferObject(const vulkanAPI::vkContext_t *vkContext)
 : mVkContext(vkContext), mUsage(GL_STATIC_DRAW), mAllocated(false), mCacheIndex(0)
 {
     FUN_ENTRY(GL_LOG_TRACE);

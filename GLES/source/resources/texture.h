@@ -55,7 +55,7 @@ class Texture {
 
 private:
     const
-    vulkanAPI::XContext_t *    mVkContext;
+    vulkanAPI::vkContext_t *    mVkContext;
 
     vulkanAPI::CommandBufferManager *mCommandBufferManager;
 
@@ -98,7 +98,7 @@ private:
     void                        ReleaseVkResources(void);
 
 public:
-    Texture(const vulkanAPI::XContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
+    Texture(const vulkanAPI::vkContext_t  *vkContext = nullptr, vulkanAPI::CommandBufferManager *cbManager = nullptr,
             const VkFlags       vkFlags   = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     ~Texture();
 
@@ -170,7 +170,7 @@ public:
                                                                                                            mImage->SetCacheManager(cacheManager);
                                                                                                            mMemory->SetCacheManager(cacheManager); }
     inline void             SetVkContext(const
-                                         vulkanAPI::XContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
+                                         vulkanAPI::vkContext_t *vkContext)     { FUN_ENTRY(GL_LOG_TRACE); mVkContext = vkContext;
                                                                                                            mMemory->SetContext(vkContext);
                                                                                                            mSampler->SetContext(vkContext);
                                                                                                            mImageView->SetContext(vkContext);

@@ -26,7 +26,7 @@
 
 namespace vulkanAPI {
 
-PipelineCache::PipelineCache(const XContext_t *vkContext)
+PipelineCache::PipelineCache(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkPipelineCache(VK_NULL_HANDLE)
 {
     FUN_ENTRY(GL_LOG_TRACE);

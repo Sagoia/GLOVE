@@ -35,7 +35,7 @@
 
 namespace vulkanAPI {
 
-Image::Image(const XContext_t *vkContext)
+Image::Image(const vkContext_t *vkContext)
 : mVkContext(vkContext), mVkImage(VK_NULL_HANDLE), mVkFormat(VK_FORMAT_UNDEFINED), mVkImageType(VK_IMAGE_TYPE_2D),
 mVkImageUsage(VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM), mVkImageLayout(VK_IMAGE_LAYOUT_UNDEFINED), mVkPipelineStage(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT),
 mVkImageTiling(VK_IMAGE_TILING_LINEAR), mVkImageTarget(VK_IMAGE_TARGET_2D),

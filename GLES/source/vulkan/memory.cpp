@@ -34,7 +34,7 @@
 
 namespace vulkanAPI {
 
-Memory::Memory(const XContext_t *vkContext, VkFlags flags)
+Memory::Memory(const vkContext_t *vkContext, VkFlags flags)
 : mVkContext(vkContext), mVkMemory (VK_NULL_HANDLE), mVkMemoryFlags(0), mVkFlags(flags), mCacheManager(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);

@@ -34,7 +34,7 @@ class Sampler {
 
 private:
     const
-    XContext_t *                     mVkContext;
+    vkContext_t *                     mVkContext;
 
     VkSampler                         mVkSampler;
     VkFilter                          mVkMinFilter;
@@ -59,7 +59,7 @@ private:
 
 public:
 // Constructor
-    Sampler(const XContext_t *vkContext = nullptr);
+    Sampler(const vkContext_t *vkContext = nullptr);
 
 // Destructor
     ~Sampler();
@@ -74,7 +74,7 @@ public:
     inline VkSampler                  GetSampler(void)                  const   { FUN_ENTRY(GL_LOG_TRACE); return mVkSampler; }
 
 // Set Functions
-    inline void                       SetContext(const XContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext      = vkContext;                  }
+    inline void                       SetContext(const vkContext_t *vkContext)  { FUN_ENTRY(GL_LOG_TRACE); mVkContext      = vkContext;                  }
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager   = manager;                    }
     inline void                       SetMinFilter(VkFilter filter)             { FUN_ENTRY(GL_LOG_TRACE); if (mVkMinFilter     != filter)  { mVkMinFilter    = filter; mUpdated = VK_TRUE; } }
     inline void                       SetMagFilter(VkFilter filter)             { FUN_ENTRY(GL_LOG_TRACE); if (mVkMagFilter     != filter)  { mVkMagFilter    = filter; mUpdated = VK_TRUE; } }
