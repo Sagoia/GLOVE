@@ -1251,7 +1251,7 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             }
 
                             if(activeTexture->IsCompleted()) {
-                                activeTexture->SetXFormat(VK_FORMAT_R8G8B8A8_UNORM);
+                                activeTexture->SetVkFormat(VK_FORMAT_R8G8B8A8_UNORM);
                                 activeTexture->Allocate();
                                 activeTexture->PrepareImageLayout(X_IMAGE_LAYOUT_SHADER_READ);
                             }
@@ -1279,12 +1279,12 @@ ShaderProgram::UpdateSamplerDescriptors(void)
                             // Create new Texture with this data 
                             Texture *inverted_texture = new Texture(mXContext, mCommandBufferManager);
                             inverted_texture->SetTarget(GL_TEXTURE_2D);
-                            inverted_texture->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_TRANSFER_DST_BIT));
-                            inverted_texture->SetImageTiling();
+                            inverted_texture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_TRANSFER_DST_BIT));
+                            inverted_texture->SetVkImageTiling();
                             inverted_texture->SetXImageTarget(X_IMAGE_TARGET_2D);
                             inverted_texture->InitState();
 
-                            inverted_texture->SetXFormat(activeTexture->GetXFormat());
+                            inverted_texture->SetVkFormat(activeTexture->GetImage()->GetFormat());
                             inverted_texture->SetState(activeTexture->GetWidth(), activeTexture->GetHeight(),
                                 0, 0,
                                 GlInternalFormatToGlFormat(dstInternalFormat),

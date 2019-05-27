@@ -73,13 +73,13 @@ public:
 // Destructor
     ~Image();
 
+// Blit Functions
+    void                              BlitImage(GLenum hintMipmapMode, VkCommandBuffer activeCmdBuffer);
+
 // Create Functions
     bool                              Create(void);
     void                              CreateImageSubresourceRange(void);
     void                              CreateBufferImageCopy(int32_t offsetX, int32_t offsetY, uint32_t extentWidth, uint32_t extentHeight, uint32_t miplevel, uint32_t layer, uint32_t layerCount);
-
-// Release Functions
-    void                              Release(void);
 
 // Copy Functions
     void                              DoCopy(VkCommandBuffer activeCmdBuffer, Buffer *srcBuffer, bool copyToImage);
@@ -93,6 +93,9 @@ public:
     inline void                       ModifyImageLayout(VkCommandBuffer activeCmdBuffer, XImageLayout newImageLayout) 
                                                                                 { FUN_ENTRY(GL_LOG_DEBUG); ModifyImageLayout(activeCmdBuffer, (VkImageLayout)newImageLayout); }
     void                              ModifyImageLayout(VkCommandBuffer activeCmdBuffer, VkImageLayout newImageLayout);
+
+// Release Functions
+    void                              Release(void);
 
 // Get Functions
     inline VkImage &                  GetImage(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mVkImage;          }
@@ -116,17 +119,14 @@ public:
     inline void                       SetImageTiling(VkImageTiling tiling)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageTiling = tiling;    }
     inline void                       SetImageTarget(XImageTarget target)       { FUN_ENTRY(GL_LOG_TRACE); mXImageTarget  = target;    }
     inline void                       SetImageLayout(VkImageLayout layout)      { FUN_ENTRY(GL_LOG_TRACE); mVkImageLayout = layout;    }
-    inline void                       ResetImageLayout(void)                    { FUN_ENTRY(GL_LOG_TRACE); mVkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;  }
     inline void                       SetWidth(uint32_t width)                  { FUN_ENTRY(GL_LOG_TRACE); mWidth         = width;     }
     inline void                       SetHeight(uint32_t height)                { FUN_ENTRY(GL_LOG_TRACE); mHeight        = height;    }
     inline void                       SetMipLevels(uint32_t levels)             { FUN_ENTRY(GL_LOG_TRACE); mMipLevels     = levels;    }
 
     inline void                       SetCacheManager(CacheManager *manager)    { FUN_ENTRY(GL_LOG_TRACE); mCacheManager  = manager;   }
 
-// Other Functions
+// Find Functions
     XFormat                           FindSupportedColorFormat(XFormat format);
-    void                              BlitImage(GLenum hintMipmapMode, VkCommandBuffer activeCmdBuffer);
-    bool                              IsValidFormat(void)                       { FUN_ENTRY(GL_LOG_TRACE); return mVkFormat != VK_FORMAT_UNDEFINED; }
 };
 
 }

@@ -63,7 +63,7 @@ Context::BeginRendering(bool clearColorEnabled, bool clearDepthEnabled, bool cle
     FUN_ENTRY(GL_LOG_TRACE);
 
     PrepareRenderPass(clearColorEnabled, clearDepthEnabled, clearStencilEnabled);
-    mCommandBufferManager->BeginDrawCommandBuffer();
+    mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->BeginVkRenderPass();
 }
 
@@ -155,11 +155,11 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
         return;
     }
 
-    mCommandBufferManager->BeginDrawCommandBuffer();
+    mCommandBufferManager->BeginVkDrawCommandBuffer();
     mWriteFBO->BeginVkRenderPass();
 
-    const VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateSecondaryCommandBuffers(1);
-    mCommandBufferManager->BeginSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
+    const VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
+    mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
 
     mScreenSpacePass->BindPipeline(secondaryCmdBuffer);
     mScreenSpacePass->BindUniformDescriptors(secondaryCmdBuffer);
@@ -168,7 +168,7 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
     pipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
 
     mScreenSpacePass->Draw(secondaryCmdBuffer);
-    mCommandBufferManager->EndSecondaryCommandBuffer(secondaryCmdBuffer);
+    mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
 
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
@@ -251,8 +251,8 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToXColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
     }
 
-    VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateSecondaryCommandBuffers(1);
-    mCommandBufferManager->BeginSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
+    VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
+    mCommandBufferManager->BeginVkSecondaryCommandBuffer(secondaryCmdBuffer, *mWriteFBO->GetVkRenderPass(), *mWriteFBO->GetActiveVkFramebuffer());
 
     mPipeline->Bind(secondaryCmdBuffer);
     BindUniformDescriptors(secondaryCmdBuffer);
@@ -265,7 +265,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     mPipeline->UpdateDynamicState(secondaryCmdBuffer, mStateManager.GetRasterizationState()->GetLineWidth());
 
     DrawGeometry(secondaryCmdBuffer, indexed, firstVertex, vertCount);
-    mCommandBufferManager->EndSecondaryCommandBuffer(secondaryCmdBuffer);
+    mCommandBufferManager->EndVkSecondaryCommandBuffer(secondaryCmdBuffer);
 
     VkCommandBuffer activeCmdBuffer = mCommandBufferManager->GetActiveCommandBuffer();
     vkCmdExecuteCommands(activeCmdBuffer, 1, secondaryCmdBuffer);
@@ -461,8 +461,8 @@ Context::Flush(void)
     }
 
     if(mWriteFBO->EndVkRenderPass()) {
-        mCommandBufferManager->EndDrawCommandBuffer();
-        mCommandBufferManager->SubmitDrawCommandBuffer();
+        mCommandBufferManager->EndVkDrawCommandBuffer();
+        mCommandBufferManager->SubmitVkDrawCommandBuffer();
     }
 
     return true;

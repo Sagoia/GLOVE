@@ -159,7 +159,6 @@ public:
     inline vulkanAPI::ImageView*    GetImageView(void)                          { FUN_ENTRY(GL_LOG_TRACE); return mImageView; }
     inline vulkanAPI::Sampler*      GetSampler(void)                            { FUN_ENTRY(GL_LOG_TRACE); return mSampler; }
 
-    inline XFormat          GetXFormat(void)                            const   { FUN_ENTRY(GL_LOG_TRACE); return mImage->GetFormat(); }
     inline XFormat          FindSupportedColorFormat(XFormat format)            { FUN_ENTRY(GL_LOG_TRACE); return mImage->FindSupportedColorFormat(format); }
 
 // Set Functions
@@ -203,8 +202,12 @@ public:
     inline void             SetDepthStencilTexture(Texture *tex)                { FUN_ENTRY(GL_LOG_TRACE); mDepthStencilTexture = tex;}
 
     inline void             SetImageBufferCopyStencil(bool copy)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetCopyStencil(copy);   }
-    inline void             SetXFormat(XFormat format)                          { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
-    inline void             SetImageTiling(void)                                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
+    inline void             SetVkFormat(VkFormat format)                        { FUN_ENTRY(GL_LOG_TRACE); mImage->SetFormat(format);      }
+    inline void             SetVkImage(VkImage image)                           { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImage(image);        }
+    inline void             SetVkImageUsage(VkImageUsageFlags usage)            { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageUsage(usage);   }
+    inline void             SetVkImageLayout(VkImageLayout layout)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageLayout(layout); }
+    inline void             SetVkImageTiling(VkImageTiling tiling)              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling(tiling); }
+    inline void             SetVkImageTiling(void)                              { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTiling();       }
     inline void             SetXImageTarget(XImageTarget target)                { FUN_ENTRY(GL_LOG_TRACE); mImage->SetImageTarget(target); }
 
 // Increase/Decrease Functions

@@ -215,7 +215,7 @@ Texture::CreateImage(void)
     mImage->SetWidth(GetWidth());
     mImage->SetHeight(GetHeight());
     mImage->SetMipLevels(mMipLevelsCount);
-    mImage->ResetImageLayout();
+    mImage->SetImageLayout(VK_IMAGE_LAYOUT_UNDEFINED);
 
     mSampler->SetMaxLod((mParameters.GetMinFilter() == GL_NEAREST || mParameters.GetMinFilter() == GL_LINEAR) ? 0.25f : static_cast<float>(mMipLevelsCount-1));
     return mImage->Create();
@@ -271,8 +271,8 @@ Texture::Allocate(void)
     SetType  (state->type);
     SetInternalFormat(GlFormatToGlInternalFormat(state->format, state->type));
 
-    if ( !(mImage->IsValidFormat()) ) {
-        mImage->SetFormat(FindSupportedColorFormat(GlColorFormatToXColorFormat(state->format, state->type)));
+    if (mImage->GetFormat() == VK_FORMAT_UNDEFINED) {
+        SetVkFormat(FindSupportedColorFormat(GlColorFormatToXColorFormat(state->format, state->type)));
     }
     mExplicitInternalFormat = XFormatToGlInternalformat(mImage->GetFormat());
     mExplicitType           = GlInternalFormatToGlType(mExplicitInternalFormat);
@@ -573,13 +573,13 @@ Texture::SubmitCopyPixels(const Rect *rect, BufferObject *tbo, GLint miplevel, G
     mImage->CreateBufferImageCopy(rect->x, rect->y, rect->width, rect->height, miplevel, layer, 1);
     mImage->ModifyImageSubresourceRange(miplevel, 1, layer, 1);
 
-    mCommandBufferManager->BeginAuxCommandBuffer();
+    mCommandBufferManager->BeginVkAuxCommandBuffer();
 
     mImage->DoCopy(mCommandBufferManager->GetAuxCommandBuffer(), tbo->GetBuffer(), copyToImage);
 
-    mCommandBufferManager->EndAuxCommandBuffer();
-    mCommandBufferManager->SubmitAuxCommandBuffer();
-    mCommandBufferManager->WaitAuxCommandBuffer();
+    mCommandBufferManager->EndVkAuxCommandBuffer();
+    mCommandBufferManager->SubmitVkAuxCommandBuffer();
+    mCommandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
@@ -591,14 +591,15 @@ Texture::PrepareImageLayout(XImageLayout newImageLayout)
         return;
     }
 
-    mCommandBufferManager->BeginAuxCommandBuffer();
+    mCommandBufferManager->BeginVkAuxCommandBuffer();
+    VkCommandBuffer cmdBuffer = mCommandBufferManager->GetAuxCommandBuffer();
 
     mImage->ModifyImageSubresourceRange(0, mMipLevelsCount, 0, mLayersCount);
-    mImage->ModifyImageLayout(mCommandBufferManager->GetAuxCommandBuffer(), newImageLayout);
+    mImage->ModifyImageLayout(cmdBuffer, newImageLayout);
 
-    mCommandBufferManager->EndAuxCommandBuffer();
-    mCommandBufferManager->SubmitAuxCommandBuffer();
-    mCommandBufferManager->WaitAuxCommandBuffer();
+    mCommandBufferManager->EndVkAuxCommandBuffer();
+    mCommandBufferManager->SubmitVkAuxCommandBuffer();
+    mCommandBufferManager->WaitVkAuxCommandBuffer();
 }
 
 void
@@ -656,13 +657,13 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     delete [] basePixels;
 
-    mCommandBufferManager->BeginAuxCommandBuffer();
+    mCommandBufferManager->BeginVkAuxCommandBuffer();
 
     mImage->BlitImage(hintMipmapMode, mCommandBufferManager->GetAuxCommandBuffer());
 
-    mCommandBufferManager->EndAuxCommandBuffer();
-    mCommandBufferManager->SubmitAuxCommandBuffer();
-    mCommandBufferManager->WaitAuxCommandBuffer();
+    mCommandBufferManager->EndVkAuxCommandBuffer();
+    mCommandBufferManager->SubmitVkAuxCommandBuffer();
+    mCommandBufferManager->WaitVkAuxCommandBuffer();
 
     // TODO: Fill the 'State_t' with the rest mipLevels
 }

@@ -260,9 +260,9 @@ Framebuffer::CreateVkRenderPass(bool clearColorEnabled, bool clearDepthEnabled, 
     mRenderPass->SetStencilWriteEnabled(writeStencilEnabled);
 
     return mRenderPass->Create(GetColorAttachmentTexture() ?
-                               GetColorAttachmentTexture()->GetXFormat() : VK_FORMAT_UNDEFINED,
+                               GetColorAttachmentTexture()->GetImage()->GetFormat() : VK_FORMAT_UNDEFINED,
                                mDepthStencilTexture ?
-                               mDepthStencilTexture->GetXFormat() : VK_FORMAT_UNDEFINED);
+                               mDepthStencilTexture->GetImage()->GetFormat() : VK_FORMAT_UNDEFINED);
 }
 
 void
@@ -292,11 +292,11 @@ Framebuffer::CreateDepthStencilTexture(void)
 
         // convert to supported format
         vkformat = vulkanAPI::FindSupportedDepthStencilFormat(mXContext->vkGpus[0], vulkanAPI::GetVkFormatDepthBits(vkformat), vulkanAPI::GetVkFormatStencilBits(vkformat));
-        mDepthStencilTexture->SetXFormat(vkformat);
-        mDepthStencilTexture->GetImage()->SetImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-        mDepthStencilTexture->GetImage()->SetImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-        mDepthStencilTexture->SetImageTiling();
-        GLenum glformat = XFormatToGlInternalformat(mDepthStencilTexture->GetXFormat());
+        mDepthStencilTexture->SetVkFormat(vkformat);
+        mDepthStencilTexture->SetVkImageUsage(static_cast<VkImageUsageFlagBits>(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+        mDepthStencilTexture->SetVkImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        mDepthStencilTexture->SetVkImageTiling();
+        GLenum glformat = XFormatToGlInternalformat(mDepthStencilTexture->GetImage()->GetFormat());
         mDepthStencilTexture->InitState();
         mDepthStencilTexture->SetState(GetWidth(), GetHeight(), 0, 0, GlInternalFormatToGlFormat(glformat),
                                        GlInternalFormatToGlType(glformat), Texture::GetDefaultInternalAlignment(), nullptr);
@@ -312,7 +312,7 @@ Framebuffer::CreateDepthStencilTexture(void)
 void
 Framebuffer::UpdateClearDepthStencilTexture(uint32_t clearStencil, uint32_t stencilMaskFront, const Rect& clearRect)
 {
-    GLenum glFormat = XFormatToGlInternalformat(mDepthStencilTexture->GetXFormat());
+    GLenum glFormat = XFormatToGlInternalformat(mDepthStencilTexture->GetImage()->GetFormat());
     size_t numElements = GlInternalFormatTypeToNumElements(glFormat, mDepthStencilTexture->GetExplicitType());
     ImageRect srcRect(clearRect, (int)numElements, 1, Texture::GetDefaultInternalAlignment());
 
