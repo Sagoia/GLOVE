@@ -37,9 +37,8 @@ enum GLColorMaskBit {
     GLC_ALPHA   = 3
 };
 
-inline GLboolean        GlColorMaskHasBit(GLubyte colorMask, GLColorMaskBit bit) { return (colorMask >> bit) & 0x1; }
-inline GLubyte          GlColorMaskPack(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) { return (GLubyte)((red << GLColorMaskBit::GLC_RED) | (green << GLColorMaskBit::GLC_GREEN) | (blue << GLColorMaskBit::GLC_BLUE) | (alpha << GLColorMaskBit::GLC_ALPHA)); }
-
+GLboolean               GlColorMaskHasBit(GLubyte colorMask, GLColorMaskBit bit);
+GLubyte                 GlColorMaskPack(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 const char *            GlAttribTypeToString(GLenum type);
 GLenum                  GlFormatToGlInternalFormat(GLenum format, GLenum type);
 GLenum                  GlInternalFormatToGlType(GLenum internalFormat);
