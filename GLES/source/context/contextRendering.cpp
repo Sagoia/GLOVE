@@ -141,9 +141,9 @@ Context::ClearWithColorMask(bool clearColorEnabled, bool clearDepthEnabled, bool
         GLboolean colormask[4];
         mStateManager.GetFramebufferOperationsState()->GetColorMask(colormask);
         GLubyte colorMaskPackRGB = GlColorMaskPack(colormask[0], colormask[1], colormask[2], GL_FALSE);
-        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToXColorComponentFlags(colorMaskPackRGB));
+        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(colorMaskPackRGB));
     } else {
-        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToXColorComponentFlags(stateFramebufferOperations->GetColorMask()));
+        pipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(stateFramebufferOperations->GetColorMask()));
     }
 
     pipeline->SetUpdatePipeline(true);
@@ -237,7 +237,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
         GLboolean colormask[4];
         mStateManager.GetFramebufferOperationsState()->GetColorMask(colormask);
         GLubyte colorMaskPackRGB = GlColorMaskPack(colormask[0], colormask[1], colormask[2], GL_FALSE);
-        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToXColorComponentFlags(colorMaskPackRGB));
+        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(colorMaskPackRGB));
     }
 
     if(SetPipelineProgramShaderStages(mStateManager.GetActiveShaderProgram())) {
@@ -248,7 +248,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     }
 
     if(mWriteFBO->GetColorAttachmentTexture() && mWriteFBO->GetColorAttachmentTexture()->GetFormat() == GL_RGB) {
-        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToXColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
+        mPipeline->SetColorBlendAttachmentWriteMask(GLColorMaskToVkColorComponentFlags(mStateManager.GetFramebufferOperationsState()->GetColorMask()));
     }
 
     VkCommandBuffer *secondaryCmdBuffer = mCommandBufferManager->AllocateVkSecondaryCmdBuffers(1);
@@ -258,7 +258,7 @@ Context::PushGeometry(uint32_t vertCount, uint32_t firstVertex, bool indexed, GL
     BindUniformDescriptors(secondaryCmdBuffer);
     BindVertexBuffers(secondaryCmdBuffer);
     if(indexed) {
-        BindIndexBuffer(secondaryCmdBuffer, indexOffset, GlToXIndexType(type));
+        BindIndexBuffer(secondaryCmdBuffer, indexOffset, GlToVkIndexType(type));
     }
     UpdateViewportState(mPipeline);
 
@@ -377,7 +377,7 @@ Context::DrawArrays(GLenum mode, GLint first, GLsizei count)
     }
 
     if(mStateManager.GetInputAssemblyState()->UpdatePrimitiveMode(mode)) {
-        mPipeline->SetInputAssemblyTopology(GlPrimitiveTopologyToXPrimitiveTopology(mStateManager.GetInputAssemblyState()->GetPrimitiveMode()));
+        mPipeline->SetInputAssemblyTopology(GlPrimitiveTopologyToVkPrimitiveTopology(mStateManager.GetInputAssemblyState()->GetPrimitiveMode()));
     }
 
     PushGeometry(count, first, false, GL_INVALID_ENUM, nullptr);
@@ -412,7 +412,7 @@ Context::DrawElements(GLenum mode, GLsizei count, GLenum type, const void* indic
     }
 
     if(mStateManager.GetInputAssemblyState()->UpdatePrimitiveMode(mode)) {
-        mPipeline->SetInputAssemblyTopology(GlPrimitiveTopologyToXPrimitiveTopology(mStateManager.GetInputAssemblyState()->GetPrimitiveMode()));
+        mPipeline->SetInputAssemblyTopology(GlPrimitiveTopologyToVkPrimitiveTopology(mStateManager.GetInputAssemblyState()->GetPrimitiveMode()));
     }
 
     PushGeometry(count, 0, true, type, indices);

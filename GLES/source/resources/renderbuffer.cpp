@@ -76,7 +76,7 @@ Renderbuffer::Allocate(GLint width, GLint height, GLenum internalformat)
 
     mTexture->SetTarget(GL_TEXTURE_2D);
 
-    VkFormat vkformat = GlInternalFormatToXFormat(mInternalFormat);
+    VkFormat vkformat = GlInternalFormatToVkFormat(mInternalFormat);
 
     if(GlFormatIsColorRenderable(mInternalFormat)) {
         mTexture->SetVkFormat(vkformat);

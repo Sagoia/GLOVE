@@ -24,12 +24,10 @@
 #ifndef __VKUTILS_H__
 #define __VKUTILS_H__
 
-#include "GLES/gl.h"
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
 #include "vulkan/vulkan.h"
 #include <vector>
-#include "types.h"
 
 namespace vulkanAPI {
 
@@ -50,48 +48,8 @@ uint64_t                HashGraphicsPipelineInfo(const VkGraphicsPipelineCreateI
 // type convert
 GLenum                  VkFormatToGlInternalformat(VkFormat format);
 
-VkColorComponentFlags   GLColorMaskToVkColorComponentFlags(GLubyte colorMask);
-VkBlendFactor           GlBlendFactorToVkBlendFactor(GLenum mode);
-VkLogicOp           	GlLogicOpToVkLogicOp(GLenum mode);
-VkBlendOp               GlBlendEquationToVkBlendOp(GLenum mode);
-VkCompareOp             GlCompareFuncToVkCompareOp(GLenum mode);
-VkCullModeFlagBits      GlCullModeToVkCullMode(GLenum mode);
-VkFrontFace             GlFrontFaceToVkFrontFace(GLenum mode);
-VkPolygonMode           GLPrimitiveModeToVkPolygonMode(GLenum mode);
-VkPrimitiveTopology     GlPrimitiveTopologyToVkPrimitiveTopology(GLenum mode);
-VkSampleCountFlagBits   GlSampleCoverageBitsToVkSampleCountFlagBits(GLint bits);
-VkStencilOp             GlStencilFuncToVkStencilOp(GLenum mode);
-VkSamplerAddressMode    GlTexAddressToVkTexAddress(GLenum mode);
-VkFilter                GlTexFilterToVkTexFilter(GLenum mode);
-VkSamplerMipmapMode     GlTexMipMapModeToVkMipMapMode(GLenum mode);
-VkFormat                GlInternalFormatToVkFormat(GLenum internalformat);
-VkFormat                GlInternalFormatToVkFormat(GLenum internalformatDepth, GLenum internalformatStencil);
-VkFormat                GlAttribPointerToVkFormat(GLint nElements, GLenum type, GLboolean normalized);
-VkIndexType             GlToVkIndexType(GLenum type);
-VkFormat                GlColorFormatToVkColorFormat(GLenum format, GLenum type);
-
 }
 
-inline GLenum                   XFormatToGlInternalformat(XFormat format) { return vulkanAPI::VkFormatToGlInternalformat((VkFormat)format); }
-
-inline XColorComponentFlags     GLColorMaskToXColorComponentFlags(GLubyte colorMask) { return vulkanAPI::GLColorMaskToVkColorComponentFlags(colorMask); }
-inline XBlendFactor             GlBlendFactorToXBlendFactor(GLenum mode) { return vulkanAPI::GlBlendFactorToVkBlendFactor(mode); }
-inline XLogicOp                 GlLogicOpToXLogicOp(GLenum mode) { return vulkanAPI::GlLogicOpToVkLogicOp(mode); }
-inline XBlendOp                 GlBlendEquationToXBlendOp(GLenum mode) { return vulkanAPI::GlBlendEquationToVkBlendOp(mode); }
-inline XCompareOp               GlCompareFuncToXCompareOp(GLenum mode) { return vulkanAPI::GlCompareFuncToVkCompareOp(mode); }
-inline XCullModeFlagBits        GlCullModeToXCullMode(GLenum mode) { return vulkanAPI::GlCullModeToVkCullMode(mode); }
-inline XFrontFace               GlFrontFaceToXFrontFace(GLenum mode) { return vulkanAPI::GlFrontFaceToVkFrontFace(mode); }
-inline XPolygonMode             GLPrimitiveModeToXPolygonMode(GLenum mode) { return vulkanAPI::GLPrimitiveModeToVkPolygonMode(mode); }
-inline XPrimitiveTopology       GlPrimitiveTopologyToXPrimitiveTopology(GLenum mode) { return vulkanAPI::GlPrimitiveTopologyToVkPrimitiveTopology(mode); }
-inline XSampleCountFlagBits     GlSampleCoverageBitsToXSampleCountFlagBits(GLint bits) { return vulkanAPI::GlSampleCoverageBitsToVkSampleCountFlagBits(bits); }
-inline XStencilOp               GlStencilFuncToXStencilOp(GLenum mode) { return vulkanAPI::GlStencilFuncToVkStencilOp(mode); }
-inline XSamplerAddressMode      GlTexAddressToXTexAddress(GLenum mode) { return vulkanAPI::GlTexAddressToVkTexAddress(mode); }
-inline XFilter                  GlTexFilterToXTexFilter(GLenum mode) { return vulkanAPI::GlTexFilterToVkTexFilter(mode); }
-inline XSamplerMipmapMode       GlTexMipMapModeToXMipMapMode(GLenum mode) { return vulkanAPI::GlTexMipMapModeToVkMipMapMode(mode); }
-inline XFormat                  GlInternalFormatToXFormat(GLenum internalformat) { return vulkanAPI::GlInternalFormatToVkFormat(internalformat); }
-inline XFormat                  GlInternalFormatToXFormat(GLenum internalformatDepth, GLenum internalformatStencil) { return vulkanAPI::GlInternalFormatToVkFormat(internalformatDepth, internalformatStencil); }
-inline XFormat                  GlAttribPointerToXFormat(GLint nElements, GLenum type, GLboolean normalized) { return vulkanAPI::GlAttribPointerToVkFormat(nElements, type, normalized); }
-inline XIndexType               GlToXIndexType(GLenum type) { return vulkanAPI::GlToVkIndexType(type); }
-inline XFormat                  GlColorFormatToXColorFormat(GLenum format, GLenum type) { return vulkanAPI::GlColorFormatToVkColorFormat(format, type); }
+inline GLenum           XFormatToGlInternalformat(uint32_t format) { return vulkanAPI::VkFormatToGlInternalformat(static_cast<VkFormat>(format)); }
 
 #endif // __VKUTILS_H__

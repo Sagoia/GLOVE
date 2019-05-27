@@ -70,11 +70,11 @@ StateManager::InitVkPipelineStates(vulkanAPI::Pipeline *pipeline)
     FUN_ENTRY(GL_LOG_TRACE);
 
     VkBool32            primitiveRestartEnable = GetInputAssemblyState()->GetPrimitiveRestartEnabled();
-    VkPrimitiveTopology topology               = GlPrimitiveTopologyToXPrimitiveTopology(GetInputAssemblyState()->GetPrimitiveMode());
+    VkPrimitiveTopology topology               = GlPrimitiveTopologyToVkPrimitiveTopology(GetInputAssemblyState()->GetPrimitiveMode());
 
-    VkPolygonMode      polygonMode             = GLPrimitiveModeToXPolygonMode(GetInputAssemblyState()->GetPrimitiveMode());
-    VkCullModeFlagBits cullMode                = GlCullModeToXCullMode(GetRasterizationState()->GetCullFace());
-    VkFrontFace        frontFace               = GlFrontFaceToXFrontFace(GetRasterizationState()->GetFrontFace());
+    VkPolygonMode      polygonMode             = GLPrimitiveModeToVkPolygonMode(GetInputAssemblyState()->GetPrimitiveMode());
+    VkCullModeFlagBits cullMode                = GlCullModeToVkCullMode(GetRasterizationState()->GetCullFace());
+    VkFrontFace        frontFace               = GlFrontFaceToVkFrontFace(GetRasterizationState()->GetFrontFace());
     VkBool32           depthClampEnable        = GetRasterizationState()->GetDepthClampEnabled();
     VkBool32           rasterizerDiscardEnable = GetRasterizationState()->GetRasterizerDiscardEnabled();
     VkBool32           depthBiasEnable         = GetRasterizationState()->GetPolygonOffsetFillEnabled();
@@ -82,16 +82,16 @@ StateManager::InitVkPipelineStates(vulkanAPI::Pipeline *pipeline)
     float              depthBiasSlopeFactor    = GetRasterizationState()->GetPolygonOffsetUnits();
     float              depthBiasClamp          = GetRasterizationState()->GetPolygonOffsetClamp();
     VkBool32           blendEnable             = GetFragmentOperationsState()->GetBlendingEnabled();
-    VkColorComponentFlags colorWriteMask       = GLColorMaskToXColorComponentFlags(GetFramebufferOperationsState()->GetColorMask());
+    VkColorComponentFlags colorWriteMask       = GLColorMaskToVkColorComponentFlags(GetFramebufferOperationsState()->GetColorMask());
 
-    VkBlendFactor srcColorBlendFactor = GlBlendFactorToXBlendFactor(GetFragmentOperationsState()->GetBlendingFactorSourceRGB());
-    VkBlendFactor dstColorBlendFactor = GlBlendFactorToXBlendFactor(GetFragmentOperationsState()->GetBlendingFactorDestinationRGB());
-    VkBlendFactor srcAlphaBlendFactor = GlBlendFactorToXBlendFactor(GetFragmentOperationsState()->GetBlendingFactorSourceAlpha());
-    VkBlendFactor dstAlphaBlendFactor = GlBlendFactorToXBlendFactor(GetFragmentOperationsState()->GetBlendingFactorDestinationAlpha());
+    VkBlendFactor srcColorBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorSourceRGB());
+    VkBlendFactor dstColorBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorDestinationRGB());
+    VkBlendFactor srcAlphaBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorSourceAlpha());
+    VkBlendFactor dstAlphaBlendFactor = GlBlendFactorToVkBlendFactor(GetFragmentOperationsState()->GetBlendingFactorDestinationAlpha());
 
-    VkBlendOp   colorBlendOp         = GlBlendEquationToXBlendOp(GetFragmentOperationsState()->GetBlendingEquationRGB());
-    VkBlendOp   alphaBlendOp         = GlBlendEquationToXBlendOp(GetFragmentOperationsState()->GetBlendingEquationAlpha());
-    VkLogicOp   logicOp              = GlLogicOpToXLogicOp(GetFragmentOperationsState()->GetBlendingLogicOp());
+    VkBlendOp   colorBlendOp         = GlBlendEquationToVkBlendOp(GetFragmentOperationsState()->GetBlendingEquationRGB());
+    VkBlendOp   alphaBlendOp         = GlBlendEquationToVkBlendOp(GetFragmentOperationsState()->GetBlendingEquationAlpha());
+    VkLogicOp   logicOp              = GlLogicOpToVkLogicOp(GetFragmentOperationsState()->GetBlendingLogicOp());
     VkBool32    logicOpEnable        = GetFragmentOperationsState()->GetBlendingLogicOpEnabled();
     uint32_t    colorAttachmentCount = GetFragmentOperationsState()->GetBlendingColorAttachmentCount();
 
@@ -103,30 +103,30 @@ StateManager::InitVkPipelineStates(vulkanAPI::Pipeline *pipeline)
 
     VkBool32              alphaToOneEnable      = GetFragmentOperationsState()->GetSampleAlphaToOneEnabled();
     VkBool32              alphaToCoverageEnable = GetFragmentOperationsState()->GetSampleAlphaToCoverageEnabled();
-    VkSampleCountFlagBits rasterizationSamples  = GlSampleCoverageBitsToXSampleCountFlagBits(GetFragmentOperationsState()->GetSampleCoverageBits());
+    VkSampleCountFlagBits rasterizationSamples  = GlSampleCoverageBitsToVkSampleCountFlagBits(GetFragmentOperationsState()->GetSampleCoverageBits());
     VkBool32              sampleShadingEnable   = GetFragmentOperationsState()->GetSampleShadingEnabled();
     float                 minSampleShading      = GetFragmentOperationsState()->GetMinSampleShading();
 
     VkBool32    depthTestEnable       = GetFragmentOperationsState()->GetDepthTestEnabled();
     VkBool32    depthWriteEnable      = GetFramebufferOperationsState()->GetDepthMask();
-    VkCompareOp depthCompareOp        = GlCompareFuncToXCompareOp(GetFragmentOperationsState()->GetDepthTestFunc());
+    VkCompareOp depthCompareOp        = GlCompareFuncToVkCompareOp(GetFragmentOperationsState()->GetDepthTestFunc());
     VkBool32    depthBoundsTestEnable = GetFragmentOperationsState()->GetDepthBoundsTestEnabled();
     float       minDepthBounds        = GetFragmentOperationsState()->GetMinDepthBounds();
     float       maxDepthBounds        = GetFragmentOperationsState()->GetMaxDepthBounds();
 
     VkBool32    stencilTestEnable     = GetFragmentOperationsState()->GetStencilTestEnabled();
-    VkStencilOp backfailOp            = GlStencilFuncToXStencilOp(GetFragmentOperationsState()->GetStencilTestOpFailBack());
-    VkStencilOp backpassOp            = GlStencilFuncToXStencilOp(GetFragmentOperationsState()->GetStencilTestOpZpassBack());
-    VkStencilOp backdepthFailOp       = GlStencilFuncToXStencilOp(GetFragmentOperationsState()->GetStencilTestOpZfailBack());
+    VkStencilOp backfailOp            = GlStencilFuncToVkStencilOp(GetFragmentOperationsState()->GetStencilTestOpFailBack());
+    VkStencilOp backpassOp            = GlStencilFuncToVkStencilOp(GetFragmentOperationsState()->GetStencilTestOpZpassBack());
+    VkStencilOp backdepthFailOp       = GlStencilFuncToVkStencilOp(GetFragmentOperationsState()->GetStencilTestOpZfailBack());
     uint32_t    backwriteMask         = GetFramebufferOperationsState()->GetStencilMaskBack();
-    VkCompareOp backcompareOp         = GlCompareFuncToXCompareOp(GetFragmentOperationsState()->GetStencilTestFuncCompareBack());
+    VkCompareOp backcompareOp         = GlCompareFuncToVkCompareOp(GetFragmentOperationsState()->GetStencilTestFuncCompareBack());
     uint32_t    backcompareMask       = GetFragmentOperationsState()->GetStencilTestFuncMaskBack();
     uint32_t    backreference         = GetFragmentOperationsState()->GetStencilTestFuncRefBack();
-    VkStencilOp frontfailOp           = GlStencilFuncToXStencilOp(GetFragmentOperationsState()->GetStencilTestOpFailFront());
-    VkStencilOp frontpassOp           = GlStencilFuncToXStencilOp(GetFragmentOperationsState()->GetStencilTestOpZpassFront());
-    VkStencilOp frontdepthFailOp      = GlStencilFuncToXStencilOp(GetFragmentOperationsState()->GetStencilTestOpZfailFront());
+    VkStencilOp frontfailOp           = GlStencilFuncToVkStencilOp(GetFragmentOperationsState()->GetStencilTestOpFailFront());
+    VkStencilOp frontpassOp           = GlStencilFuncToVkStencilOp(GetFragmentOperationsState()->GetStencilTestOpZpassFront());
+    VkStencilOp frontdepthFailOp      = GlStencilFuncToVkStencilOp(GetFragmentOperationsState()->GetStencilTestOpZfailFront());
     uint32_t    frontwriteMask        = GetFramebufferOperationsState()->GetStencilMaskFront();
-    VkCompareOp frontcompareOp        = GlCompareFuncToXCompareOp(GetFragmentOperationsState()->GetStencilTestFuncCompareFront());
+    VkCompareOp frontcompareOp        = GlCompareFuncToVkCompareOp(GetFragmentOperationsState()->GetStencilTestFuncCompareFront());
     uint32_t    frontcompareMask      = GetFragmentOperationsState()->GetStencilTestFuncMaskFront();
     uint32_t    frontreference        = GetFragmentOperationsState()->GetStencilTestFuncRefFront();
 

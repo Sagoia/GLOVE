@@ -199,7 +199,7 @@ Context::InitializeFrameBuffer(EGLSurfaceInterface *eglSurfaceInterface)
     for(uint32_t i = 0; i < eglSurfaceInterface->imageCount; ++i) {
         Texture *tex = new Texture(mVkContext, mCommandBufferManager);
 
-        GLenum glformat = XFormatToGlInternalformat((XFormat)eglSurfaceInterface->surfaceColorFormat);
+        GLenum glformat = XFormatToGlInternalformat(eglSurfaceInterface->surfaceColorFormat);
 
         tex->SetTarget(GL_TEXTURE_2D);
         tex->SetWidth(eglSurfaceInterface->width);

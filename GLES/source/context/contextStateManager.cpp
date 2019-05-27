@@ -62,7 +62,7 @@ Context::SetCapability(GLenum cap, GLboolean enable)
         break;
     case GL_CULL_FACE:
         if(mStateManager.GetRasterizationState()->UpdateCullEnabled(enable)) {
-            mPipeline->SetRasterizationCullMode(mStateManager.GetRasterizationState()->GetCullEnabled(), GlCullModeToXCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
+            mPipeline->SetRasterizationCullMode(mStateManager.GetRasterizationState()->GetCullEnabled(), GlCullModeToVkCullMode(mStateManager.GetRasterizationState()->GetCullFace()));
         }
         break;
     case GL_POLYGON_OFFSET_FILL:
