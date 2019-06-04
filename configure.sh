@@ -106,7 +106,7 @@ else
                     USE_SURFACE=$1
                     echo "Setting windowing system to $USE_SURFACE"
                 else
-                    echo "Wrong surface argument $1 provided (Options are: XCB, ANDROID and NATIVE). Using $USE_SURFACE."
+                    echo "Wrong surface argument $1 provided (Options are: XCB, WAYLAND, ANDROID and NATIVE). Using $USE_SURFACE."
                 fi
                 ;;
             *)
