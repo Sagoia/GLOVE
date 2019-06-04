@@ -19,7 +19,6 @@ set(SOURCES
     platform/vulkan/vulkanAPI.cpp
     platform/vulkan/vulkanResources.cpp
     platform/vulkan/WSIPlaneDisplay.cpp
-    platform/vulkan/WSIXcb.cpp
     rendering_api/rendering_api.c
     utils/eglUtils.cpp
     utils/eglLogger.cpp
@@ -44,10 +43,23 @@ if(USE_SURFACE STREQUAL "XCB")
         set(LIBS ${LIBS} X11-xcb)
     else()
         # Take action for other platforms
-        message(FATAL_ERROR "Implement EGL for your platform")
+        message(FATAL_ERROR "Could not find X11 LIBRARIES")
     endif()
 endif()
 
+if(USE_SURFACE STREQUAL "WAYLAND")
+    find_package(ECM REQUIRED NO_MODULE)
+    ecm_use_find_modules(DIR "${CMAKE_SOURCE_DIR}/CMake"
+                         MODULES FindWayland.cmake)
+    find_package(Wayland)
+
+    if(Wayland_FOUND)
+        set(SOURCES ${SOURCES} platform/vulkan/WSIWayland.cpp)
+        set(LIBS ${LIBS} wayland-client)
+     else()
+         message(FATAL_ERROR "Could not find Wayland LIBRARIES")
+     endif()
+endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_SOURCE_DIR}/EGL/include

@@ -81,7 +81,7 @@ EGLGlobalResourceManager::GetDisplayByID(EGLNativeDisplayType display_id)
    }
 #endif
 
-#ifdef VK_USE_PLATFORM_XCB_KHR
+#if defined (VK_USE_PLATFORM_XCB_KHR) || defined (VK_USE_PLATFORM_WAYLAND_KHR)
    if(display_id == EGL_DEFAULT_DISPLAY) {
        dpy = nullptr;
    } else {
@@ -128,6 +128,12 @@ EGLGlobalResourceManager::InitializeDisplay(EGLDisplay dpy, void* displayDriver)
 #ifdef VK_USE_PLATFORM_XCB_KHR
     if(eglDisplay->display_id == EGL_DEFAULT_DISPLAY && eglDisplay->display == nullptr) {
         eglDisplay->display = XOpenDisplay(nullptr);
+    }
+#endif
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+    if(eglDisplay->display_id == EGL_DEFAULT_DISPLAY && eglDisplay->display == nullptr) {
+        eglDisplay->display = wl_display_connect(NULL);
     }
 #endif
 

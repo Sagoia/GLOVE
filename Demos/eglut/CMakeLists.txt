@@ -15,6 +15,13 @@ elseif(USE_SURFACE STREQUAL "XCB")
         ${EGLUT_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/eglut_x11.c
     )
+
+elseif(USE_SURFACE STREQUAL "WAYLAND")
+    set(EGLUT_SOURCES
+        ${EGLUT_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_wayland.c
+    )
+
 elseif(USE_SURFACE STREQUAL "ANDROID")
 
 endif()

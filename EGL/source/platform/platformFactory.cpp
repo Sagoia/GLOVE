@@ -27,6 +27,9 @@
 #ifdef VK_USE_PLATFORM_XCB_KHR
 #include "platform/vulkan/WSIXcb.h"
 #endif
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+#include "platform/vulkan/WSIWayland.h"
+#endif
 #include "platform/vulkan/WSIPlaneDisplay.h"
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
@@ -81,6 +84,11 @@ PlatformFactory::ChoosePlatform()
     return;
 #endif
 
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+    platformFactory->SetPlatformType(PlatformFactory::WSI_WAYLAND);
+    return;
+#endif
+
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     platformFactory->SetPlatformType(PlatformFactory::WSI_ANDROID);
     return;
@@ -107,6 +115,14 @@ PlatformFactory::GetWindowInterface()
         }
 #endif
 
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+        case WSI_WAYLAND: {
+            VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
+            WSIWayland *vulkanWSI = new WSIWayland();
+            windowInterface->SetWSI(vulkanWSI);
+            return windowInterface;
+        }
+#endif
         case WSI_PLANE_DISPLAY: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
             WSIPlaneDisplay *vulkanWSI = new WSIPlaneDisplay();
@@ -141,6 +157,7 @@ PlatformFactory::GetResources()
 
     switch(platformType) {
         case WSI_XCB:
+        case WSI_WAYLAND:
         case WSI_PLANE_DISPLAY:
             return new VulkanResources();
 

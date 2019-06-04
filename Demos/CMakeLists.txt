@@ -36,6 +36,14 @@ if(USE_SURFACE STREQUAL "XCB")
     )
 endif()
 
+if(USE_SURFACE STREQUAL "WAYLAND")
+    set(LIBS
+        ${LIBS}
+        wayland-client
+        wayland-egl
+    )
+endif()
+
 include_directories(${CMAKE_SOURCE_DIR}/EGL/include
                     ${CMAKE_SOURCE_DIR}/GLES/include)
 
