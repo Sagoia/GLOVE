@@ -18,6 +18,18 @@ GLOVE is accompanied by a demo SDK that contains fully commented, highly optimiz
 
 **Table 1.** Example demos name and description
 
+## Supported Window Platforms
+
+### X11/XCB
+By default, GLOVE uses X11/XCB as a Window system. If no particular "--use-surface" option is given in configure.sh, GLOVE builds the XCB backend for EGL.
+
+### WAYLAND
+For Linux OS, there is a second Window backend alternative, the **Wayland Window System**. If configure.sh is executed with "--use-surface WAYLAND" option, GLOVE builds the WAYLAND backend for EGL.
+
+**IMPORTANT** : To run GLOVE with WAYLAND, Vulkan Loader must be built with "BUILD_WSI_WAYLAND_SUPPORT" option ON (see details in [Vulkan Loader Khronos page](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/BUILD.md)).
+
+Once GLOVE is built with WAYLAND backend, GLOVE Demos for Linux can be tested with Weston Server (see [HowTo run Weston here](https://jan.newmarch.name/Wayland/RunningWayland/)). 
+
 ## Execution
 
 Open a new terminal and navigate to the &#39; **build/Demos/demos**&#39; directory (``` $ cd build/Demos/demos/ ```), then run all examples by typing this command:
