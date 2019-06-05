@@ -25,7 +25,7 @@
 
 #include <wayland-client.h>
 #include <wayland-egl.h>
-
+#include <linux/input-event-codes.h>
 #include "eglutint.h"
 
 struct wl_compositor *compositor = NULL;
@@ -82,8 +82,13 @@ keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
                     uint32_t state)
 {
     struct eglut_window *win = _eglut->current;
-    if(state == 1 && key == 1) { // ESC KEY handling
-        win->keyboard_cb(27);
+    if(state == 1) {
+        switch(key) {
+            case KEY_ESC: win->keyboard_cb(27); break;
+            case KEY_P: win->keyboard_cb('p');  break;
+            case KEY_T: win->keyboard_cb('t');  break;
+            default: ; //do nothing
+        }
     }
 }
 
