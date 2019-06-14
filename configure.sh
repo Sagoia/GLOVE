@@ -102,7 +102,7 @@ else
             # option to set surface
             -f|--use-surface)
                 shift
-                if [ $1 == "XCB" ] || [ $1 == "WAYLAND" ] || [ $1 == "ANDROID" ] || [ $1 == "NATIVE" ]; then
+                if [ $1 == "XCB" ] || [ $1 == "WAYLAND" ] || [ $1 == "ANDROID" ] || [ $1 == "NATIVE" ] || [ $1 == "MACOS" ]; then
                     USE_SURFACE=$1
                     echo "Setting windowing system to $USE_SURFACE"
                 else

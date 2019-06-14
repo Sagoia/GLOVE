@@ -42,6 +42,9 @@ static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFA
 #elif defined (VK_USE_PLATFORM_ANDROID_KHR)
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_ANDROID_SURFACE_EXTENSION_NAME};
+#elif defined (VK_USE_PLATFORM_MACOS_MVK)
+static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
+                                                                    VK_MVK_MACOS_SURFACE_EXTENSION_NAME};
 #else // native
 static const std::vector<const char*> requiredInstanceExtensions = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                                     VK_KHR_DISPLAY_EXTENSION_NAME};

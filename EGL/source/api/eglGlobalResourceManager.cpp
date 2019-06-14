@@ -57,10 +57,17 @@ EGLGlobalResourceManager::FindDisplayByID(EGLNativeDisplayType display_id)
             break;
         }
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+        // return the next available id
+        if(dis->created == false && dis->display_id == 0) {
+            break;
+        }
+#else
         // return the next available id
         if(dis->created == false && dis->display_id == nullptr) {
             break;
         }
+#endif
      }
 
     return dis;
@@ -75,7 +82,7 @@ EGLGlobalResourceManager::GetDisplayByID(EGLNativeDisplayType display_id)
 
    // create a new display if it does not exist
    EGLDisplay dpy = nullptr;
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
+#if defined (VK_USE_PLATFORM_ANDROID_KHR)
    if (display_id == EGL_DEFAULT_DISPLAY) {
        dpy = (EGLDisplay)1;
    }
@@ -86,6 +93,12 @@ EGLGlobalResourceManager::GetDisplayByID(EGLNativeDisplayType display_id)
        dpy = nullptr;
    } else {
        dpy = display_id;
+   }
+
+#elif defined (VK_USE_PLATFORM_MACOS_MVK)
+   // Hack: Should be changed to proper implementation
+   if(display_id == EGL_DEFAULT_DISPLAY) {
+       dpy = (EGLDisplay)1;
    }
 #else
    dpy = display_id;
@@ -136,6 +149,8 @@ EGLGlobalResourceManager::InitializeDisplay(EGLDisplay dpy, void* displayDriver)
         eglDisplay->display = wl_display_connect(NULL);
     }
 #endif
+
+    // Missing implementation for VK_USE_PLATFORM_MACOS_MVK
 
     eglDisplay->displayDriver = displayDriver;
 

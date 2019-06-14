@@ -46,9 +46,15 @@ struct EGLDisplay_t {
     void* displayDriver;
     bool created;
     EGLDisplay_t():
-        display_id(nullptr), display(nullptr),
+        display(nullptr),
         displayDriver(nullptr), created(false)
-    { }
+    {
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+        display_id = 0;
+#else
+        display_id = nullptr;
+#endif
+    }
 };
 
 #endif // __DISPLAY_CONTAINER_H__

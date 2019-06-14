@@ -22,6 +22,13 @@ elseif(USE_SURFACE STREQUAL "WAYLAND")
         ${CMAKE_CURRENT_SOURCE_DIR}/eglut_wayland.c
     )
 
+elseif(USE_SURFACE STREQUAL "MACOS")
+    set(EGLUT_SOURCES
+        ${EGLUT_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_macos.c
+    )
+
+
 elseif(USE_SURFACE STREQUAL "ANDROID")
 
 endif()
