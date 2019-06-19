@@ -162,7 +162,7 @@ RenderPass::Begin(VkCommandBuffer *activeCmdBuffer, VkFramebuffer *framebuffer, 
     info.clearValueCount           = 2;
     info.pClearValues              = mVkClearValues;
 
-    const VkSubpassContents subpassContents = !hasSecondary ? VK_SUBPASS_CONTENTS_INLINE : VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS;
+    const VkSubpassContents subpassContents = hasSecondary ? VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS : VK_SUBPASS_CONTENTS_INLINE;
 
     vkCmdBeginRenderPass(*activeCmdBuffer, &info, subpassContents);
 
