@@ -102,6 +102,7 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
         pipelineShaderStages[0].stage  = GetShaderStage();
         pipelineShaderStages[0].module = GetShaderModule();
         pipelineShaderStages[0].pName  = "main\0";
+        pipelineShaderStages[0].pSpecializationInfo = nullptr;
         pipelineShaderStagesIDs[0]     = GetStagesIDs(0);
 
         if(GetShaderModule() == VK_NULL_HANDLE) {
@@ -114,6 +115,7 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
         pipelineShaderStages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
         pipelineShaderStages[0].module = GetVertexShaderModule();
         pipelineShaderStages[0].pName  = "main\0";
+        pipelineShaderStages[0].pSpecializationInfo = nullptr;
         pipelineShaderStagesIDs[0]     = GetStagesIDs(0);
 
         if(GetVertexShaderModule() == VK_NULL_HANDLE) {
@@ -126,6 +128,7 @@ ShaderProgram::SetPipelineShaderStage(uint32_t &pipelineShaderStageCount, int *p
         pipelineShaderStages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
         pipelineShaderStages[1].module = GetFragmentShaderModule();
         pipelineShaderStages[1].pName  = "main\0";
+        pipelineShaderStages[1].pSpecializationInfo = nullptr;
         pipelineShaderStagesIDs[1]     = GetStagesIDs(1);
 
         if(GetFragmentShaderModule() == VK_NULL_HANDLE) {
