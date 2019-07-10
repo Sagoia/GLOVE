@@ -1,0 +1,10 @@
+language: cpp
+sudo: required
+dist: trusty
+compiler:
+- gcc
+os:
+- linux
+install: sudo apt-get install git cmake extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev mesa-vulkan-drivers && ./update_external_sources.sh
+script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make
+
