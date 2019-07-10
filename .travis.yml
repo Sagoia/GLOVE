@@ -5,6 +5,10 @@ compiler:
 - gcc
 os:
 - linux
-install: sudo apt-get install git cmake extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev mesa-vulkan-drivers && ./update_external_sources.sh
+before_install: sudo apt-get install -y extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev mesa-vulkan-drivers && ./update_external_sources.sh
+addons:
+  apt:
+    update: true
+
 script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make
 
