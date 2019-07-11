@@ -5,10 +5,14 @@ compiler:
   - gcc
 os:
   - linux
-before_install: sudo apt-get install -y extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev mesa-vulkan-drivers && ./update_external_sources.sh
+before_install: sudo apt-get install -y gdb extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev mesa-vulkan-drivers && ./update_external_sources.sh
 addons:
   apt:
     update: true
 
-script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make && cd build/Demos/demos && xvfb-run ./run_all_samples.sh --smoke
+script: ./configure.sh -e -d -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make && cd build/Demos/demos && xvfb-run ./run_all_samples.sh --smoke
+
+after_failure:
+  - COREFILE=$(find . -maxdepth 1 -name "core*" | head -n 1) # find core file
+  - if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" triangle2d_one_color -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
 
