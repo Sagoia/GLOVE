@@ -1,8 +1,6 @@
 language: cpp
 sudo: required
 dist: xenial
-services:
-  - xvfb
 compiler:
   - gcc
 os:
@@ -12,5 +10,5 @@ addons:
   apt:
     update: true
 
-script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make && cd build/Demos/demos && ./run_all_samples.sh --smoke
+script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make && cd build/Demos/demos && xvfb-run ./run_all_samples.sh --smoke
 
