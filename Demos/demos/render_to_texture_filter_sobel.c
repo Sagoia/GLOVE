@@ -236,9 +236,22 @@ int main(int argc, char **argv)
     eglutReshapeFunc    (ReshapeGL);
     eglutKeyboardFunc   (KeyboardGL);
 
-    if(InitGL())
-      eglutMainLoop();
-    DestroyGL      ();
+    if(!InitGL()) {
+        return 1;
+    }
+
+    if(SmokeTestsRunning()) {
+        ReshapeGL(WIDTH, HEIGHT);
+        char *fileName = EXECUTABLE_NAME(argv[0]);
+        TakeScreenshot(fileName, DrawGL, WIDTH, HEIGHT);
+        DestroyGL();
+        eglutDestroyWindow(win);
+        _eglutFini();
+
+    } else {
+        eglutMainLoop();
+        DestroyGL();
+    }
 
     return 0;
 }

@@ -22,6 +22,7 @@
 #include "../renderer/shading.h"
 #include "../scenegraph/mesh.h"
 #include "../utilities/profiler.h"
+#include "../utilities/smoke_tests.h"
 #include "../asset_manager/shaderManager.h"
 
 #define ESC_KEY            27

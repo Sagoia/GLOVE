@@ -11,6 +11,7 @@ set(GRAPHICS_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/scenegraph/camera.c
     ${CMAKE_CURRENT_SOURCE_DIR}/scenegraph/mesh.c
     ${CMAKE_CURRENT_SOURCE_DIR}/utilities/profiler.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/utilities/smoke_tests.c
 )
 
 add_library(GRAPHICS_ENGINE SHARED ${GRAPHICS_ENGINE_SOURCES})
