@@ -10,7 +10,7 @@ addons:
   apt:
     update: true
 
-script: ./configure.sh -e -d -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make && cd build/Demos/demos && xvfb-run ./run_all_samples.sh --smoke
+script: ./configure.sh -e -d -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && make && cd build_debug/Demos/demos && xvfb-run ./run_all_samples.sh --smoke
 
 after_failure:
   - COREFILE=$(find . -maxdepth 1 -name "core*" | head -n 1) # find core file
