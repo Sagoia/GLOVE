@@ -1,10 +1,12 @@
 language: cpp
 sudo: required
 dist: xenial
+services:
+  - xvfb
 compiler:
-- gcc
+  - gcc
 os:
-- linux
+  - linux
 before_install: sudo apt-get install -y extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev mesa-vulkan-drivers && ./update_external_sources.sh
 addons:
   apt:
