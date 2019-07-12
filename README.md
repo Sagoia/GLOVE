@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/Think-Silicon/GLOVE.svg?branch=master)](https://travis-ci.com/Think-Silicon/GLOVE)
+
 # GLOVE - GL Over Vulkan
 
 ![GLOVE functionality](Docs/Images/GLOVEfunction.jpg)
