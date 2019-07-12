@@ -26,13 +26,15 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 
 | **GL version**  | **Graphics Card** | **Vulkan Driver** | **Vulkan API** | **OS** | **Windows Platform** | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| ES 2.0  | Intel Ivybridge Desktop             | Mesa 17.3.3          | 1.0.54 | Ubuntu 16.04  | XCB | success |
-| ES 2.0  | Intel HD Graphics 530 (Skylake GT2) | Mesa 18.0.5        | 1.0.57 | Ubuntu 16.04  | XCB | success |
-| ES 2.0  | Intel HD Graphics 630 (Kabylake GT2) | Mesa 18.0.5        | 1.0.61 | Ubuntu 16.04  | XCB | success |
-| ES 2.0  | GeForce 940M                        | NVIDIA 396.51      | 1.1.70 | Ubuntu 16.04  | XCB | success |
-| ES 2.0  | GeForce GTX 670                     | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB | success |
-| ES 2.0  | Mali-G71                            | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
-| ES 2.0  | Mali-G71                            | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
+| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54 | Ubuntu 16.04  | XCB     | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57 | Ubuntu 16.04  | XCB     | success |
+| ES 2.0  | Intel HD Graphics 630 (Kabylake GT2) | Mesa 18.0.5        | 1.0.61 | Ubuntu 16.04  | XCB     | success |
+| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54 | Ubuntu 16.04  | WAYLAND | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57 | Ubuntu 16.04  | WAYLAND | success |
+| ES 2.0  | GeForce 940M                         | NVIDIA 396.51      | 1.1.70 | Ubuntu 16.04  | XCB     | success |
+| ES 2.0  | GeForce GTX 670                      | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB     | success |
+| ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
+| ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
 
 # Software Design
 
