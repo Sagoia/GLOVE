@@ -48,7 +48,12 @@ To create the Pull Request, please follow the below steps:
 1. Fork the repo and create your branch from master.
 2. Make sure that your code is consistent with [GLOVE Coding style](#coding-style).
 3. Make sure that your code compiles with --werror option ON and links correctly with the underlaying Vulkan driver.
-4. Make sure that GLOVE demos run successfully.
+4. Make sure that GLOVE demos run successfully. You also can run the demos as Smoke tests to get an automated result.
+
+```
+cd build/Demos/demos
+./run_all_samples.sh --smoke
+```
 5. Create and submit the Pull Request!
 
 GLOVE team members will be assigned to review your pull requests. Once the pull requests are approved and pass our internal continuous integration checks, we will merge the pull requests.
