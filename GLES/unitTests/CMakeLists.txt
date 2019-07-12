@@ -28,6 +28,6 @@ set_target_properties(gtest_main PROPERTIES IMPORTED_LOCATION ${GTEST_PATH}/lib/
 add_library(gtest STATIC IMPORTED)
 set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${GTEST_PATH}/lib/libgtest.a)
 
-add_executable(arrays_tests ${SOURCES})
-target_link_libraries(arrays_tests ${LIBS})
-add_dependencies(arrays_tests GLESv2)
+add_executable(gles_unit_tests ${SOURCES})
+target_link_libraries(gles_unit_tests ${LIBS})
+add_dependencies(gles_unit_tests GLESv2)

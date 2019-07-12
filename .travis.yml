@@ -10,5 +10,5 @@ addons:
   apt:
     update: true
 
-script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && cd build && make && cd GLES/unitTests && ./arrays_tests
+script: ./configure.sh -e -u /usr/include/vulkan/ -v /usr/lib/x86_64-linux-gnu/libvulkan.so && cd build && make && cd GLES/unitTests && ./gles_unit_tests
 
