@@ -120,7 +120,7 @@ ReplaceString(const std::string &s_in, const std::string &s_out, std::string &so
     size_t first = source.find_first_of(s_in);
 
     if(first != string::npos) {
-        source = s_out + string(source, first, source.size());
+        source = s_out + string(source, first + s_in.size(), source.size());
     }
 }
 
