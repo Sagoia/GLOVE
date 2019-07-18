@@ -110,7 +110,7 @@ Context::DeleteProgram(GLuint program)
         // Flush in case the shader is part of the pipeline
         // Optimization: perform this only when needed or defer deletion
         if(mWriteFBO->IsInDrawState()) {
-            Flush();
+            Finish();
         }
         progPtr->DetachShaders();
         mResourceManager->EraseShadingObject(program);
