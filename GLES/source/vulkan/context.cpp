@@ -332,6 +332,12 @@ CreateVkDevice(void)
     queueInfo.pQueuePriorities = queue_priorities;
     queueInfo.queueFamilyIndex = GloveVkContext.vkGraphicsQueueNodeIndex;
 
+    std::vector<const char*> enabledExtensions(requiredDeviceExtensions);
+
+    if(true == GetContext()->mIsMaintenanceExtSupported) {
+        enabledExtensions.insert(enabledExtensions.end(), usefulDeviceExtensions.begin(), usefulDeviceExtensions.end());
+    }
+
     VkDeviceCreateInfo deviceInfo;
     deviceInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceInfo.pNext                   = nullptr;
@@ -340,8 +346,8 @@ CreateVkDevice(void)
     deviceInfo.pQueueCreateInfos       = &queueInfo;
     deviceInfo.enabledLayerCount       = 0;
     deviceInfo.ppEnabledLayerNames     = nullptr;
-    deviceInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtensions.size());
-    deviceInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
+    deviceInfo.enabledExtensionCount   = enabledExtensions.size();
+    deviceInfo.ppEnabledExtensionNames = enabledExtensions.data();
     deviceInfo.pEnabledFeatures        = nullptr;
 
     VkResult err = vkCreateDevice(GloveVkContext.vkGpus[0], &deviceInfo, nullptr, &GloveVkContext.vkDevice);
