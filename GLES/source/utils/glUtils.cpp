@@ -656,7 +656,9 @@ GlFormatIsDepthRenderable(GLenum format)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(format) {
-    case GL_DEPTH_COMPONENT16:          return true;
+    case GL_DEPTH_COMPONENT16:
+    case GL_DEPTH_COMPONENT24_OES:
+    case GL_DEPTH_COMPONENT32_OES:      return true;
     default:                            return false;
     }
 }
@@ -718,4 +720,3 @@ IsGlSampler(GLenum type)
 {
     return (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE);
 }
-
