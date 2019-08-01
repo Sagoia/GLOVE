@@ -88,6 +88,7 @@ GlFormatToGlInternalFormat(GLenum format, GLenum type)
     case GL_DEPTH_COMPONENT24_OES:          return GL_DEPTH_COMPONENT24_OES;
     case GL_DEPTH_COMPONENT32_OES:          return GL_DEPTH_COMPONENT32_OES;
     case GL_STENCIL_INDEX8:                 return GL_STENCIL_INDEX8;
+    case GL_STENCIL_INDEX4_OES:             return GL_STENCIL_INDEX4_OES;
     case GL_BGRA_EXT:
     case GL_BGRA8_EXT:
         switch(type) {
@@ -153,6 +154,7 @@ GlInternalFormatToGlType(GLenum internalformat)
     case GL_DEPTH_COMPONENT24_OES:
     case GL_DEPTH_COMPONENT32_OES:
     case GL_STENCIL_INDEX8:
+    case GL_STENCIL_INDEX4_OES:
     case GL_RGB:
     case GL_RGBA:
     case GL_RGB8_OES  :
@@ -185,6 +187,7 @@ GlInternalFormatToGlFormat(GLenum internalFormat)
     case GL_DEPTH_COMPONENT32_OES:            return GL_DEPTH_COMPONENT32_OES;
     case GL_DEPTH24_STENCIL8_OES:             return GL_DEPTH24_STENCIL8_OES;
     case GL_STENCIL_INDEX8:                   return GL_STENCIL_INDEX8;
+    case GL_STENCIL_INDEX4_OES:               return GL_STENCIL_INDEX4_OES;
     default: NOT_FOUND_ENUM(internalFormat);  return GL_INVALID_VALUE;
     }
 }
@@ -197,6 +200,7 @@ GlInternalFormatTypeToNumElements(GLenum internalFormat, GLenum type)
     switch(type) {
     case GL_UNSIGNED_BYTE:
         switch(internalFormat) {
+        case GL_STENCIL_INDEX4_OES:
         case GL_STENCIL_INDEX8:
         case GL_ALPHA8_OES:
         case GL_ALPHA:
@@ -663,6 +667,7 @@ GlFormatIsStencilRenderable(GLenum format)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(format) {
+    case GL_STENCIL_INDEX4_OES:
     case GL_STENCIL_INDEX8:             return true;
     default:                            return false;
     }
