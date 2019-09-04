@@ -89,8 +89,8 @@ GenericVertexAttribute::GenerateUserSpaceVBO(uint32_t numVertices, bool& updated
     }
 
     SetOffset(0);
-    SetCurrentVbo(vbo);
     SetInternalVBOStatus(true);
+    SetCurrentVbo(vbo);
     updatedVBO = true;
     return vbo;
 }
@@ -130,8 +130,8 @@ GenericVertexAttribute::UpdateGenericValueVBO(bool& updatedVBO)
     SetNumElements(4);
     SetType(GL_FLOAT);
     SetStride(0);
-    SetCurrentVbo(vbo);
     SetInternalVBOStatus(true);
+    SetCurrentVbo(vbo);
     updatedVBO = true;
     return vbo;
 }
