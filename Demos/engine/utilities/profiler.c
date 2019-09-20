@@ -34,9 +34,13 @@ void GpuViewer()
 #endif
 }
 
-double GpuTimer						(const char *title)
+double GpuTimer(const char *title)
 {
+#ifdef WIN32
+    SYSTEMTIME tim;
+#else
     struct timeval tim;
+#endif
     static double t0                = 0.0;
     static double totalTimeFPS      = 0.0;
     static int    frames            = 0;
@@ -48,13 +52,23 @@ double GpuTimer						(const char *title)
     char  str[256];
 
     if(t0 == 0.0) {
+#ifdef WIN32
+        GetLocalTime(&tim);
+        t0 = tim.wSecond + tim.wMilliseconds;
+#else
         gettimeofday(&tim, NULL);
         t0 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+#endif
     }
 
     // Get time
+#ifdef WIN32
+    GetLocalTime(&tim);
+    t1 = tim.wSecond + tim.wMilliseconds;
+#else
     gettimeofday(&tim, NULL);
     t1                 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+#endif
     timePerFrame       = t1 - t0;
     totalTimeFPS      += timePerFrame;
     t0                 = t1;

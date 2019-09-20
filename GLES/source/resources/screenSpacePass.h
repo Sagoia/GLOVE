@@ -31,6 +31,7 @@
 #include "vulkan/renderPass.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/pipelineCache.h"
+#include <string>
 #include <utility>
 #include <map>
 

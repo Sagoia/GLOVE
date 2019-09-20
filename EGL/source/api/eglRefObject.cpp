@@ -23,6 +23,7 @@
 
 #include "utils/egl_defs.h"
 #include "eglRefObject.h"
+#include <algorithm>
 
 EGLRefObject::EGLRefObject():
     misMarkedForDeletion(false),

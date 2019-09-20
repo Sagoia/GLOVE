@@ -212,7 +212,7 @@ GlslangCompiler::CompileShader(const char* const* source, const TBuiltInResource
                 return false;
             }
 
-            std::string Src = to_string(*source);
+            std::string Src(*source);
             auto S = FixSamplers(samplers, Src);
             Src.clear();
             Src = std::move(S);

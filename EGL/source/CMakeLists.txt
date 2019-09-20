@@ -24,6 +24,11 @@ set(SOURCES
     utils/eglLogger.cpp
 )
 
+# For Microsoft Windows add the module-definition file to SOURCES (necessary to export API functions)
+if(WIN32)
+    set(SOURCES ${SOURCES} api/egl.def)
+endif()
+
 # Sets the LIBS variable to contain the libraries that GLESv2 shared library
 # will need to be linked against to.
 set(LIBS
@@ -72,11 +77,21 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${Vulkan_INCLUDE_DIR}
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
+if(WIN32)
+    set(OTHER_LINK_FLAGS "/INCREMENTAL:NO")
+else()
+    set(OTHER_LINK_FLAGS "-Wl,-Bsymbolic")
+endif()
+
 add_library(EGL SHARED ${SOURCES})
 set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                     LINK_FLAGS "-Wl,-Bsymbolic"
+                                     LINK_FLAGS ${OTHER_LINK_FLAGS}
                                      INSTALL_RPATH_USE_LINK_PATH TRUE
                                      INSTALL_RPATH "\$ORIGIN")
 target_link_libraries(EGL ${LIBS})
 
-install(TARGETS EGL LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+if(WIN32)
+    install(TARGETS EGL RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+else()
+    install(TARGETS EGL LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+endif()

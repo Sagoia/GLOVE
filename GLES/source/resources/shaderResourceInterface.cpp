@@ -25,6 +25,7 @@
  *
  */
 
+#include <string>
 #include "shaderResourceInterface.h"
 #include "utils/parser_helpers.h"
 #include "utils/glUtils.h"

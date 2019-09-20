@@ -43,7 +43,7 @@ private:
         CLEAR,
         CLEAR_DRAW,
         DRAW,
-        DELETE
+        IN_DELETE
     };
 
     const
@@ -170,7 +170,7 @@ public:
     inline void             SetStateClear(void)                                 { FUN_ENTRY(GL_LOG_TRACE); mState       = CLEAR;  }
     inline void             SetStateClearDraw(void)                             { FUN_ENTRY(GL_LOG_TRACE); mState       = CLEAR_DRAW;  }
     inline void             SetStateDraw(void)                                  { FUN_ENTRY(GL_LOG_TRACE); mState       = DRAW;   }
-    inline void             SetStateDelete(void)                                { FUN_ENTRY(GL_LOG_TRACE); mState       = DELETE; }
+    inline void             SetStateDelete(void)                                { FUN_ENTRY(GL_LOG_TRACE); mState       = IN_DELETE; }
     inline void             SetTarget(GLenum target)                            { FUN_ENTRY(GL_LOG_TRACE); mTarget      = target; }
     inline void             SetWidth(int32_t width)                             { FUN_ENTRY(GL_LOG_TRACE); mDims.width  = width;  }
     inline void             SetHeight(int32_t height)                           { FUN_ENTRY(GL_LOG_TRACE); mDims.height = height; }
@@ -201,7 +201,7 @@ public:
     inline bool             IsInIdleState(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return (mState == IDLE); }
     inline bool             IsInClearState(void)                                { FUN_ENTRY(GL_LOG_TRACE); return (mState == CLEAR); }
     inline bool             IsInClearDrawState(void)                            { FUN_ENTRY(GL_LOG_TRACE); return (mState == CLEAR_DRAW); }
-    inline bool             IsInDeleteState(void)                               { FUN_ENTRY(GL_LOG_TRACE); return (mState == DELETE); }
+    inline bool             IsInDeleteState(void)                               { FUN_ENTRY(GL_LOG_TRACE); return (mState == IN_DELETE); }
     inline bool             IsInDrawState(void)                                 { FUN_ENTRY(GL_LOG_TRACE); return !IsInIdleState(); }
 };
 

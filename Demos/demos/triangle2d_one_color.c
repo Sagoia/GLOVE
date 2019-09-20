@@ -47,10 +47,10 @@ bool InitGL()
     InitProgram(&program);
 
 // Initialize Mesh
-    InitMesh      (&mesh_triangle, 2, 1,  triangle_vertex_buffer_data , sizeof(triangle_vertex_buffer_data) ,
-                                          triangle_uv_buffer_data     , sizeof(triangle_uv_buffer_data)     ,
-                                          triangle_color_buffer_data  , sizeof(triangle_color_buffer_data)  ,
-                                          triangle_index_buffer_data  , sizeof(triangle_index_buffer_data)  ,
+    InitMesh      (&mesh_triangle, 2, 1,  triangle_vertex_buffer_data , sizeof(triangle_vertex_buffer_data)                                 ,
+                                          triangle_uv_buffer_data     , triangle_uv_buffer_data ? sizeof(triangle_uv_buffer_data) : 0       ,
+                                          triangle_color_buffer_data  , triangle_color_buffer_data? sizeof(triangle_color_buffer_data) : 0  ,
+                                          triangle_index_buffer_data  , triangle_index_buffer_data? sizeof(triangle_index_buffer_data) : 0  ,
                                           diffuse_textures, 0);
 
 // Initialize Camera

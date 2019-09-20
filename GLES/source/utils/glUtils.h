@@ -27,6 +27,7 @@
 #include <cstdio>
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
+#include <stdint.h>
 
 enum GLColorMaskBit {
     GLC_RED     = 0,

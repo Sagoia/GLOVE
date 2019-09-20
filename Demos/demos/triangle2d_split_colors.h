@@ -21,7 +21,7 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "vertical_split_colors.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "vertical_split_colors.bin"
 
-static const char* diffuse_textures [] = {};
+static const char **diffuse_textures = NULL;
 static const char* shading_titles   [] = { "COLOR_SPLIT" };
 
 #endif // __TRIANGLE2D_SPLIT_COLORS_H_

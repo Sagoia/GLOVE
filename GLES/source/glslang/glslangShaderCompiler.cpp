@@ -22,6 +22,7 @@
  */
 
 #include <vector>
+#include <sstream>
 #include "glslang/Include/intermediate.h"
 #include "glslang/MachineIndependent/localintermediate.h"
 #include "glslangShaderCompiler.h"

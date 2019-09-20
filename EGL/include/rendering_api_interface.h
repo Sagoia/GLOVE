@@ -24,8 +24,14 @@
 #ifndef __RENDERING_API_INTERFACE_H__
 #define __RENDERING_API_INTERFACE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdint.h>
 #include <stdbool.h>
+#ifdef __cplusplus
+}
+#endif
 #include "EGL/egl.h"
 #include "vulkan/vulkan.h"
 
@@ -74,6 +80,18 @@ typedef struct rendering_api_interface {
     finish_cb_t finish_cb;
     bind_to_texture_cb_t bind_to_texture_cb;
 } rendering_api_interface_t;
+
+extern rendering_api_interface_t GLES2Interface;
+
+#ifdef WIN32
+#ifdef __cplusplus
+extern "C" {
+#endif
+    EGLAPI rendering_api_interface_t* EGLAPIENTRY GetGLES2Interface(void);
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 typedef struct vkSyncItems_t {
     VkSemaphore                         vkAcquireSemaphore;

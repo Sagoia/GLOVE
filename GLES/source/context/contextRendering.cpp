@@ -326,9 +326,10 @@ Context::BindVertexBuffers(VkCommandBuffer *CmdBuffer)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount()) {
-        VkDeviceSize offsets[mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount()];
+        VkDeviceSize *offsets = new VkDeviceSize[mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount()];
         memset(offsets, 0, sizeof(VkDeviceSize) * mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount());
         vkCmdBindVertexBuffers(*CmdBuffer, 0, mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffersCount(), mStateManager.GetActiveShaderProgram()->GetActiveVertexVkBuffers(), offsets);
+        delete[] offsets;
     }
 }
 

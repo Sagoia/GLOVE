@@ -511,7 +511,7 @@ Texture::GenerateMipmaps(GLenum hintMipmapMode)
 
     const size_t     baseLevel  = 0;
     const size_t     baseSize   = dstRect.GetRectBufferSize();
-          uint8_t   *basePixels[mLayersCount];
+    std::vector<uint8_t*> basePixels(mLayersCount);
     for(GLint layer = 0; layer < mLayersCount; ++layer) {
         basePixels[layer] = new uint8_t[baseSize];
         CopyPixelsToHost(&srcRect, &dstRect, baseLevel, layer, GetExplicitInternalFormat(), basePixels[layer]);

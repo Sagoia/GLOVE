@@ -29,7 +29,7 @@ typedef struct openGL_program_t
 
 } openGL_program_t;
 
-void InitProgram(struct openGL_program_t *p)
+static inline void InitProgram(struct openGL_program_t *p)
 {
     p->mLocationMVP   = -1;
     p->mLocationPos   = -1;

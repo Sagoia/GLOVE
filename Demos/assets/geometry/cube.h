@@ -164,6 +164,6 @@ static const GLfloat cube_color_buffer_data [] = {
     0.0f,  0.0f,  1.0f,
 };
 
-static const GLuint  cube_index_buffer_data [] = {};
+static const GLuint  *cube_index_buffer_data = NULL;
 
 #endif // __CUBE_H_

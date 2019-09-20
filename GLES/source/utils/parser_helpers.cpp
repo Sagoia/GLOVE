@@ -21,6 +21,7 @@
  *
  */
 
+#include <string>
 #include "parser_helpers.h"
 
 const char *SAMPLER_TYPES[] =   { "sampler1D",

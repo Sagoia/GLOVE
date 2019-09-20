@@ -57,6 +57,11 @@ _eglutFatal(char *format, ...)
 int
 _eglutNow(void)
 {
+#ifdef WIN32
+    SYSTEMTIME lt;
+    GetLocalTime(&lt);
+    return lt.wSecond * 1000 + lt.wMilliseconds;
+#else
    struct timeval tv;
 #ifdef __VMS
    (void) gettimeofday(&tv, NULL );
@@ -65,6 +70,7 @@ _eglutNow(void)
    (void) gettimeofday(&tv, &tz);
 #endif
    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+#endif
 }
 
 static void

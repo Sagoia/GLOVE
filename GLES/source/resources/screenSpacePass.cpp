@@ -21,6 +21,7 @@
  *
  */
 
+#include <array>
 #include "screenSpacePass.h"
 #include "utils/VkToGlConverter.h"
 #include "shaderProgram.h"

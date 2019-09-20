@@ -49,10 +49,10 @@ bool InitGL()
     InitProgram(&program);
 
 // Initialize Mesh
-    InitMesh      (&mesh_screen_quad, 2, 2, squad_vertex_buffer_data, sizeof(squad_vertex_buffer_data),
-                                            squad_uv_buffer_data    , sizeof(squad_uv_buffer_data)    ,
-                                            squad_color_buffer_data , sizeof(squad_color_buffer_data) ,
-                                            squad_index_buffer_data , sizeof(squad_index_buffer_data) ,
+    InitMesh      (&mesh_screen_quad, 2, 2, squad_vertex_buffer_data, sizeof(squad_vertex_buffer_data)                              ,
+                                            squad_uv_buffer_data    , sizeof(squad_uv_buffer_data)                                  ,
+                                            squad_color_buffer_data , squad_color_buffer_data ? sizeof(squad_color_buffer_data) : 0 ,
+                                            squad_index_buffer_data , squad_index_buffer_data ? sizeof(squad_index_buffer_data) : 0 ,
                                             diffuse_textures, 1);
 
 // Initialize Camera

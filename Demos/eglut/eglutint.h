@@ -31,7 +31,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+
+#ifndef WIN32
 #include <sys/time.h>
+#endif
+
 #include "eglut.h"
 
 #define __VMS

@@ -65,7 +65,7 @@ EGLGlobalResourceManager eglGlobalResourceManager;
                                              if(eglDriverPtr->CheckBadContext(eglContextPtr) == EGL_FALSE)                \
                                              { return erroRetValue; }
 
-EGLAPI EGLDisplay EGLAPIENTRY
+EGLDisplay EGLAPIENTRY
 eglGetDisplay(EGLNativeDisplayType display_id)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -74,55 +74,55 @@ eglGetDisplay(EGLNativeDisplayType display_id)
     return reinterpret_cast<EGLDisplay>(eglDisplay);
 }
 
-EGLAPI EGLint EGLAPIENTRY
+EGLint EGLAPIENTRY
 eglGetError(void)
 {
     THREAD_EXEC_RETURN(GetError());
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglBindAPI(EGLenum api)
 {
     THREAD_EXEC_RETURN(BindAPI(api));
 }
 
-EGLAPI EGLenum EGLAPIENTRY
+EGLenum EGLAPIENTRY
 eglQueryAPI(void)
 {
     THREAD_EXEC_RETURN(QueryAPI());
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglWaitClient(void)
 {
     THREAD_EXEC_RETURN(WaitClient());
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglReleaseThread(void)
 {
     THREAD_EXEC_RETURN(ReleaseThread());
 }
 
-EGLAPI EGLContext EGLAPIENTRY
+EGLContext EGLAPIENTRY
 eglGetCurrentContext(void)
 {
     THREAD_EXEC_RETURN(GetCurrentContext());
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
+EGLSurface EGLAPIENTRY
 eglGetCurrentSurface(EGLint readdraw)
 {
     THREAD_EXEC_RETURN(GetCurrentSurface(readdraw));
 }
 
-EGLAPI EGLDisplay EGLAPIENTRY
+EGLDisplay EGLAPIENTRY
 eglGetCurrentDisplay(void)
 {
     THREAD_EXEC_RETURN(GetCurrentDisplay());
 }
 
-EGLAPI EGLContext EGLAPIENTRY
+EGLContext EGLAPIENTRY
 eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -135,7 +135,7 @@ eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context, con
     THREAD_EXEC_RETURN(CreateContext(eglDriver, eglConfig, eglShareContext, attrib_list));
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -146,7 +146,7 @@ eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
     THREAD_EXEC_RETURN(DestroyContext(eglDriver, eglContext));
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -163,7 +163,7 @@ eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
     return currentThread.MakeCurrent(eglDriver, eglDisplay, draw, read, ctx);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglQueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -174,19 +174,19 @@ eglQueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value)
     THREAD_EXEC_RETURN(QueryContext(eglDriver, eglContext, attribute, value));
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglWaitGL(void)
 {
     THREAD_EXEC_RETURN(WaitGL());
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglWaitNative(EGLint engine)
 {
     THREAD_EXEC_RETURN(WaitNative(engine));
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -201,7 +201,7 @@ eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     return res;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglTerminate(EGLDisplay dpy)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -224,7 +224,7 @@ eglTerminate(EGLDisplay dpy)
     return res;
 }
 
-EGLAPI const char * EGLAPIENTRY
+const char * EGLAPIENTRY
 eglQueryString(EGLDisplay dpy, EGLint name)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -245,7 +245,7 @@ eglQueryString(EGLDisplay dpy, EGLint name)
     }
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglGetConfigs(EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -255,7 +255,7 @@ eglGetConfigs(EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *nu
     return eglDriver->GetConfigs(configs, config_size, num_config);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglChooseConfig(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -265,7 +265,7 @@ eglChooseConfig(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, E
     return eglDriver->ChooseConfig(attrib_list, configs, config_size, num_config);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -276,7 +276,7 @@ eglGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *v
     return eglDriver->GetConfigAttrib(eglConfig, attribute, value);
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
+EGLSurface EGLAPIENTRY
 eglCreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -287,7 +287,7 @@ eglCreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win
     return eglDriver->CreateWindowSurface(eglConfig, win, attrib_list);
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
+EGLSurface EGLAPIENTRY
 eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -298,7 +298,7 @@ eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config, const EGLint *attrib_l
     return eglDriver->CreatePbufferSurface(eglConfig, attrib_list);
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
+EGLSurface EGLAPIENTRY
 eglCreatePixmapSurface(EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -309,7 +309,7 @@ eglCreatePixmapSurface(EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pix
     return eglDriver->CreatePixmapSurface(eglConfig, pixmap, attrib_list);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -320,7 +320,7 @@ eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
     return eglDriver->DestroySurface(eglSurface);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglQuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -332,7 +332,7 @@ eglQuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *va
 
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
+EGLSurface EGLAPIENTRY
 eglCreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -343,7 +343,7 @@ eglCreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EGLClientBuffe
     return eglDriver->CreatePbufferFromClientBuffer(buftype, buffer, eglConfig, attrib_list);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglSurfaceAttrib(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -354,7 +354,7 @@ eglSurfaceAttrib(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint va
     return eglDriver->SurfaceAttrib(eglSurface, attribute, value);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglBindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -365,7 +365,7 @@ eglBindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
     return eglDriver->BindTexImage(eglSurface, buffer);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -376,7 +376,7 @@ eglReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
     return eglDriver->ReleaseTexImage(eglSurface, buffer);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglSwapInterval(EGLDisplay dpy, EGLint interval)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -386,7 +386,7 @@ eglSwapInterval(EGLDisplay dpy, EGLint interval)
     return eglDriver->SwapInterval(interval);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -397,7 +397,7 @@ eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
     return eglDriver->SwapBuffers(eglSurface);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglCopyBuffers(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -408,7 +408,7 @@ eglCopyBuffers(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target)
     return eglDriver->CopyBuffers(eglSurface, target);
 }
 
-EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
+__eglMustCastToProperFunctionPointerType EGLAPIENTRY
 eglGetProcAddress(const char *procname)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -437,7 +437,7 @@ eglGetProcAddress(const char *procname)
     return fp;
 }
 
-EGLAPI EGLImageKHR EGLAPIENTRY
+EGLImageKHR EGLAPIENTRY
 eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -448,7 +448,7 @@ eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffe
     return eglDriver->CreateImageKHR(ctx, target, buffer, attrib_list);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -459,7 +459,7 @@ eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
 }
 
 //TODO: Implement the KHR_fence_sync extension
-EGLAPI EGLSyncKHR EGLAPIENTRY
+EGLSyncKHR EGLAPIENTRY
 eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -469,7 +469,7 @@ eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
     return eglDriver->CreateSyncKHR(type, attrib_list);
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
+EGLBoolean EGLAPIENTRY
 eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 {
     FUN_ENTRY(DEBUG_DEPTH);
@@ -479,7 +479,7 @@ eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
     return eglDriver->DestroySyncKHR(sync);
 }
 
-EGLAPI EGLint EGLAPIENTRY
+EGLint EGLAPIENTRY
 eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
 {
     FUN_ENTRY(DEBUG_DEPTH);

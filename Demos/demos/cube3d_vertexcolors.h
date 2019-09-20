@@ -21,7 +21,7 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "geometry3d_vertexcolors.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "geometry3d_vertexcolors.bin"
 
-static const char* diffuse_textures [] = { };
+static const char **diffuse_textures = NULL;
 static const char* material_titles  [] = { "OPAQUE", "TRANSPARENT" };
 static const char* projection_titles[] = { "ORTHOGRAPHIC", "PERSPECTIVE" };
 static const char* shading_titles   [] = { "COLOR_VERTEX"};

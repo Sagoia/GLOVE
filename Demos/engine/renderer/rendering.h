@@ -17,6 +17,15 @@
 #include "../utilities/debug.h"
 #include "../utilities/linmath.h"
 
+#ifdef WIN32
+    #ifdef OPAQUE
+        #undef OPAQUE
+    #endif
+    #ifdef TRANSPARENT
+        #undef TRANSPARENT
+    #endif
+#endif
+
 enum projectionMatrix {
     ORTHOGRAPHIC = 0,
     PERSPECTIVE  = 1

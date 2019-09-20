@@ -11,6 +11,7 @@
  * Lesser General Public License for more details.
  */
 
+#include <stdint.h>
 #include "shaderManager.h"
 
 bool

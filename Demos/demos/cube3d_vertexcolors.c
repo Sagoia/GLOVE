@@ -47,10 +47,10 @@ bool InitGL()
     InitProgram(&program);
 
 // Initialize Mesh
-    InitMesh      (&mesh_cube, 3, 12, cube_vertex_buffer_data, sizeof(cube_vertex_buffer_data),
-                                      cube_uv_buffer_data    , sizeof(cube_uv_buffer_data)    ,
-                                      cube_color_buffer_data , sizeof(cube_color_buffer_data) ,
-                                      cube_index_buffer_data , sizeof(cube_index_buffer_data) ,
+    InitMesh      (&mesh_cube, 3, 12, cube_vertex_buffer_data, sizeof(cube_vertex_buffer_data)                             ,
+                                      cube_uv_buffer_data    , sizeof(cube_uv_buffer_data)                                 ,
+                                      cube_color_buffer_data , sizeof(cube_color_buffer_data)                              ,
+                                      cube_index_buffer_data , cube_index_buffer_data ? sizeof(cube_index_buffer_data) : 0 ,
                                       diffuse_textures, 0);
 
 // Initialize Camera
