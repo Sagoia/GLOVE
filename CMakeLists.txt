@@ -110,6 +110,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_MACOS_MVK")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_USE_PLATFORM_MACOS_MVK")
     endif()
+elseif(CMAKE_SYSTEM_NAME STEQUAL "Windows")
+    set(USE_SURFACE WINDOWS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_WIN32_KHR")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_USE_PLATFORM_WIN32_KHR")
 endif()
 
 # Recurse into the the following subdirectories. This does not actually cause
