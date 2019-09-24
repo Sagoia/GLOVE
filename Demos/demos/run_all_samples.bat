@@ -1,0 +1,11 @@
+start /W triangle2d_one_color
+start /W triangle2d_split_colors
+start /W circle2d_sdf
+start /W texture2d_color
+start /W cube3d_vertexcolors
+start /W cube3d_textures
+start /W render_to_texture_filter_gamma
+start /W render_to_texture_filter_invert
+start /W render_to_texture_filter_grayscale
+start /W render_to_texture_filter_sobel
+start /W render_to_texture_filter_boxblur

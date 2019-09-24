@@ -71,6 +71,10 @@ if(USE_SURFACE STREQUAL "MACOS")
     #set(LIBS ${LIBS} wayland-client)
 endif()
 
+if(USE_SURFACE STREQUAL "WINDOWS")
+    set(SOURCES ${SOURCES} platform/vulkan/WSIWindows.cpp)
+endif()
+
 include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_SOURCE_DIR}/EGL/include
                     ${CMAKE_SOURCE_DIR}/GLES/include

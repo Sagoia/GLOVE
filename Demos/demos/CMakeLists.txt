@@ -21,4 +21,9 @@ foreach(example ${DEMOS})
     add_dependencies(${example} GLESv2 EGL)
 endforeach()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+if(WIN32)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples.bat ${CMAKE_BINARY_DIR}/bin COPYONLY)
+else()
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+endif()
+

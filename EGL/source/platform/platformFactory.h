@@ -35,7 +35,8 @@ public:
         WSI_XCB,
         WSI_WAYLAND,
         WSI_ANDROID,
-        WSI_PLANE_DISPLAY
+        WSI_PLANE_DISPLAY,
+        WSI_WINDOWS
     };
 
 private:
@@ -53,7 +54,7 @@ public:
 
     static void                        ChoosePlatform();
     static PlatformWindowInterface    *GetWindowInterface();
-    static PlatformResources          *GetResources();    
+    static PlatformResources          *GetResources();
 };
 
 #endif // __PLATFORM_FACTORY_H__

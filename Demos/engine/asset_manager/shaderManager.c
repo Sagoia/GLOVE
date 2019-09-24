@@ -18,7 +18,7 @@ bool
 LoadSource(const char *filename, char **shaderSource, int *length)
 {
     FILE *file;
-    file = fopen(filename, "r");
+    file = fopen(filename, "rb");
     if(!file) {
 #ifdef DEBUG_ASSET_MANAGEMENT
         fprintf(stderr, "[shaderManager.c] [LoadSource()]: Error opening file %s\n", filename);

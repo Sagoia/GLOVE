@@ -36,6 +36,10 @@
 #include "platform/vulkan/WSIAndroid.h"
 #endif // VK_USE_PLATFORM_ANDROID_KHR
 
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+#include "platform/vulkan/WSIWindows.h"
+#endif // VK_USE_PLATFORM_WIN32_KHR
+
 PlatformFactory *PlatformFactory::mInstance = nullptr;
 
 PlatformFactory::PlatformFactory()
@@ -94,6 +98,11 @@ PlatformFactory::ChoosePlatform()
     return;
 #endif
 
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+    platformFactory->SetPlatformType(PlatformFactory::WSI_WINDOWS);
+    return;
+#endif
+
     platformFactory->SetPlatformType(PlatformFactory::WSI_PLANE_DISPLAY);
 }
 
@@ -139,6 +148,15 @@ PlatformFactory::GetWindowInterface()
         }
 #endif
 
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+        case WSI_WINDOWS: {
+            VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
+            WSIWindows *vulkanWSI = new WSIWindows();
+            windowInterface->SetWSI(vulkanWSI);
+            return windowInterface;
+        }
+#endif
+
         case UNKNOWN_PLATFORM:
         default:
             NOT_REACHED();
@@ -163,6 +181,11 @@ PlatformFactory::GetResources()
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
         case WSI_ANDROID:
+            return new VulkanResources();
+#endif
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+        case WSI_WINDOWS:
             return new VulkanResources();
 #endif
 

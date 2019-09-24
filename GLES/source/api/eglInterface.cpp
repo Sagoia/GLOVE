@@ -58,7 +58,7 @@ rendering_api_interface_t GLES2Interface = {
 };
 
 #ifdef WIN32
-EGLAPI rendering_api_interface_t* EGLAPIENTRY GetGLES2Interface(void)
+rendering_api_interface_t* EGLAPIENTRY GetGLES2Interface(void)
 {
     return &GLES2Interface;
 }

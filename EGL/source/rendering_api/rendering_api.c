@@ -129,22 +129,24 @@ static rendering_api_return_e rendering_api_get_api_interface(const char *librar
         return RENDERING_API_NOT_FOUND;
     }
 #else
-    library_info->handle = LoadLibrary(library_name);
+    EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+    CHAR DllPath[MAX_PATH] = { 0 };
+    GetModuleFileName((HINSTANCE)& __ImageBase, DllPath, _countof(DllPath));
+    char* r = strrchr(DllPath, '\\');
+    strcpy(r + 1, library_name);
+    library_info->handle = LoadLibrary(DllPath);
     if (!library_info->handle) {
-        fprintf(stderr, "0x%x\n", GetLastError());
-    return RENDERING_API_NOT_FOUND;
+        library_info->handle = LoadLibrary(library_name);
+        if (!library_info->handle) {
+            fprintf(stderr, "0x%x\n", GetLastError());
+            return RENDERING_API_NOT_FOUND;
+        }
     }
 
-    typedef rendering_api_interface_t * p_api_interface;
+    typedef rendering_api_interface_t* p_api_interface;
     typedef p_api_interface(*func_get_api_interface)();
-
     func_get_api_interface get_api_interface = (func_get_api_interface)GetProcAddress(library_info->handle, api_interface_name);
     api_interface = get_api_interface();
-
-    if (!api_interface || !api_interface->init_API_cb) {
-        FreeLibrary(library_info->handle);
-    return RENDERING_API_LOAD_ERROR;
-    }
 #endif
 
     library_info->loaded = true;

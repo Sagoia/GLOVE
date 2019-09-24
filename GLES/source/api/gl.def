@@ -151,3 +151,4 @@ glPushGroupMarkerEXT
 glPopGroupMarkerEXT
 glGetProgramBinaryOES
 glProgramBinaryOES
+GetGLES2Interface
