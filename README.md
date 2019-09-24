@@ -37,6 +37,7 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 | ES 2.0  | GeForce GTX 670                      | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB     | success |
 | ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
 | ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
+| ES 2.0  | GeForce GTX 1050                     | NVIDIA 416.83      | 1.1.84 | Windows 10    | Windows | success |
 
 # Software Design
 
@@ -74,6 +75,14 @@ Khronos [glslang](https://github.com/KhronosGroup/glslang) repository is mandato
 Google [googletest](https://github.com/google/googletest) repository is used for unit testing.
 
 To get and build the above projects:
+
+```
+python update_external_sources.py
+```
+
+**ATTENTION: Python 3 is supported only, so you need to install python 3.* version**
+
+Linux Users can also use the equivalent bash shell script, as follows
 
 ```
 ./update_external_sources.sh

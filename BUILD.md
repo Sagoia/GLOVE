@@ -47,6 +47,58 @@ To uninstall the libraries from the system directories (superuser privilege migh
 make uninstall
 ```
 
+# Building GLOVE for Windows
+
+The building process has been tested on Windows 10, using MS Visual Studio 2019.
+
+## Create an MS Visual Studio Project
+
+At first, you should create an MS Visual Studio Project by cloning GLOVE from github.
+Afterwards, you should resolve the external dependencies, as described [here](README.md#external-repositories-dependencies)
+
+## Configure Building
+
+GLOVE building can be configured according to the options listed in the following table:
+
+Select Project->CMake Settings
+
+| **Option** | **Default** | **Description** |
+| --- | --- | --- |
+| -d \| --debug | _OFF_ | _Enable building Debug mode_ |
+| -t \| --trace-build | _OFF_ | _Enable logs_ |
+
+example of CMakeSettings json file
+
+```
+{
+    "configurations": [
+        {
+            "name": "x64-Release",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "TRACE_BUILD",
+                    "value": "false",
+                    "type": "BOOL"
+                }
+            ]
+        }
+    ]
+}
+```
+
+## Build Project
+
+To build the Project, use MS Visual Studio GUI (Build->Build All)
+
+
 # Building GLOVE for Android
 
 The building process has been tested on Android 7 and 8.

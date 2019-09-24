@@ -80,6 +80,18 @@ $ ./offline_shader_compiler -v sh.vert -f sh.frag -o sh.bin
 
 Note that, the **BINARY\_PROG** macro preprocessor in the &#39; **CMakeLists.txt**&#39; file has to be provided in the **CMAKE\_C\_FLAGS** to inform graphics applications to use precompiled shaders (see **Table 2**).
 
+# GLOVE demos for Windows
+
+GLOVE demos described in [previous section](README_demos.md#glove-demos-for-linux) are supported on Windows as well.
+
+## Execution
+
+By using either command prompt or Windows explorer, navigate to **GLOVE\out\build\<build_name>\bin** and execute **run_all_samples** batch file to run all samples.
+
+```
+run_all_samples.bat
+```
+
 # GLOVE demos for Android
 
 Currently, GLOVE uses the es2gears demo (official link [here](http://manpages.ubuntu.com/manpages/cosmic/man1/es2gears.1.html)) as a demo application for Android.
