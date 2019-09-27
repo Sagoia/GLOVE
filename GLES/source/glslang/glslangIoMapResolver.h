@@ -74,7 +74,7 @@ public:
     void               CreateVaryingLocationMap(std::map<std::string, std::pair<int,bool>> *location_map);
 
 /// Get Functions
-    inline uint32_t    GetVaryingInNum(void)                        const { FUN_ENTRY(GL_LOG_TRACE); return mVaryingINMap.size(); }
+    inline uint32_t    GetVaryingInNum(void)                        const { FUN_ENTRY(GL_LOG_TRACE); return static_cast<uint32_t>(mVaryingINMap.size()); }
     inline const char *GetVaryingInName(uint32_t index)             const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingINMap.size() - 1) ? "" : mVaryingINMap[index].name;        }
     inline const char *GetVaryingInType(uint32_t index)             const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingINMap.size() - 1) ? "" : mVaryingINMap[index].type;        }
     inline int         GetVaryingInLocation(uint32_t index)         const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].location;    }
@@ -83,7 +83,7 @@ public:
     inline int         GetVaryingInMatrixCols(uint32_t index)       const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingINMap.size() - 1) ? -1 : mVaryingINMap[index].vectorSize == 0 ?
                                                                                                                                                       mVaryingINMap[index].matrixCols : 1; }
 
-    inline uint32_t    GetVaryingOutNum(void)                       const { FUN_ENTRY(GL_LOG_TRACE); return mVaryingOUTMap.size(); }
+    inline uint32_t    GetVaryingOutNum(void)                       const { FUN_ENTRY(GL_LOG_TRACE); return static_cast<uint32_t>(mVaryingOUTMap.size()); }
     inline const char *GetVaryingOutName(uint32_t index)            const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingOUTMap.size() - 1) ? "" : mVaryingOUTMap[index].name;        }
     inline const char *GetVaryingOutType(uint32_t index)            const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingOUTMap.size() - 1) ? "" : mVaryingOUTMap[index].type;        }
     inline int         GetVaryingOutLocation(uint32_t index)        const { FUN_ENTRY(GL_LOG_TRACE); return (index > mVaryingOUTMap.size() - 1) ? -1 : mVaryingOUTMap[index].location;    }
