@@ -94,7 +94,7 @@ bool InitGL()
     return true;
 }
 
-void DrawGL()
+void DrawGL(void)
 {
 // Set Viewport
     glViewport(0, 0, viewport.mWidth, viewport.mHeight);
