@@ -327,10 +327,10 @@ struct Color {
         temp_R = (int16_t)((18 * (int16_t)y                   +   24 * (int16_t)v - 3368) >> 4);
         temp_G = (int16_t)((18 * (int16_t)y -  6 * (int16_t)u -   16 * (int16_t)v + 2536) >> 4);
         temp_B = (int16_t)((18 * (int16_t)y + 32 * (int16_t)u - 4392) >> 4);
-        color.r = CLAMP(temp_R, int16_t(0), int16_t(0xff));
-        color.g = CLAMP(temp_G, int16_t(0), int16_t(0xff));
-        color.b = CLAMP(temp_B, int16_t(0), int16_t(0xff));
-        color.a = 0xff;
+
+        color.r = static_cast<unsigned char>(CLAMP(temp_R, int16_t(0), int16_t(0xff)));
+        color.g = static_cast<unsigned char>(CLAMP(temp_G, int16_t(0), int16_t(0xff)));
+        color.b = static_cast<unsigned char>(CLAMP(temp_B, int16_t(0), int16_t(0xff)));
 
         return color;
     }
