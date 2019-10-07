@@ -36,3 +36,4 @@ android/bin/project.properties
 android/bin/proguard-project.txt
 android/bin/local.properties
 android/bin/NativeActivity-debug-unaligned.apk
+/.vs

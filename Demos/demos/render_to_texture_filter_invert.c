@@ -115,9 +115,11 @@ bool InitGL()
 
     glUseProgram(program_screen_quad.mID);
     program_screen_quad.mLocationPos = glGetAttribLocation (program_screen_quad.mID, "v_posCoord_in");
-    program_screen_quad.mLocationUV  = glGetAttribLocation (program_screen_quad.mID, "v_texCoord_in");    
+    program_screen_quad.mLocationUV  = glGetAttribLocation (program_screen_quad.mID, "v_texCoord_in");
     glUniform1i(glGetUniformLocation(program_screen_quad.mID, "uniform_texture"), 0);
-    glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"), 1.0/(float)WIDTH, 1.0/(float)HEIGHT);
+    glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"),
+                                     (float)1.0/(float)WIDTH,
+                                     (float)1.0/(float)HEIGHT);
 
     InitFBO(&fbo, WIDTH, HEIGHT);
 

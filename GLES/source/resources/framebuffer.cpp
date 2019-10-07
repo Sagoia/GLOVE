@@ -623,12 +623,12 @@ Framebuffer::CreateRenderPass(bool clearColorEnabled, bool clearDepthEnabled, bo
     FUN_ENTRY(GL_LOG_DEBUG);
 
     if(mUpdated || mSizeUpdated ||
-       mRenderPass->GetColorClearEnabled()   != clearColorEnabled    ||
-       mRenderPass->GetDepthClearEnabled()   != clearDepthEnabled    ||
-       mRenderPass->GetStencilClearEnabled() != clearStencilEnabled  ||
-       mRenderPass->GetColorWriteEnabled()   != writeColorEnabled    ||
-       mRenderPass->GetDepthWriteEnabled()   != writeDepthEnabled    ||
-       mRenderPass->GetStencilWriteEnabled() != writeStencilEnabled) {
+       static_cast<bool>(mRenderPass->GetColorClearEnabled())   != clearColorEnabled    ||
+       static_cast<bool>(mRenderPass->GetDepthClearEnabled())   != clearDepthEnabled    ||
+       static_cast<bool>(mRenderPass->GetStencilClearEnabled()) != clearStencilEnabled  ||
+       static_cast<bool>(mRenderPass->GetColorWriteEnabled())   != writeColorEnabled    ||
+       static_cast<bool>(mRenderPass->GetDepthWriteEnabled())   != writeDepthEnabled    ||
+       static_cast<bool>(mRenderPass->GetStencilWriteEnabled()) != writeStencilEnabled) {
 
         if(!mIsSystem && mSizeUpdated) {
             CreateDepthStencilTexture();

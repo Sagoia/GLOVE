@@ -117,7 +117,9 @@ bool InitGL()
     program_screen_quad.mLocationPos = glGetAttribLocation (program_screen_quad.mID, "v_posCoord_in");
     program_screen_quad.mLocationUV  = glGetAttribLocation (program_screen_quad.mID, "v_texCoord_in");
     glUniform1i(glGetUniformLocation(program_screen_quad.mID, "uniform_texture"), 0);
-    glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"), 1.0/(float)WIDTH, 1.0/(float)HEIGHT);
+    glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"),
+                                     (float)1.0/(float)WIDTH,
+                                     (float)1.0/(float)HEIGHT);
 
     InitFBO(&fbo, WIDTH, HEIGHT);
 
@@ -201,7 +203,9 @@ void ReshapeGL(int width, int height)
         mat4x4_ortho      (camera.mProjectionMatrix, camera.mLeft, camera.mRight, camera.mBottom, camera.mTop, camera.mNear, camera.mFar);
 
     glUseProgram(program_screen_quad.mID);
-    glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"), 1.0/(float)viewport.mWidth, 1.0/(float)viewport.mHeight);
+    glUniform2f(glGetUniformLocation(program_screen_quad.mID, "uniform_resolution_div"),
+                                     (float)1.0/(float)viewport.mWidth,
+                                     (float)1.0/(float)viewport.mHeight);
 
 // Check for opengGL-relate Errors
     ASSERT_NO_GL_ERROR();
