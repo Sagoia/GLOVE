@@ -180,7 +180,7 @@ Context::GetIntegerv(GLenum pname, GLint* params)
                                                           0x7fffffff :  static_cast<GLint>(mStateManager.GetViewportTransformationState()->GetMaxDepthRange() * 0x7fffffff); break;
     case GL_DITHER:                             *params = mStateManager.GetFragmentOperationsState()->GetDitheringEnabled(); break;
     case GL_FRONT_FACE:                         *params = mStateManager.GetRasterizationState()->GetFrontFace(); break;
-    case GL_LINE_WIDTH:                         *params = mStateManager.GetRasterizationState()->GetLineWidth(); break;
+    case GL_LINE_WIDTH:                         *params = static_cast<GLint>(mStateManager.GetRasterizationState()->GetLineWidth()); break;
     case GL_PACK_ALIGNMENT:                     *params = mStateManager.GetPixelStorageState()->GetPixelStorePack(); break;
     case GL_POLYGON_OFFSET_FACTOR:              *params = static_cast<GLint>(std::roundf(mStateManager.GetRasterizationState()->GetPolygonOffsetFactor())); break;
     case GL_POLYGON_OFFSET_UNITS:               *params = static_cast<GLint>(std::roundf(mStateManager.GetRasterizationState()->GetPolygonOffsetUnits())); break;
@@ -242,7 +242,7 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     FUN_ENTRY(GL_LOG_DEBUG);
 
     switch(pname) {
-    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER) ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER)) : 0; break;
+    case GL_ARRAY_BUFFER_BINDING:               *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER) ? static_cast<GLfloat>(mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ARRAY_BUFFER))) : 0; break;
     case GL_BLEND:                              *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetBlendingEnabled()); break;
     case GL_BLEND_COLOR:                        mStateManager.GetFragmentOperationsState()->GetBlendingColor(params); break;
     case GL_BLEND_DST_ALPHA:                    *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetBlendingFactorDestinationAlpha()); break;
@@ -254,14 +254,14 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     case GL_COLOR_CLEAR_VALUE:                  mStateManager.GetFramebufferOperationsState()->GetClearColor(params); break;
     case GL_COLOR_WRITEMASK:                    mStateManager.GetFramebufferOperationsState()->GetColorMask(params); break;
     case GL_CULL_FACE:                          *params = static_cast<GLfloat>(mStateManager.GetRasterizationState()->GetCullEnabled()); break;
-    case GL_CULL_FACE_MODE:                     *params = mStateManager.GetRasterizationState()->GetCullFace(); break;
-    case GL_CURRENT_PROGRAM:                    *params = GetProgramId(mStateManager.GetActiveShaderProgram()); break;
+    case GL_CULL_FACE_MODE:                     *params = static_cast<GLfloat>(mStateManager.GetRasterizationState()->GetCullFace()); break;
+    case GL_CURRENT_PROGRAM:                    *params = static_cast<GLfloat>(GetProgramId(mStateManager.GetActiveShaderProgram())); break;
     case GL_DEPTH_CLEAR_VALUE:                  *params = mStateManager.GetFramebufferOperationsState()->GetClearDepth(); break;
     case GL_DEPTH_FUNC:                         *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetDepthTestFunc()); break;
     case GL_DEPTH_TEST:                         *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetDepthTestEnabled()); break;
     case GL_DEPTH_WRITEMASK:                    *params = static_cast<GLfloat>(mStateManager.GetFramebufferOperationsState()->GetDepthMask()); break;
     case GL_DITHER:                             *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetDitheringEnabled()); break;
-    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER)) : 0; break;
+    case GL_ELEMENT_ARRAY_BUFFER_BINDING:       *params = mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER) ? static_cast<GLfloat>(mResourceManager->GetBufferID(mStateManager.GetActiveObjectsState()->GetActiveBufferObject(GL_ELEMENT_ARRAY_BUFFER))) : 0; break;
     case GL_FRAMEBUFFER_BINDING:                *params = static_cast<GLfloat>(mStateManager.GetActiveObjectsState()->GetActiveFramebufferObjectID()); break;
     case GL_FRONT_FACE:                         *params = static_cast<GLfloat>(mStateManager.GetRasterizationState()->GetFrontFace()); break;
     case GL_IMPLEMENTATION_COLOR_READ_FORMAT:   *params = GL_RGBA; break;
@@ -281,7 +281,7 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
                                                 params[1] = GLOVE_MAX_TEXTURE_SIZE; break;
     case GL_NUM_SHADER_BINARY_FORMATS:          *params = GLOVE_NUM_SHADER_BINARY_FORMATS; break;
     case GL_NUM_PROGRAM_BINARY_FORMATS_OES:     *params = GLOVE_NUM_PROGRAM_BINARY_FORMATS; break;
-    case GL_PACK_ALIGNMENT:                     *params = mStateManager.GetPixelStorageState()->GetPixelStorePack(); break;
+    case GL_PACK_ALIGNMENT:                     *params = static_cast<GLfloat>(mStateManager.GetPixelStorageState()->GetPixelStorePack()); break;
     case GL_POLYGON_OFFSET_FACTOR:              *params = mStateManager.GetRasterizationState()->GetPolygonOffsetFactor(); break;
     case GL_POLYGON_OFFSET_FILL:                *params = static_cast<GLfloat>(mStateManager.GetRasterizationState()->GetPolygonOffsetFillEnabled()); break;
     case GL_POLYGON_OFFSET_UNITS:               *params = mStateManager.GetRasterizationState()->GetPolygonOffsetUnits(); break;
@@ -291,7 +291,7 @@ Context::GetFloatv(GLenum pname, GLfloat* params)
     case GL_SCISSOR_BOX:                        mStateManager.GetFragmentOperationsState()->GetScissorRect(params); break;
     case GL_SCISSOR_TEST:                       *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetScissorTestEnabled()); break;
     case GL_STENCIL_TEST:                       *params = static_cast<GLfloat>(mStateManager.GetFragmentOperationsState()->GetStencilTestEnabled()); break;
-    case GL_UNPACK_ALIGNMENT:                   *params = mStateManager.GetPixelStorageState()->GetPixelStoreUnpack(); break;
+    case GL_UNPACK_ALIGNMENT:                   *params = static_cast<GLfloat>(mStateManager.GetPixelStorageState()->GetPixelStoreUnpack()); break;
     case GL_VIEWPORT:                           mStateManager.GetViewportTransformationState()->GetViewportRect(params); break;
     case GL_RED_BITS:                           GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), params, NULL, NULL, NULL, NULL, NULL); break;
     case GL_BLUE_BITS:                          GlFormatToStorageBits(mWriteFBO->GetColorAttachmentTexture()->GetInternalFormat(), NULL, params, NULL, NULL, NULL, NULL); break;
