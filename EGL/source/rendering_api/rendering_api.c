@@ -41,6 +41,9 @@ system's GLESv2.
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
     #define GLESv2_LIBRARY_NAME "GLESv2.dll"
     #define GLESv2_INTERFACE_NAME "GetGLES2Interface"
+#elif defined(VK_USE_PLATFORM_MACOS_MVK)
+    #define GLESv2_LIBRARY_NAME "libGLESv2.dylib"
+    #define GLESv2_INTERFACE_NAME "GLES2Interface"
 #else
     #define GLESv2_LIBRARY_NAME "libGLESv2.so"
     #define GLESv2_INTERFACE_NAME "GLES2Interface"

@@ -36,6 +36,10 @@
 #include "platform/vulkan/WSIAndroid.h"
 #endif // VK_USE_PLATFORM_ANDROID_KHR
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+#include "platform/vulkan/WSIMacOS.h"
+#endif // VK_USE_PLATFORM_MACOS_MVK
+
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 #include "platform/vulkan/WSIWindows.h"
 #endif // VK_USE_PLATFORM_WIN32_KHR
@@ -103,6 +107,11 @@ PlatformFactory::ChoosePlatform()
     return;
 #endif
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+    platformFactory->SetPlatformType(PlatformFactory::WSI_MACOS);
+    return;
+#endif
+
     platformFactory->SetPlatformType(PlatformFactory::WSI_PLANE_DISPLAY);
 }
 
@@ -148,6 +157,15 @@ PlatformFactory::GetWindowInterface()
         }
 #endif
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+        case WSI_MACOS: {
+            VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
+            WSIMacOS *vulkanWSI = new WSIMacOS();
+            windowInterface->SetWSI(vulkanWSI);
+            return windowInterface;
+        }
+#endif
+
 #ifdef VK_USE_PLATFORM_WIN32_KHR
         case WSI_WINDOWS: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
@@ -186,6 +204,11 @@ PlatformFactory::GetResources()
 
 #ifdef VK_USE_PLATFORM_WIN32_KHR
         case WSI_WINDOWS:
+            return new VulkanResources();
+#endif
+
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+        case WSI_MACOS:
             return new VulkanResources();
 #endif
 

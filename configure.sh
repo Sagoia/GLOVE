@@ -115,7 +115,7 @@ else
                 echo " -a | --arm-compile                   # cross build for ARM platform (default OFF)"
                 echo " -d | --debug                         # build in Debug mode (default Release)"
                 echo " -e | --werror                        # handle warnings as errors (default OFF)"
-                echo " -f | --use-surface                   # set windowing system (Options: XCB, ANDROID, NATIVE) (default XCB)"
+                echo " -f | --use-surface                   # set windowing system (Options: XCB, ANDROID, NATIVE, WINDOWS, MACOS) (default XCB)"
                 echo " -i | --install-prefix      (dir)     # set custom installation prefix path"
                 echo " -s | --sysroot             (dir)     # set sysroot for cross compilation"
                 echo " -t | --trace-build                   # activate logs (default OFF)"
@@ -128,12 +128,18 @@ else
     done
 fi
 
+DYN_LIB_EXTENSION=".so"
+
+if [ "$(uname)" == "Darwin" ]; then
+    DYN_LIB_EXTENSION=".dylib"
+fi
+
 if [ ! -d "$BASEDIR/External/glslang" ] || [ ! -d "$BASEDIR/External/glslang/.git" ]; then
     echo -e "\e[0;31mExternal sources are missing. Run './update_external_sources.sh'.\e[0m"
     exit 1
 fi
 
-if [ -n "$VULKAN_LIBRARY" ] && { [ ! -e $VULKAN_LIBRARY ] || echo $VULKAN_LIBRARY | grep -q -v ".so" ; }; then
+if [ -n "$VULKAN_LIBRARY" ] && { [ ! -e $VULKAN_LIBRARY ] || echo $VULKAN_LIBRARY | grep -q -v $DYN_LIB_EXTENSION ; }; then
     echo -e "\e[0;31mCannot find Vulkan loader '$VULKAN_LIBRARY'.\e[0m"
     exit 1
 fi

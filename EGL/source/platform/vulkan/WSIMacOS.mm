@@ -24,6 +24,8 @@
 #ifdef VK_USE_PLATFORM_MACOS_MVK
 #include "WSIMacOS.h"
 
+#import <APPKit/APPKit.h>
+
 #include "api/eglDisplay.h"
 
 EGLBoolean
@@ -64,10 +66,13 @@ WSIMacOS::CreateSurface(EGLDisplay_t* dpy, EGLNativeWindowType win, EGLSurface_t
     //     return VK_NULL_HANDLE;
     // }
 
-    // if(!surface->GetWidth() || !surface->GetHeight()) {
-    //     surface->SetWidth(win->width);
-    //     surface->SetHeight(win->height);
-    // }
+    if (!surface->GetWidth() || !surface->GetHeight()) {
+        NSView *view = (__bridge NSView *)win;
+        CGSize frameSize = view.frame.size;
+
+        surface->SetWidth(frameSize.width );
+        surface->SetHeight(frameSize.height );
+    }
 
     VkSurfaceKHR vkSurface;
     VkMacOSSurfaceCreateInfoMVK surfaceCreateInfo;

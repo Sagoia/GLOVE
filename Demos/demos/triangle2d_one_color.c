@@ -148,7 +148,11 @@ void KeyboardGL(unsigned char key)
    }
 }
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+int macos_main(int argc, char **argv)
+#else
 int main(int argc, char **argv)
+#endif
 {
     win_name = EXECUTABLE_NAME(argv[0]);
 
@@ -177,7 +181,9 @@ int main(int argc, char **argv)
 
     } else {
         eglutMainLoop();
+#ifndef VK_USE_PLATFORM_MACOS_MVK
         DestroyGL();
+#endif
     }
 
     return 0;

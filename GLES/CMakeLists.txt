@@ -13,6 +13,6 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTAL
 
 add_subdirectory(source)
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT APPLE)
     add_subdirectory(unitTests)
 endif()

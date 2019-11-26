@@ -13,6 +13,11 @@
 
 #include "tgaLoader.h"
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+extern FILE *macos_fopen(const char *filename, const char *mode);
+#define fopen macos_fopen
+#endif
+
 int LoadTGA(Texture * texture, const char *filename)
 {
     FILE * fTGA;												// File pointer to texture file

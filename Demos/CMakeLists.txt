@@ -25,7 +25,7 @@ set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} ${C_REDUCE_ERRORS} ${DEBUG} ${PROFILE}
 
 # Sets the libs variable to contain the libraries that the examples will
 # need to be linked against to.
-if(WIN32)
+if(WIN32 OR APPLE)
     set(LIBS
         EGL
         GLESv2

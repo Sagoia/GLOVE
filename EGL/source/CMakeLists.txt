@@ -23,6 +23,41 @@ set(SOURCES
     utils/eglUtils.cpp
     utils/eglLogger.cpp
 )
+set(HEADERS
+    api/eglConfig.h
+    api/eglConfig_android.h
+    api/eglConfig_linux.h
+    api/eglContext.h
+    api/eglDisplay.h
+    api/eglFunctions.h
+    api/eglSurface.h
+    display/displayDriver.h
+    display/displayDriversContainer.h
+    thread/renderingThread.h
+    platform/platformFactory.h
+    platform/platformResources.h
+    platform/platformWindowInterface.h
+    platform/vulkan/vulkanWindowInterface.h
+    platform/vulkan/vulkanWSI.h
+    platform/vulkan/vulkanAPI.h
+    platform/vulkan/vulkanResources.h
+    platform/vulkan/WSIMacOS.h
+    platform/vulkan/WSIPlaneDisplay.h
+    platform/vulkan/WSIWindows.h
+    platform/vulkan/WSIXcb.h
+    rendering_api/rendering_api.h
+    utils/egl_defs.h
+    utils/eglLogger.h
+    utils/eglLoggerImpl.h
+    utils/eglUtils.h
+    utils/simpleLoggerImpl.h
+)
+
+set(OTHER_HEADERS
+    ${CMAKE_SOURCE_DIR}/GLES/source/utils/arrays.hpp
+    ${CMAKE_SOURCE_DIR}/EGL/include/rendering_api_interface.h
+)
+
 
 # For Microsoft Windows add the module-definition file to SOURCES (necessary to export API functions)
 if(WIN32)
@@ -67,8 +102,7 @@ if(USE_SURFACE STREQUAL "WAYLAND")
 endif()
 
 if(USE_SURFACE STREQUAL "MACOS")
-    set(SOURCES ${SOURCES} platform/vulkan/WSIMacOS.cpp)
-    #set(LIBS ${LIBS} wayland-client)
+    set(SOURCES ${SOURCES} platform/vulkan/WSIMacOS.mm)
 endif()
 
 if(USE_SURFACE STREQUAL "WINDOWS")
@@ -82,16 +116,40 @@ include_directories(${CMAKE_SOURCE_DIR}/EGL/source
                     ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 if(WIN32)
-    set(OTHER_LINK_FLAGS "/INCREMENTAL:NO")
+    add_library(EGL SHARED ${HEADERS} ${SOURCES})
+
+    set_target_properties(EGL PROPERTIES PREFIX "lib"
+                                         POSITION_INDEPENDENT_CODE ON
+                                         LINK_FLAGS "/INCREMENTAL:NO"
+                                         INSTALL_RPATH_USE_LINK_PATH TRUE
+                                         INSTALL_RPATH "\$ORIGIN")
 else()
-    set(OTHER_LINK_FLAGS "-Wl,-Bsymbolic")
+    if(APPLE)
+        find_library(APPKIT APPKit)
+
+        add_library(EGL SHARED ${OTHER_HEADERS} ${HEADERS} ${SOURCES})
+
+        set_target_properties(EGL PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                             XCODE_ATTRIBUTE_VALID_ARCHS "x86_64"
+					     #XCODE_ATTRIBUTE_CLANG_LINK_OBJC_RUNTIME "YES"
+                                             POSITION_INDEPENDENT_CODE ON
+				             MACOSX_RPATH TRUE
+					     SKIP_BUILD_RPATH FALSE
+                                             #LINK_FLAGS "-Wl,-Bsymbolic"
+                                             INSTALL_RPATH_USE_LINK_PATH TRUE
+                                             INSTALL_RPATH "\$ORIGIN")
+        target_link_libraries(EGL ${APPKIT})
+    else()
+        add_library(EGL SHARED ${SOURCES})
+        set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                             LINK_FLAGS "-Wl,-Bsymbolic"
+                                             INSTALL_RPATH_USE_LINK_PATH TRUE
+                                             INSTALL_RPATH "\$ORIGIN")
+    endif()
 endif()
 
-add_library(EGL SHARED ${SOURCES})
-set_target_properties(EGL PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                     LINK_FLAGS ${OTHER_LINK_FLAGS}
-                                     INSTALL_RPATH_USE_LINK_PATH TRUE
-                                     INSTALL_RPATH "\$ORIGIN")
+
+
 target_link_libraries(EGL ${LIBS})
 
 if(WIN32)

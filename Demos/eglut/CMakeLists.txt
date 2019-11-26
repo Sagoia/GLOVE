@@ -5,6 +5,11 @@ set(EGLUT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/eglut.c
 )
 
+set(EGLUT_HEADS
+    ${CMAKE_CURRENT_SOURCE_DIR}/eglut.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/eglutint.h
+)
+
 if(USE_SURFACE STREQUAL "DISPLAY")
     set(EGLUT_SOURCES
         ${EGLUT_SOURCES}
@@ -23,9 +28,14 @@ elseif(USE_SURFACE STREQUAL "WAYLAND")
     )
 
 elseif(USE_SURFACE STREQUAL "MACOS")
+    set(EGLUT_HEADS
+        ${EGLUT_HEADS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_macos_app.h
+    )
     set(EGLUT_SOURCES
         ${EGLUT_SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_macos.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_macos.m
+        ${CMAKE_CURRENT_SOURCE_DIR}/eglut_macos_app.m
     )
 
 elseif(USE_SURFACE STREQUAL "WINDOWS")
@@ -38,9 +48,12 @@ elseif(USE_SURFACE STREQUAL "ANDROID")
 
 endif()
 
-if(WIN32)
-     add_library(EGLUT STATIC ${EGLUT_SOURCES})
-     target_link_libraries(EGLUT ${LIBS})
+if(WIN32 OR APPLE)
+    add_library(EGLUT STATIC ${EGLUT_HEADS} ${EGLUT_SOURCES})
+    if (APPLE)
+        set_target_properties(EGLUT PROPERTIES  XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                                XCODE_ATTRIBUTE_VALID_ARCHS "x86_64")
+    endif()
 else()
     add_library(EGLUT SHARED ${EGLUT_SOURCES})
 endif()

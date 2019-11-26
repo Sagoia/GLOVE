@@ -28,39 +28,61 @@
  */
 
 #include "eglutint.h"
+#import "eglut_macos_app.h"
 
 void
 _eglutNativeInitDisplay(void)
 {
+   _eglut->native_dpy = EGL_DEFAULT_DISPLAY;
+   _eglut->surface_type = EGL_WINDOW_BIT;
 }
 
 void
 _eglutStoreName(const char *title)
 {
+
 }
 
 void
 _eglutNativeFiniDisplay(void)
 {
+
 }
 
 void
 _eglutNativeInitWindow(struct eglut_window *win, const char *title,
                        int x, int y, int w, int h)
 {
+    eglutAppDelegate *appDelegate = (eglutAppDelegate *)[[NSApplication sharedApplication] delegate];
+    eglutViewController *viewController = (eglutViewController *)appDelegate.rootController;
+    NSView *view = viewController.glView;
+
+    win->native.u.window = (__bridge EGLNativeWindowType)(view);
+    win->native.width = view.frame.size.width;
+    win->native.height = view.frame.size.height;
 }
 
 void
 _eglutNativeFiniWindow(struct eglut_window *win)
 {
-}
 
-static void
-next_event(struct eglut_window *win)
-{
 }
 
 void
 _eglutNativeEventLoop(void)
 {
+    eglutAppDelegate *appDelegate = (eglutAppDelegate *)[[NSApplication sharedApplication] delegate];
+    eglutViewController *viewController = (eglutViewController *)appDelegate.rootController;
+    [viewController startRun];
+}
+
+void
+macos_draw_cb(void)
+{
+    struct eglut_window *win = _eglut->current;
+    if (win) {
+        if(win->display_cb)
+            win->display_cb();
+        eglSwapBuffers(_eglut->dpy, win->surface);
+    }
 }

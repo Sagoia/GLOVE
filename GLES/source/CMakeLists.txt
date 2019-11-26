@@ -87,6 +87,68 @@ set(SOURCES
     vulkan/utils.cpp
 )
 
+set(HEADERS
+    api/glFunctions.h
+    context/context.h
+    glslang/glslangCompiler.h
+    glslang/glslangLinker.h
+    glslang/glslangIoMapResolver.h
+    glslang/glslangShaderCompiler.h
+    glslang/shaderConverter.h
+    resources/attachment.h
+    resources/bufferObject.h
+    resources/framebuffer.h
+    resources/genericVertexAttribute.h
+    resources/resourceManager.h
+    resources/renderbuffer.h
+    resources/shader.h
+    resources/shaderCompiler.h
+    resources/shaderProgram.h
+    resources/shaderReflection.h
+    resources/shaderResourceInterface.h
+    resources/texture.h
+    resources/rect.h
+    resources/sampler.h
+    resources/screenSpacePass.h
+    state/stateManager.h
+    state/stateActiveObjects.h
+    state/stateInputAssembly.h
+    state/stateFragmentOperations.h
+    state/stateFramebufferOperations.h
+    state/statePixelStorage.h
+    state/stateRasterization.h
+    state/stateHintAspects.h
+    state/stateViewportTransformation.h
+    utils/color.hpp
+    utils/globals.h
+    utils/glsl_types.h
+    utils/GlToVkConverter.h
+    utils/parser_helpers.h
+    utils/VkToGlConverter.h
+    utils/glLogger.h
+    utils/glLoggerImpl.h
+    utils/glUtils.h
+    utils/cacheManager.h
+    vulkan/commandBufferManager.h
+    vulkan/commandBufferPool.h
+    vulkan/clearPass.h
+    vulkan/renderPass.h
+    vulkan/buffer.h
+    vulkan/memory.h
+    vulkan/sampler.h
+    vulkan/image.h
+    vulkan/imageView.h
+    vulkan/pipeline.h
+    vulkan/pipelineCache.h
+    vulkan/framebuffer.h
+    vulkan/fence.h
+    vulkan/context.h
+    vulkan/utils.h
+)
+
+set(OTHER_HEADERS
+    ${CMAKE_SOURCE_DIR}/GLES/source/utils/arrays.hpp
+)
 # For Microsoft Windows add the module-definition file to SOURCES (necessary to export API functions)
 if(WIN32)
     set(SOURCES ${SOURCES} api/gl.def)
@@ -163,16 +225,35 @@ else()
 endif()
 
 if(WIN32)
-    set(OTHER_LINK_FLAGS "/INCREMENTAL:NO")
+    add_library(GLESv2 SHARED ${SOURCES})
+    set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                            LINK_FLAGS "-Wl,-Bsymbolic"
+                                            INSTALL_RPATH_USE_LINK_PATH TRUE
+                                            INSTALL_RPATH "\$ORIGIN")
 else()
-    set(OTHER_LINK_FLAGS "-Wl,-Bsymbolic")
+
+    if(APPLE)
+	add_library(GLESv2 SHARED ${OTHER_HEADERS} ${HEADERS} ${SOURCES})
+
+        set_target_properties(GLESv2 PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                                XCODE_ATTRIBUTE_VALID_ARCHS "x86_64"
+                                                POSITION_INDEPENDENT_CODE ON
+					        MACOSX_RPATH TRUE
+					        SKIP_BUILD_RPATH FALSE
+                                                #LINK_FLAGS "-Wl,-Bsymbolic"
+                                                INSTALL_RPATH_USE_LINK_PATH TRUE
+                                                INSTALL_RPATH "\$ORIGIN")
+    else()
+        add_library(GLESv2 SHARED ${SOURCES})
+        set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                                LINK_FLAGS "-Wl,-Bsymbolic"
+                                                INSTALL_RPATH_USE_LINK_PATH TRUE
+                                                INSTALL_RPATH "\$ORIGIN")
+    endif()
+
 endif()
 
-add_library(GLESv2 SHARED ${SOURCES})
-set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                        LINK_FLAGS ${OTHER_LINK_FLAGS}
-                                        INSTALL_RPATH_USE_LINK_PATH TRUE
-                                        INSTALL_RPATH "\$ORIGIN")
+
 target_link_libraries(GLESv2 ${LIBS})
 
 if(WIN32)

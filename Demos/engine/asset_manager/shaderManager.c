@@ -14,6 +14,11 @@
 #include <stdint.h>
 #include "shaderManager.h"
 
+#ifdef VK_USE_PLATFORM_MACOSX_MVK
+extern FILE *macos_fopen(const char *filename, const char *mode);
+#define fopen macos_fopen
+#endif
+
 bool
 LoadSource(const char *filename, char **shaderSource, int *length)
 {

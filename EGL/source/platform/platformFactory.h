@@ -36,7 +36,8 @@ public:
         WSI_WAYLAND,
         WSI_ANDROID,
         WSI_PLANE_DISPLAY,
-        WSI_WINDOWS
+        WSI_WINDOWS,
+        WSI_MACOS
     };
 
 private:
