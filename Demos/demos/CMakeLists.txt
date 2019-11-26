@@ -22,7 +22,8 @@ if (APPLE)
     find_library(APPKIT APPKit)
     find_library(METAL Metal)
 
-    file(GLOB XIB_FILES $(CMAKE_SOURCE_DIR)/Demos/demos/macOS/*.storyboard)
+    #file(GLOB XIB_FILES LIST_DIRECTORIES false $(CMAKE_SOURCE_DIR)/Demos/demos/macOS/*.storyboard)
+    set(XIB_FILES 	${CMAKE_SOURCE_DIR}/Demos/demos/macOS/Main.storyboard)
     set_source_files_properties(${XIB_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     file(GLOB RES_FILES ${CMAKE_BINARY_DIR}/Demos/assets)
@@ -32,13 +33,14 @@ endif()
 foreach(example ${DEMOS})
     if (APPLE)
         add_executable(${example} MACOSX_BUNDLE ${example}.c
+                                                ${CMAKE_SOURCE_DIR}/Demos/demos/macOS/main.m
                                                 ${XIB_FILES}
-                                                ${RES_FILES}
-                                                ${CMAKE_SOURCE_DIR}/Demos/demos/macOS/main.m)
-        set_target_properties(${example} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
-					 MACOSX_RPATH TRUE
-					 SKIP_BUILD_RPATH FALSE
-                                         XCODE_ATTRIBUTE_VALID_ARCHS "x86_64")
+                                                ${RES_FILES})
+        set_target_properties(${example} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/Demos/demos/plist.in
+                                                    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
+                                                    MACOSX_RPATH TRUE
+                                                    SKIP_BUILD_RPATH FALSE
+                                                    XCODE_ATTRIBUTE_VALID_ARCHS "x86_64")
         target_link_libraries(${example} ${FOUNDATION})
         target_link_libraries(${example} ${QUARTZCORE})
         target_link_libraries(${example} ${COCOA})

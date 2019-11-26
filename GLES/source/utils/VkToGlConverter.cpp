@@ -46,7 +46,8 @@ VkFormatToGlInternalformat(VkFormat format)
 
     case VK_FORMAT_D16_UNORM:               return GL_DEPTH_COMPONENT16;
     case VK_FORMAT_D16_UNORM_S8_UINT:
-    case VK_FORMAT_D24_UNORM_S8_UINT:       return GL_DEPTH24_STENCIL8_OES;
+    case VK_FORMAT_D24_UNORM_S8_UINT:
+    case VK_FORMAT_D32_SFLOAT_S8_UINT:      return GL_DEPTH24_STENCIL8_OES;
     case VK_FORMAT_X8_D24_UNORM_PACK32:     return GL_DEPTH_COMPONENT24_OES;
     case VK_FORMAT_D32_SFLOAT:              return GL_DEPTH_COMPONENT32_OES;
     case VK_FORMAT_S8_UINT:                 return GL_STENCIL_INDEX8;

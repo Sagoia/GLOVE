@@ -26,7 +26,11 @@
 #include "../asset_manager/shaderManager.h"
 
 #define ESC_KEY            27
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+#define SOURCES_PATH
+#else
 #define SOURCES_PATH       "../"
+#endif
 #define SHADERS_PATH       "assets/shaders/"
 #define TEXTURES_PATH      "assets/textures/"
 

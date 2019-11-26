@@ -13,19 +13,6 @@ extern void macos_draw_cb(void);
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-    NSRect frame = NSMakeRect(0, 0, 600, 600);
-    self.window  = [[[NSWindow alloc] initWithContentRect:frame
-                       styleMask:NSWindowStyleMaskTitled
-                       backing:NSBackingStoreBuffered
-                       defer:NO] autorelease];
-
-    self.rootController = [[eglutViewController alloc] init];
-
-    [self.window.contentView addSubview:self.rootController.view];
-    self.window.contentViewController = self.rootController;
-    //[self.window bind:NSTitleBinding toObject:self.rootController withKeyPath:@"view controller" options:nil];
-
-    [self.window makeKeyAndOrderFront:NSApp];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -54,12 +41,9 @@ extern void macos_draw_cb(void);
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    //self.view.wantsLayer = YES;		// Back the view with a layer created by the makeBackingLayer method.
+    self.view.wantsLayer = YES;		// Back the view with a layer created by the makeBackingLayer method.
 
     // Do any additional setup after loading the view, typically from a nib.
-    _glView = [[eglutView alloc] initWithFrame:self.view.frame];
-    _glView.wantsLayer = YES;
-    [self.view addSubview:_glView];
 
     NSArray<NSString *> *arguments = [[NSProcessInfo processInfo] arguments];
     int argc = (int)arguments.count;
@@ -77,8 +61,6 @@ extern void macos_draw_cb(void);
 - (void)startRun {
 
     CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
-    //CGDirectDisplayID displayID = CGMainDisplayID();
-    //CVReturn error = CVDisplayLinkCreateWithCGDisplay(displayID, &_displayLink);
     CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
     CVDisplayLinkSetOutputCallback(_displayLink, renderCallback, (__bridge void *)self);
     CVDisplayLinkStart(_displayLink);

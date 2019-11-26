@@ -15,6 +15,7 @@ INSTALL_PREFIX="/usr/local"
 BUILD_FOLDER=build
 CROSS_COMPILATION_ARM=false
 USE_SURFACE=XCB
+OS_FLAGS=""
 
 #########################################################
 ####################### GLOVE ###########################
@@ -23,7 +24,8 @@ function buildGlove() {
     mkdir -p $BUILD_FOLDER
     cd $BUILD_FOLDER
 
-    cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    cmake  $OS_FLAGS \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DVULKAN_LIBRARY=$VULKAN_LIBRARY \
           -DUSE_SURFACE=$USE_SURFACE \
           -DVULKAN_INCLUDE_PATH=$VULKAN_INCLUDE_PATH \
@@ -132,6 +134,7 @@ DYN_LIB_EXTENSION=".so"
 
 if [ "$(uname)" == "Darwin" ]; then
     DYN_LIB_EXTENSION=".dylib"
+    OS_FLAGS="-G Xcode "
 fi
 
 if [ ! -d "$BASEDIR/External/glslang" ] || [ ! -d "$BASEDIR/External/glslang/.git" ]; then

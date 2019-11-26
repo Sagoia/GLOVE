@@ -3,9 +3,6 @@
 
 @interface eglutAppDelegate : NSResponder <NSApplicationDelegate>
 
-@property (strong, nonatomic) NSWindow *window;
-@property (strong, nonatomic) NSViewController *rootController;
-
 @end
 
 #pragma mark -

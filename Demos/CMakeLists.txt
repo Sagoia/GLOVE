@@ -65,6 +65,7 @@ add_subdirectory(assets)
 add_subdirectory(eglut)
 add_subdirectory(engine)
 add_subdirectory(demos)
-if(NOT WIN32)
+if(UNIX AND NOT APPLE)
     add_subdirectory(tools)
 endif()
+

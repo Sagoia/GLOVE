@@ -21,7 +21,12 @@
 #define FRAGMENT_SHADER_NAME        SOURCES_PATH SHADERS_PATH "texture2d_color.frag"
 #define BINARY_PROGRAM_SHADER_NAME  SOURCES_PATH SHADERS_PATH "texture2d_color.bin"
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+static const char* diffuse_textures [] = { "assets/textures/tsi_256x256.tga"};
+#else
 static const char* diffuse_textures [] = { "../assets/textures/tsi_256x256.tga" };
+#endif
+
 static const char* shading_titles   [] = { "TEXTURE_2D" };
 
 #endif // __TEXTURE2D_COLOR_H_

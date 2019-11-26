@@ -53,9 +53,10 @@ void
 _eglutNativeInitWindow(struct eglut_window *win, const char *title,
                        int x, int y, int w, int h)
 {
-    eglutAppDelegate *appDelegate = (eglutAppDelegate *)[[NSApplication sharedApplication] delegate];
-    eglutViewController *viewController = (eglutViewController *)appDelegate.rootController;
-    NSView *view = viewController.glView;
+
+    NSArray<NSWindow *> *windows = [[NSApplication sharedApplication] windows];
+    eglutViewController *viewController = (eglutViewController *)windows[0].windowController.contentViewController;
+    NSView *view = viewController.self.view;
 
     win->native.u.window = (__bridge EGLNativeWindowType)(view);
     win->native.width = view.frame.size.width;
@@ -71,8 +72,9 @@ _eglutNativeFiniWindow(struct eglut_window *win)
 void
 _eglutNativeEventLoop(void)
 {
-    eglutAppDelegate *appDelegate = (eglutAppDelegate *)[[NSApplication sharedApplication] delegate];
-    eglutViewController *viewController = (eglutViewController *)appDelegate.rootController;
+    NSArray<NSWindow *> *windows = [[NSApplication sharedApplication] windows];
+    eglutViewController *viewController = (eglutViewController *)windows[0].windowController.contentViewController;
+
     [viewController startRun];
 }
 

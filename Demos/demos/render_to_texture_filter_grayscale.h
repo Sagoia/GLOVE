@@ -26,7 +26,12 @@
 #define FRAGMENT_SHADER_QUAD_NAME        SOURCES_PATH SHADERS_PATH "texture2d_filter_grayscale.frag"
 #define BINARY_PROGRAM_SHADER_QUAD_NAME  SOURCES_PATH SHADERS_PATH "texture2d_filter_grayscale.bin"
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+static const char* diffuse_textures [] = { "assets/textures/tsi_256x256.tga", "assets/textures/vulkan_512x512.tga"};
+#else
 static const char* diffuse_textures [] = { "../assets/textures/tsi_256x256.tga", "../assets/textures/vulkan_512x512.tga"};
+#endif
+
 static const char* shading_titles   [] = { "COLOR_GRAYSCALE" };
 
 #endif // __RENDER_TO_TEXTURE_FILTER_GRAYSCALE_H_
