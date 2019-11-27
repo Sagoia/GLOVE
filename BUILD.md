@@ -15,7 +15,7 @@ GLOVE building can be configured according to the options listed in the followin
 | -a \| --arm-compile | _OFF_ | _Enable cross building for ARM platform_ |
 | -d \| --debug | _OFF_ | _Enable building Debug mode_ |
 | -e \| --werror | _OFF_ | _Turn all compilation warnings into errors_ |
-| -f \| --use-surface | _XCB_ |  _Sets the windowing system<br>(Options: XCB, WAYLAND, ANDROID, NATIVE)_ |
+| -f \| --use-surface | _XCB_ |  _Sets the windowing system<br>(Options: XCB, WAYLAND, ANDROID, NATIVE, WINDOWS, MACOS)_ |
 | -i \| --install-prefix (dir) | _System Installation Prefix (/usr/local)_ | _Set custom installation prefix path_ |
 | -s \| --sysroot (dir) | _-_ | _Set sysroot for cross compilation_ |
 | -t \| --trace-build | _OFF_ | _Enable logs_ |
@@ -98,6 +98,39 @@ example of CMakeSettings json file
 
 To build the Project, use MS Visual Studio GUI (Build->Build All)
 
+
+# Building GLOVE for macOS
+
+The building process has been tested on macOS Catalina (10.15).
+
+## Configure Building
+
+GLOVE building can be configured according to the options listed in the following table:
+
+```
+./configure.sh [-options]
+```
+
+| **Option** | **Default** | **Description** |
+| --- | --- | --- |
+| -d \| --debug | _OFF_ | _Enable building Debug mode_ |
+| -e \| --werror | _OFF_ | _Turn all compilation warnings into errors_ |
+| -f \| --use-surface | _XCB_ |  _Sets the windowing system<br>_ **(MACOS option must be set for macOS)** |
+| -i \| --install-prefix (dir) | _System Installation Prefix (/usr/local)_ | _Set custom installation prefix path_ |
+| -t \| --trace-build | _OFF_ | _Enable logs_ |
+| -u \| --vulkan-include-path (dir) | _System Include Path_ | _Set custom Vulkan include path_ |
+| -v \| --vulkan-loader (lib) | _System Vulkan Loader_ | _Set custom Vulkan loader library_ |
+
+
+In macOS, the configure.sh script calls CMake with "-G Xcode" argument, thus preparing all necessary files for opening GLOVE in Xcode. Build files are stored in "build" folder.
+
+## Build Project
+
+Open GLOVE.xcodeproj (\<GLOVE_root\>/build/GLOVE.xcodeproj) with Xcode and build the Project from the tool (Product | Build). 
+
+## MoltenVK
+
+GLOVE has been tested in macOS, using [MoltenVK](https://github.com/KhronosGroup/MoltenVK) (Vulkan to Metal middleware), which creates the necessary Vulkan headers and Vulkan loader (libMoltenVK.dylib). Instructions on how to build MoltenVk can be found [here](https://github.com/KhronosGroup/MoltenVK#building).
 
 # Building GLOVE for Android
 

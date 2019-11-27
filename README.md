@@ -26,18 +26,19 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 
 | **GL version**  | **Graphics Card** | **Vulkan Driver** | **Vulkan API** | **OS** | **Windows Platform** | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54 | Ubuntu 16.04  | XCB     | success |
-| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57 | Ubuntu 16.04  | XCB     | success |
-| ES 2.0  | Intel HD Graphics 630 (Kabylake GT2) | Mesa 18.0.5        | 1.0.61 | Ubuntu 16.04  | XCB     | success |
-| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54 | Ubuntu 16.04  | WAYLAND | success |
-| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57 | Ubuntu 16.04  | WAYLAND | success |
-| ES 2.0  | Radeon RX 550 Series                 | Mesa 18.0.5        | 1.0.61 | Ubuntu 16.04  | XCB     | success |
-| ES 2.0  | Radeon RX 550 Series                 | AMDGPU-Pro v18.40  | 1.1.77 | Ubuntu 16.04  | XCB     | success |
-| ES 2.0  | GeForce 940M                         | NVIDIA 396.51      | 1.1.70 | Ubuntu 16.04  | XCB     | success |
-| ES 2.0  | GeForce GTX 670                      | NVIDIA 396.54      | 1.1.70 | Ubuntu 18.04  | XCB     | success |
-| ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26 | Android 7.0   | Android | success |
-| ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65 | Android 8.0   | Android | success |
-| ES 2.0  | GeForce GTX 1050                     | NVIDIA 416.83      | 1.1.84 | Windows 10    | Windows | success |
+| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54  | Ubuntu 16.04   | XCB     | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57  | Ubuntu 16.04   | XCB     | success |
+| ES 2.0  | Intel HD Graphics 630 (Kabylake GT2) | Mesa 18.0.5        | 1.0.61  | Ubuntu 16.04   | XCB     | success |
+| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54  | Ubuntu 16.04   | WAYLAND | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57  | Ubuntu 16.04   | WAYLAND | success |
+| ES 2.0  | Radeon RX 550 Series                 | Mesa 18.0.5        | 1.0.61  | Ubuntu 16.04   | XCB     | success |
+| ES 2.0  | Radeon RX 550 Series                 | AMDGPU-Pro v18.40  | 1.1.77  | Ubuntu 16.04   | XCB     | success |
+| ES 2.0  | GeForce 940M                         | NVIDIA 396.51      | 1.1.70  | Ubuntu 16.04   | XCB     | success |
+| ES 2.0  | GeForce GTX 670                      | NVIDIA 396.54      | 1.1.70  | Ubuntu 18.04   | XCB     | success |
+| ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26  | Android 7.0    | Android | success |
+| ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65  | Android 8.0    | Android | success |
+| ES 2.0  | GeForce GTX 1050                     | NVIDIA 416.83      | 1.1.84  | Windows 10     | Windows | success |
+| ES 2.0  | Intel Iris Graphics 6100             | MoltenVK v1.0.38   | 1.1.126 | macOS Catalina | MacOS   | ongoing |
 
 # Software Design
 
@@ -77,12 +78,12 @@ Google [googletest](https://github.com/google/googletest) repository is used for
 To get and build the above projects:
 
 ```
-python update_external_sources.py
+python3.x update_external_sources.py
 ```
 
-**ATTENTION: Python 3 is supported only, so you need to install python 3.* version**
+**ATTENTION: Python 3 is supported only, so you need to install python 3.x version**
 
-Linux Users can also use the equivalent bash shell script, as follows
+Linux and macOS Users can also use the equivalent bash shell script, as follows
 
 ```
 ./update_external_sources.sh
