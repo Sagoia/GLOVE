@@ -14,7 +14,6 @@ SYSROOT = ""
 
 GLSLANG_REPOSITORY="https://github.com/KhronosGroup/glslang.git"
 GOOGLETEST_REPOSITORY="https://github.com/google/googletest.git"
-MOLTENVK_REPOSITORY="https://github.com/KhronosGroup/MoltenVK"
 GLSLANG_FLAGS="-DENABLE_AMD_EXTENSIONS=OFF -DENABLE_NV_EXTENSIONS=OFF -DENABLE_OPT=OFF"
 
 def ReadLine(fileName):
@@ -42,7 +41,7 @@ def Update(proj, ver):
     check_output(["git", "checkout", "--force", ver])
     os.chdir(BASEDIR)
 
-def BuildCMakeProj(proj):
+def Build(proj):
     projPath = EXT_DIR + os.path.sep + proj
     print("Building " + proj)
 
@@ -72,7 +71,7 @@ def BuildCMakeProj(proj):
         os.system("make install")
     elif sys.platform == "win32" :
         print(check_output(["cmake", "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
-                                     "-G", "Visual Studio 16 2019", 
+                                     "-G", "Visual Studio 16 2019",
                                      ".."]))
         os.system("cmake --build . --config Release --target install")
     elif sys.platform == "darwin" :
@@ -83,14 +82,6 @@ def BuildCMakeProj(proj):
         return
 
     os.chdir(BASEDIR)
-
-def BuildMoltenVK():
-    projPath = EXT_DIR + os.path.sep + "MoltenVK"
-    os.chdir(projPath)
-    os.system("./fetchDependencies")
-
-    os.system("xcodebuild -quiet -project MoltenVKPackaging.xcodeproj -scheme \"MoltenVK Package (macOS only)\" build")
-
 
 def PrintUsage():
     print('Usage:')
@@ -119,33 +110,23 @@ def ParseOptions():
 ## start script
 os.chdir(BASEDIR)
 ParseOptions()
-            
+
 GLSLANG_REVISION = ReadLine(EXT_DIR + os.path.sep + "glslang_revision")
 GOOGLETEST_REVISION = ReadLine(EXT_DIR + os.path.sep + "googletest_revision")
-MOLTENVK_REVISION = "v1.0.30"
 print('glslang revision: ' + GLSLANG_REVISION)
 print('googletest revision: ' + GOOGLETEST_REVISION)
-print('MoltenVK revision: ' + MOLTENVK_REVISION)
 
 if os.path.exists(EXT_DIR + os.path.sep + "glslang") == False or os.path.exists(EXT_DIR + os.path.sep + "glslang" + os.path.sep + ".git") == False :
     Create("glslang", GLSLANG_REPOSITORY, GLSLANG_REVISION)
 else :
     Update("glslang", GLSLANG_REVISION)
 
-BuildCMakeProj("glslang")
+Build("glslang")
 
 if os.path.exists(EXT_DIR + os.path.sep + "googletest") == False or os.path.exists(EXT_DIR + os.path.sep + "googletest" + os.path.sep + ".git") == False :
     Create("googletest", GOOGLETEST_REPOSITORY, GOOGLETEST_REVISION)
 else :
     Update("googletest", GOOGLETEST_REVISION)
 
-BuildCMakeProj("googletest")
+Build("googletest")
 
-
-if sys.platform == "darwin" :
-    if os.path.exists(EXT_DIR + os.path.sep + "MoltenVK") == False or os.path.exists(EXT_DIR + os.path.sep + "MoltenVK" + os.path.sep + ".git") == False :
-        Create("MoltenVK", MOLTENVK_REPOSITORY, MOLTENVK_REVISION)
-    else :
-        Update("MoltenVK", MOLTENVK_REVISION)
-
-BuildMoltenVK()
