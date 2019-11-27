@@ -67,6 +67,7 @@ def Build(proj):
                                      "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
                                      project_flags,
                                      ".."]))
+
         os.system("make -j" + str(multiprocessing.cpu_count()))
         os.system("make install")
     elif sys.platform == "win32" :
@@ -75,7 +76,11 @@ def Build(proj):
                                      ".."]))
         os.system("cmake --build . --config Release --target install")
     elif sys.platform == "darwin" :
-        print(check_output(["cmake", "..", "-G", "Xcode", "-DCMAKE_INSTALL_PREFIX=" + install_prefix, "-DENABLE_GLSLANG_BINARIES=OFF", "-DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake"]))
+        print(check_output(["cmake", "-G", "Xcode",
+                                     "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
+                                     "-DENABLE_GLSLANG_BINARIES=OFF",
+                                     project_flags,
+                                     ".."]))
         os.system("cmake --build . --config Release --target install")
     else :
         print(sys.platform + " not supported!")
@@ -129,4 +134,3 @@ else :
     Update("googletest", GOOGLETEST_REVISION)
 
 Build("googletest")
-
