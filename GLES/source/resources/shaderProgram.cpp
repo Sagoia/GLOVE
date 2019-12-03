@@ -229,8 +229,8 @@ ShaderProgram::SerializeShadersSpirv(void *binary)
 
     uint8_t *rawDataPtr = reinterpret_cast<uint8_t *>(binary);
     uint32_t *u32DataPtr = nullptr;
-    uint32_t vsSpirvSize = 4 * mShaderSPVsize[0];
-    uint32_t fsSpirvSize = 4 * mShaderSPVsize[1];
+    uint32_t vsSpirvSize = static_cast<int>(4 * mShaderSPVsize[0]);
+    uint32_t fsSpirvSize = static_cast<int>(4 * mShaderSPVsize[1]);
 
     u32DataPtr = reinterpret_cast<uint32_t *>(rawDataPtr);
     *u32DataPtr = vsSpirvSize;

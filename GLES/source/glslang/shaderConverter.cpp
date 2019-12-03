@@ -77,7 +77,9 @@ const char * const ShaderConverter::shaderLimitsBuiltIns = "#define gl_MaxVertex
 ShaderConverter::ShaderConverter()
 : mConversionType(SHADER_CONVERSION_INVALID),
   mShaderType(SHADER_TYPE_INVALID),
-  mMemLayoutQualifier("std140")
+  mMemLayoutQualifier("std140"),
+  mSlangProg(nullptr),
+  mIoMapResolver(nullptr)
 {
     FUN_ENTRY(GL_LOG_TRACE);
 }
@@ -202,8 +204,8 @@ ShaderConverter::ProcessMacros(std::string& source)
         size_t f1 = found;
         found = SkipWhiteSpaces(source, found + lineStr.length());
 
-        int firstNL  = source.rfind('\n', f1);
-        int secondNL = source.rfind('#' , f1);
+        int firstNL  = static_cast<int>(source.rfind('\n', f1));
+        int secondNL = static_cast<int>(source.rfind('#' , f1));
 
         // check if is used in a define function & linedirective is not used
         if(firstNL >= secondNL && !linedirectiveEnabled) {
@@ -235,8 +237,8 @@ ShaderConverter::ProcessMacros(std::string& source)
         found = SkipWhiteSpaces(source, found + glStr.length());
 
         // check if is used in a ifdef function
-        int firstNL  = source.rfind('\n', f1);
-        int secondNL = source.rfind("#ifdef" , f1);
+        int firstNL  = static_cast<int>(source.rfind('\n', f1));
+        int secondNL = static_cast<int>(source.rfind("#ifdef" , f1));
         if(firstNL >= secondNL) {
             // replace with '1' value
             source.replace(f1, glStr.length(), "1");
@@ -252,7 +254,7 @@ ShaderConverter::ProcessUniforms(std::string& source, const uniformBlockMap_t &u
     FUN_ENTRY(GL_LOG_DEBUG);
 
     /// Start of dead uniform blocks where the active end
-    uint32_t unusedBlockBindings = uniformBlockMap.size();
+    uint32_t unusedBlockBindings = static_cast<uint32_t>(uniformBlockMap.size());
     uniformBlockMap_t::const_iterator uniBlockIt;
     string layoutSyntax;
     string blockSyntax;

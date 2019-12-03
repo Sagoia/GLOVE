@@ -227,7 +227,7 @@ endif()
 if(WIN32)
     add_library(GLESv2 SHARED ${SOURCES})
     set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                            LINK_FLAGS "-Wl,-Bsymbolic"
+                                            LINK_FLAGS "/INCREMENTAL:NO"
                                             INSTALL_RPATH_USE_LINK_PATH TRUE
                                             INSTALL_RPATH "\$ORIGIN")
 else()

@@ -660,8 +660,8 @@ EGLSyncKHR
 DisplayDriver::CreateSyncKHR(EGLenum type, const EGLint *attrib_list)
 {
     FUN_ENTRY(EGL_LOG_TRACE);
-
-    return ((EGLSyncKHR)0xFE4CE000);
+    uintptr_t sync = 0xFE4CE000;
+    return ((EGLSyncKHR)sync);
 }
 
 EGLBoolean
