@@ -37,7 +37,7 @@ private:
     EGLenum                      mRenderingAPI;
     EGLint                       mRenderableAPIbit;
     rendering_api_interface_t   *mAPIInterface;
-    class EGLDisplay_t          *mDisplay;
+    struct EGLDisplay_t          *mDisplay;
     class EGLSurface_t          *mReadSurface;
     class EGLSurface_t          *mDrawSurface;
     struct EGLConfig_t          *mConfig;
@@ -50,12 +50,12 @@ private:
     EGLBoolean                   Validate();
 
 public:
-    EGLContext_t(class EGLDisplay_t * display, EGLenum rendering_api, EGLConfig_t* config, const EGLint *attribList);
+    EGLContext_t(struct EGLDisplay_t * display, EGLenum rendering_api, EGLConfig_t* config, const EGLint *attribList);
     ~EGLContext_t();
 
     EGLBoolean                   Create();
     EGLBoolean                   Destroy();
-    EGLBoolean                   MakeCurrent(class EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
+    EGLBoolean                   MakeCurrent(struct EGLDisplay_t *dpy, EGLSurface_t *draw, EGLSurface_t *read);
     //void                         SetNextImageIndex(uint32_t index);
     void                         Flush();
     void                         Finish();

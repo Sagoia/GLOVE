@@ -84,7 +84,7 @@ void                    CopyPixelsConvert(
                         const ImageRect* dstRect,
                         void* dstData,
                         Color (*SrcColorFunPtr)(const uint8_t*),
-                        void (*DstColorFunPtr)(class Color&, uint8_t*));
+                                          void (*DstColorFunPtr)(struct Color&, uint8_t*));
 void                    ConvertPixels(GLenum srcFormat , GLenum dstFormat,
                         ImageRect* srcRect,
                         const void* srcData,

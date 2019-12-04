@@ -63,7 +63,7 @@ public:
     GLType() : Name() {}
 
     // Create a type for sampler.
-    GLType(const char *N, int D) : Name(N), SamplerDim(D) {}
+    GLType(const char *N, int D) : Name(N) {}
 
     GLType(const char* N) : Name(N) {}
 
@@ -103,7 +103,6 @@ public:
 
 private:
     StringRef Name;
-    int SamplerDim = 0;
     std::vector<GLMember> Members;
 };
 

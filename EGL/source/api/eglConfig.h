@@ -37,7 +37,7 @@
 
 struct EGLConfig_t
 {
-    class EGLDisplay_t *Display;
+    struct EGLDisplay_t *Display;
 
     EGLint BufferSize;
     EGLint AlphaSize;
@@ -158,7 +158,7 @@ SetConfigKey(EGLConfig_t *conf, EGLint key, EGLint val)
     *((EGLint *) ((char *) conf + offset)) = val;
 }
 
-void InitConfig(EGLConfig_t *conf, class EGLDisplay_t *dpy, EGLint id);
+void InitConfig(EGLConfig_t *conf, struct EGLDisplay_t *dpy, EGLint id);
 
 /**
  * Return true if a config is valid.  When for_matching is true,
@@ -174,7 +174,7 @@ EGLBoolean ValidateConfig(const EGLConfig_t *conf, EGLBoolean for_matching);
  * Initialize a criteria config from the given attribute list.
  * Return EGL_FALSE if any of the attribute is invalid.
  */
-EGLBoolean ParseConfigAttribList(EGLConfig_t *conf, class EGLDisplay_t *dpy, const EGLint *attrib_list);
+EGLBoolean ParseConfigAttribList(EGLConfig_t *conf, struct EGLDisplay_t *dpy, const EGLint *attrib_list);
 
 /**
  * Return true if a config matches the criteria.  This and
