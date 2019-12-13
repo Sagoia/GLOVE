@@ -28,7 +28,7 @@ For Linux OS, there is a second Window backend alternative, the **Wayland Window
 
 **IMPORTANT** : To run GLOVE with WAYLAND, Vulkan Loader must be built with "BUILD_WSI_WAYLAND_SUPPORT" option ON (see details in [Vulkan Loader Khronos page](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/BUILD.md)).
 
-Once GLOVE is built with WAYLAND backend, GLOVE Demos for Linux can be tested with Weston Server (see [HowTo run Weston here](https://jan.newmarch.name/Wayland/RunningWayland/)). 
+Once GLOVE is built with WAYLAND backend, GLOVE Demos for Linux can be tested with Weston Server (see [HowTo run Weston here](https://jan.newmarch.name/Wayland/RunningWayland/)).
 
 ## Execution
 
@@ -92,6 +92,21 @@ By using either command prompt or Windows explorer, navigate to **GLOVE\out\buil
 run_all_samples.bat
 ```
 
+# GLOVE demos for MacOS
+
+GLOVE demos described in the [first section](README_demos.md#glove-demos-for-linux) are supported on MacOS as well.
+
+## Execution
+
+Navigate to <GLOVE_root>/build/Demos/demos and execute each one of the applications under <build_type> folder (e.g. for Debug build execute triangle2d_one_color.app under Debug folder).
+
+To execute all samples in a row, just execute the following script.
+
+```
+./run_all_samples_mac.sh <build_type>
+```
+build_type: Debug/Release
+
 # GLOVE demos for Android
 
 Currently, GLOVE uses the es2gears demo (official link [here](http://manpages.ubuntu.com/manpages/cosmic/man1/es2gears.1.html)) as a demo application for Android.
@@ -111,4 +126,3 @@ The application will be automatically installed to the Android device.
 To execute the application, tap on the application icon named &#39;**GLOVE\_Demo**&#39;.
 
 ![](../Docs/Images/GLOVE_Demo_Android.jpg)
-
