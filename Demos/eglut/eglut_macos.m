@@ -83,8 +83,13 @@ macos_draw_cb(void)
 {
     struct eglut_window *win = _eglut->current;
     if (win) {
-        if(win->display_cb)
+        if (_eglut->idle_cb) {
+            _eglut->idle_cb();
+        }
+
+        if(win->display_cb) {
             win->display_cb();
+        }
         eglSwapBuffers(_eglut->dpy, win->surface);
     }
 }

@@ -257,7 +257,9 @@ int main(int argc, char **argv)
 
     } else {
         eglutMainLoop();
+#ifndef VK_USE_PLATFORM_MACOS_MVK
         DestroyGL();
+#endif
     }
 
     return 0;
