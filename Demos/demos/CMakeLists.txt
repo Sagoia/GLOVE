@@ -23,7 +23,7 @@ if (APPLE)
     find_library(METAL Metal)
 
     #file(GLOB XIB_FILES LIST_DIRECTORIES false $(CMAKE_SOURCE_DIR)/Demos/demos/macOS/*.storyboard)
-    set(XIB_FILES 	${CMAKE_SOURCE_DIR}/Demos/demos/macOS/Main.storyboard)
+    set(XIB_FILES   ${CMAKE_SOURCE_DIR}/Demos/demos/macOS/Main.storyboard)
     set_source_files_properties(${XIB_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     file(GLOB RES_FILES ${CMAKE_BINARY_DIR}/Demos/assets)
@@ -57,11 +57,8 @@ endforeach()
 
 if(WIN32)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples.bat ${CMAKE_BINARY_DIR}/bin COPYONLY)
-else()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 elseif(APPLE)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples_mac.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 else()
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/run_all_samples.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 endif()
-
