@@ -38,7 +38,7 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 | ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26  | Android 7.0    | Android | success |
 | ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65  | Android 8.0    | Android | success |
 | ES 2.0  | GeForce GTX 1050                     | NVIDIA 416.83      | 1.1.84  | Windows 10     | Windows | success |
-| ES 2.0  | Intel Iris Graphics 6100             | MoltenVK v1.0.38   | 1.1.126 | macOS Catalina | MacOS   | ongoing |
+| ES 2.0  | Intel Iris Graphics 6100             | MoltenVK v1.0.38   | 1.1.126 | macOS Catalina | MacOS   | success |
 
 # Software Design
 
