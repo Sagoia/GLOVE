@@ -240,7 +240,7 @@ else()
                                                 POSITION_INDEPENDENT_CODE ON
 					        MACOSX_RPATH TRUE
 					        SKIP_BUILD_RPATH FALSE
-                                                #LINK_FLAGS "-Wl,-Bsymbolic"
+                                                LINK_FLAGS "-w"
                                                 INSTALL_RPATH_USE_LINK_PATH TRUE
                                                 INSTALL_RPATH "\$ORIGIN")
     else()

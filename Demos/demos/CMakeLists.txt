@@ -40,6 +40,7 @@ foreach(example ${DEMOS})
                                                     XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
                                                     MACOSX_RPATH TRUE
                                                     SKIP_BUILD_RPATH FALSE
+                                                    LINK_FLAGS "-w"
                                                     XCODE_ATTRIBUTE_VALID_ARCHS "x86_64")
         target_link_libraries(${example} ${FOUNDATION})
         target_link_libraries(${example} ${QUARTZCORE})
