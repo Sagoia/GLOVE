@@ -11,9 +11,9 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="GLOVE Demo" id="1Xt-HY-uBw">
+                            <menuItem title="GLOVE Demos" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="GLOVE Demo" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="GLOVE Demos" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
                                         <menuItem title="About Demo" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -73,18 +73,6 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Help" id="wpr-3q-Mcd">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
-                                    <items>
-                                        <menuItem title="GLOVE Demo Help" keyEquivalent="?" id="FKE-Sm-Kum">
-                                            <connections>
-                                                <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
-                                            </connections>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
                         </items>
                     </menu>
                     <connections>
@@ -100,11 +88,10 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="GLOVE Demo" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="GLOVE Demos" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-                        <rect key="contentRect" x="1051" y="656" width="500" height="500"/>
+                        <rect key="contentRect" x="1051" y="656" width="600" height="600"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1024" height="745"/>
-                        <value key="minSize" type="size" width="500" height="500"/>
                         <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="W4e-Xs-vl5"/>
                         </connections>
@@ -120,10 +107,10 @@
         <!--Eglut View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="eglutViewController" propertyAccessControl="all" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="eglutViewController" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl" customClass="eglutView">
-                        <rect key="frame" x="0.0" y="0.0" width="500" height="500"/>
-                        <autoresizingMask key="autoresizingMask"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                     </view>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
