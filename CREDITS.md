@@ -2,9 +2,9 @@
 
 GLOVE Project started in early 2015 as an Internal Think Silicon Project, by [Panagiotis Apostolou](https://github.com/hiddenbitious). Such a project was necessary for Think Silicon back in 2015, since there was no other GL to Vulkan translation middle-ware in the open source community.
 
-During 2016, GLOVE was able to support simple 3D demos as well as a set of KHRONOS conformance tests on top of Intel and NVidia Vulkan drivers. During 2017 & 2018 GLOVE was stabilized and extended to support the full OpenGL ES 2.0 feature set. On summer of 2018, it was decided to be uploaded to GitHub as a project of great potential that could be used by many people in Computer Graphics community.
+During 2016, GLOVE was able to support simple 3D demos as well as a set of KHRONOS conformance tests on top of Intel and NVidia Vulkan drivers. During 2017 & 2018 GLOVE was stabilized and extended to support the full OpenGL ES 2.0 feature set. On summer of 2018, it was decided to be uploaded to GitHub as a project of great potential that could be used by many people in Computer Graphics community. During 2019, GLOVE was extended to support other platforms such as Wayland, MS Windows and MacOS. 
 
-Presently, the Think Silicon developer team is comprised of (sorted by GitHub user name):
+Contributors from Think Silicon developer team are shown in the following list (sorted by GitHub user name):
 
 * [Andreas Vasilakis (abasilak)](https://github.com/abasilak)
 * [Dennis Bakas (de2nis)](https://github.com/de2nis)
