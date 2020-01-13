@@ -60,6 +60,8 @@ git clone https://github.com/Think-Silicon/GLOVE.git
 
 ## Required Packages
 
+### Required Packages for Linux
+
 To install all required packages:
 
 ```
@@ -68,6 +70,30 @@ sudo apt-get install git cmake extra-cmake-modules libvulkan-dev vulkan-utils bu
 
 Optionally "mesa-vulkan-drivers" package is needed if no other Vulkan driver is available.
 The compiler minimum version that this project is built with, is GCC 4.9.3, although earlier versions may work.
+
+### Required Packages for MS Windows
+
+To compile GLOVE on Windows, you need
+
+- MS Visual Studio 2019 (Download [here](https://visualstudio.microsoft.com/downloads/)), with CMake enabled
+- Python3 (Download [here](https://www.python.org/downloads/))
+
+### Vulkan SDK
+
+To facilitate running and debugging GLOVE on MS Windows, it is recommended to download [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) .
+
+### Required Packages for MacOS
+
+Python3 and cmake are required for MacOS. You can install them via homebrew with the following commands
+
+```
+brew install cmake
+brew install python3
+ ```
+
+ ### MoltenVK
+
+GLOVE has been tested in macOS, using [MoltenVK](https://github.com/KhronosGroup/MoltenVK) (Vulkan to Metal middleware), which creates the necessary Vulkan headers and Vulkan loader (libMoltenVK.dylib). Instructions on how to build MoltenVk can be found [here](https://github.com/KhronosGroup/MoltenVK#building).
 
 ## External Repositories Dependencies
 
@@ -83,7 +109,7 @@ python3.x update_external_sources.py
 
 **ATTENTION: Python 3 is supported only, so you need to install python 3.x version**
 
-Linux and macOS Users can also use the equivalent bash shell script, as follows
+Linux Users can also use the equivalent bash shell script, as follows
 
 ```
 ./update_external_sources.sh

@@ -130,10 +130,6 @@ In macOS, the configure.sh script calls CMake with "-G Xcode" argument, thus pre
 
 Open GLOVE.xcodeproj (\<GLOVE_root\>/build/GLOVE.xcodeproj) with Xcode and build the Project from the tool (Product | Build). 
 
-## MoltenVK
-
-GLOVE has been tested in macOS, using [MoltenVK](https://github.com/KhronosGroup/MoltenVK) (Vulkan to Metal middleware), which creates the necessary Vulkan headers and Vulkan loader (libMoltenVK.dylib). Instructions on how to build MoltenVk can be found [here](https://github.com/KhronosGroup/MoltenVK#building).
-
 # Building GLOVE for Android
 
 The building process has been tested on Android 7 and 8.
