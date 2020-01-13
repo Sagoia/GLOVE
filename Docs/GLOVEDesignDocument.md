@@ -18,12 +18,14 @@ GLOVE (GLOverVulkan) is a software library that acts as a bridge between an Open
 
 To accomplish the above functionality, GLOVE offers implementations of OpenGL ES and EGL (see Figure 2) and is comprised of two shared libraries: libGLESv2.so and libEGL.so. Additionally, the translation from ESSL shaders to SPIR-V (needed by Vulkan) is handled by the external [glslang](https://github.com/KhronosGroup/glslang) library. The latter is statically linked to libGLESv2.so.
 
+The same architecture applies on MS Windows and MacOS, changing only the name of shared libraries (GLESv2.dll and libEGL.dll for MS Windows - libGLESv2.dylib and libEGL.dylib for MacOS) ).  
+
 Currently, GLOVE supports [OpenGL ES 2.0](https://www.khronos.org/registry/OpenGL/specs/es/2.0/es_full_spec_2.0.pdf) and [EGL 1.4](https://www.khronos.org/registry/EGL/specs/eglspec.1.4.pdf) versions and has been tested with mesa Vulkan Intel driver, version **1.0.54** (see specification [here](https://www.khronos.org/registry/vulkan/)).
 
 As a prerequisite for correct functioning, GLOVE must be linked to a Vulkan driver implementation which supports **VK\_KHR\_maintenance1** extension, mandatory for OpenGL to Vulkan Coordinates conversion (left handed to right handed coordinate system).
 
 
-GLOVE EGL implementation can be connected to one or more window platforms such as XCB, Wayland, Android or fbdev, which handle framebuffer allocation / deallocation and presentation onto the system&#39;s display. Currently EGL supports XCB back-end, but it can be easily extended to support more back-ends (more details in [section 2.1.2](#2-1-2-egl-back-end-platform-support-))
+GLOVE EGL implementation can be connected to one or more window platforms such as XCB, Wayland, Android or fbdev, which handle framebuffer allocation / deallocation and presentation onto the system&#39;s display. Currently EGL supports **XCB, Wayland, Android, Windows and MacOS surfaces**. Moreover, it can be easily extended to support even more back-ends (more details in [section 2.1.2](#2-1-2-egl-back-end-platform-support-))
 
 ## 1.3 GLOVE EGL
 
@@ -34,7 +36,16 @@ GLOVE EGL implementation can be connected to one or more window platforms such a
 GLOVE EGL implementation is comprised of 2 parts:
 
 1. **Rendering Thread:** This part implements rendering thread calls such as _eglBindAPI_, _eglQueryAPI_, _eglCreateContext_, etc.  It connects EGL to client APIs and maintains rendering contexts. Currently, GLOVE supports connection to OpenGL ES 2.0 only, but it already hosts hooks enabling to connect to other APIs (see [section 2.1.1](#2-1-1-egl-front-end-client-api-))
-2. **Display Driver:** This part is responsible of creating and maintaining rendering surfaces as well as connecting to a window platform like XCB or Wayland. Platform part is implemented with abstract classes (platformWindowInterface, platformResources) that can be extended to support any desired platform (more details in [section 2.1.2](#2-1-2-egl-back-end-platform-support-)). Currently, GLOVE EGL implements connections to Vulkan WSI using XCB and native rendering (useful on embedded platforms) through the **VK\_KHR\_xcb\_surface** and **VK\_KHR_display** extensions, respectively.
+2. **Display Driver:** This part is responsible of creating and maintaining rendering surfaces as well as connecting to a window platform like XCB or Wayland. Platform part is implemented with abstract classes (platformWindowInterface, platformResources) that can be extended to support any desired platform (more details in [section 2.1.2](#2-1-2-egl-back-end-platform-support-)). Currently, GLOVE EGL implements connections to Vulkan WSI using the following back-ends (window platforms) and Vulkan extensions: 
+
+| **Window platform**  | **Vulkan extension** |
+| --- | --- |
+| XCB     | VK\_KHR\_xcb\_surface       |
+| Native  | VK\_KHR_display             |
+| Wayland | VK\_KHR\_wayland\_surface   |
+| Android | VK\_KHR\_android\_surface   |
+| Windows | VK\_KHR\_win32\_surface     |
+| MacOS   | VK\_MVK\_macos\_surface     |
 
 EGL folder structure conforms to the above diagram (Figure 3).
 
