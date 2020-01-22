@@ -38,7 +38,7 @@ extern "C" {
 typedef struct EGLSurfaceInterface_t {
     void    *surface;
     void    *images;
-    uint64_t depthBuffer;
+    void    *depthBuffer;
     int32_t  contextRef;
     uint32_t imageCount;
     uint32_t nextImageIndex;

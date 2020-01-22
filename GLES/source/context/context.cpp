@@ -237,7 +237,7 @@ Context::CreateDepthStencil(EGLSurfaceInterface *eglSurfaceInterface)
             return nullptr;
         }
         VkImage vkImage = tex->GetImage()->GetImage();
-        eglSurfaceInterface->depthBuffer = reinterpret_cast<uint64_t>(vkImage);
+        eglSurfaceInterface->depthBuffer = reinterpret_cast<void *>(vkImage);
         tex->SetVkImage(vkImage);
     } else {
         VkImage vkImage = reinterpret_cast<VkImage>(eglSurfaceInterface->depthBuffer);
