@@ -12,6 +12,15 @@ set(LIBS
     GLESv2
 )
 
+if(USE_SURFACE STREQUAL "WAYLAND")
+    include_directories(${Wayland_INCLUDE_DIRS})
+    if(Wayland_FOUND)
+        set(LIBS ${LIBS} wayland-client)
+     else()
+         message(FATAL_ERROR "Could not find Wayland LIBRARIES")
+     endif()
+endif()
+
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include
                     ${EGL_PATH}/include

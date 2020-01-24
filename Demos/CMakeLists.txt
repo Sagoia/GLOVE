@@ -48,11 +48,15 @@ if(USE_SURFACE STREQUAL "XCB")
 endif()
 
 if(USE_SURFACE STREQUAL "WAYLAND")
-    set(LIBS
-        ${LIBS}
-        wayland-client
-        wayland-egl
-    )
+    include_directories(${Wayland_INCLUDE_DIRS})
+    if(Wayland_FOUND)
+        set(LIBS
+            ${LIBS}
+            wayland-client
+            wayland-egl)
+     else()
+         message(FATAL_ERROR "Could not find Wayland LIBRARIES")
+     endif()
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/EGL/include

@@ -180,6 +180,15 @@ else()
     )
 endif()
 
+if(USE_SURFACE STREQUAL "WAYLAND")
+    include_directories(${Wayland_INCLUDE_DIRS})
+    if(Wayland_FOUND)
+        set(LIBS ${LIBS} wayland-client)
+     else()
+         message(FATAL_ERROR "Could not find Wayland LIBRARIES")
+     endif()
+endif()
+
 # Where the .h files included in the source files can be found.
 include_directories(${GLES_PATH}/source
                     ${GLES_PATH}/include

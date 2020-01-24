@@ -88,11 +88,7 @@ if(USE_SURFACE STREQUAL "XCB")
 endif()
 
 if(USE_SURFACE STREQUAL "WAYLAND")
-    find_package(ECM REQUIRED NO_MODULE)
-    ecm_use_find_modules(DIR "${CMAKE_SOURCE_DIR}/CMake"
-                         MODULES FindWayland.cmake)
-    find_package(Wayland)
-
+    include_directories(${Wayland_INCLUDE_DIRS})
     if(Wayland_FOUND)
         set(SOURCES ${SOURCES} platform/vulkan/WSIWayland.cpp)
         set(LIBS ${LIBS} wayland-client)
