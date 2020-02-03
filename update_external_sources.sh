@@ -105,3 +105,14 @@ if [ ! -d "$EXT_DIR/googletest" ] || [ ! -d "$EXT_DIR/googletest/.git" ]; then
 fi
 update googletest $GOOGLETEST_REVISION
 build googletest
+
+if  grep -q "openSUSE" /etc/os-release 
+then
+	cd External/googletest/
+	if [ ! -d lib ]; then
+	   echo "createing link lib64 -> lib"
+	   ln -sf lib64 lib
+	fi
+	cd -
+fi
+

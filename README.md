@@ -26,19 +26,21 @@ GLOVE has been successfully tested with [GLOVE demos](Demos/README_demos.md) wit
 
 | **GL version**  | **Graphics Card** | **Vulkan Driver** | **Vulkan API** | **OS** | **Windows Platform** | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54  | Ubuntu 16.04   | XCB     | success |
-| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57  | Ubuntu 16.04   | XCB     | success |
-| ES 2.0  | Intel HD Graphics 630 (Kabylake GT2) | Mesa 18.0.5        | 1.0.61  | Ubuntu 16.04   | XCB     | success |
-| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54  | Ubuntu 16.04   | WAYLAND | success |
-| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57  | Ubuntu 16.04   | WAYLAND | success |
-| ES 2.0  | Radeon RX 550 Series                 | Mesa 18.0.5        | 1.0.61  | Ubuntu 16.04   | XCB     | success |
-| ES 2.0  | Radeon RX 550 Series                 | AMDGPU-Pro v18.40  | 1.1.77  | Ubuntu 16.04   | XCB     | success |
-| ES 2.0  | GeForce 940M                         | NVIDIA 396.51      | 1.1.70  | Ubuntu 16.04   | XCB     | success |
-| ES 2.0  | GeForce GTX 670                      | NVIDIA 396.54      | 1.1.70  | Ubuntu 18.04   | XCB     | success |
-| ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26  | Android 7.0    | Android | success |
-| ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65  | Android 8.0    | Android | success |
-| ES 2.0  | GeForce GTX 1050                     | NVIDIA 416.83      | 1.1.84  | Windows 10     | Windows | success |
-| ES 2.0  | Intel Iris Graphics 6100             | MoltenVK v1.0.38   | 1.1.126 | macOS Catalina | MacOS   | success |
+| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54  | Ubuntu 16.04        | XCB     | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57  | Ubuntu 16.04        | XCB     | success |
+| ES 2.0  | Intel HD Graphics 630 (Kabylake GT2) | Mesa 18.0.5        | 1.0.61  | Ubuntu 16.04        | XCB     | success |
+| ES 2.0  | Intel Ivybridge Desktop              | Mesa 17.3.3        | 1.0.54  | Ubuntu 16.04        | WAYLAND | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa 18.0.5        | 1.0.57  | Ubuntu 16.04        | WAYLAND | success |
+| ES 2.0  | Radeon RX 550 Series                 | Mesa 18.0.5        | 1.0.61  | Ubuntu 16.04        | XCB     | success |
+| ES 2.0  | Radeon RX 550 Series                 | AMDGPU-Pro v18.40  | 1.1.77  | Ubuntu 16.04        | XCB     | success |
+| ES 2.0  | GeForce 940M                         | NVIDIA 396.51      | 1.1.70  | Ubuntu 16.04        | XCB     | success |
+| ES 2.0  | GeForce GTX 670                      | NVIDIA 396.54      | 1.1.70  | Ubuntu 18.04        | XCB     | success |
+| ES 2.0  | Mali-G71                             | ARM 482.381.3347   | 1.0.26  | Android 7.0         | Android | success |
+| ES 2.0  | Mali-G71                             | ARM 485.111.1108   | 1.0.65  | Android 8.0         | Android | success |
+| ES 2.0  | GeForce GTX 1050                     | NVIDIA 416.83      | 1.1.84  | Windows 10          | Windows | success |
+| ES 2.0  | Intel Iris Graphics 6100             | MoltenVK v1.0.38   | 1.1.126 | macOS Catalina      | MacOS   | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa v19.3.2       | 1.2.31  | OpenSUSE Tumbleweed | XCB     | success |
+| ES 2.0  | Intel HD Graphics 530 (Skylake GT2)  | Mesa v19.3.2       | 1.2.31  | OpenSUSE Tumbleweed | WAYLAND | success |
 
 # Software Design
 
@@ -60,16 +62,28 @@ git clone https://github.com/Think-Silicon/GLOVE.git
 
 ## Required Packages
 
-### Required Packages for Linux
+### Required Packages for Linux Distributions
 
 To install all required packages:
 
+For Ubuntu
 ```
 sudo apt-get install git cmake extra-cmake-modules libvulkan-dev vulkan-utils build-essential libx11-xcb-dev
 ```
-
 Optionally "mesa-vulkan-drivers" package is needed if no other Vulkan driver is available.
 The compiler minimum version that this project is built with, is GCC 4.9.3, although earlier versions may work.
+
+For OpenSUSE 
+```
+sudo zypper install -t pattern devel_C_C++
+sudo zypper install cmake extra-cmake-modules libX11-devel
+```
+To install packages libvulkan1 vulkan-headers vulkan-loader vulkan tools follow the directions in the links below 
+
+https://software.opensuse.org/package/libvulkan1
+https://software.opensuse.org/package/vulkan-loader
+https://software.opensuse.org/package/vulkan-headers
+https://software.opensuse.org/package/vulkan-tools
 
 ### Required Packages for MS Windows
 

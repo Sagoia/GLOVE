@@ -80,7 +80,7 @@ if(USE_SURFACE STREQUAL "XCB")
 
         set(SOURCES ${SOURCES} platform/vulkan/WSIXcb.cpp)
 
-        set(LIBS ${LIBS} X11-xcb)
+        set(LIBS ${LIBS} xcb X11 X11-xcb dl )
     else()
         # Take action for other platforms
         message(FATAL_ERROR "Could not find X11 LIBRARIES")
