@@ -4,7 +4,11 @@ message(STATUS "  Building GLESv2 Library")
 # By default, GLOVE does not add support to AMD or NV.
 # Further, ENABLE_OPT is also turned off by default.
 
-add_definitions(-DGLSLANG_OSINCLUDE_UNIX)
+if(WIN32)
+    add_definitions(-DGLSLANG_OSINCLUDE_WIN32)
+else()
+    add_definitions(-DGLSLANG_OSINCLUDE_UNIX)
+endif()
 add_definitions(-DENABLE_HLSL)
 add_definitions(-DENABLE_OPT=0)
 
@@ -157,28 +161,6 @@ endif()
 # Sets the LIBS variable to contain the libraries that our GLESv2 shared library
 # will need to be linked against to.
 
-if(WIN32)
-    set(LIBS
-        ${Vulkan_LIBRARY}
-        glslang
-        SPIRV
-        HLSL
-        OGLCompiler
-        OSDependent
-    )
-else()
-
-    set(LIBS
-        ${Vulkan_LIBRARY}
-        glslang
-        SPIRV
-        HLSL
-        OGLCompiler
-        OSDependent
-        pthread
-        m
-    )
-endif()
 
 if(USE_SURFACE STREQUAL "WAYLAND")
     include_directories(${Wayland_INCLUDE_DIRS})
@@ -201,22 +183,41 @@ link_directories(${GLSLANG_PATH}/lib)
 
 # Ensure we re-link if our external libraries change.
 if(WIN32)
-    add_library(glslang STATIC IMPORTED)
-    set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/glslang.lib)
 
-    add_library(SPIRV STATIC IMPORTED)
-    set_target_properties(SPIRV PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/SPIRV.lib)
+    set(LIBS
+        ${Vulkan_LIBRARY}
+        debug ${GLSLANG_PATH}/lib/glslangd.lib
+        optimized ${GLSLANG_PATH}/lib/glslang.lib
+        debug ${GLSLANG_PATH}/lib/SPIRVd.lib
+        optimized ${GLSLANG_PATH}/lib/SPIRV.lib
+        debug ${GLSLANG_PATH}/lib/HLSLd.lib
+        optimized ${GLSLANG_PATH}/lib/HLSL.lib
+        debug ${GLSLANG_PATH}/lib/OGLCompilerd.lib
+        optimized ${GLSLANG_PATH}/lib/OGLCompiler.lib
+        debug ${GLSLANG_PATH}/lib/OSDependentd.lib
+        optimized ${GLSLANG_PATH}/lib/OSDependent.lib
+    )
 
-    add_library(HLSL STATIC IMPORTED)
-    set_target_properties(HLSL PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/HLSL.lib)
+    add_library(GLESv2 SHARED ${SOURCES})
 
-    add_library(OGLCompiler STATIC IMPORTED)
-    set_target_properties(OGLCompiler PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/OGLCompiler.lib)
-
-    add_library(OSDependent STATIC IMPORTED)
-    set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/OSDependent.lib)
+    set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
+                                            LINK_FLAGS "/INCREMENTAL:NO"
+                                            INSTALL_RPATH_USE_LINK_PATH TRUE
+                                            INSTALL_RPATH "\$ORIGIN")
 
 else()
+
+    set(LIBS
+        ${Vulkan_LIBRARY}
+        glslang
+        SPIRV
+        HLSL
+        OGLCompiler
+        OSDependent
+        pthread
+        m
+    )
+
     add_library(glslang STATIC IMPORTED)
     set_target_properties(glslang PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libglslang.a)
 
@@ -231,15 +232,6 @@ else()
 
     add_library(OSDependent STATIC IMPORTED)
     set_target_properties(OSDependent PROPERTIES IMPORTED_LOCATION ${GLSLANG_PATH}/lib/libOSDependent.a)
-endif()
-
-if(WIN32)
-    add_library(GLESv2 SHARED ${SOURCES})
-    set_target_properties(GLESv2 PROPERTIES POSITION_INDEPENDENT_CODE ON
-                                            LINK_FLAGS "/INCREMENTAL:NO"
-                                            INSTALL_RPATH_USE_LINK_PATH TRUE
-                                            INSTALL_RPATH "\$ORIGIN")
-else()
 
     if(APPLE)
 	add_library(GLESv2 SHARED ${OTHER_HEADERS} ${HEADERS} ${SOURCES})

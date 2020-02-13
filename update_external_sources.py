@@ -14,7 +14,9 @@ SYSROOT = ""
 
 GLSLANG_REPOSITORY="https://github.com/KhronosGroup/glslang.git"
 GOOGLETEST_REPOSITORY="https://github.com/google/googletest.git"
-GLSLANG_FLAGS="-DENABLE_AMD_EXTENSIONS=OFF -DENABLE_NV_EXTENSIONS=OFF -DENABLE_OPT=OFF"
+NO_AMD_FLAG = "-DENABLE_AMD_EXTENSIONS=OFF"
+NO_NV_FLAG  = "-DENABLE_NV_EXTENSIONS=OFF"
+NO_OPT_FLAG = "-DENABLE_OPT=OFF"
 
 def ReadLine(fileName):
     file = open(fileName, "rb")
@@ -54,32 +56,43 @@ def Build(proj):
         os.mkdir(BUILD_FOLDER)
     os.chdir(projPath + os.path.sep + BUILD_FOLDER)
 
-    project_flags = ""
+    amd_flag = ""
+    nv_flag  = ""
+    opt_flag = ""
     if proj == "glslang":
-        project_flags = GLSLANG_FLAGS
-
-    print("PROJECT_FLAGS: " + project_flags)
+        amd_flag = NO_AMD_FLAG
+        nv_flag  = NO_NV_FLAG
+        opt_flag = NO_OPT_FLAG
 
     if sys.platform == "linux2" or sys.platform == "linux":
         print(check_output(["cmake", "-DCMAKE_BUILD_TYPE=Release",
                                      "-DCMAKE_TOOLCHAIN_FILE=" + TOOLCHAIN_FILE,
                                      "-DCMAKE_SYSROOT=" + SYSROOT,
                                      "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
-                                     project_flags,
+                                     amd_flag,
+                                     nv_flag,
+                                     opt_flag,
                                      ".."]))
 
         os.system("make -j" + str(multiprocessing.cpu_count()))
         os.system("make install")
     elif sys.platform == "win32" :
-        print(check_output(["cmake", "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
-                                     "-G", "Visual Studio 16 2019",
+        print(check_output(["cmake", "-G", "Visual Studio 16 2019",
+                                     "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
+                                     amd_flag,
+                                     nv_flag,
+                                     opt_flag,
                                      ".."]))
+        # Build both versions for Windows to comply with MSVC requirements
         os.system("cmake --build . --config Release --target install")
+        os.system("cmake --build . --config Debug --target install")
     elif sys.platform == "darwin" :
         print(check_output(["cmake", "-G", "Xcode",
                                      "-DCMAKE_INSTALL_PREFIX=" + install_prefix,
                                      "-DENABLE_GLSLANG_BINARIES=OFF",
-                                     project_flags,
+                                     amd_flag,
+                                     nv_flag,
+                                     opt_flag,
                                      ".."]))
         os.system("cmake --build . --config Release --target install")
     else :

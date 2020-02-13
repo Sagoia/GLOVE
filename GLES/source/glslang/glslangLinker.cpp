@@ -40,9 +40,14 @@ GlslangLinker::Release()
 {
     FUN_ENTRY(GL_LOG_DEBUG);
 
+#if defined(VK_USE_PLATFORM_WIN32_KHR) && ! defined(NDEBUG)
+    // HACK: Deletion of glslang::TProgram cuases exception in MSCV debug versions
+    // Skip for the moment till solving the issue with glslang
+#else
     for(auto shader : mProgramMap) {
         SafeDelete(shader.second);
     }
+#endif
     mProgramMap.clear();
 }
 
