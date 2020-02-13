@@ -94,8 +94,6 @@ example of CMakeSettings json file
 }
 ```
 
-**ATTENTION:** Since glslang is built with Release option, it is easier to build GLOVE with Release flag as well. If you need to build GLOVE in Debug mode, you must build glslang in Debug mode as well, otherwise MSVC compiler complains about this. In order to do the latter, you have to modify the 'Build' function of update_external_sources.py script.
-
 ## Build Project
 
 To build the Project, use MS Visual Studio GUI (Build->Build All)
